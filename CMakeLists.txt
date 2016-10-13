@@ -39,7 +39,7 @@ endif()
 ################################################################################
 
 file(GLOB IMGUI_FILES imgui/*.cpp)
-add_executable(noonlight main.cpp s7/s7.c ${IMGUI_FILES})
+add_executable(noonlight main.cpp datum.cpp colors.cpp ui.cpp s7/s7.c ${IMGUI_FILES})
 
 target_include_directories(noonlight SYSTEM PRIVATE
     ${GLFW_INCLUDE_DIRS}

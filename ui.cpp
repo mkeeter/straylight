@@ -1,5 +1,6 @@
+#include <iostream>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 
 #include <epoxy/gl.h>
 #include <GLFW/glfw3.h>
@@ -9,6 +10,7 @@
 
 #include "ui.hpp"
 #include "colors.hpp"
+#include "datum.hpp"
 
 namespace ui
 {
@@ -98,7 +100,7 @@ static void finish(GLFWwindow* window)
     glfwSwapBuffers(window);
 }
 
-void draw(Window* window)
+void draw(Window* window, std::map<std::string, Datum*>& ds)
 {
     start();
 
@@ -111,29 +113,36 @@ void draw(Window* window)
     ImGui::SetNextWindowSize({float(width)/4, float(height)});
     ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-    const int n = 20;
-    char scripts[n][1024];
-    for (int i=0; i < n; ++i)
+    for (auto d : ds)
     {
-        ImGui::PushID(std::to_string(i).c_str());
-        ImGui::Columns(2, "col", true);
-        ImGui::Button("name");
+        ImGui::PushID(d.first.c_str());
+        ImGui::Button(d.first.c_str(), {50.0f, 0.0f});
 
-        ImGui::NextColumn();
-        std::string txt(scripts[i]);
-        auto newlines = std::count(txt.begin(), txt.end(), '\n');
+        std::string txt(d.second->expr);
+        auto newlines = d.second->newlines();
 
+        ImGui::SameLine();
+        if (ImGui::InputTextMultiline("##txt",
+                d.second->expr, sizeof(d.second->expr),
+                {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
+        {
+            d.second->update();
+        }
+
+        ImGui::Dummy({50.0f, 0.0f});
+        ImGui::SameLine();
         ImGui::PushItemWidth(-1.0f);
-        ImGui::InputTextMultiline("##txt",
-            scripts[i], sizeof(scripts[i]), {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)});
-        char out[] = "result";
-        ImGui::InputText("##result", out, 10, ImGuiInputTextFlags_ReadOnly);
+        ImGui::Text("%s", d.second->val_str);
         ImGui::PopItemWidth();
 
-        ImGui::Columns(1);
         ImGui::Separator();
         ImGui::PopID();
     }
+
+    char buf[4096] = {0};
+    ImGui::InputTextMultiline("test", buf, 4096);
+    char buff[4096] = {0};
+    ImGui::InputText("boop", buff, 4096);
 
     ImGui::End();
     ImGui::PopStyleVar(1);
