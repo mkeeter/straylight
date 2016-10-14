@@ -125,14 +125,14 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     for (auto k : keys)
     {
         ImGui::PushID(k.c_str());
+        char buf[128];
         if (ImGui::Button(k.c_str(), {50.0f, 0.0f}))
         {
+            std::copy(k.begin(), k.end(), buf);
             ImGui::OpenPopup("rename");
         }
         if (ImGui::BeginPopup("rename"))
         {
-            char buf[128];
-            std::copy(k.begin(), k.end(), buf);
             const bool ret = ImGui::InputText("##rename", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::SameLine();
             if (buf[0] == 'x')
