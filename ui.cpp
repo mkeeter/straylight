@@ -125,8 +125,13 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     for (auto k : keys)
     {
         ImGui::PushID(k.c_str());
+
+        ImGui::Columns(2, "datum", false);
+        ImGui::SetColumnOffset(1, 60.0f);
+        ImGui::Text("Name");
+        ImGui::NextColumn();
         char buf[128];
-        if (ImGui::Button(k.c_str(), {50.0f, 0.0f}))
+        if (ImGui::Button(k.c_str(), {-1.0f, 0.0f}))
         {
             std::copy(k.begin(), k.end(), buf);
             ImGui::OpenPopup("rename");
@@ -150,9 +155,11 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
             ImGui::EndPopup();
         }
 
+        ImGui::Columns(2, "datum", false);
+        ImGui::Text("Script");
+        ImGui::NextColumn();
+        ImGui::PushItemWidth(-1.0f);
         auto newlines = ds[k]->newlines();
-
-        ImGui::SameLine();
         if (ImGui::InputTextMultiline("##txt",
                 ds[k]->expr, sizeof(ds[k]->expr),
                 {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
@@ -160,14 +167,16 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
             ds[k]->update();
         }
 
-        ImGui::Dummy({50.0f, 0.0f});
-        ImGui::SameLine();
+        ImGui::Columns(2, "datum", false);
+        ImGui::Text("Value");
+        ImGui::NextColumn();
         ImGui::PushItemWidth(-1.0f);
-        ImGui::Text("%s", ds[k]->val_str);
+        ImGui::InputText("##result", ds[k]->val_str, strlen(ds[k]->val_str),
+                         ImGuiInputTextFlags_ReadOnly);
         ImGui::PopItemWidth();
 
-        ImGui::Separator();
         ImGui::PopID();
+        ImGui::Separator();
     }
 
     for (auto k : erased)
