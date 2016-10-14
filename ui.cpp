@@ -1,4 +1,6 @@
 #include <iostream>
+#include <list>
+
 #include <string>
 #include <cstdio>
 
@@ -113,36 +115,66 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     ImGui::SetNextWindowSize({float(width)/4, float(height)});
     ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+    std::list<std::string> keys;
     for (auto d : ds)
     {
-        ImGui::PushID(d.first.c_str());
-        ImGui::Button(d.first.c_str(), {50.0f, 0.0f});
+        keys.push_back(d.first);
+    }
+    std::list<std::string> erased;
 
-        std::string txt(d.second->expr);
-        auto newlines = d.second->newlines();
+    for (auto k : keys)
+    {
+        ImGui::PushID(k.c_str());
+        if (ImGui::Button(k.c_str(), {50.0f, 0.0f}))
+        {
+            ImGui::OpenPopup("rename");
+        }
+        if (ImGui::BeginPopup("rename"))
+        {
+            char buf[128];
+            std::copy(k.begin(), k.end(), buf);
+            const bool ret = ImGui::InputText("##rename", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::SameLine();
+            if (buf[0] == 'x')
+            {
+                if (ImGui::Button("Rename") || ret)
+                {
+                    ds[std::string(buf)] = ds[k];
+                    erased.push_back(k);
+                }
+            }
+            else
+            {
+                ImGui::Text("Invalid name");
+            }
+            ImGui::EndPopup();
+        }
+
+        std::string txt(ds[k]->expr);
+        auto newlines = ds[k]->newlines();
 
         ImGui::SameLine();
         if (ImGui::InputTextMultiline("##txt",
-                d.second->expr, sizeof(d.second->expr),
+                ds[k]->expr, sizeof(ds[k]->expr),
                 {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
         {
-            d.second->update();
+            ds[k]->update();
         }
 
         ImGui::Dummy({50.0f, 0.0f});
         ImGui::SameLine();
         ImGui::PushItemWidth(-1.0f);
-        ImGui::Text("%s", d.second->val_str);
+        ImGui::Text("%s", ds[k]->val_str);
         ImGui::PopItemWidth();
 
         ImGui::Separator();
         ImGui::PopID();
     }
 
-    char buf[4096] = {0};
-    ImGui::InputTextMultiline("test", buf, 4096);
-    char buff[4096] = {0};
-    ImGui::InputText("boop", buff, 4096);
+    for (auto k : erased)
+    {
+        ds.erase(k);
+    }
 
     ImGui::End();
     ImGui::PopStyleVar(1);
