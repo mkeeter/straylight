@@ -39,4 +39,9 @@ glm::vec4 dim(glm::vec4 c)
     return adjust(c, 1/1.4);
 }
 
+glm::vec4 transparent(glm::vec4 c, float a)
+{
+    return {c.r, c.g, c.b, a};
+}
+
 }

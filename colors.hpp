@@ -25,4 +25,5 @@ extern glm::vec4 base07;
 glm::vec4 adjust(glm::vec4 c, float scale);
 glm::vec4 highlight(glm::vec4 c);
 glm::vec4 dim(glm::vec4 c);
+glm::vec4 transparent(glm::vec4 c, float a=0.5);
 }

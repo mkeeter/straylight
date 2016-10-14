@@ -59,6 +59,9 @@ static void set_style()
     ImGui::PushStyleColor(ImGuiCol_WindowBg, Colors::base01);
     ImGui::PushStyleColor(ImGuiCol_Button, Colors::base02);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Colors::base03);
+    ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, Colors::blue);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::base03);
+    ImGui::PushStyleColor(ImGuiCol_Text, Colors::base06);
 }
 
 Window* init()
@@ -130,29 +133,32 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
         ImGui::SetColumnOffset(1, 60.0f);
         ImGui::Text("Name");
         ImGui::NextColumn();
-        char buf[128];
-        if (ImGui::Button(k.c_str(), {-1.0f, 0.0f}))
-        {
-            std::copy(k.begin(), k.end(), buf);
-            ImGui::OpenPopup("rename");
-        }
-        if (ImGui::BeginPopup("rename"))
-        {
-            const bool ret = ImGui::InputText("##rename", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
-            ImGui::SameLine();
-            if (buf[0] == 'x')
+
+        {   // Temporary buffer for editing a cell's name
+            char buf[128];
+            if (ImGui::Button(k.c_str(), {-1.0f, 0.0f}))
             {
-                if (ImGui::Button("Rename") || ret)
+                std::copy(k.begin(), k.end(), buf);
+                ImGui::OpenPopup("rename");
+            }
+            if (ImGui::BeginPopup("rename"))
+            {
+                const bool ret = ImGui::InputText("##rename", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
+                ImGui::SameLine();
+                if (ds[k]->canRenameTo(buf))
                 {
-                    ds[std::string(buf)] = ds[k];
-                    erased.push_back(k);
+                    if (ImGui::Button("Rename") || ret)
+                    {
+                        ds[std::string(buf)] = ds[k];
+                        erased.push_back(k);
+                    }
                 }
+                else
+                {
+                    ImGui::Text("Invalid name");
+                }
+                ImGui::EndPopup();
             }
-            else
-            {
-                ImGui::Text("Invalid name");
-            }
-            ImGui::EndPopup();
         }
 
         ImGui::Columns(2, "datum", false);
@@ -171,8 +177,12 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
         ImGui::Text("Value");
         ImGui::NextColumn();
         ImGui::PushItemWidth(-1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base05);
+        ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
+                              Colors::transparent(Colors::blue));
         ImGui::InputText("##result", ds[k]->val_str, strlen(ds[k]->val_str),
                          ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopStyleColor(2);
         ImGui::PopItemWidth();
 
         ImGui::PopID();
