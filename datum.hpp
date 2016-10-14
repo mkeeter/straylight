@@ -6,7 +6,7 @@
 class Datum
 {
 public:
-    Datum(std::string expr, s7_scheme* s7);
+    Datum(const std::string& expr, s7_scheme* s7);
     void update();
 
     /*  Expression to evaluation */
@@ -15,6 +15,10 @@ public:
     /*  Count the number of newlines in the expression
      *  (used for layout) */
     int newlines() const;
+
+    /*  Check to see whether we can rename to the given name
+     */
+    bool canRenameTo(const std::string& n);
 
     /*  Resulting value and value string */
     s7_pointer val;

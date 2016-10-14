@@ -118,12 +118,14 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     ImGui::SetNextWindowSize({float(width)/4, float(height)});
     ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+    // Reserve keys and erased keys in a separate list here to avoid
+    // glitches when we iterate over a changing map
     std::list<std::string> keys;
+    std::list<std::string> erased;
     for (auto d : ds)
     {
         keys.push_back(d.first);
     }
-    std::list<std::string> erased;
 
     for (auto k : keys)
     {
