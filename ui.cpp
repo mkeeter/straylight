@@ -150,7 +150,6 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
             ImGui::EndPopup();
         }
 
-        std::string txt(ds[k]->expr);
         auto newlines = ds[k]->newlines();
 
         ImGui::SameLine();
