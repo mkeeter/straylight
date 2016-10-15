@@ -57,6 +57,12 @@ static Window* make_window()
 static void set_style()
 {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, Colors::base01);
+
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, Colors::base01);
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, Colors::base02);
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, Colors::base03);
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, Colors::base03);
+
     ImGui::PushStyleColor(ImGuiCol_Button, Colors::base02);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Colors::base03);
     ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, Colors::blue);
@@ -110,13 +116,14 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     start();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::SetNextWindowPos({0, 0});
 
     int width, height;
     glfwGetWindowSize(window, &width, &height);
 
-    ImGui::SetNextWindowSize({float(width)/4, float(height)});
-    ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    ImGui::SetNextWindowSize({float(width)/4, float(height)}, ImGuiSetCond_Appearing);
+    ImGui::SetNextWindowPos({0, 0});
+    ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
+    ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
@@ -126,6 +133,9 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
     {
         keys.push_back(d.first);
     }
+
+    static char* editor_buf = nullptr;
+    static size_t editor_buf_size = 0;
 
     for (auto k : keys)
     {
@@ -145,7 +155,8 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
             }
             if (ImGui::BeginPopup("rename"))
             {
-                const bool ret = ImGui::InputText("##rename", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
+                const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
+                        ImGuiInputTextFlags_EnterReturnsTrue);
                 ImGui::SameLine();
                 if (ds[k]->canRenameTo(buf))
                 {
@@ -168,22 +179,35 @@ void draw(Window* window, std::map<std::string, Datum*>& ds)
         ImGui::NextColumn();
         ImGui::PushItemWidth(-1.0f);
         auto newlines = ds[k]->newlines();
-        if (ImGui::InputTextMultiline("##txt",
-                ds[k]->expr, sizeof(ds[k]->expr),
-                {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
         {
-            ds[k]->update();
+            auto str_len = ds[k]->expr.size() + 1;
+            if (str_len > editor_buf_size)
+            {
+                str_len += 4096;
+                editor_buf = (char*)realloc(editor_buf, str_len);
+                editor_buf_size = str_len;
+            }
+            std::copy(ds[k]->expr.begin(), ds[k]->expr.end() + 1, editor_buf);
+
+            if (ImGui::InputTextMultiline("##txt",
+                    editor_buf, editor_buf_size,
+                    {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
+            {
+                ds[k]->setExpr(std::string(editor_buf));
+            }
         }
 
         ImGui::Columns(2, "datum", false);
         ImGui::Text("Value");
         ImGui::NextColumn();
         ImGui::PushItemWidth(-1.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base05);
+        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base04);
         ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
                               Colors::transparent(Colors::blue));
+        ImGui::PushAllowKeyboardFocus(false);
         ImGui::InputText("##result", ds[k]->val_str, strlen(ds[k]->val_str),
                          ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopAllowKeyboardFocus();
         ImGui::PopStyleColor(2);
         ImGui::PopItemWidth();
 

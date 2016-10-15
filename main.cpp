@@ -19,6 +19,12 @@ int main(int, char**)
     std::map<std::string, Datum*> ds;
     ds["x"] = new Datum("(+ 1 2)", s7);
     ds["y"] = new Datum("(+ 3 4)", s7);
+    ds["a"] = new Datum("(+ 1 2)", s7);
+    ds["b"] = new Datum("(+ 3 4)", s7);
+    ds["c"] = new Datum("(+ 1 2)", s7);
+    ds["d"] = new Datum("(+ 3 4)", s7);
+    ds["e"] = new Datum("(+ 1 2)", s7);
+    ds["q"] = new Datum("(+ 3 4)", s7);
 
     // Main loop
     while (!ui::finished(window))

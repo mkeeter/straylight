@@ -1,17 +1,21 @@
 #include <cassert>
 #include "datum.hpp"
 
-Datum::Datum(const std::string& _expr, s7_scheme* s7)
-    : s7(s7)
+Datum::Datum(const std::string& expr, s7_scheme* s7)
+    : expr(expr), s7(s7)
 {
-    assert(_expr.size() < sizeof(expr));
-    std::copy(_expr.begin(), _expr.end(), expr);
+    update();
+}
+
+void Datum::setExpr(const std::string& e)
+{
+    expr = e;
     update();
 }
 
 void Datum::update()
 {
-    val = s7_eval_c_string(s7, expr);
+    val = s7_eval_c_string(s7, expr.c_str());
     val_str = s7_object_to_c_string(s7, val);
 }
 

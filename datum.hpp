@@ -7,10 +7,11 @@ class Datum
 {
 public:
     Datum(const std::string& expr, s7_scheme* s7);
+    void setExpr(const std::string& expr);
     void update();
 
     /*  Expression to evaluation */
-    char expr[4096] = {0};
+    std::string expr;
 
     /*  Count the number of newlines in the expression
      *  (used for layout) */
