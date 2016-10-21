@@ -15,6 +15,7 @@ class Root
 {
 public:
     Root();
+    ~Root();
 
     /*
      *  Insert a cell into a particular Sheet
@@ -96,6 +97,10 @@ private:
 
     /*
      *  Call when the given item has been changed
+     *
+     *  This recurses down every instance and marks the given cell or
+     *  sheet/name pair as dirty (the second case is used when deleting
+     *  or renaming cells).
      */
     void changed(Cell* cell);
     void changed(Sheet* sheet, const Name& name);
@@ -125,5 +130,8 @@ private:
     /*  When locked, changes don't provoke evaluation
      *  (though the dirty list is still populated)  */
     bool locked=false;
+
+    /*  This is our embedded Scheme interpreter  */
+    s7_scheme* const interpreter;
 };
 }   // namespace Graph

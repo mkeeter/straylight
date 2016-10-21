@@ -9,9 +9,15 @@ namespace Graph
 {
 
 Root::Root()
-    : sheet(new Sheet()), instance(new Instance(sheet.get()))
+    : sheet(new Sheet()), instance(new Instance(sheet.get())),
+      interpreter(s7_init())
 {
     /* Nothing to do here */
+}
+
+Root::~Root()
+{
+    free(interpreter);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +43,12 @@ void Root::eraseCell(Cell* cell)
 {
     Sheet* parent = parentSheet(cell);
     assert(parent != nullptr);
+
+    // Release Scheme values for GC
+    for (auto& v : cell->values)
+    {
+        s7_gc_unprotect(interpreter, v.second);
+    }
 
     auto name = parent->cells.right.at(cell);
     parent->cells.right.erase(cell);
@@ -216,6 +228,33 @@ void Root::changed(Sheet* sheet, const Name& name)
     sync();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+bool Root::eval(const CellKey& k)
+{
+    auto& env = k.first;
+    auto cell = k.second;
+
+    auto bindings = s7_list(interpreter, 0);
+    s7_pointer e = s7_inlet(interpreter, bindings);
+
+    auto value = s7_eval_c_string_with_environment(
+            interpreter, cell->expr.c_str(), e);
+    if (s7_is_equal(interpreter, value, cell->values[env]))
+    {
+        return false;
+    }
+    else
+    {
+        s7_gc_unprotect(interpreter, cell->values[env]);
+        cell->values[env] = value;
+        s7_gc_protect(interpreter, cell->values[env]);
+        return true;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void Root::sync()
 {
     if (!locked)
@@ -235,6 +274,8 @@ void Root::sync()
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 void Root::pushDirty(const CellKey& k)
 {
@@ -269,5 +310,7 @@ void Root::markDirty(const NameKey& k)
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 }   // namespace Graph

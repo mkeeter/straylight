@@ -24,10 +24,6 @@ struct Sheet
     /*  Cells local to this sheet   */
     boost::bimap<Name, std::unique_ptr<Cell>> cells;
 
-    /*  Environments in which this sheet is an instance */
-    std::set<Env> envs;
-    Sheet* parent;
-
     /*
      *  Returns a list of cells that should be inputs,
      *  along with their default expression
