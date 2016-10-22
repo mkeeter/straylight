@@ -11,7 +11,6 @@ struct Cell;
 struct Instance
 {
     Instance(Sheet* sheet);
-    ~Instance();
 
     Sheet* sheet;
     std::map<Cell*, Expr> inputs;

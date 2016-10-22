@@ -7,12 +7,14 @@ namespace Graph
 {
 struct Cell
 {
-    Cell(const Expr& expr);
+    Cell(const Expr& expr) : expr(expr) {}
 
     Expr expr;
-    std::map<Env, Value> results;
+    std::map<Env, Value> values;
 
-    bool isInput() const;
-    bool isOutput() const;
+    bool isInput() const { return false; }
+    bool isOutput() const { return false; }
+
+    std::string defaultExpr() const { return ""; }
 };
 }   // namespace Graph

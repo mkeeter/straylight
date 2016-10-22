@@ -1,5 +1,6 @@
 #include "instance.hpp"
 #include "sheet.hpp"
+#include "cell.hpp"
 
 namespace Graph
 {
@@ -10,7 +11,7 @@ Instance::Instance(Sheet* sheet)
     // Construct inputs from default expressions
     for (auto c : sheet->inputs())
     {
-        inputs[c.first] = c.second;
+        inputs[c] = c->defaultExpr();
     }
 }
 

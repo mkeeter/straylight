@@ -14,8 +14,9 @@ struct Dependencies
 {
     /*
      *  Insert a lookup
+     *  Returns 1 if the lookup is recursive, 0 otherwise
      */
-    void insert(const CellKey& looker, const NameKey& lookee);
+    int insert(const CellKey& looker, const NameKey& lookee);
 
     /*
      *  Clear all recorded lookups

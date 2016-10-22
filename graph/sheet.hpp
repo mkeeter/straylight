@@ -15,6 +15,8 @@ struct Cell;
 
 struct Sheet
 {
+    ~Sheet();
+
     /*  Library of child sheets  */
     std::map<Name, std::unique_ptr<Sheet>> library;
 
@@ -22,12 +24,13 @@ struct Sheet
     std::map<Name, std::unique_ptr<Instance>> instances;
 
     /*  Cells local to this sheet   */
-    boost::bimap<Name, std::unique_ptr<Cell>> cells;
+    boost::bimap<Name, Cell*> cells;
 
     /*
      *  Returns a list of cells that should be inputs,
      *  along with their default expression
      */
-    std::list<std::pair<Cell*, Expr>> inputs() const;
+    std::list<Cell*> inputs() const { return {}; };
+    std::list<Cell*> outputs() const { return {}; };
 };
 }   // namespace Graph
