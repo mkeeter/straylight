@@ -21,7 +21,7 @@ Root::Root()
             "(lambda (deps target looker check-upstream value)"
             "   (lambda ()"
             "   (let ((res (check-upstream deps target looker)))"
-            "       (cond ((= 1  res) (error 'circular-lookup))"
+            "       (cond ((=  1 res) (error 'circular-lookup))"
             "             ((= -1 res) (error 'no-such-value))"
             "             (else value)))))"))
 {
@@ -335,14 +335,18 @@ bool Root::eval(const CellKey& k)
     }
 
     // If the value is the same, return false
-    if (s7_is_equal(interpreter, value, cell->values[env]))
+    if (cell->values.count(env) &&
+        s7_is_equal(interpreter, value, cell->values[env]))
     {
         return false;
     }
     // Otherwise, swap out the value and return true
     else
     {
-        s7_gc_unprotect(interpreter, cell->values[env]);
+        if (cell->values.count(env))
+        {
+            s7_gc_unprotect(interpreter, cell->values[env]);
+        }
         cell->values[env] = value;
         s7_gc_protect(interpreter, cell->values[env]);
         return true;

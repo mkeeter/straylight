@@ -63,6 +63,10 @@ public:
      */
     void deleteSheet(Sheet* sheet, const Name& name);
 
+    /*  Encapsulation?  Never heard of it!  */
+    std::unique_ptr<Sheet> sheet;
+    std::unique_ptr<Instance> instance;
+
 private:
     /*
      *  RAII-style system for locking the tree
@@ -135,9 +139,6 @@ private:
      *  position in the list to minimize re-evaluation.
      */
     void pushDirty(const CellKey& k);
-
-    std::unique_ptr<Sheet> sheet;
-    std::unique_ptr<Instance> instance;
 
     /*  struct that stores lookups in both directions  */
     Dependencies deps;
