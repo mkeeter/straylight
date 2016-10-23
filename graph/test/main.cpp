@@ -21,6 +21,15 @@ TEST_CASE("Evaluation with lookups")
     REQUIRE(y->strs[{root->instance.get()}] == "2");
 }
 
+TEST_CASE("Re-evaluation on parent change")
+{
+    std::unique_ptr<Graph::Root> root(new Graph::Root());
+    auto x = root->insertCell(root->sheet.get(), "x", "1");
+    auto y = root->insertCell(root->sheet.get(), "y", "(+ 1 (x))");
+    root->editCell(x, "2");
+    REQUIRE(y->strs[{root->instance.get()}] == "3");
+}
+
 int main(int argc, char** argv)
 {
     return Catch::Session().run(argc, argv);
