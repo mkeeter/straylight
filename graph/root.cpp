@@ -415,16 +415,18 @@ void Root::sync()
     {
         while (dirty.size())
         {
-            const auto& k = dirty.front();
+            const auto k = dirty.front();
             deps.clear(k);
-            if (eval(k))
+            auto result = eval(k);
+            dirty.pop_front();
+
+            if (result)
             {
                 for (const auto& d : deps.inverse[toNameKey(k)])
                 {
-                    dirty.push_back(d);
+                    pushDirty(d);
                 }
             }
-            dirty.pop_front();
         }
     }
 }
@@ -433,9 +435,13 @@ void Root::sync()
 
 void Root::pushDirty(const CellKey& k)
 {
-    dirty.insert(std::find_if(dirty.begin(), dirty.end(),
-            [&](CellKey& o){ return deps.upstream[k].count(o) != 0; }),
-            k);
+    auto itr = std::find_if(dirty.begin(), dirty.end(),
+        [&](CellKey& o){ return deps.upstream[o].count(k) != 0; });
+
+    if (itr == dirty.end() || *itr != k)
+    {
+        dirty.insert(itr, k);
+    }
 }
 
 void Root::markDirty(const NameKey& k)

@@ -30,6 +30,16 @@ TEST_CASE("Re-evaluation on parent change")
     REQUIRE(y->strs[{root->instance.get()}] == "3");
 }
 
+TEST_CASE("Multiple evaluation paths")
+{
+    std::unique_ptr<Graph::Root> root(new Graph::Root());
+    auto x = root->insertCell(root->sheet.get(), "x", "1");
+    auto a = root->insertCell(root->sheet.get(), "a", "(+ 2 (x))");
+    auto y = root->insertCell(root->sheet.get(), "y", "(+ (a) (x))");
+    root->editCell(x, "3");
+    REQUIRE(y->strs[{root->instance.get()}] == "8");
+}
+
 int main(int argc, char** argv)
 {
     return Catch::Session().run(argc, argv);
