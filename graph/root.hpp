@@ -158,5 +158,6 @@ private:
     /*  Scheme functions */
     s7_pointer const check_upstream;
     s7_pointer const value_thunk_factory;
+    s7_pointer const eval_func;
 };
 }   // namespace Graph

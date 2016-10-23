@@ -17,17 +17,33 @@ Root::Root()
                 0, /* optional args */
                 false, /* rest args */
                 "(check-upstream deps target looker)")),
-      value_thunk_factory(s7_eval_c_string(interpreter,
-            "(lambda (deps target looker check-upstream value)"
-            "   (lambda ()"
-            "   (let ((res (check-upstream deps target looker)))"
-            "       (cond ((=  1 res) (error 'circular-lookup))"
-            "             ((= -1 res) (error 'no-such-value))"
-            "             (else value)))))"))
+      value_thunk_factory(s7_eval_c_string(interpreter,R"(
+           (lambda (deps target looker check-upstream value)
+               (lambda ()
+               (let ((res (check-upstream deps target looker)))
+                   (cond ((=  1 res) (error 'circular-lookup))
+                         ((= -1 res) (error 'no-such-value))
+                         ((eqv? 'value (car value)) (cdr value))
+                         (else (error 'invalid-lookup))))))
+          )")),
+      eval_func(s7_eval_c_string(interpreter, R"(
+        (lambda (str env)
+          (catch #t
+            (lambda ()
+              (let* ((s (format #f "(begin ~a ) " str))
+                     (r (read (open-input-string s))))
+                (cons 'value (eval r env))))
+            (lambda args
+                (if (string=? "~A: unbound variable" (caadr args))
+                    (cons 'unbound (cadr args))
+                    (cons 'error (cadr args))))))
+      )"))
+
 {
     // Protect all of our functions from the garbage collector
     s7_gc_protect(interpreter, check_upstream);
     s7_gc_protect(interpreter, value_thunk_factory);
+    s7_gc_protect(interpreter, eval_func);
 }
 
 Root::~Root()
@@ -301,6 +317,8 @@ bool Root::eval(const CellKey& k)
                     s7_make_symbol(interpreter, c.first.c_str()),
                     bindings);
         }
+
+        // Then, install instances into the inlet
         for (auto& i : env.back()->sheet->instances)
         {
             // Create a temporary environment inside the instance
@@ -325,14 +343,29 @@ bool Root::eval(const CellKey& k)
             bindings = s7_cons(interpreter,
                     s7_make_symbol(interpreter, i.first.c_str()),
                     bindings);
-
         }
 
         // Run the evaluation and get out a value
-        expr = "(begin " + expr + ")";
-        value = s7_eval_c_string_with_environment(
-                interpreter, expr.c_str(),
+        auto args = s7_list(interpreter, 2,
+                s7_make_string(interpreter, expr.c_str()),
                 s7_inlet(interpreter, bindings));
+        value = s7_call(interpreter, eval_func, args);
+    }
+
+    // If the output is not tagged as a value, handle the error, return it
+    const bool valid = s7_is_eqv(s7_car(value),
+                                 s7_make_symbol(interpreter, "value"));
+    if (!valid)
+    {
+        // If the error was due to an unbound variable, then record the
+        // attempted lookup in our dependencies table.
+        if (s7_is_eqv(s7_car(value),
+                      s7_make_symbol(interpreter, "unbound")))
+        {
+            auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
+            deps.insert(k, {env, std::string(target)});
+            free(target);
+        }
     }
 
     // If the value is the same, return false
@@ -352,9 +385,17 @@ bool Root::eval(const CellKey& k)
         s7_gc_protect(interpreter, cell->values[env]);
 
         // Also get a string representation out
-        auto str_ptr = s7_object_to_c_string(interpreter, value);
-        cell->strs[env] = std::string(str_ptr);
-        free(str_ptr);
+        if (valid)
+        {
+            char* str_ptr = s7_object_to_c_string(interpreter, s7_cdr(value));
+            cell->strs[env] = std::string(str_ptr);
+            free(str_ptr);
+        }
+        else
+        {
+            cell->strs[env] = std::string(
+                    s7_format(interpreter, s7_cdr(value)));
+        }
 
         return true;
     }
@@ -394,14 +435,17 @@ s7_pointer Root::_check_upstream(s7_scheme* interpreter, s7_pointer args)
     auto lookee = Root::fromList(interpreter, s7_cadr(args));
     auto looker = Root::fromList(interpreter, s7_caddr(args));
 
+    // Success
     int out = 0;
 
     if (lookee.second->values.count(looker.first) == 0)
     {
+        // Failure due to non-existent value
         out = -1;
     }
     else if (deps.insert(looker, toNameKey(lookee)))
     {
+        // Failure due to recursive lookup
         out = 1;
     }
     return s7_make_integer(interpreter, out);
