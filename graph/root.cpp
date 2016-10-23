@@ -284,11 +284,6 @@ bool Root::eval(const CellKey& k)
         auto bindings = s7_list(interpreter, 0);
         for (auto& c : env.back()->sheet->cells.left)
         {
-            // Push the symbol name to the bindings list
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, c.first.c_str()),
-                    bindings);
-
             // Construct a lookup thunk using value_thunk_factory
             auto target = toList({env, c.second});
             auto args = s7_list(interpreter, 5, deps_ptr, target, looker,
@@ -300,17 +295,17 @@ bool Root::eval(const CellKey& k)
 
             // Then push it to the list
             bindings = s7_cons(interpreter, thunk, bindings);
+
+            // Prepend the symbol name to the bindings list
+            bindings = s7_cons(interpreter,
+                    s7_make_symbol(interpreter, c.first.c_str()),
+                    bindings);
         }
         for (auto& i : env.back()->sheet->instances)
         {
             // Create a temporary environment inside the instance
             auto env_ = env;
             env_.push_back(i.second.get());
-
-            // Push the symbol name to the bindings list
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, i.first.c_str()),
-                    bindings);
 
             s7_pointer callback=nullptr;
             for (auto o : i.second->sheet->outputs())
@@ -325,6 +320,12 @@ bool Root::eval(const CellKey& k)
                 }
             }
             bindings = s7_cons(interpreter, callback, bindings);
+
+            // Push the symbol name to the bindings list
+            bindings = s7_cons(interpreter,
+                    s7_make_symbol(interpreter, i.first.c_str()),
+                    bindings);
+
         }
 
         // Run the evaluation and get out a value
@@ -349,6 +350,12 @@ bool Root::eval(const CellKey& k)
         }
         cell->values[env] = value;
         s7_gc_protect(interpreter, cell->values[env]);
+
+        // Also get a string representation out
+        auto str_ptr = s7_object_to_c_string(interpreter, value);
+        cell->strs[env] = std::string(str_ptr);
+        free(str_ptr);
+
         return true;
     }
 }

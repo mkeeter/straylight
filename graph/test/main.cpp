@@ -10,6 +10,7 @@ TEST_CASE("Wat")
     auto c = root->insertCell(root->sheet.get(), "x", "(+ 1 2)");
     REQUIRE(c->values.size() == 1);
     REQUIRE(c->values.count({root->instance.get()}) == 1);
+    REQUIRE(c->strs[{root->instance.get()}] == "3");
 }
 
 int main(int argc, char** argv)
