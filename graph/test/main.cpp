@@ -40,6 +40,14 @@ TEST_CASE("Multiple evaluation paths")
     REQUIRE(y->strs[{root->instance.get()}] == "8");
 }
 
+TEST_CASE("Re-evaluation on cell insertion")
+{
+    std::unique_ptr<Graph::Root> root(new Graph::Root());
+    auto y = root->insertCell(root->sheet.get(), "y", "(+ 1 (x))");
+    auto x = root->insertCell(root->sheet.get(), "x", "1");
+    REQUIRE(y->strs[{root->instance.get()}] == "2");
+}
+
 int main(int argc, char** argv)
 {
     return Catch::Session().run(argc, argv);
