@@ -96,8 +96,10 @@ private:
     /*
      *  Encodes a cell key as a list in the interpreter
      */
-    Value toList(const CellKey& k);
-    CellKey fromList(Value v);
+    Value toList(const CellKey& k) { return toList(interpreter, k); }
+    Value toList(s7_scheme* interpreter, const CellKey& k);
+    static CellKey fromList(s7_scheme* interpreter, Value v);
+    CellKey fromList(Value v) { return fromList(interpreter, v); }
 
     /*
      *  Embedded function to check whether looker is upstream of lookee

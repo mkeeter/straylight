@@ -281,7 +281,7 @@ bool Root::eval(const CellKey& k)
     }
     else
     {
-        auto bindings = s7_list(interpreter, 0);
+        auto bindings = s7_nil(interpreter);
         for (auto& c : env.back()->sheet->cells.left)
         {
             // Construct a lookup thunk using value_thunk_factory
@@ -291,6 +291,7 @@ bool Root::eval(const CellKey& k)
                                 c.second->values.count(env)
                                     ? c.second->values.at(env)
                                     : s7_nil(interpreter));
+            printf("args: %s\n", s7_object_to_c_string(interpreter, args));
             auto thunk = s7_call(interpreter, value_thunk_factory, args);
 
             // Then push it to the list
@@ -360,24 +361,29 @@ bool Root::eval(const CellKey& k)
     }
 }
 
-Value Root::toList(const CellKey& k)
+Value Root::toList(s7_scheme* interpreter, const CellKey& k)
 {
-    auto out = s7_list(interpreter, 0);
+    auto out = s7_nil(interpreter);
     for (auto& i : k.first)
     {
         out = s7_cons(interpreter, s7_make_c_pointer(interpreter, i), out);
+        printf("%s\n", s7_object_to_c_string(interpreter, out));
     }
     out = s7_cons(interpreter, s7_make_c_pointer(interpreter, k.second), out);
+    printf("%s\n", s7_object_to_c_string(interpreter, out));
+    printf("-----\n");
     return out;
 }
 
-CellKey Root::fromList(Value v)
+CellKey Root::fromList(s7_scheme* interpreter, Value v)
 {
     CellKey out;
     out.second = static_cast<Cell*>(s7_c_pointer(s7_car(v)));
     v = s7_cdr(v);
+    printf("List: %s\n", s7_object_to_c_string(interpreter, v));
 
     // Because of the list's order, we fill the key from back to front
+    printf("Resizing to %i\n", (s7_list_length(interpreter, v)));
     out.first.resize(s7_list_length(interpreter, v));
     for (auto itr = out.first.rbegin(); itr != out.first.rend();
          ++itr, v = s7_cdr(v))
@@ -390,16 +396,17 @@ CellKey Root::fromList(Value v)
 
 s7_pointer Root::_check_upstream(s7_scheme* interpreter, s7_pointer args)
 {
-    auto& root = *static_cast<Root*>(s7_c_pointer(s7_car(args)));
-    auto lookee = root.fromList(s7_cadr(args));
-    auto looker = root.fromList(s7_caddr(args));
+    printf("_check_upstream args: %s\n", s7_object_to_c_string(interpreter, args));
+    auto& deps = *static_cast<Dependencies*>(s7_c_pointer(s7_car(args)));
+    auto lookee = Root::fromList(interpreter, s7_cadr(args));
+    auto looker = Root::fromList(interpreter, s7_caddr(args));
 
     int out = 0;
     if (lookee.second->values.count(looker.first))
     {
         out = -1;
     }
-    else if (root.deps.insert(looker, toNameKey(lookee)))
+    else if (deps.insert(looker, toNameKey(lookee)))
     {
         out = 1;
     }
