@@ -37,6 +37,14 @@ Root::Root()
                 (if (string=? "~A: unbound variable" (caadr args))
                     (cons 'unbound (cadr args))
                     (cons 'error (cadr args))))))
+      )")),
+      is_input(s7_eval_c_string(interpreter, R"(
+        (lambda (str)
+          (catch #t
+            (lambda ()
+              (let ((r (read (open-input-string s))))
+                (eqv? (car r) 'input)))
+            (lambda args #f)))
       )"))
 
 {

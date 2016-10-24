@@ -4,7 +4,6 @@
 
 namespace Graph
 {
-
 Sheet::~Sheet()
 {
     for (auto c : cells.left)

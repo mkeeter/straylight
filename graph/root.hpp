@@ -36,6 +36,12 @@ public:
     Instance* insertInstance(Sheet* sheet, const Name& name, Sheet* target);
 
     /*
+     *  Checks to see whether we can insert the given sheet
+     *  by examining whether this would create a recursive loop.
+     */
+    bool canInsertInstance(Sheet* sheet, const Name& name, Sheet* target);
+
+    /*
      *  Renames a cell or instance
      *  Requires canInsert(sheet, name) to be true
      */
@@ -159,5 +165,6 @@ private:
     s7_pointer const check_upstream;
     s7_pointer const value_thunk_factory;
     s7_pointer const eval_func;
+    s7_pointer const is_input;
 };
 }   // namespace Graph
