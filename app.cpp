@@ -40,12 +40,14 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 
     // Draw the cell's name, allowing for renaming
     {   // Temporary buffer for editing a cell's name
+        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0, 0.5});
         char buf[128];
         strcpy(buf, &name[0]);
         if (ImGui::Button(buf, {-1.0f, 0.0f}))
         {
             ImGui::OpenPopup("rename");
         }
+        ImGui::PopStyleVar(1);
         if (ImGui::BeginPopup("rename"))
         {
             const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
@@ -106,7 +108,6 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::PopItemWidth();
 
     ImGui::PopID();
-    ImGui::Separator();
 
 }
 
@@ -115,15 +116,37 @@ void App::drawSheet(const Graph::Env& env, float offset)
     Graph::Sheet* sheet = env.back()->sheet;
 
     ImGui::SetNextWindowPos({offset, 0});
+    {   // Set window size
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        if (col_width.count(env))
+        {
+            ImGui::SetNextWindowSize({col_width[env], float(height)},
+                    ImGuiSetCond_Always);
+        }
+        else
+        {
+            ImGui::SetNextWindowSize({200, float(height)},
+                    ImGuiSetCond_Always);
+        }
+    }
     ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
     ImGui::Begin("Cells", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
     ImGui::PushID(env.back());
 
+    ImGui::BeginChild("CellsSub", ImVec2(-1, ImGui::GetWindowHeight() - 50));
+
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
     std::list<std::string> cells;
+    bool drawn = false;
     for (auto& d : sheet->cells.left)
     {
+        if (drawn)
+        {
+            ImGui::Separator();
+        }
+        drawn = true;
         cells.push_back(d.first);
     }
 
@@ -131,8 +154,13 @@ void App::drawSheet(const Graph::Env& env, float offset)
     {
         drawCell(k, env);
     }
+    ImGui::EndChild();
 
+    ImGui::Separator();
+    ImGui::Button("Add");
     ImGui::PopID();
+
+    col_width[env] = ImGui::GetWindowSize().x;
     ImGui::End();
 }
 

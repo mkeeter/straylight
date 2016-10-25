@@ -22,4 +22,5 @@ private:
     // UI state
     Graph::Env focused;
     std::vector<char> editor_buf;
+    std::map<Graph::Env, float> col_width;
 };
