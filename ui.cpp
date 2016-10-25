@@ -12,7 +12,6 @@
 
 #include "ui.hpp"
 #include "colors.hpp"
-#include "datum.hpp"
 
 namespace ui
 {
@@ -23,7 +22,7 @@ static void error_callback(int error, const char* description)
 }
 
 // Load a better font and adjust its scale for high-DPI monitors
-static void load_font(Window* window)
+static void load_font(GLFWwindow* window)
 {
     int window_width, window_height;
     int framebuffer_width, framebuffer_height;
@@ -36,7 +35,7 @@ static void load_font(Window* window)
     io.Fonts->Fonts[0]->Scale /= scale;
 }
 
-static Window* make_window()
+static GLFWwindow* make_window()
 {
     // Setup window
     glfwSetErrorCallback(error_callback);
@@ -70,7 +69,7 @@ static void set_style()
     ImGui::PushStyleColor(ImGuiCol_Text, Colors::base06);
 }
 
-Window* init()
+GLFWwindow* init()
 {
     auto window = make_window();
     ImGui_ImplGlfwGL3_Init(window, true);
@@ -86,18 +85,18 @@ void shutdown()
     glfwTerminate();
 }
 
-bool finished(Window* w)
+bool finished(GLFWwindow* w)
 {
     return glfwWindowShouldClose(w);
 }
 
-static void start()
+void start()
 {
     glfwPollEvents();
     ImGui_ImplGlfwGL3_NewFrame();
 }
 
-static void finish(GLFWwindow* window)
+void finish(GLFWwindow* window)
 {
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -110,124 +109,5 @@ static void finish(GLFWwindow* window)
     ImGui::Render();
     glfwSwapBuffers(window);
 }
-
-void draw(Window* window, std::map<std::string, Datum*>& ds)
-{
-    start();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-
-    ImGui::SetNextWindowSize({float(width)/4, float(height)}, ImGuiSetCond_Appearing);
-    ImGui::SetNextWindowPos({0, 0});
-    ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
-    ImGui::Begin("Screens", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-
-    // Reserve keys and erased keys in a separate list here to avoid
-    // glitches when we iterate over a changing map
-    std::list<std::string> keys;
-    std::list<std::string> erased;
-    for (auto d : ds)
-    {
-        keys.push_back(d.first);
-    }
-
-    static char* editor_buf = nullptr;
-    static size_t editor_buf_size = 0;
-
-    for (auto k : keys)
-    {
-        ImGui::PushID(k.c_str());
-
-        ImGui::Columns(2, "datum", false);
-        ImGui::SetColumnOffset(1, 60.0f);
-        ImGui::Text("Name");
-        ImGui::NextColumn();
-
-        {   // Temporary buffer for editing a cell's name
-            char buf[128];
-            if (ImGui::Button(k.c_str(), {-1.0f, 0.0f}))
-            {
-                std::copy(k.begin(), k.end(), buf);
-                ImGui::OpenPopup("rename");
-            }
-            if (ImGui::BeginPopup("rename"))
-            {
-                const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
-                        ImGuiInputTextFlags_EnterReturnsTrue);
-                ImGui::SameLine();
-                if (ds[k]->canRenameTo(buf))
-                {
-                    if (ImGui::Button("Rename") || ret)
-                    {
-                        ds[std::string(buf)] = ds[k];
-                        erased.push_back(k);
-                    }
-                }
-                else
-                {
-                    ImGui::Text("Invalid name");
-                }
-                ImGui::EndPopup();
-            }
-        }
-
-        ImGui::Columns(2, "datum", false);
-        ImGui::Text("Script");
-        ImGui::NextColumn();
-        ImGui::PushItemWidth(-1.0f);
-        auto newlines = ds[k]->newlines();
-        {
-            auto str_len = ds[k]->expr.size() + 1;
-            if (str_len > editor_buf_size)
-            {
-                str_len += 4096;
-                editor_buf = (char*)realloc(editor_buf, str_len);
-                editor_buf_size = str_len;
-            }
-            std::copy(ds[k]->expr.begin(), ds[k]->expr.end() + 1, editor_buf);
-
-            if (ImGui::InputTextMultiline("##txt",
-                    editor_buf, editor_buf_size,
-                    {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
-            {
-                ds[k]->setExpr(std::string(editor_buf));
-            }
-        }
-
-        ImGui::Columns(2, "datum", false);
-        ImGui::Text("Value");
-        ImGui::NextColumn();
-        ImGui::PushItemWidth(-1.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base04);
-        ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
-                              Colors::transparent(Colors::blue));
-        ImGui::PushAllowKeyboardFocus(false);
-        ImGui::InputText("##result", ds[k]->val_str, strlen(ds[k]->val_str),
-                         ImGuiInputTextFlags_ReadOnly);
-        ImGui::PopAllowKeyboardFocus();
-        ImGui::PopStyleColor(2);
-        ImGui::PopItemWidth();
-
-        ImGui::PopID();
-        ImGui::Separator();
-    }
-
-    for (auto k : erased)
-    {
-        ds.erase(k);
-    }
-
-    ImGui::End();
-    ImGui::PopStyleVar(1);
-
-    ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    ImGui::ShowTestWindow();
-
-    finish(window);
-}
-
 
 } // namespace ui

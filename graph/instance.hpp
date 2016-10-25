@@ -10,9 +10,13 @@ struct Cell;
 
 struct Instance
 {
-    Instance(Sheet* sheet);
+    /*
+     *  Default constructor
+     *  (requires inputs to be populated elsewhere)
+     */
+    Instance(Sheet* sheet) : sheet(sheet) {}
 
-    Sheet* sheet;
+    Sheet* const sheet;
     std::map<Cell*, Expr> inputs;
 };
 }   // namespace Graph

@@ -2,38 +2,12 @@
 #include <map>
 
 #include "ui.hpp"
-#include "datum.hpp"
-#include "s7.h"
+#include "app.hpp"
 
 int main(int, char**)
 {
-    s7_scheme* s7 = s7_init();
-    if (!s7)
-    {
-        fprintf(stderr, "Error: could not create s7\n");
-        exit(1);
-    }
-
-    auto window = ui::init();
-
-    std::map<std::string, Datum*> ds;
-    ds["x"] = new Datum("(+ 1 2)", s7);
-    ds["y"] = new Datum("(+ 3 4)", s7);
-    ds["a"] = new Datum("(+ 1 2)", s7);
-    ds["b"] = new Datum("(+ 3 4)", s7);
-    ds["c"] = new Datum("(+ 1 2)", s7);
-    ds["d"] = new Datum("(+ 3 4)", s7);
-    ds["e"] = new Datum("(+ 1 2)", s7);
-    ds["q"] = new Datum("(+ 3 4)", s7);
-
-    // Main loop
-    while (!ui::finished(window))
-    {
-        ui::draw(window, ds);
-    }
-
-    ui::shutdown();
-    free(s7);
+    auto app = App();
+    app.run();
 
     return 0;
 }

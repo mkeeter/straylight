@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(noonlight)
-set(CMAKE_BUILD_TYPE RELEASE)
+set(CMAKE_BUILD_TYPE DEBUG)
 
 ################################################################################
 # Flags
@@ -39,7 +39,9 @@ endif()
 ################################################################################
 
 file(GLOB IMGUI_FILES imgui/*.cpp)
-add_executable(noonlight main.cpp datum.cpp colors.cpp ui.cpp s7/s7.c ${IMGUI_FILES})
+file(GLOB GRAPH_FILES graph/*.cpp)
+add_executable(noonlight main.cpp app.cpp colors.cpp ui.cpp ${GRAPH_FILES}
+               s7/s7.c ${IMGUI_FILES})
 
 target_include_directories(noonlight SYSTEM PRIVATE
     ${GLFW_INCLUDE_DIRS}

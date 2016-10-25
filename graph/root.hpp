@@ -5,17 +5,18 @@
 
 #include "types.hpp"
 #include "dependencies.hpp"
+#include "interpreter.hpp"
+#include "sheet.hpp"
+#include "instance.hpp"
 
 namespace Graph
 {
-struct Sheet;
 struct Cell;
 
 class Root
 {
 public:
     Root();
-    ~Root();
 
     /*
      *  Insert a cell into a particular Sheet
@@ -94,32 +95,6 @@ private:
     Lock_ Lock() { return Lock_(this); }
 
     /*
-     *  Evaluates the given cell + environment
-     *  Returns true if the result has changed
-     */
-    bool eval(const CellKey& k);
-
-    /*
-     *  Encodes a cell key as a list in the interpreter
-     */
-    Value toList(const CellKey& k) { return toList(interpreter, k); }
-    Value toList(s7_scheme* interpreter, const CellKey& k);
-    static CellKey fromList(s7_scheme* interpreter, Value v);
-    CellKey fromList(Value v) { return fromList(interpreter, v); }
-
-    /*
-     *  Embedded function to check whether looker is upstream of lookee
-     *  args should be of the order
-     *      root (Root*)
-     *      target (CellKey)
-     *      looker (CellKey)
-     *  Returns 0 if all is well
-     *          1 if this lookup creates a recursive loop
-     *         -1 if there is no value present
-     */
-    static s7_pointer _check_upstream(s7_scheme* interpreter, s7_pointer args);
-
-    /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
      *  (if frozen is true, then this is a no-op)
      */
@@ -159,12 +134,6 @@ private:
     bool locked=false;
 
     /*  This is our embedded Scheme interpreter  */
-    s7_scheme* const interpreter;
-
-    /*  Scheme functions */
-    s7_pointer const check_upstream;
-    s7_pointer const value_thunk_factory;
-    s7_pointer const eval_func;
-    s7_pointer const is_input;
+    Interpreter interpreter;
 };
 }   // namespace Graph
