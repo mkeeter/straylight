@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "imgui.h"
 
 #include "app.hpp"
@@ -25,11 +27,6 @@ void App::run()
     ui::shutdown();
 }
 
-unsigned App::countNewlines(const Graph::Cell* cell) const
-{
-    return std::count(cell->expr.begin(), cell->expr.end(), '\n');
-}
-
 void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 {
     Graph::Sheet* sheet = env.back()->sheet;
@@ -44,17 +41,18 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     // Draw the cell's name, allowing for renaming
     {   // Temporary buffer for editing a cell's name
         char buf[128];
-        if (ImGui::Button(name.c_str(), {-1.0f, 0.0f}))
+        strcpy(buf, &name[0]);
+        if (ImGui::Button(buf, {-1.0f, 0.0f}))
         {
-            std::copy(name.begin(), name.end(), buf);
             ImGui::OpenPopup("rename");
         }
         if (ImGui::BeginPopup("rename"))
         {
+            printf("Making text: '%s'\n", buf);
             const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
                     ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::SameLine();
-            if (root.canInsert(sheet, buf))
+            if (name == buf || root.canInsert(sheet, buf))
             {
                 if (ImGui::Button("Rename") || ret)
                 {
@@ -75,21 +73,21 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::Text("Script");
     ImGui::NextColumn();
     ImGui::PushItemWidth(-1.0f);
-    auto newlines = countNewlines(cell);
+
     {
-        auto str_len = cell->expr.size() + 1;
-        if (str_len > editor_buf.size())
+        if (cell->expr.size() + 256 > editor_buf.size())
         {
-            str_len += 4096;
-            editor_buf.resize(str_len);
+            editor_buf.resize(editor_buf.size() + 4096);
         }
         std::copy(cell->expr.begin(), cell->expr.end(), editor_buf.begin());
 
+        auto height = ImGui::CalcTextSize(cell->expr.c_str()).y +
+            (cell->expr.back() == '\n' ? ImGui::GetFontSize() : 0);
         if (ImGui::InputTextMultiline("##txt",
                 editor_buf.data(), editor_buf.size(),
-                {-1.0f, ImGui::GetTextLineHeight() * (2.3f + newlines)}))
+                {-1.0f, ImGui::GetTextLineHeight() * 1.3f + height}))
         {
-            root.editCell(cell, std::string(editor_buf.begin(), editor_buf.end()));
+            root.editCell(cell, std::string(&editor_buf[0]));
         }
     }
 

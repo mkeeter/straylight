@@ -48,6 +48,13 @@ TEST_CASE("Re-evaluation on cell insertion")
     REQUIRE(y->strs[{root->instance.get()}] == "2");
 }
 
+TEST_CASE("canInsert")
+{
+    std::unique_ptr<Graph::Root> root(new Graph::Root());
+    auto x = root->insertCell(root->sheet.get(), "x", "1");
+    REQUIRE(!root->canInsert(root->sheet.get(), "x"));
+}
+
 int main(int argc, char** argv)
 {
     return Catch::Session().run(argc, argv);

@@ -13,7 +13,6 @@ public:
 private:
     void drawCell(const Graph::Name& name, const Graph::Env& env);
     void drawSheet(const Graph::Env& env, float offset=0.0f);
-    unsigned countNewlines(const Graph::Cell* cell) const;
 
     void draw();
 
