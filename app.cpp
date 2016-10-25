@@ -48,7 +48,6 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
         }
         if (ImGui::BeginPopup("rename"))
         {
-            printf("Making text: '%s'\n", buf);
             const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
                     ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::SameLine();
