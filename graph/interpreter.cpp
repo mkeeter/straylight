@@ -49,15 +49,15 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
     // Success
     int out = 0;
 
-    if (lookee.second->values.count(looker.first) == 0)
-    {
-        // Failure due to non-existent value
-        out = -1;
-    }
-    else if (deps.insert(looker, toNameKey(lookee)))
+    if (deps.insert(looker, toNameKey(lookee)))
     {
         // Failure due to recursive lookup
         out = 1;
+    }
+    else if (lookee.second->values.count(looker.first) == 0)
+    {
+        // Failure due to non-existent value
+        out = -1;
     }
     return s7_make_integer(interpreter, out);
 }
@@ -76,8 +76,8 @@ Interpreter::Interpreter()
            (lambda (deps target looker check-upstream value)
                (lambda ()
                (let ((res (check-upstream deps target looker)))
-                   (cond ((=  1 res) (error 'circular-lookup))
-                         ((= -1 res) (error 'no-such-value))
+                   (cond ((=  1 res) (error 'circular-lookup "Circular lookup"))
+                         ((= -1 res) (error 'no-such-value "Missing value"))
                          ((eqv? 'value (car value)) (cdr value))
                          (else (error 'invalid-lookup))))))
           )")),

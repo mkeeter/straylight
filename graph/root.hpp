@@ -24,6 +24,7 @@ public:
     Cell* insertCell(Sheet* sheet, const Name& name, const Expr& expr);
     void editCell(Cell* cell, const Expr& expr);
     void eraseCell(Cell* cell);
+    bool isValid(Cell* cell) const;
 
     /*
      *  Find the parent sheet of a cell
@@ -40,7 +41,7 @@ public:
      *  Checks to see whether we can insert the given sheet
      *  by examining whether this would create a recursive loop.
      */
-    bool canInsertInstance(Sheet* sheet, const Name& name, Sheet* target);
+    bool canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const;
 
     /*
      *  Renames a cell or instance
@@ -58,7 +59,7 @@ public:
      *  Create a new Sheet in an existing Sheet's library
      */
     Sheet* createSheet(Sheet* sheet, const Name& name);
-    bool canCreateSheet(Sheet* sheet, const Name& name);
+    bool canCreateSheet(Sheet* sheet, const Name& name) const;
 
     /*
      *  Erase a cell or instance from a Sheet

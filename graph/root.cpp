@@ -51,6 +51,11 @@ void Root::eraseCell(Cell* cell)
     changed(parent, name);
 }
 
+bool Root::isValid(Cell* cell) const
+{
+    return true;
+}
+
 Sheet* Root::parentSheet(Cell* cell) const
 {
     std::list<Sheet*> todo = {sheet.get()};
@@ -72,9 +77,30 @@ Sheet* Root::parentSheet(Cell* cell) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+Sheet* Root::createSheet(Sheet* sheet, const Name& name)
+{
+    assert(canCreateSheet(sheet, name));
+    auto s = new Sheet();
+    sheet->library[name].reset(s);
+    return s;
+}
+
+bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
+{
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const
+{
+    // TODO check for recursion here
+    return canInsert(sheet, name);
+}
+
 Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 {
-    assert(canInsert(sheet, name));
+    assert(canInsertInstance(sheet, name, target));
 
     auto added = new Instance(target);
 
