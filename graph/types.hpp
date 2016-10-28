@@ -13,5 +13,4 @@ typedef std::string Name;
 typedef std::vector<Name> Id;
 typedef std::vector<Instance*> Env;
 typedef std::string Expr;
-typedef s7_pointer Value;
 }   // namespace Graph

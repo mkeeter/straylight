@@ -10,7 +10,7 @@ TEST_CASE("Simple evaluation")
     auto c = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
     REQUIRE(c->values.size() == 1);
     REQUIRE(c->values.count({root.instance.get()}) == 1);
-    REQUIRE(c->strs[{root.instance.get()}] == "3");
+    REQUIRE(c->values[{root.instance.get()}].str == "3");
 }
 
 TEST_CASE("Evaluation with lookups")
@@ -18,7 +18,7 @@ TEST_CASE("Evaluation with lookups")
     Graph::Root root;
     auto x = root.insertCell(root.sheet.get(), "x", "1");
     auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
-    REQUIRE(y->strs[{root.instance.get()}] == "2");
+    REQUIRE(y->values[{root.instance.get()}].str == "2");
 }
 
 TEST_CASE("Re-evaluation on parent change")
@@ -27,7 +27,7 @@ TEST_CASE("Re-evaluation on parent change")
     auto x = root.insertCell(root.sheet.get(), "x", "1");
     auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
     root.editCell(x, "2");
-    REQUIRE(y->strs[{root.instance.get()}] == "3");
+    REQUIRE(y->values[{root.instance.get()}].str == "3");
 }
 
 TEST_CASE("Multiple evaluation paths")
@@ -37,7 +37,7 @@ TEST_CASE("Multiple evaluation paths")
     auto a = root.insertCell(root.sheet.get(), "a", "(+ 2 (x))");
     auto y = root.insertCell(root.sheet.get(), "y", "(+ (a) (x))");
     root.editCell(x, "3");
-    REQUIRE(y->strs[{root.instance.get()}] == "8");
+    REQUIRE(y->values[{root.instance.get()}].str == "8");
 }
 
 TEST_CASE("Re-evaluation on cell insertion")
@@ -45,7 +45,7 @@ TEST_CASE("Re-evaluation on cell insertion")
     Graph::Root root;
     auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
     auto x = root.insertCell(root.sheet.get(), "x", "1");
-    REQUIRE(y->strs[{root.instance.get()}] == "2");
+    REQUIRE(y->values[{root.instance.get()}].str == "2");
 }
 
 TEST_CASE("Root::canInsert")
@@ -67,11 +67,14 @@ TEST_CASE("Root::canInsert")
     }
 }
 
-TEST_CASE("Auto-recursive lookup")
+TEST_CASE("Cell.values.valid")
 {
     Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "(x)");
-    REQUIRE(!root.isValid(x));
+    SECTION("Auto-recursive lookup")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(x)");
+        REQUIRE(!x->values[{root.instance.get()}].valid);
+    }
 }
 
 TEST_CASE("Root::canCreateSheet")
@@ -97,7 +100,7 @@ TEST_CASE("Root::rename")
     auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
     auto z = root.insertCell(root.sheet.get(), "z", "(+ (y) 2)");
     root.rename(root.sheet.get(), "x", "y");
-    REQUIRE(z->strs[{root.instance.get()}] == "5");
+    REQUIRE(z->values[{root.instance.get()}].str == "5");
 }
 
 int main(int argc, char** argv)

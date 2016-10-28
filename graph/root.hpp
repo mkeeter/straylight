@@ -24,7 +24,6 @@ public:
     Cell* insertCell(Sheet* sheet, const Name& name, const Expr& expr);
     void editCell(Cell* cell, const Expr& expr);
     void eraseCell(Cell* cell);
-    bool isValid(Cell* cell) const;
 
     /*
      *  Find the parent sheet of a cell

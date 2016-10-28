@@ -117,7 +117,7 @@ void Interpreter::release(Cell* cell)
 {
     for (auto& v : cell->values)
     {
-        s7_gc_unprotect(interpreter, v.second);
+        s7_gc_unprotect(interpreter, v.second.value);
     }
 }
 
@@ -160,7 +160,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
                 encode_key(interpreter, {env, c.second}),
                 encode_key(interpreter, key),
                 check_upstream,
-                c.second->values.count(env) ? c.second->values.at(env)
+                c.second->values.count(env) ? c.second->values.at(env).value
                                             : s7_nil(interpreter));
             auto thunk = s7_call(interpreter, value_thunk_factory, args);
 
@@ -225,7 +225,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
 
     // If the value is the same, return false
     if (cell->values.count(env) &&
-        s7_is_equal(interpreter, value, cell->values[env]))
+        s7_is_equal(interpreter, value, cell->values[env].value))
     {
         return false;
     }
@@ -234,21 +234,22 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
     {
         if (cell->values.count(env))
         {
-            s7_gc_unprotect(interpreter, cell->values[env]);
+            s7_gc_unprotect(interpreter, cell->values[env].value);
         }
-        cell->values[env] = value;
-        s7_gc_protect(interpreter, cell->values[env]);
+        cell->values[env].value = value;
+        cell->values[env].valid = valid;
+        s7_gc_protect(interpreter, cell->values[env].value);
 
         // Also get a string representation out
         if (valid)
         {
             char* str_ptr = s7_object_to_c_string(interpreter, s7_cdr(value));
-            cell->strs[env] = std::string(str_ptr);
+            cell->values[env].str = std::string(str_ptr);
             free(str_ptr);
         }
         else
         {
-            cell->strs[env] = std::string(
+            cell->values[env].str = std::string(
                     s7_format(interpreter, s7_cdr(value)));
         }
 

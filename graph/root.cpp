@@ -51,11 +51,6 @@ void Root::eraseCell(Cell* cell)
     changed(parent, name);
 }
 
-bool Root::isValid(Cell* cell) const
-{
-    return true;
-}
-
 Sheet* Root::parentSheet(Cell* cell) const
 {
     std::list<Sheet*> todo = {sheet.get()};

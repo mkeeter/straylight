@@ -100,11 +100,14 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
                           Colors::transparent(Colors::blue));
     ImGui::PushAllowKeyboardFocus(false);
-    ImGui::InputText("##result", &cell->strs[env][0],
-                     cell->strs[env].size(),
+    ImGui::PushStyleColor(ImGuiCol_FrameBg,
+            cell->values[env].valid ?
+            Colors::base03 : Colors::red);
+    ImGui::InputText("##result", &cell->values[env].str[0],
+                     cell->values[env].str.size(),
                      ImGuiInputTextFlags_ReadOnly);
     ImGui::PopAllowKeyboardFocus();
-    ImGui::PopStyleColor(2);
+    ImGui::PopStyleColor(3);
     ImGui::PopItemWidth();
 
     ImGui::PopID();
