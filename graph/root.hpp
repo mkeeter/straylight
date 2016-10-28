@@ -81,9 +81,9 @@ private:
      */
     struct Lock_
     {
-        Lock_(Root* r) : was_locked(r->locked), root(r) {}
+        Lock_(Root* r) : was_locked(r->locked), root(r) { r->locked = true; }
         ~Lock_() {
-            if (was_locked)
+            if (!was_locked)
             {
                 root->locked = false;
                 root->sync();
