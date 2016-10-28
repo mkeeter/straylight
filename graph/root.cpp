@@ -179,6 +179,15 @@ void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
            sheet->instances.count(orig));
     assert(canInsert(sheet, name));
 
+    // Prevent sync calls until the end of this function
+    auto lock = Lock();
+
+    // Call changed now so that anything that looked for the new name will be
+    // added to the dirty list; if we called this after the new name was
+    // valid, it would re-evaluate the new name and notice that it hadn't
+    // changed and thus not mark anything else as changed.
+    changed(sheet, name);
+
     if (sheet->cells.left.count(orig))
     {
         auto ptr = sheet->cells.left.at(orig);
@@ -191,9 +200,7 @@ void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
         sheet->instances.erase(name);
     }
 
-    auto lock = Lock();
     changed(sheet, orig);
-    changed(sheet, name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
