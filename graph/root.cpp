@@ -241,17 +241,13 @@ void Root::changed(Sheet* sheet, const Name& name)
         const auto& i = todo.front();
         auto s = i.back()->sheet;
 
-        if (s == sheet && s->cells.left.count(name))
+        if (s == sheet)
         {
             markDirty({i, name});
         }
-        for (const auto& j : s->instances)
+        else
         {
-            if (s == sheet && j.first == name)
-            {
-                markDirty({i, name});
-            }
-            else
+            for (const auto& j : s->instances)
             {
                 auto i_ = i;
                 i_.push_back(j.second.get());
