@@ -48,7 +48,7 @@ TEST_CASE("Re-evaluation on cell insertion")
     REQUIRE(y->strs[{root.instance.get()}] == "2");
 }
 
-TEST_CASE("canInsert")
+TEST_CASE("Root::canInsert")
 {
     Graph::Root root;
     SECTION("Cell name collision")
@@ -83,12 +83,21 @@ TEST_CASE("Root::canCreateSheet")
     REQUIRE(root.canCreateSheet(root.sheet.get(), "a"));
 }
 
-TEST_CASE("canInsertInstance")
+TEST_CASE("Root::canInsertInstance")
 {
     Graph::Root root;
     auto s = root.createSheet(root.sheet.get(), "b");
     REQUIRE(root.canInsertInstance(root.sheet.get(), "b", s));
     REQUIRE(!root.canInsertInstance(root.sheet.get(), "b", root.sheet.get()));
+}
+
+TEST_CASE("Root::rename")
+{
+    Graph::Root root;
+    auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+    auto z = root.insertCell(root.sheet.get(), "z", "(+ (y) 2)");
+    root.rename(root.sheet.get(), "x", "y");
+    REQUIRE(z->strs[{root.instance.get()}] == "5");
 }
 
 int main(int argc, char** argv)
