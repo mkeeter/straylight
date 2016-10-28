@@ -100,6 +100,18 @@ Interpreter::Interpreter()
               (let ((r (read (open-input-string s))))
                 (eqv? (car r) 'input)))
             (lambda args #f)))
+      )")),
+      name_valid(s7_eval_c_string(interpreter, R"(
+        (lambda (str)
+          (and (not (char-position #\( str))
+               (not (char-position #\) str))
+              (catch #t
+                (lambda ()
+                  (let* ((s (format #f "(define ~a #t) " str))
+                         (r (read (open-input-string s))))
+                    (eval r)
+                    #t))
+                (lambda args #f))))
       )"))
 {
     for (s7_pointer ptr: {check_upstream,  value_thunk_factory, eval_func, is_input})
@@ -147,7 +159,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
     if (!env.size())
     {
         value = s7_eval_c_string(interpreter,
-                "(error 'input-at-top-level)");
+                "(error 'input-at-top-level \"Input at top level\")");
     }
     else
     {
@@ -255,6 +267,15 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
 
         return true;
     }
+}
+
+bool Interpreter::nameValid(const std::string& str) const
+{
+    return
+        s7_is_eq(s7_t(interpreter),
+            s7_call(interpreter, name_valid,
+                s7_list(interpreter, 1,
+                    s7_make_string(interpreter, str.c_str()))));
 }
 
 

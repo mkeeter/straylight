@@ -168,7 +168,8 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 bool Root::canInsert(Sheet* const sheet, const Name& name) const
 {
     return (sheet->cells.left.count(name) == 0) &&
-           (sheet->instances.count(name) == 0);
+           (sheet->instances.count(name) == 0) &&
+           interpreter.nameValid(name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -65,6 +65,17 @@ TEST_CASE("Root::canInsert")
         REQUIRE(!root.canInsert(root.sheet.get(), "x"));
         REQUIRE(root.canInsert(root.sheet.get(), "y"));
     }
+
+    SECTION("Valid and invalid names")
+    {
+        REQUIRE(root.canInsert(root.sheet.get(), "x"));
+        REQUIRE(root.canInsert(root.sheet.get(), "name-with-dashes"));
+        REQUIRE(root.canInsert(root.sheet.get(), "a123"));
+        REQUIRE(root.canInsert(root.sheet.get(), "123a"));
+        REQUIRE(!root.canInsert(root.sheet.get(), "123"));
+        REQUIRE(!root.canInsert(root.sheet.get(), "name with spaces"));
+        REQUIRE(!root.canInsert(root.sheet.get(), "(name-with-parens)"));
+    }
 }
 
 TEST_CASE("Cell.values.valid")
