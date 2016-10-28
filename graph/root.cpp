@@ -82,7 +82,7 @@ Sheet* Root::createSheet(Sheet* sheet, const Name& name)
 
 bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
 {
-    return true;
+    return sheet->library.count(name) == 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
