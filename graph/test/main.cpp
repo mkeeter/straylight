@@ -108,9 +108,18 @@ TEST_CASE("Root::rename")
     SECTION("Change detection")
     {
         auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-        auto z = root.insertCell(root.sheet.get(), "z", "(+ (y) 2)");
+
+        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
+        REQUIRE(a->values[{root.instance.get()}].str == "4");
+        REQUIRE(a->values[{root.instance.get()}].valid);
+
+        auto b = root.insertCell(root.sheet.get(), "b", "(+ (y) 2)");
+        REQUIRE(!b->values[{root.instance.get()}].valid);
+
         root.rename(root.sheet.get(), "x", "y");
-        REQUIRE(z->values[{root.instance.get()}].str == "5");
+        REQUIRE(!a->values[{root.instance.get()}].valid);
+        REQUIRE(b->values[{root.instance.get()}].str == "5");
+        REQUIRE(b->values[{root.instance.get()}].valid);
     }
 }
 
