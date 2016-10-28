@@ -30,6 +30,7 @@ void App::run()
 void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 {
     Graph::Sheet* sheet = env.back()->sheet;
+    auto cell = sheet->cells.left.at(name);
 
     ImGui::PushID(name.c_str());
 
@@ -68,14 +69,12 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
         }
     }
 
-    auto cell = sheet->cells.left.at(name);
-
     ImGui::Columns(2, "datum", false);
     ImGui::Text("Script");
     ImGui::NextColumn();
     ImGui::PushItemWidth(-1.0f);
 
-    {
+    {   // Draw the cell's expression and handle changes here
         if (cell->expr.size() + 256 > editor_buf.size())
         {
             editor_buf.resize(editor_buf.size() + 4096);
@@ -142,19 +141,19 @@ void App::drawSheet(const Graph::Env& env, float offset)
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
     std::list<std::string> cells;
-    bool drawn = false;
     for (auto& d : sheet->cells.left)
+    {
+        cells.push_back(d.first);
+    }
+
+    bool drawn = false;
+    for (auto k : cells)
     {
         if (drawn)
         {
             ImGui::Separator();
         }
         drawn = true;
-        cells.push_back(d.first);
-    }
-
-    for (auto k : cells)
-    {
         drawCell(k, env);
     }
     ImGui::EndChild();

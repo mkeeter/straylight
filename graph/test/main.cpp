@@ -97,10 +97,21 @@ TEST_CASE("Root::canInsertInstance")
 TEST_CASE("Root::rename")
 {
     Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-    auto z = root.insertCell(root.sheet.get(), "z", "(+ (y) 2)");
-    root.rename(root.sheet.get(), "x", "y");
-    REQUIRE(z->values[{root.instance.get()}].str == "5");
+    SECTION("Renaming")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+        root.rename(root.sheet.get(), "x", "y");
+        REQUIRE(root.sheet->cells.left.count("y") == 1);
+        REQUIRE(root.sheet->cells.left.at("y") == x);
+    }
+
+    SECTION("Change detection")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+        auto z = root.insertCell(root.sheet.get(), "z", "(+ (y) 2)");
+        root.rename(root.sheet.get(), "x", "y");
+        REQUIRE(z->values[{root.instance.get()}].str == "5");
+    }
 }
 
 int main(int argc, char** argv)
