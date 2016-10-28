@@ -181,8 +181,9 @@ void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
 
     if (sheet->cells.left.count(orig))
     {
-        sheet->cells.insert({name, sheet->cells.left.at(orig)});
+        auto ptr = sheet->cells.left.at(orig);
         sheet->cells.left.erase(orig);
+        sheet->cells.insert({name, ptr});
     }
     else if (sheet->instances.count(orig))
     {
