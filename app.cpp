@@ -12,6 +12,7 @@ App::App()
  : window(ui::init()), focused({root.instance.get()})
 {
     root.insertCell(root.sheet.get(), "a", "(+ 1 2)");
+    root.insertCell(root.sheet.get(), "b", "(+ (a) 2)");
 }
 
 void App::run()
@@ -39,18 +40,27 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::Text("Name");
     ImGui::NextColumn();
 
-    // Draw the cell's name, allowing for renaming
-    {   // Temporary buffer for editing a cell's name
+    {   // Draw the cell's name, allowing for renaming
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0, 0.5});
-        char buf[128];
-        strcpy(buf, &name[0]);
-        if (ImGui::Button(buf, {-1.0f, 0.0f}))
+
+        // Temporary buffer in which we can rename the cell
+        static char buf[128];
+        static bool set_focus = false;
+        if (ImGui::Button(name.c_str(), {-1.0f, 0.0f}))
         {
+            strcpy(buf, &name[0]);
             ImGui::OpenPopup("rename");
+            set_focus = true;
         }
         ImGui::PopStyleVar(1);
+
         if (ImGui::BeginPopup("rename"))
         {
+            if (set_focus)
+            {
+                ImGui::SetKeyboardFocusHere();
+                set_focus = false;
+            }
             const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
                     ImGuiInputTextFlags_EnterReturnsTrue);
             ImGui::SameLine();
@@ -58,7 +68,11 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
             {
                 if (ImGui::Button("Rename") || ret)
                 {
-                    root.rename(sheet, name, buf);
+                    if (name != buf)
+                    {
+                        root.rename(sheet, name, buf);
+                    }
+                    ImGui::CloseCurrentPopup();
                 }
             }
             else
@@ -79,7 +93,7 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
         {
             editor_buf.resize(editor_buf.size() + 4096);
         }
-        std::copy(cell->expr.begin(), cell->expr.end(), editor_buf.begin());
+        std::copy(cell->expr.begin(), cell->expr.end() + 1, editor_buf.begin());
 
         auto height = ImGui::CalcTextSize(cell->expr.c_str()).y +
             (cell->expr.back() == '\n' ? ImGui::GetFontSize() : 0);
@@ -159,11 +173,86 @@ void App::drawSheet(const Graph::Env& env, float offset)
     ImGui::EndChild();
 
     ImGui::Separator();
-    ImGui::Button("Add");
+    drawAddMenu(env);
     ImGui::PopID();
 
     col_width[env] = ImGui::GetWindowSize().x;
     ImGui::End();
+}
+
+void App::drawAddMenu(const Graph::Env& env)
+{
+    if (ImGui::Button("Add", {-1, -1}))
+    {
+        ImGui::OpenPopup("add");
+    }
+
+    if (ImGui::BeginPopup("add"))
+    {
+        static char name_buf[128];
+        static bool set_focus = false;
+
+        if (ImGui::Selectable("Cell", ImGui::IsPopupOpen("addCell"),
+                              ImGuiSelectableFlags_DontClosePopups))
+        {
+            ImGui::OpenPopup("addCell");
+            set_focus = true;
+            name_buf[0] = 0;
+        }
+        else if (ImGui::Selectable("Sheet", ImGui::IsPopupOpen("addSheet"),
+                                   ImGuiSelectableFlags_DontClosePopups))
+        {
+            ImGui::OpenPopup("addSheet");
+            set_focus = true;
+            name_buf[0] = 0;
+        }
+
+        const auto sheet = env.back()->sheet;
+        bool close_parent = false;
+
+        // Submenu for adding a cell
+        if (ImGui::BeginPopup("addCell"))
+        {
+            if (set_focus)
+            {
+                ImGui::SetKeyboardFocusHere();
+                set_focus = false;
+            }
+
+            const bool ret = ImGui::InputText("##addCellInput", name_buf, sizeof(name_buf),
+                    ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::SameLine();
+            if (root.canInsert(sheet, name_buf))
+            {
+                if (ImGui::Button("Insert") || ret)
+                {
+                    root.insertCell(sheet, name_buf, "(+ 1 2)");
+                    ImGui::CloseCurrentPopup();
+                    close_parent = true;
+                }
+            }
+            else
+            {
+                ImGui::Text("Invalid name");
+            }
+            ImGui::EndPopup();
+        }
+        else if (ImGui::BeginPopup("addSheet"))
+        {
+            if (ImGui::Button("Boop"))
+            {
+                ImGui::CloseCurrentPopup();
+                close_parent = true;
+            }
+            ImGui::EndPopup();
+        }
+
+        if (close_parent)
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 }
 
 void App::draw()

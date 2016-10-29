@@ -9,7 +9,7 @@ namespace Graph
 {
 
 Root::Root()
-    : sheet(new Sheet()), instance(new Instance(sheet.get()))
+    : sheet(new Sheet(nullptr)), instance(new Instance(sheet.get()))
 {
     // Nothing to do here
 }
@@ -20,7 +20,7 @@ Cell* Root::insertCell(Sheet* sheet, const Name& name, const Expr& expr)
 {
     assert(canInsert(sheet, name));
 
-    auto c = new Cell(expr);
+    auto c = new Cell(expr, sheet);
     sheet->cells.insert({name, c});
     changed(c);
 
@@ -36,7 +36,7 @@ void Root::editCell(Cell* cell, const Expr& expr)
 
 void Root::eraseCell(Cell* cell)
 {
-    Sheet* parent = parentSheet(cell);
+    Sheet* parent = cell->parent;
     assert(parent != nullptr);
 
     // Release Scheme values for GC
@@ -51,46 +51,40 @@ void Root::eraseCell(Cell* cell)
     changed(parent, name);
 }
 
-Sheet* Root::parentSheet(Cell* cell) const
-{
-    std::list<Sheet*> todo = {sheet.get()};
-    while (todo.size())
-    {
-        const auto& s = todo.front();
-        if (s->cells.right.count(cell))
-        {
-            return s;
-        }
-        for (auto& k : s->library)
-        {
-            todo.push_back(k.second.get());
-        }
-        todo.pop_front();
-    }
-    return nullptr;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 Sheet* Root::createSheet(Sheet* sheet, const Name& name)
 {
     assert(canCreateSheet(sheet, name));
-    auto s = new Sheet();
-    sheet->library[name].reset(s);
+    auto s = new Sheet(sheet);
+    sheet->library.insert({name, s});
     return s;
 }
 
 bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
 {
-    return sheet->library.count(name) == 0;
+    return sheet->library.left.count(name) == 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const
 {
+    // Make sure that the sheet to be inserted is above the sheet which it
+    // will be an instance in.
+    bool above = false;
+    auto sheet_ = sheet;
+    while (sheet_ && !above)
+    {
+        if (sheet_->library.right.count(target))
+        {
+            above = true;
+        }
+        sheet_ = sheet->parent;
+    }
+
     // TODO check for recursion here
-    return canInsert(sheet, name);
+    return above && canInsert(sheet, name);
 }
 
 Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)

@@ -79,7 +79,7 @@ Interpreter::Interpreter()
                    (cond ((=  1 res) (error 'circular-lookup "Circular lookup"))
                          ((= -1 res) (error 'no-such-value "Missing value"))
                          ((eqv? 'value (car value)) (cdr value))
-                         (else (error 'invalid-lookup))))))
+                         (else (error 'invalid-lookup "Invalid lookup"))))))
           )")),
       eval_func(s7_eval_c_string(interpreter, R"(
         (lambda (str env)
@@ -105,6 +105,7 @@ Interpreter::Interpreter()
         (lambda (str)
           (and (not (char-position #\( str))
                (not (char-position #\) str))
+               (not (char-position #\  str))
               (catch #t
                 (lambda ()
                   (let* ((s (format #f "(define ~a #t) " str))

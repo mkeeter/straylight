@@ -26,12 +26,6 @@ public:
     void eraseCell(Cell* cell);
 
     /*
-     *  Find the parent sheet of a cell
-     *  Returns nullptr if the cell has no parent in the graph library
-     */
-    Sheet* parentSheet(Cell* cell) const;
-
-    /*
      *  Insert a new instance to a given Sheet
      */
     Instance* insertInstance(Sheet* sheet, const Name& name, Sheet* target);

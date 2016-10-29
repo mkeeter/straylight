@@ -15,10 +15,11 @@ struct Cell;
 
 struct Sheet
 {
+    Sheet(Sheet* parent) : parent(parent) {}
     ~Sheet();
 
     /*  Library of child sheets  */
-    std::map<Name, std::unique_ptr<Sheet>> library;
+    boost::bimap<Name, Sheet*> library;
 
     /*  Instances of sheets (from library or parent's library) */
     std::map<Name, std::unique_ptr<Instance>> instances;
@@ -32,5 +33,7 @@ struct Sheet
      */
     std::list<Cell*> inputs() const { return {}; };
     std::list<Cell*> outputs() const { return {}; };
+
+    Sheet* const parent;
 };
 }   // namespace Graph

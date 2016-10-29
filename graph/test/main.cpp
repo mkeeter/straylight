@@ -30,6 +30,15 @@ TEST_CASE("Re-evaluation on parent change")
     REQUIRE(y->values[{root.instance.get()}].str == "3");
 }
 
+TEST_CASE("Parent becoming invalid")
+{
+    Graph::Root root;
+    auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+    auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
+    root.editCell(x, "(+ 1 2");
+    REQUIRE(!y->values[{root.instance.get()}].valid);
+}
+
 TEST_CASE("Multiple evaluation paths")
 {
     Graph::Root root;
@@ -74,7 +83,11 @@ TEST_CASE("Root::canInsert")
         REQUIRE(root.canInsert(root.sheet.get(), "123a"));
         REQUIRE(!root.canInsert(root.sheet.get(), "123"));
         REQUIRE(!root.canInsert(root.sheet.get(), "name with spaces"));
+        REQUIRE(!root.canInsert(root.sheet.get(), "trailing-space "));
+        REQUIRE(!root.canInsert(root.sheet.get(), "trailing-spaces   "));
+        REQUIRE(!root.canInsert(root.sheet.get(), "    preceeding-spaces"));
         REQUIRE(!root.canInsert(root.sheet.get(), "(name-with-parens)"));
+        REQUIRE(!root.canInsert(root.sheet.get(), ""));
     }
 }
 

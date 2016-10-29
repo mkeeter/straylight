@@ -10,5 +10,9 @@ Sheet::~Sheet()
     {
         delete c.second;
     }
+    for (auto s : library.left)
+    {
+        delete s.second;
+    }
 }
 }
