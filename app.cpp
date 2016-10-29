@@ -142,7 +142,7 @@ void App::drawSheet(const Graph::Env& env, float offset)
         }
         else
         {
-            ImGui::SetNextWindowSize({200, float(height)},
+            ImGui::SetNextWindowSize({300, float(height)},
                     ImGuiSetCond_Always);
         }
     }
@@ -190,6 +190,7 @@ void App::drawAddMenu(const Graph::Env& env)
     if (ImGui::BeginPopup("add"))
     {
         static char name_buf[128];
+        static char sheet_buf[128];
         static bool set_focus = false;
 
         if (ImGui::Selectable("Cell", ImGui::IsPopupOpen("addCell"),
@@ -197,14 +198,15 @@ void App::drawAddMenu(const Graph::Env& env)
         {
             ImGui::OpenPopup("addCell");
             set_focus = true;
-            name_buf[0] = 0;
+            strcpy(name_buf, "cell-name");
         }
         else if (ImGui::Selectable("Sheet", ImGui::IsPopupOpen("addSheet"),
                                    ImGuiSelectableFlags_DontClosePopups))
         {
             ImGui::OpenPopup("addSheet");
             set_focus = true;
-            name_buf[0] = 0;
+            strcpy(name_buf, "instance-name");
+            strcpy(sheet_buf, "Sheet name");
         }
 
         const auto sheet = env.back()->sheet;
@@ -237,13 +239,46 @@ void App::drawAddMenu(const Graph::Env& env)
             }
             ImGui::EndPopup();
         }
+        // Submenu for adding a sheet
         else if (ImGui::BeginPopup("addSheet"))
         {
-            if (ImGui::Button("Boop"))
+            ImGui::Dummy({300, 0});
+
+            if (set_focus)
             {
-                ImGui::CloseCurrentPopup();
-                close_parent = true;
+                ImGui::SetKeyboardFocusHere();
+                set_focus = false;
             }
+            bool ret = ImGui::InputText("Sheet name", sheet_buf, sizeof(sheet_buf),
+                    ImGuiInputTextFlags_EnterReturnsTrue);
+
+            if (ret)
+            {
+                ImGui::SetKeyboardFocusHere();
+            }
+            ret = ImGui::InputText("Instance name", name_buf, sizeof(name_buf),
+                    ImGuiInputTextFlags_EnterReturnsTrue);
+
+            ImGui::PushItemWidth(-1);
+            if (!root.canInsert(sheet, name_buf))
+            {
+                ImGui::Text("Invalid instance name");
+            }
+            else if (!root.canCreateSheet(sheet, sheet_buf))
+            {
+                ImGui::Text("Invalid sheet name");
+            }
+            else
+            {
+                if (ImGui::Button("Create", {-1, 0}) || ret)
+                {
+                    auto s = root.createSheet(sheet, sheet_buf);
+                    root.insertInstance(sheet, name_buf, s);
+                    ImGui::CloseCurrentPopup();
+                    close_parent = true;
+                }
+            }
+            ImGui::PopItemWidth();
             ImGui::EndPopup();
         }
 
