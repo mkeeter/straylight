@@ -133,7 +133,8 @@ Interpreter::Interpreter()
                 (lambda args #f))))
       )"))
 {
-    for (s7_pointer ptr: {check_upstream,  value_thunk_factory, eval_func, is_input})
+    for (s7_pointer ptr: {check_upstream,  value_thunk_factory,
+                          eval_func, is_input, is_output, default_expr})
     {
         s7_gc_protect(interpreter, ptr);
     }
