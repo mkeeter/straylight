@@ -22,6 +22,7 @@ Cell* Root::insertCell(Sheet* sheet, const Name& name, const Expr& expr)
 
     auto c = new Cell(expr, sheet);
     sheet->cells.insert({name, c});
+    sheet->order.push_back(c);
     changed(c);
 
     return c;
@@ -102,7 +103,9 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
         }
     }
 
-    sheet->instances[name].reset(added);
+    sheet->instances.insert({name, added});
+    sheet->order.push_back(added);
+
     std::list<NameKey> changed;
     {   // Recursively find all cells in this sheet.
         std::list<Env> todo = {{added}};
@@ -114,10 +117,10 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
             {
                 changed.push_back({i, c.first});
             }
-            for (auto& j : s->instances)
+            for (auto& j : s->instances.left)
             {
                 auto i_ = i;
-                i_.push_back(j.second.get());
+                i_.push_back(j.second);
                 todo.push_back(i_);
             }
             todo.pop_back();
@@ -131,11 +134,11 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
         {
             const auto& i = todo.front();
             auto s = i.back()->sheet;
-            for (auto& j : s->instances)
+            for (auto& j : s->instances.left)
             {
                 // If this is an example of the added instance, then add all
                 // of the cells that we found earlier underneath the instance
-                if (j.second.get() == added)
+                if (j.second == added)
                 {
                     for (auto k : changed)
                     {
@@ -146,7 +149,7 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
                 else
                 {
                     auto i_ = i;
-                    i_.push_back(j.second.get());
+                    i_.push_back(j.second);
                     todo.push_back(i_);
                 }
             }
@@ -162,7 +165,7 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 bool Root::canInsert(Sheet* const sheet, const Name& name) const
 {
     return (sheet->cells.left.count(name) == 0) &&
-           (sheet->instances.count(name) == 0) &&
+           (sheet->instances.left.count(name) == 0) &&
            interpreter.nameValid(name);
 }
 
@@ -171,7 +174,7 @@ bool Root::canInsert(Sheet* const sheet, const Name& name) const
 void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
 {
     assert(sheet->cells.left.count(orig) ||
-           sheet->instances.count(orig));
+           sheet->instances.left.count(orig));
     assert(canInsert(sheet, name));
 
     // Prevent sync calls until the end of this function
@@ -189,10 +192,11 @@ void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
         sheet->cells.left.erase(orig);
         sheet->cells.insert({name, ptr});
     }
-    else if (sheet->instances.count(orig))
+    else if (sheet->instances.left.count(orig))
     {
-        sheet->instances[name].swap(sheet->instances[orig]);
-        sheet->instances.erase(name);
+        auto ptr = sheet->instances.left.at(name);
+        sheet->instances.left.erase(orig);
+        sheet->instances.insert({name, ptr});
     }
 
     changed(sheet, orig);
@@ -214,10 +218,10 @@ void Root::changed(Cell* cell)
         {
             markDirty({i, s->cells.right.at(cell)});
         }
-        for (const auto& j : s->instances)
+        for (const auto& j : s->instances.left)
         {
             auto i_ = i;
-            i_.push_back(j.second.get());
+            i_.push_back(j.second);
             todo.push_back(i_);
         }
         todo.pop_front();
@@ -242,10 +246,10 @@ void Root::changed(Sheet* sheet, const Name& name)
         }
         else
         {
-            for (const auto& j : s->instances)
+            for (const auto& j : s->instances.left)
             {
                 auto i_ = i;
-                i_.push_back(j.second.get());
+                i_.push_back(j.second);
                 todo.push_back(i_);
             }
         }

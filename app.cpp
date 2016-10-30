@@ -127,6 +127,15 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 
 }
 
+void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
+{
+    Graph::Sheet* sheet = env.back()->sheet;
+    auto instance = sheet->instances.left.at(name);
+    ImGui::PushID(instance);
+    ImGui::Text("%s", name.c_str());
+    ImGui::PopID();
+}
+
 void App::drawSheet(const Graph::Env& env, float offset)
 {
     Graph::Sheet* sheet = env.back()->sheet;
@@ -154,21 +163,29 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
-    std::list<std::string> cells;
-    for (auto& d : sheet->cells.left)
+    std::list<void*> items;
+    for (auto& d : sheet->order)
     {
-        cells.push_back(d.first);
+        items.push_back(d);
     }
 
     bool drawn = false;
-    for (auto k : cells)
+    for (auto k : items)
     {
         if (drawn)
         {
             ImGui::Separator();
         }
         drawn = true;
-        drawCell(k, env);
+
+        if (auto c = sheet->isCell(k))
+        {
+            drawCell(sheet->cells.right.at(c), env);
+        }
+        else if (auto i = sheet->isInstance(k))
+        {
+            drawInstance(sheet->instances.right.at(i), env);
+        }
     }
     ImGui::EndChild();
 

@@ -206,11 +206,11 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         }
 
         // Then, install instances into the inlet
-        for (auto& i : env.back()->sheet->instances)
+        for (auto& i : env.back()->sheet->instances.left)
         {
             // Create a temporary environment inside the instance
             auto env_ = env;
-            env_.push_back(i.second.get());
+            env_.push_back(i.second);
 
             s7_pointer callback=nullptr;
             for (auto o : i.second->sheet->outputs())
