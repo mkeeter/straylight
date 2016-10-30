@@ -97,9 +97,27 @@ Interpreter::Interpreter()
         (lambda (str)
           (catch #t
             (lambda ()
-              (let ((r (read (open-input-string s))))
+              (let ((r (read (open-input-string str))))
                 (eqv? (car r) 'input)))
             (lambda args #f)))
+      )")),
+      is_output(s7_eval_c_string(interpreter, R"(
+        (lambda (str)
+          (catch #t
+            (lambda ()
+              (let ((r (read (open-input-string str))))
+                (eqv? (car r) 'output)))
+            (lambda args #f)))
+      )")),
+      default_expr(s7_eval_c_string(interpreter, R"(
+        (lambda (str)
+          (catch #t
+            (lambda ()
+              (let ((r (read (open-input-string str))))
+                (if (eqv? (car r) 'input)
+                    (cadr r)
+                    "")))
+            (lambda args "")))
       )")),
       name_valid(s7_eval_c_string(interpreter, R"(
         (lambda (str)
@@ -268,6 +286,36 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
 
         return true;
     }
+}
+
+bool Interpreter::isInput(const Cell* cell) const
+{
+    return
+        s7_is_eq(s7_t(interpreter),
+            s7_call(interpreter, is_input,
+                s7_list(interpreter, 1,
+                    s7_make_string(interpreter, cell->expr.c_str()))));
+}
+
+bool Interpreter::isOutput(const Cell* cell) const
+{
+    return
+        s7_is_eq(s7_t(interpreter),
+            s7_call(interpreter, is_output,
+                s7_list(interpreter, 1,
+                    s7_make_string(interpreter, cell->expr.c_str()))));
+}
+
+std::string Interpreter::defaultExpr(const Cell* cell) const
+{
+    auto s =
+        s7_object_to_c_string(interpreter,
+            s7_call(interpreter, default_expr,
+                s7_list(interpreter, 1,
+                    s7_make_string(interpreter, cell->expr.c_str()))));
+    std::string out(s);
+    free(s);
+    return out;
 }
 
 bool Interpreter::nameValid(const std::string& str) const

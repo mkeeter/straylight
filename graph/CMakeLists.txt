@@ -17,5 +17,6 @@ endif()
 ################################################################################
 
 file(GLOB SOURCE_FILES *.cpp)
-add_executable(graph-test test/main.cpp ${SOURCE_FILES} ../s7/s7.c)
+file(GLOB TEST_FILES test/*.cpp)
+add_executable(graph-test ${TEST_FILES} ${SOURCE_FILES} ../s7/s7.c)
 target_include_directories(graph-test PRIVATE . ../s7)

@@ -20,9 +20,9 @@ struct Interpreter
      */
     bool eval(const CellKey& key, Dependencies* deps);
 
-    bool isInput(const Cell* cell) const { return false; };
-    bool isOutput(const Cell* cell) const { return false; };
-    std::string defaultExpr(const Cell* cell) const { return ""; };
+    bool isInput(const Cell* cell) const;
+    bool isOutput(const Cell* cell) const;
+    std::string defaultExpr(const Cell* cell) const;
 
     /*
      *  Checks to see whether the given name is valid
@@ -41,8 +41,8 @@ private:
     s7_pointer const eval_func;
 
     s7_pointer const is_input;
-    //s7_pointer const is_output;
-    //s7_pointer const default_expr;
+    s7_pointer const is_output;
+    s7_pointer const default_expr;
     s7_pointer const name_valid;
 };
 }   //  namespace Graph
