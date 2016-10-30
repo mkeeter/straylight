@@ -1,7 +1,10 @@
 #include "catch.hpp"
 
-#include "interpreter.hpp"
 #include "cell.hpp"
+#include "dependencies.hpp"
+#include "interpreter.hpp"
+#include "instance.hpp"
+#include "sheet.hpp"
 
 TEST_CASE("Interpreter parsing of expressions")
 {
@@ -40,5 +43,47 @@ TEST_CASE("Interpreter parsing of expressions")
     {
         REQUIRE(interp.defaultExpr(&i) == "12");
         REQUIRE(interp.defaultExpr(&j) == "(+ 1 2)");
+    }
+}
+
+TEST_CASE("Interpreter::eval")
+{
+    Graph::Sheet sheet(nullptr);
+    Graph::Instance instance(&sheet);
+    Graph::Cell cell("", &sheet);
+    Graph::CellKey key = {{&instance}, &cell};
+    Graph::Dependencies deps;
+
+    Graph::Interpreter interp;
+    SECTION("Basic eval")
+    {
+        cell.expr = "12";
+        interp.eval(key, &deps);
+        REQUIRE(cell.values[{&instance}].str == "12");
+    }
+
+    SECTION("Changing value")
+    {
+        cell.expr = "12";
+        interp.eval(key, &deps);
+        cell.expr = "13";
+
+        // On the first evaluation, the value changes
+        REQUIRE(interp.eval(key, &deps));
+        // On the second evaluation, the value stays the same
+        REQUIRE(!interp.eval(key, &deps));
+        REQUIRE(cell.values[{&instance}].str == "13");
+    }
+
+    SECTION("Changing error")
+    {
+        cell.expr = "omg";
+        interp.eval(key, &deps);
+        cell.expr = "wtf";
+
+        // On the first evaluation, the error changes
+        REQUIRE(interp.eval(key, &deps));
+        // On the second evaluation, the error stays the same
+        REQUIRE(!interp.eval(key, &deps));
     }
 }

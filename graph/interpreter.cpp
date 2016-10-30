@@ -90,8 +90,8 @@ Interpreter::Interpreter()
                 (cons 'value (eval r env))))
             (lambda args
                 (if (string=? "~A: unbound variable" (caadr args))
-                    (cons 'unbound (cadr args))
-                    (cons 'error (cadr args))))))
+                    (copy (cons 'unbound (cadr args)))
+                    (copy (cons 'error (cadr args)))))))
       )")),
       is_input(s7_eval_c_string(interpreter, R"(
         (lambda (str)
