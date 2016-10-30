@@ -179,7 +179,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
     if (!env.size())
     {
         value = s7_eval_c_string(interpreter,
-                "(error 'input-at-top-level \"Input at top level\")");
+                "(list 'error \"Input at top level\")");
     }
     else
     {
