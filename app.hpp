@@ -18,6 +18,8 @@ private:
 
     void renamePopup(Graph::Sheet* sheet, const Graph::Name& name,
                      bool* set_focus, char* buf, size_t buf_size);
+    void renameSheetPopup(Graph::Sheet* sheet, const Graph::Name& name,
+                          bool* set_focus, char* buf, size_t buf_size);
     void draw();
 
     Graph::Root root;

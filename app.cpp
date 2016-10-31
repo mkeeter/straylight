@@ -100,6 +100,41 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::Columns(1);
 }
 
+void App::renameSheetPopup(Graph::Sheet* parent, const Graph::Name& name,
+                           bool* set_focus, char* buf, size_t buf_size)
+{
+    if (ImGui::BeginPopup("rename"))
+    {
+        if (*set_focus)
+        {
+            ImGui::SetKeyboardFocusHere();
+            *set_focus = false;
+        }
+        const bool ret = ImGui::InputText("##rename", buf, buf_size,
+                ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::SameLine();
+
+        // If the name hasn't changed or we can do the insertion, then
+        // show a button and rename on button press
+        if (name == buf || root.canCreateSheet(parent, buf))
+        {
+            if (ImGui::Button("Rename") || ret)
+            {
+                if (name != buf)
+                {
+                    root.renameSheet(parent, name, buf);
+                }
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        else
+        {
+            ImGui::Text("Invalid name");
+        }
+        ImGui::EndPopup();
+    }
+}
+
 void App::renamePopup(Graph::Sheet* sheet, const Graph::Name& name,
                       bool* set_focus, char* buf, size_t buf_size)
 {
@@ -180,7 +215,8 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
             set_focus = true;
         }
         ImGui::PopStyleVar(1);
-        renamePopup(sheet, sheet_name, &set_focus, buf, sizeof(buf));
+        renameSheetPopup(parent_sheet, sheet_name,
+                         &set_focus, buf, sizeof(buf));
         ImGui::PopID();
     }
 
@@ -311,20 +347,21 @@ void App::drawAddMenu(const Graph::Env& env)
         else if (ImGui::BeginPopup("addSheet"))
         {
             ImGui::Dummy({300, 0});
+            bool ret = false;
 
             if (set_focus)
             {
                 ImGui::SetKeyboardFocusHere();
                 set_focus = false;
             }
-            bool ret = ImGui::InputText("Sheet name", sheet_buf, sizeof(sheet_buf),
+            ret = ImGui::InputText("Instance name", name_buf, sizeof(name_buf),
                     ImGuiInputTextFlags_EnterReturnsTrue);
 
             if (ret)
             {
                 ImGui::SetKeyboardFocusHere();
             }
-            ret = ImGui::InputText("Instance name", name_buf, sizeof(name_buf),
+            ret = ImGui::InputText("Sheet name", sheet_buf, sizeof(sheet_buf),
                     ImGuiInputTextFlags_EnterReturnsTrue);
 
             ImGui::PushItemWidth(-1);
