@@ -160,7 +160,7 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
                     todo.push_back(i_);
                 }
             }
-            todo.pop_back();
+            todo.pop_front();
         }
     }
 
