@@ -16,6 +16,8 @@ private:
     void drawSheet(const Graph::Env& env, float offset=0.0f);
     void drawAddMenu(const Graph::Env& env);
 
+    void renamePopup(Graph::Sheet* sheet, const Graph::Name& name,
+                     bool* set_focus, char* buf, size_t buf_size);
     void draw();
 
     Graph::Root root;

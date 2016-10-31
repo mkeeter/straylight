@@ -53,6 +53,7 @@ public:
      */
     Sheet* createSheet(Sheet* sheet, const Name& name);
     bool canCreateSheet(Sheet* sheet, const Name& name) const;
+    void renameSheet(Sheet* sheet, const Name& orig, const Name& name);
 
     /*
      *  Erase a cell or instance from a Sheet

@@ -67,6 +67,13 @@ bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
     return sheet->library.left.count(name) == 0;
 }
 
+void Root::renameSheet(Sheet* sheet, const Name& orig, const Name& name)
+{
+    auto ptr = sheet->library.left.at(orig);
+    sheet->library.left.erase(orig);
+    sheet->library.insert({name, ptr});
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const

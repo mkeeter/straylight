@@ -53,34 +53,7 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
             set_focus = true;
         }
         ImGui::PopStyleVar(1);
-
-        if (ImGui::BeginPopup("rename"))
-        {
-            if (set_focus)
-            {
-                ImGui::SetKeyboardFocusHere();
-                set_focus = false;
-            }
-            const bool ret = ImGui::InputText("##rename", buf, sizeof(buf),
-                    ImGuiInputTextFlags_EnterReturnsTrue);
-            ImGui::SameLine();
-            if (name == buf || root.canInsert(sheet, buf))
-            {
-                if (ImGui::Button("Rename") || ret)
-                {
-                    if (name != buf)
-                    {
-                        root.rename(sheet, name, buf);
-                    }
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            else
-            {
-                ImGui::Text("Invalid name");
-            }
-            ImGui::EndPopup();
-        }
+        renamePopup(sheet, name, &set_focus, buf, sizeof(buf));
     }
 
     ImGui::Columns(2, "datum", false);
@@ -124,15 +97,93 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
     ImGui::PopItemWidth();
 
     ImGui::PopID();
+    ImGui::Columns(1);
+}
 
+void App::renamePopup(Graph::Sheet* sheet, const Graph::Name& name,
+                      bool* set_focus, char* buf, size_t buf_size)
+{
+    if (ImGui::BeginPopup("rename"))
+    {
+        if (*set_focus)
+        {
+            ImGui::SetKeyboardFocusHere();
+            *set_focus = false;
+        }
+        const bool ret = ImGui::InputText("##rename", buf, buf_size,
+                ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::SameLine();
+
+        // If the name hasn't changed or we can do the insertion, then
+        // show a button and rename on button press
+        if (name == buf || root.canInsert(sheet, buf))
+        {
+            if (ImGui::Button("Rename") || ret)
+            {
+                if (name != buf)
+                {
+                    root.rename(sheet, name, buf);
+                }
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        else
+        {
+            ImGui::Text("Invalid name");
+        }
+        ImGui::EndPopup();
+    }
 }
 
 void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
 {
     Graph::Sheet* sheet = env.back()->sheet;
     auto instance = sheet->instances.left.at(name);
+    auto parent_sheet = instance->sheet->parent;
+    std::string sheet_name = parent_sheet->library.right.at(instance->sheet);
+
     ImGui::PushID(instance);
-    ImGui::Text("%s", name.c_str());
+
+    {   // Draw the instance's name, allowing for renaming
+        ImGui::PushID("instance name");
+        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0, 0.5});
+
+        // Temporary buffer in which we can rename the cell
+        static char buf[128];
+        static bool set_focus = false;
+        if (ImGui::Button(name.c_str(), {60.0f, 0.0f}))
+        {
+            strcpy(buf, &name[0]);
+            ImGui::OpenPopup("rename");
+            set_focus = true;
+        }
+        ImGui::PopStyleVar(1);
+        renamePopup(sheet, name, &set_focus, buf, sizeof(buf));
+        ImGui::PopID();
+    }
+
+    ImGui::SameLine();
+    ImGui::Text("is a");
+    ImGui::SameLine();
+
+    {   // Draw the Sheet name, allowing for renaming
+        ImGui::PushID("sheet name");
+        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0, 0.5});
+
+        // Temporary buffer in which we can rename the cell
+        static char buf[128];
+        static bool set_focus = false;
+        if (ImGui::Button(sheet_name.c_str(), {-1.0f, 0.0f}))
+        {
+            strcpy(buf, &sheet_name[0]);
+            ImGui::OpenPopup("rename");
+            set_focus = true;
+        }
+        ImGui::PopStyleVar(1);
+        renamePopup(sheet, sheet_name, &set_focus, buf, sizeof(buf));
+        ImGui::PopID();
+    }
+
     ImGui::PopID();
 }
 
