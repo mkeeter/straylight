@@ -144,6 +144,15 @@ TEST_CASE("Root::rename")
         REQUIRE(b->values[{root.instance.get()}].str == "5");
         REQUIRE(b->values[{root.instance.get()}].valid);
     }
+
+    SECTION("Renaming instances")
+    {
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+        root.rename(root.sheet.get(), "ia", "ja");
+        REQUIRE(root.sheet->instances.left.count("ja") == 1);
+        REQUIRE(root.sheet->instances.left.at("ja") == ia);
+    }
 }
 
 TEST_CASE("Root::createSheet")

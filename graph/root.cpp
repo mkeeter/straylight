@@ -201,7 +201,7 @@ void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
     }
     else if (sheet->instances.left.count(orig))
     {
-        auto ptr = sheet->instances.left.at(name);
+        auto ptr = sheet->instances.left.at(orig);
         sheet->instances.left.erase(orig);
         sheet->instances.insert({name, ptr});
     }
