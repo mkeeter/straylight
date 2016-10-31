@@ -145,3 +145,28 @@ TEST_CASE("Root::rename")
         REQUIRE(b->values[{root.instance.get()}].valid);
     }
 }
+
+TEST_CASE("Root::createSheet")
+{
+    Graph::Root root;
+    auto a = root.createSheet(root.sheet.get(), "a");
+    auto b = root.createSheet(root.sheet.get(), "b");
+
+    REQUIRE(a != nullptr);
+    REQUIRE(a->parent == root.sheet.get());
+    REQUIRE(b != nullptr);
+    REQUIRE(b->parent == root.sheet.get());
+}
+
+TEST_CASE("Root::insertInstance")
+{
+    Graph::Root root;
+    auto a = root.createSheet(root.sheet.get(), "a");
+    auto b = root.createSheet(root.sheet.get(), "b");
+
+    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+    auto ib = root.insertInstance(root.sheet.get(), "ib", b);
+
+    REQUIRE(ia->sheet == a);
+    REQUIRE(ib->sheet == b);
+}
