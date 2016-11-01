@@ -155,6 +155,28 @@ TEST_CASE("Root::rename")
     }
 }
 
+TEST_CASE("Root::eraseCell")
+{
+    Graph::Root root;
+
+    SECTION("Basic erasing")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+        REQUIRE(root.sheet->cells.right.count(x));
+        root.eraseCell(x);
+        REQUIRE(!root.sheet->cells.right.count(x));
+    }
+
+    SECTION("Change detection")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
+
+        root.eraseCell(x);
+        REQUIRE(!a->values[{root.instance.get()}].valid);
+    }
+}
+
 TEST_CASE("Root::createSheet")
 {
     Graph::Root root;

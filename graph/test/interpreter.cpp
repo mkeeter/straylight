@@ -17,26 +17,15 @@ TEST_CASE("Interpreter parsing of expressions")
     auto y = Graph::Cell("\"omg", nullptr);
     auto z = Graph::Cell("'input", nullptr);
 
-    SECTION("Interpreter::isInput")
+    SECTION("Interpreter::cellType")
     {
-        REQUIRE(interp.isInput(&i));
-        REQUIRE(interp.isInput(&j));
-        REQUIRE(!interp.isInput(&o));
-        REQUIRE(!interp.isInput(&p));
-        REQUIRE(!interp.isInput(&x));
-        REQUIRE(!interp.isInput(&y));
-        REQUIRE(!interp.isInput(&z));
-    }
-
-    SECTION("Interpreter::isOutput")
-    {
-        REQUIRE(interp.isOutput(&o));
-        REQUIRE(interp.isOutput(&p));
-        REQUIRE(!interp.isOutput(&i));
-        REQUIRE(!interp.isOutput(&j));
-        REQUIRE(!interp.isOutput(&x));
-        REQUIRE(!interp.isOutput(&y));
-        REQUIRE(!interp.isOutput(&z));
+        REQUIRE(interp.cellType(&i) == Graph::Cell::INPUT);
+        REQUIRE(interp.cellType(&j) == Graph::Cell::INPUT);
+        REQUIRE(interp.cellType(&o) == Graph::Cell::OUTPUT);
+        REQUIRE(interp.cellType(&p) == Graph::Cell::OUTPUT);
+        REQUIRE(interp.cellType(&x) == Graph::Cell::BASIC);
+        REQUIRE(interp.cellType(&y) == Graph::Cell::BASIC);
+        REQUIRE(interp.cellType(&z) == Graph::Cell::BASIC);
     }
 
     SECTION("Interpreter::defaultExpr")
@@ -49,7 +38,7 @@ TEST_CASE("Interpreter parsing of expressions")
 TEST_CASE("Interpreter::eval")
 {
     Graph::Sheet sheet(nullptr);
-    Graph::Instance instance(&sheet);
+    Graph::Instance instance(&sheet, nullptr);
     Graph::Cell cell("", &sheet);
     Graph::CellKey key = {{&instance}, &cell};
     Graph::Dependencies deps;

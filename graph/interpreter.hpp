@@ -1,7 +1,9 @@
 #pragma once
 
 #include "s7.h"
+
 #include "keys.hpp"
+#include "cell.hpp"
 
 namespace Graph
 {
@@ -20,9 +22,15 @@ struct Interpreter
      */
     bool eval(const CellKey& key, Dependencies* deps);
 
-    bool isInput(const Cell* cell) const;
-    bool isOutput(const Cell* cell) const;
+    /*
+     *  Extracts and returns the default expression for an input cell
+     */
     std::string defaultExpr(const Cell* cell) const;
+
+    /*
+     *  Checks whether a cell is BASIC, INPUT, or OUTPUT
+     */
+    Cell::Type cellType(const Cell* cell) const;
 
     /*
      *  Checks to see whether the given name is valid
@@ -35,6 +43,12 @@ struct Interpreter
     void release(Cell* cell);
 
 private:
+    /*
+     *  Helper functions used in cellType
+     */
+    bool isInput(const Cell* cell) const;
+    bool isOutput(const Cell* cell) const;
+
     /*  Scheme function pointers */
     s7_pointer const check_upstream;
     s7_pointer const value_thunk_factory;

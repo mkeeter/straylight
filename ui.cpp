@@ -31,6 +31,7 @@ static void load_font(GLFWwindow* window)
 
     const float scale = framebuffer_width / float(window_width);
     ImGuiIO& io = ImGui::GetIO();
+
     io.Fonts->AddFontFromFileTTF("../imgui/Inconsolata.ttf", scale * 13.0f);
     io.Fonts->Fonts[0]->Scale /= scale;
 }

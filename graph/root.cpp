@@ -9,7 +9,7 @@ namespace Graph
 {
 
 Root::Root()
-    : sheet(new Sheet(nullptr)), instance(new Instance(sheet.get()))
+    : sheet(new Sheet(nullptr)), instance(new Instance(sheet.get(), nullptr))
 {
     // Nothing to do here
 }
@@ -21,6 +21,7 @@ Cell* Root::insertCell(Sheet* sheet, const Name& name, const Expr& expr)
     assert(canInsert(sheet, name));
 
     auto c = new Cell(expr, sheet);
+    c->type = interpreter.cellType(c);
     sheet->cells.insert({name, c});
     sheet->order.push_back(c);
     changed(c);
@@ -31,6 +32,8 @@ Cell* Root::insertCell(Sheet* sheet, const Name& name, const Expr& expr)
 void Root::editCell(Cell* cell, const Expr& expr)
 {
     cell->expr = expr;
+    cell->type = interpreter.cellType(cell);
+
     // If this changed inputs or outputs, do something here!
     changed(cell);
 }
@@ -45,6 +48,26 @@ void Root::eraseCell(Cell* cell)
 
     auto name = parent->cells.right.at(cell);
     parent->cells.right.erase(cell);
+    parent->order.erase(std::find(parent->order.begin(),
+                                  parent->order.end(), cell));
+    delete cell;
+
+    // Mark that this cell has changed (by name, rather than pointer, since
+    // we just deleted the cell itself).  This will cause all downstream cells
+    // to re-evaluate themselves.
+    changed(parent, name);
+}
+
+void Root::eraseInstance(Instance* i)
+{
+    Sheet* parent = i->parent;
+    assert(parent != nullptr);
+
+    auto name = parent->instances.right.at(i);
+    parent->instances.right.erase(i);
+    parent->order.erase(std::find(parent->order.begin(),
+                                  parent->order.end(), i));
+    delete i;
 
     // Mark that this cell has changed (by name, rather than pointer, since
     // we just deleted the cell itself).  This will cause all downstream cells
@@ -99,12 +122,12 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 {
     assert(canInsertInstance(sheet, name, target));
 
-    auto added = new Instance(target);
+    auto added = new Instance(target, sheet);
 
     // Set default expressions for any inputs
-    for (auto cell : target->cells.left)
+    for (const auto& cell : target->cells.left)
     {
-        if (interpreter.isInput(cell.second))
+        if (cell.second->type == Cell::INPUT)
         {
             added->inputs[cell.second] = interpreter.defaultExpr(cell.second);
         }

@@ -319,6 +319,13 @@ std::string Interpreter::defaultExpr(const Cell* cell) const
     return out;
 }
 
+Cell::Type Interpreter::cellType(const Cell* cell) const
+{
+    return isInput(cell)  ? Cell::INPUT :
+           isOutput(cell) ? Cell::OUTPUT :
+                            Cell::BASIC;
+}
+
 bool Interpreter::nameValid(const std::string& str) const
 {
     return

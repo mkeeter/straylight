@@ -29,6 +29,7 @@ public:
      *  Insert a new instance to a given Sheet
      */
     Instance* insertInstance(Sheet* sheet, const Name& name, Sheet* target);
+    void eraseInstance(Instance* i);
 
     /*
      *  Checks to see whether we can insert the given sheet
@@ -54,11 +55,6 @@ public:
     Sheet* createSheet(Sheet* sheet, const Name& name);
     bool canCreateSheet(Sheet* sheet, const Name& name) const;
     void renameSheet(Sheet* sheet, const Name& orig, const Name& name);
-
-    /*
-     *  Erase a cell or instance from a Sheet
-     */
-    void erase(Sheet* sheet, const Name& name);
 
     /*
      *  Delete a sheet from a library

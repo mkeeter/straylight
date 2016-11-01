@@ -32,6 +32,7 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 {
     Graph::Sheet* sheet = env.back()->sheet;
     auto cell = sheet->cells.left.at(name);
+    bool erased = false;
 
     ImGui::PushID(name.c_str());
 
@@ -46,7 +47,8 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
         // Temporary buffer in which we can rename the cell
         static char buf[128];
         bool set_focus = false;
-        if (ImGui::Button(name.c_str(), {-1.0f, 0.0f}))
+        if (ImGui::Button(name.c_str(),
+                    {ImGui::GetContentRegionAvailWidth() - 30, 0.0f}))
         {
             strcpy(buf, &name[0]);
             ImGui::OpenPopup("rename");
@@ -54,6 +56,12 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
         }
         ImGui::PopStyleVar(1);
         renamePopup(sheet, name, set_focus, buf, sizeof(buf));
+
+        ImGui::SameLine();
+        if (ImGui::Button("×", {-1.0f, 0.0f}))
+        {
+            erased = true;
+        }
     }
 
     ImGui::Columns(2, "datum", false);
@@ -98,6 +106,11 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env)
 
     ImGui::PopID();
     ImGui::Columns(1);
+
+    if (erased)
+    {
+        root.eraseCell(cell);
+    }
 }
 
 void App::renameSheetPopup(Graph::Sheet* parent, const Graph::Name& name,

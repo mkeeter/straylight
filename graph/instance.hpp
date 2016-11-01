@@ -14,9 +14,11 @@ struct Instance
      *  Default constructor
      *  (requires inputs to be populated elsewhere)
      */
-    Instance(Sheet* sheet) : sheet(sheet) {}
+    Instance(Sheet* sheet, Sheet* parent) : sheet(sheet), parent(parent) {}
 
     Sheet* const sheet;
     std::map<Cell*, Expr> inputs;
+
+    Sheet* const parent;
 };
 }   // namespace Graph
