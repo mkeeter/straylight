@@ -187,6 +187,7 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     auto instance = sheet->instances.left.at(name);
     auto parent_sheet = instance->sheet->parent;
     std::string sheet_name = parent_sheet->library.right.at(instance->sheet);
+    bool erased = false;
 
     ImGui::PushID(instance);
 
@@ -197,7 +198,8 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         // Temporary buffer in which we can rename the cell
         static char buf[128];
         bool set_focus = false;
-        if (ImGui::Button(name.c_str(), {60.0f, 0.0f}))
+        if (ImGui::Button(name.c_str(),
+                    {ImGui::GetContentRegionAvailWidth()*0.3f, 0.0f}))
         {
             strcpy(buf, &name[0]);
             ImGui::OpenPopup("rename");
@@ -219,7 +221,8 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         // Temporary buffer in which we can rename the cell
         static char buf[128];
         bool set_focus = false;
-        if (ImGui::Button(sheet_name.c_str(), {-1.0f, 0.0f}))
+        if (ImGui::Button(sheet_name.c_str(),
+                    {ImGui::GetContentRegionAvailWidth() - 30 - ImGui::GetStyle().ScrollbarSize, 0.0f}))
         {
             strcpy(buf, &sheet_name[0]);
             ImGui::OpenPopup("rename");
@@ -229,8 +232,18 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         renameSheetPopup(parent_sheet, sheet_name,
                          set_focus, buf, sizeof(buf));
         ImGui::PopID();
+
+        ImGui::SameLine();
+        if (ImGui::Button("×", {ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().ScrollbarSize, 0.0f}))
+        {
+            erased = true;
+        }
     }
 
+    if (erased)
+    {
+        root.eraseInstance(instance);
+    }
     ImGui::PopID();
 }
 
