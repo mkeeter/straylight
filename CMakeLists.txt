@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(noonlight)
+project(Straylight)
 set(CMAKE_BUILD_TYPE DEBUG)
 
 ################################################################################
@@ -40,15 +40,15 @@ endif()
 
 file(GLOB IMGUI_FILES imgui/*.cpp)
 file(GLOB GRAPH_FILES graph/*.cpp)
-add_executable(noonlight main.cpp app.cpp colors.cpp ui.cpp ${GRAPH_FILES}
+add_executable(straylight main.cpp app.cpp colors.cpp ui.cpp ${GRAPH_FILES}
                s7/s7.c ${IMGUI_FILES})
 
-target_include_directories(noonlight SYSTEM PRIVATE
+target_include_directories(straylight SYSTEM PRIVATE
     ${GLFW_INCLUDE_DIRS}
     ${EPOXY_INCLUDE_DIR})
-target_include_directories(noonlight PUBLIC s7 imgui)
+target_include_directories(straylight PUBLIC s7 imgui)
 
-target_link_libraries(noonlight
+target_link_libraries(straylight
     ${GLFW_LIBRARIES}
     ${OPENGL_LIBRARY}
     ${EPOXY_LIBRARY})
