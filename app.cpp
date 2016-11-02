@@ -253,6 +253,8 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     }
     else if (expand)
     {
+        focused.erase(std::find(focused.begin(), focused.end(), env.back()) + 1,
+                      focused.end());
         focused.push_back(instance);
     }
     ImGui::PopID();
