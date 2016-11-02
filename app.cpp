@@ -187,7 +187,9 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     auto instance = sheet->instances.left.at(name);
     auto parent_sheet = instance->sheet->parent;
     std::string sheet_name = parent_sheet->library.right.at(instance->sheet);
+
     bool erased = false;
+    bool expand = false;
 
     ImGui::PushID(instance);
 
@@ -222,7 +224,7 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         static char buf[128];
         bool set_focus = false;
         if (ImGui::Button(sheet_name.c_str(),
-                    {ImGui::GetContentRegionAvailWidth() - 30 - ImGui::GetStyle().ScrollbarSize, 0.0f}))
+                    {ImGui::GetContentRegionAvailWidth() - 60 - ImGui::GetStyle().ScrollbarSize, 0.0f}))
         {
             strcpy(buf, &sheet_name[0]);
             ImGui::OpenPopup("rename");
@@ -234,9 +236,14 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         ImGui::PopID();
 
         ImGui::SameLine();
-        if (ImGui::Button("×", {ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().ScrollbarSize, 0.0f}))
+        if (ImGui::Button("×", {(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().ScrollbarSize) / 2, 0.0f}))
         {
             erased = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(">", {ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().ScrollbarSize, 0.0f}))
+        {
+            expand = true;
         }
     }
 
@@ -244,13 +251,19 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     {
         root.eraseInstance(instance);
     }
+    else if (expand)
+    {
+        focused.push_back(instance);
+    }
     ImGui::PopID();
 }
 
 void App::drawSheet(const Graph::Env& env, float offset)
 {
     Graph::Sheet* sheet = env.back()->sheet;
+    bool stay_open = true;
 
+    ImGui::PushID(env.back());
     ImGui::SetNextWindowPos({offset, 0});
     {   // Set window size
         int width, height;
@@ -267,10 +280,10 @@ void App::drawSheet(const Graph::Env& env, float offset)
         }
     }
     ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
-    ImGui::Begin("Cells", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-    ImGui::PushID(env.back());
+    ImGui::Begin(windowName(env).c_str(),
+                 env.size() == 1 ? nullptr : &stay_open);
 
-    ImGui::BeginChild("CellsSub", ImVec2(-1, ImGui::GetWindowHeight() - 50));
+    ImGui::BeginChild("CellsSub", ImVec2(-1, ImGui::GetWindowHeight() - ImGui::GetTextLineHeightWithSpacing() - 50));
 
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
@@ -302,10 +315,16 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
     ImGui::Separator();
     drawAddMenu(env);
-    ImGui::PopID();
 
     col_width[env] = ImGui::GetWindowSize().x;
     ImGui::End();
+    ImGui::PopID();
+
+    if (env.size() > 1 && !stay_open)
+    {
+        focused.erase(std::find(focused.begin(), focused.end(), env.back()),
+                      focused.end());
+    }
 }
 
 void App::drawAddMenu(const Graph::Env& env)
@@ -495,15 +514,39 @@ void App::draw()
     float offset = 0;
 
     Graph::Env current_env = {};
-    for (auto& f : focused)
+    for (unsigned i=0; i < focused.size(); ++i)
     {
-        current_env.push_back(f);
+        current_env.push_back(focused[i]);
         drawSheet(current_env, offset);
-        offset += ImGui::GetWindowSize().x;
+        offset += col_width[current_env];
     }
 
     ImGui::PopStyleVar(1);
 
     ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
     ImGui::ShowTestWindow();
+}
+
+std::string App::windowName(const Graph::Env& env)
+{
+    std::stringstream ss;
+
+    if (env.size() == 1)
+    {
+        ss << "Root";
+    }
+    else
+    {
+        const auto instance_name =
+            env.back()->sheet->parent->instances.right.at(env.back()).c_str();
+        const auto sheet_name =
+            env.back()->parent->library.right.at(env.back()->sheet).c_str();
+        ss << instance_name << " (" << sheet_name << ")";
+    }
+    ss << "###";
+    for (const auto& e : env)
+    {
+        ss << (void*)e;
+    }
+    return ss.str();
 }

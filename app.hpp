@@ -22,6 +22,8 @@ private:
                           bool set_focus, char* buf, size_t buf_size);
     void draw();
 
+    static std::string windowName(const Graph::Env& env);
+
     Graph::Root root;
     GLFWwindow* window;
 
