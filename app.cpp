@@ -28,84 +28,77 @@ void App::run()
     ui::shutdown();
 }
 
-void App::drawCell(const Graph::Name& name, const Graph::Env& env)
+void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
 {
     Graph::Sheet* sheet = env.back()->sheet;
-    auto cell = sheet->cells.left.at(name);
+    const auto cell = sheet->cells.left.at(name);
     bool erased = false;
 
     ImGui::PushID(name.c_str());
+    ImGui::Text("%s:", name.c_str());
 
-    ImGui::Columns(2, "datum", false);
-    ImGui::SetColumnOffset(1, 60.0f);
-    ImGui::Text("Name");
-    ImGui::NextColumn();
-
-    {   // Draw the cell's name, allowing for renaming
-        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0, 0.5});
-
-        // Temporary buffer in which we can rename the cell
+    // Open up the cell editing menu
+    if (ImGui::BeginPopupContextItem("cell context menu"))
+    {
         static char buf[128];
         bool set_focus = false;
-        if (ImGui::Button(name.c_str(),
-                    {ImGui::GetContentRegionAvailWidth() - 30, 0.0f}))
+
+        erased |= ImGui::Selectable("Erase");
+
+        // Nested menu for renaming the cell
+        if (ImGui::Selectable("Rename", ImGui::IsPopupOpen("renameCell"),
+                              ImGuiSelectableFlags_DontClosePopups))
         {
             strcpy(buf, &name[0]);
             ImGui::OpenPopup("rename");
             set_focus = true;
         }
-        ImGui::PopStyleVar(1);
         renamePopup(sheet, name, set_focus, buf, sizeof(buf));
-
-        ImGui::SameLine();
-        if (ImGui::Button("×", {-1.0f, 0.0f}))
-        {
-            erased = true;
-        }
+        ImGui::EndPopup();
     }
 
-    ImGui::Columns(2, "datum", false);
-    ImGui::Text("Script");
-    ImGui::NextColumn();
-    ImGui::PushItemWidth(-1.0f);
-
     {   // Draw the cell's expression and handle changes here
+        ImGui::SameLine(offset);
         if (cell->expr.size() + 256 > editor_buf.size())
         {
             editor_buf.resize(editor_buf.size() + 4096);
         }
         std::copy(cell->expr.begin(), cell->expr.end() + 1, editor_buf.begin());
 
-        auto height = ImGui::CalcTextSize(cell->expr.c_str()).y +
+        const auto height = ImGui::CalcTextSize(cell->expr.c_str()).y +
             (cell->expr.back() == '\n' ? ImGui::GetFontSize() : 0);
         if (ImGui::InputTextMultiline("##txt",
                 editor_buf.data(), editor_buf.size(),
-                {-1.0f, ImGui::GetTextLineHeight() * 1.3f + height}))
+                {ImGui::GetContentRegionAvailWidth(),
+                 ImGui::GetTextLineHeight() * 1.3f + height}))
         {
             root.editCell(cell, std::string(&editor_buf[0]));
         }
     }
 
-    ImGui::Columns(2, "datum", false);
-    ImGui::Text("Value");
-    ImGui::NextColumn();
-    ImGui::PushItemWidth(-1.0f);
-    ImGui::PushStyleColor(ImGuiCol_Text, Colors::base04);
-    ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
-                          Colors::transparent(Colors::blue));
-    ImGui::PushAllowKeyboardFocus(false);
-    ImGui::PushStyleColor(ImGuiCol_FrameBg,
-            cell->values[env].valid ?
-            Colors::base03 : Colors::red);
-    ImGui::InputText("##result", &cell->values[env].str[0],
-                     cell->values[env].str.size(),
-                     ImGuiInputTextFlags_ReadOnly);
-    ImGui::PopAllowKeyboardFocus();
-    ImGui::PopStyleColor(3);
-    ImGui::PopItemWidth();
 
+    // Draw the value if it's different (as a string) from the expr
+    if (cell->expr != cell->values[env].str)
+    {
+        ImGui::Dummy({0,0});
+        ImGui::SameLine(offset);
+        ImGui::PushItemWidth(-1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base04);
+        ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
+                              Colors::transparent(Colors::blue));
+        ImGui::PushAllowKeyboardFocus(false);
+        ImGui::PushStyleColor(ImGuiCol_FrameBg,
+                cell->values[env].valid ?
+                Colors::base03 : Colors::red);
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+        ImGui::InputText("##result", &cell->values[env].str[0],
+                         cell->values[env].str.size(),
+                         ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopAllowKeyboardFocus();
+        ImGui::PopStyleColor(3);
+        ImGui::PopItemWidth();
+    }
     ImGui::PopID();
-    ImGui::Columns(1);
 
     if (erased)
     {
@@ -296,7 +289,17 @@ void App::drawSheet(const Graph::Env& env, float offset)
     }
 
     bool drawn = false;
-    for (auto k : items)
+    float max_width = 0.0f;
+    for (const auto& k : items)
+    {
+        if (auto c = sheet->isCell(k))
+        {
+            auto s = ImGui::CalcTextSize(sheet->cells.right.at(c).c_str());
+            max_width = fmax(s.x + 20.0f, max_width);
+        }
+    }
+
+    for (const auto& k : items)
     {
         if (drawn)
         {
@@ -306,7 +309,7 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
         if (auto c = sheet->isCell(k))
         {
-            drawCell(sheet->cells.right.at(c), env);
+            drawCell(sheet->cells.right.at(c), env, max_width);
         }
         else if (auto i = sheet->isInstance(k))
         {
