@@ -112,9 +112,20 @@ TEST_CASE("Root::canCreateSheet")
 TEST_CASE("Root::canInsertInstance")
 {
     Graph::Root root;
-    auto s = root.createSheet(root.sheet.get(), "b");
-    REQUIRE(root.canInsertInstance(root.sheet.get(), "b", s));
-    REQUIRE(!root.canInsertInstance(root.sheet.get(), "b", root.sheet.get()));
+
+    SECTION("Recursive")
+    {
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+        REQUIRE(!root.canInsertInstance(ia->sheet, "recursive", a));
+    }
+
+    SECTION("By name")
+    {
+        auto s = root.createSheet(root.sheet.get(), "b");
+        REQUIRE(root.canInsertInstance(root.sheet.get(), "b", s));
+        REQUIRE(!root.canInsertInstance(root.sheet.get(), "b", root.sheet.get()));
+    }
 }
 
 TEST_CASE("Root::rename")

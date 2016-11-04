@@ -101,21 +101,48 @@ void Root::renameSheet(Sheet* sheet, const Name& orig, const Name& name)
 
 bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const
 {
-    // Make sure that the sheet to be inserted is above the sheet which it
-    // will be an instance in.
-    bool above = false;
-    auto sheet_ = sheet;
-    while (sheet_ && !above)
-    {
-        if (sheet_->library.right.count(target))
+    {   // Make sure that the sheet to be inserted is above the sheet which it
+        // will be an instance in.
+        bool above = false;
+        auto sheet_ = sheet;
+        while (sheet_ && !above)
         {
-            above = true;
+            if (sheet_->library.right.count(target))
+            {
+                above = true;
+            }
+            sheet_ = sheet->parent;
         }
-        sheet_ = sheet->parent;
+        if (!above)
+        {
+            return false;
+        }
     }
 
-    // TODO check for recursion here
-    return above && canInsert(sheet, name);
+    {   // Then, check for recursive loops from the target to the parent
+        std::set<Sheet*> checked = {target};
+        std::list<Sheet*> todo = {target};
+        while (todo.size())
+        {
+            auto s = todo.front();
+            if (s == sheet)
+            {
+                return false;
+            }
+
+            for (const auto& h : s->instances.left)
+            {
+                if (checked.count(h.second->sheet) == 0)
+                {
+                    todo.push_back(h.second->sheet);
+                    checked.insert(h.second->sheet);
+                }
+            }
+            todo.pop_front();
+        }
+    }
+
+    return canInsert(sheet, name);
 }
 
 Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
