@@ -88,13 +88,17 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
         ImGui::Dummy({0,0});
         ImGui::SameLine(offset);
         ImGui::PushItemWidth(-1.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, Colors::base04);
+        ImGui::PushStyleColor(ImGuiCol_Text,
+                cell->values[env].valid
+                ? ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]
+                : ImGui::GetStyle().Colors[ImGuiCol_Text]);
         ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
-                              Colors::transparent(Colors::blue));
-        ImGui::PushAllowKeyboardFocus(false);
+            Colors::transparent(ImGui::GetStyle().Colors[ImGuiCol_TextSelectedBg]));
         ImGui::PushStyleColor(ImGuiCol_FrameBg,
                 cell->values[env].valid ?
                 ImGui::GetStyle().Colors[ImGuiCol_FrameBg] : ImVec4(Colors::red));
+
+        ImGui::PushAllowKeyboardFocus(false);
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         ImGui::InputText("##result", &cell->values[env].str[0],
                          cell->values[env].str.size(),
