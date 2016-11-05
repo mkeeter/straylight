@@ -99,7 +99,7 @@ void Root::renameSheet(Sheet* sheet, const Name& orig, const Name& name)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const
+bool Root::canInsertInstance(Sheet* sheet, Sheet* target) const
 {
     {   // Make sure that the sheet to be inserted is above the sheet which it
         // will be an instance in.
@@ -142,12 +142,13 @@ bool Root::canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) cons
         }
     }
 
-    return canInsert(sheet, name);
+    return true;
 }
 
 Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 {
-    assert(canInsertInstance(sheet, name, target));
+    assert(canInsertInstance(sheet, target));
+    assert(canInsert(sheet, name));
 
     auto added = new Instance(target, sheet);
 

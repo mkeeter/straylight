@@ -117,14 +117,15 @@ TEST_CASE("Root::canInsertInstance")
     {
         auto a = root.createSheet(root.sheet.get(), "a");
         auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        REQUIRE(!root.canInsertInstance(ia->sheet, "recursive", a));
+        REQUIRE(!root.canInsertInstance(ia->sheet, a));
     }
 
-    SECTION("By name")
+    SECTION("More recursive")
     {
-        auto s = root.createSheet(root.sheet.get(), "b");
-        REQUIRE(root.canInsertInstance(root.sheet.get(), "b", s));
-        REQUIRE(!root.canInsertInstance(root.sheet.get(), "b", root.sheet.get()));
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+        auto ba = root.createSheet(ia->sheet, "b");
+        REQUIRE(root.canInsertInstance(ia->sheet, ba));
     }
 }
 

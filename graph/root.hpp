@@ -35,7 +35,7 @@ public:
      *  Checks to see whether we can insert the given sheet
      *  by examining whether this would create a recursive loop.
      */
-    bool canInsertInstance(Sheet* sheet, const Name& name, Sheet* target) const;
+    bool canInsertInstance(Sheet* sheet, Sheet* target) const;
 
     /*
      *  Renames a cell or instance
