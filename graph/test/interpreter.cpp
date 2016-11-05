@@ -75,4 +75,12 @@ TEST_CASE("Interpreter::eval")
         // On the second evaluation, the error stays the same
         REQUIRE(!interp.eval(key, &deps));
     }
+
+    SECTION("Input at top level")
+    {
+        cell.expr = "(input 0)";
+        interp.eval(key, &deps);
+        REQUIRE(cell.values[key.first].str == "Input at top level");
+        REQUIRE(cell.values[key.first].valid == false);
+    }
 }

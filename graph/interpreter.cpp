@@ -164,24 +164,32 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
     // Input cells are evaluated in their parent's environment and with an
     // input string from their containing Instance
     std::string expr;
+    s7_pointer value = nullptr;
     if (isInput(cell))
     {
-        expr = env.back()->inputs[cell];
         env.pop_back();
+        if (!env.size())
+        {
+            value = s7_eval_c_string(interpreter,
+                    "(list 'error \"Input at top level\")");
+        }
+        else
+        {
+            // If the parent instance doesn't have an expression for this cell,
+            // use the default expression, e.g. "0" for (input 0)
+            if (!env.back()->inputs.count(cell))
+            {
+                env.back()->inputs[cell] = defaultExpr(cell);
+            }
+            expr = env.back()->inputs[cell];
+        }
     }
     else
     {
         expr = cell->expr;
     }
 
-    s7_pointer value;
-
-    if (!env.size())
-    {
-        value = s7_eval_c_string(interpreter,
-                "(list 'error \"Input at top level\")");
-    }
-    else
+    if (value == nullptr)
     {
         auto bindings = s7_nil(interpreter);
         for (auto& c : env.back()->sheet->cells.left)
@@ -256,32 +264,32 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
     }
 
     // If the value is the same, return false
-    if (cell->values.count(env) &&
-        s7_is_equal(interpreter, value, cell->values[env].value))
+    if (cell->values.count(key.first) &&
+        s7_is_equal(interpreter, value, cell->values[key.first].value))
     {
         return false;
     }
     // Otherwise, swap out the value and return true
     else
     {
-        if (cell->values.count(env))
+        if (cell->values.count(key.first))
         {
-            s7_gc_unprotect(interpreter, cell->values[env].value);
+            s7_gc_unprotect(interpreter, cell->values[key.first].value);
         }
-        cell->values[env].value = value;
-        cell->values[env].valid = valid;
-        s7_gc_protect(interpreter, cell->values[env].value);
+        cell->values[key.first].value = value;
+        cell->values[key.first].valid = valid;
+        s7_gc_protect(interpreter, cell->values[key.first].value);
 
         // Also get a string representation out
         if (valid)
         {
             char* str_ptr = s7_object_to_c_string(interpreter, s7_cdr(value));
-            cell->values[env].str = std::string(str_ptr);
+            cell->values[key.first].str = std::string(str_ptr);
             free(str_ptr);
         }
         else
         {
-            cell->values[env].str = std::string(
+            cell->values[key.first].str = std::string(
                     s7_format(interpreter, s7_cdr(value)));
         }
 

@@ -152,15 +152,6 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
 
     auto added = new Instance(target, sheet);
 
-    // Set default expressions for any inputs
-    for (const auto& cell : target->cells.left)
-    {
-        if (cell.second->type == Cell::INPUT)
-        {
-            added->inputs[cell.second] = interpreter.defaultExpr(cell.second);
-        }
-    }
-
     sheet->instances.insert({name, added});
     sheet->order.push_back(added);
 
