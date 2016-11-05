@@ -35,10 +35,15 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
     bool erased = false;
 
     ImGui::PushID(name.c_str());
-    ImGui::Text("%s:", name.c_str());
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+    if (ImGui::Button((name + ":").c_str()))
+    {
+        ImGui::OpenPopup("cell context menu");
+    }
+    ImGui::PopStyleColor();
 
     // Open up the cell editing menu
-    if (ImGui::BeginPopupContextItem("cell context menu"))
+    if (ImGui::BeginPopup("cell context menu"))
     {
         static char buf[128];
         bool set_focus = false;
@@ -89,7 +94,7 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
         ImGui::PushAllowKeyboardFocus(false);
         ImGui::PushStyleColor(ImGuiCol_FrameBg,
                 cell->values[env].valid ?
-                Colors::base03 : Colors::red);
+                ImGui::GetStyle().Colors[ImGuiCol_FrameBg] : ImVec4(Colors::red));
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         ImGui::InputText("##result", &cell->values[env].str[0],
                          cell->values[env].str.size(),
@@ -185,7 +190,13 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     bool expand = false;
 
     ImGui::PushID(instance);
-    ImGui::Text("%s:", (name + " (" + sheet_name + ")").c_str());
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+    if (ImGui::Button((name + " (" + sheet_name + ")").c_str()))
+    {
+        ImGui::OpenPopup("sheet context menu");
+    }
+    ImGui::PopStyleColor();
+
     if (ImGui::BeginPopupContextItem("sheet context menu"))
     {
         // Temporary buffer in which we can rename the cell
