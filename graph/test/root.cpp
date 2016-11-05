@@ -124,8 +124,10 @@ TEST_CASE("Root::canInsertInstance")
     {
         auto a = root.createSheet(root.sheet.get(), "a");
         auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        auto ba = root.createSheet(ia->sheet, "b");
-        REQUIRE(root.canInsertInstance(ia->sheet, ba));
+        auto b = root.createSheet(ia->sheet, "b");
+        auto ib = root.insertInstance(ia->sheet, "ib", b);
+        REQUIRE(!root.canInsertInstance(ib->sheet, b));
+        REQUIRE(!root.canInsertInstance(ib->sheet, a));
     }
 }
 

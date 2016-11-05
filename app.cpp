@@ -242,23 +242,37 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
     ImGui::PushID(env.back());
     ImGui::SetNextWindowPos({offset, 0});
-    {   // Set window size
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        if (col_width.count(env))
-        {
-            ImGui::SetNextWindowSize({col_width[env], float(height)},
-                    ImGuiSetCond_Always);
-        }
-        else
-        {
-            ImGui::SetNextWindowSize({300, float(height)},
-                    ImGuiSetCond_Always);
-        }
+
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    // Set window size
+    if (col_width.count(env))
+    {
+        ImGui::SetNextWindowSize({col_width[env], float(height)},
+                ImGuiSetCond_Always);
     }
+    else
+    {
+        ImGui::SetNextWindowSize({300, float(height)},
+                ImGuiSetCond_Always);
+    }
+
     ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
     ImGui::Begin(windowName(env).c_str(),
                  env.size() == 1 ? nullptr : &stay_open);
+
+    /*
+    if (offset > 0)
+    {
+        auto p = ImGui::GetCursorScreenPos();
+        auto pad = ImGui::GetStyle().WindowPadding;
+        printf("%f %f\t%f\n", p.x, p.y, offset);
+        ImGui::GetWindowDrawList()->AddLine(
+                {p.x - pad.x + 2, p.y - pad.y},
+                {p.x - pad.x + 2, p.y - pad.y - 50 + height},
+                ImColor(Colors::blue), 4);
+    }
+    */
 
     ImGui::BeginChild("CellsSub", ImVec2(-1, ImGui::GetWindowHeight() - ImGui::GetTextLineHeightWithSpacing() - 50));
 
@@ -345,6 +359,7 @@ void App::drawAddMenu(const Graph::Env& env)
             }
             p = p->parent;
         }
+
         // Draw all potential sheets in the library
         for (auto& s : library)
         {
