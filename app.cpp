@@ -238,6 +238,36 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         ImGui::EndPopup();
     }
 
+    for (const auto& i : instance->sheet->cells.left)
+    {
+        printf("input: %s\n", i.first.c_str());
+        if (i.second->type == Graph::Cell::INPUT)
+        {
+            ImGui::Text("%s: ", i.first.c_str());
+            ImGui::SameLine();
+
+            assert(instance->inputs.count(i.second) != 0);
+            auto& expr = instance->inputs[i.second];
+            if (expr.size() + 256 > editor_buf.size())
+            {
+                editor_buf.resize(editor_buf.size() + 4096);
+            }
+            printf("Got expr %s\n", expr.c_str());
+            std::copy(expr.begin(), expr.end() + 1, editor_buf.begin());
+
+            const auto height = ImGui::CalcTextSize(expr.c_str()).y +
+                (expr.back() == '\n' ? ImGui::GetFontSize() : 0);
+            if (ImGui::InputTextMultiline("##txt",
+                    editor_buf.data(), editor_buf.size(),
+                    {ImGui::GetContentRegionAvailWidth(),
+                     ImGui::GetTextLineHeight() * 1.3f + height}))
+            {
+                printf("Editing input to say %s\n", &editor_buf[0]);
+            }
+        }
+    }
+
+
     if (erased)
     {
         root.eraseInstance(instance);

@@ -221,6 +221,8 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
             env_.push_back(i.second);
 
             s7_pointer callback=nullptr;
+
+            /* TODO make outputs work here
             for (auto o : i.second->sheet->outputs())
             {
                 if (deps->upstream[key].count({env_, o}))
@@ -232,6 +234,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
                     // Insert callback beep boop
                 }
             }
+            */
             bindings = s7_cons(interpreter, callback, bindings);
 
             // Push the symbol name to the bindings list

@@ -33,13 +33,6 @@ struct Sheet
      */
     Cell* isCell(void* ptr) const;
 
-    /*
-     *  Returns a list of cells that should be inputs,
-     *  along with their default expression
-     */
-    std::list<Cell*> inputs() const { return {}; };
-    std::list<Cell*> outputs() const { return {}; };
-
     /*  Instances of sheets (from library or parent's library) */
     boost::bimap<Name, Instance*> instances;
 
