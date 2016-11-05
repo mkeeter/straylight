@@ -111,7 +111,7 @@ bool Root::canInsertInstance(Sheet* sheet, Sheet* target) const
             {
                 above = true;
             }
-            sheet_ = sheet->parent;
+            sheet_ = sheet_->parent;
         }
         if (!above)
         {

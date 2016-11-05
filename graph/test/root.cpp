@@ -206,12 +206,40 @@ TEST_CASE("Root::createSheet")
 TEST_CASE("Root::insertInstance")
 {
     Graph::Root root;
-    auto a = root.createSheet(root.sheet.get(), "a");
-    auto b = root.createSheet(root.sheet.get(), "b");
 
-    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-    auto ib = root.insertInstance(root.sheet.get(), "ib", b);
+    SECTION("Flat")
+    {
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto b = root.createSheet(root.sheet.get(), "b");
 
-    REQUIRE(ia->sheet == a);
-    REQUIRE(ib->sheet == b);
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+        auto ib = root.insertInstance(root.sheet.get(), "ib", b);
+
+        REQUIRE(ia->sheet == a);
+        REQUIRE(ib->sheet == b);
+        REQUIRE(ia->sheet->parent == root.sheet.get());
+        REQUIRE(ib->sheet->parent == root.sheet.get());
+        REQUIRE(ia->parent == root.sheet.get());
+        REQUIRE(ib->parent == root.sheet.get());
+    }
+
+    SECTION("Nested")
+    {
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+        auto ab = root.createSheet(ia->sheet, "b");
+        auto iab = root.insertInstance(ia->sheet, "ib", ab);
+
+        auto c = root.createSheet(root.sheet.get(), "c");
+        auto iac = root.insertInstance(ia->sheet, "iac", c);
+        auto iabc = root.insertInstance(iab->sheet, "iabc", c);
+
+        REQUIRE(a->parent == root.sheet.get());
+        REQUIRE(ia->parent == root.sheet.get());
+        REQUIRE(ab->parent == a);
+        REQUIRE(iab->parent == a);
+        REQUIRE(c->parent == root.sheet.get());
+        REQUIRE(iac->parent == ia->sheet);
+        REQUIRE(iabc->parent == iab->sheet);
+    }
 }
