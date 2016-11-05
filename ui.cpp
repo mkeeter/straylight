@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "IconsFontAwesome.h"
 
 #include "ui.hpp"
 #include "colors.hpp"
@@ -33,6 +34,16 @@ static void load_font(GLFWwindow* window)
     ImGuiIO& io = ImGui::GetIO();
 
     io.Fonts->AddFontFromFileTTF("../imgui/Inconsolata.ttf", scale * 13.0f);
+
+    {   // merge in icons from Font Awesome
+        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        ImFontConfig icons_config;
+        icons_config.MergeMode = true;
+        icons_config.PixelSnapH = true;
+        io.Fonts->AddFontFromFileTTF("../imgui/fontawesome-webfont.ttf",
+                13.0f * scale, &icons_config, icons_ranges);
+    }
+
     io.Fonts->Fonts[0]->Scale /= scale;
 }
 

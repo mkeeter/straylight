@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include "imgui.h"
+#include "IconsFontAwesome.h"
 
 #include "app.hpp"
 #include "ui.hpp"
@@ -345,7 +346,7 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
 void App::drawAddMenu(const Graph::Env& env)
 {
-    if (ImGui::Button("Add", {-1, -1}))
+    if (ImGui::Button("Add " ICON_FA_PLUS, {-1, -1}))
     {
         ImGui::OpenPopup("add");
     }
