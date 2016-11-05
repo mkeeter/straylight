@@ -85,8 +85,8 @@ Interpreter::Interpreter()
         (lambda (str env)
           (catch #t
             (lambda ()
-              (let* ((s (format #f "(begin ~a ) " str))
-                     (r (read (open-input-string s))))
+              (let* ((i (read (open-input-string str)))
+                     (r (cons 'begin (list i))))
                 (cons 'value (eval r env))))
             (lambda args
                 (if (string=? "~A: unbound variable" (caadr args))
