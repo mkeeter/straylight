@@ -257,4 +257,6 @@ TEST_CASE("Root: inputs")
     REQUIRE(x->values.size() == 1);
     REQUIRE(x->values.count(env) == 1);
     REQUIRE(x->values[env].str == "0");
+
+    REQUIRE(ia->inputs.count(x));
 }
