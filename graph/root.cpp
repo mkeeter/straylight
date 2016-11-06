@@ -33,7 +33,6 @@ void Root::editCell(Cell* cell, const Expr& expr)
 {
     cell->expr = expr;
     cell->type = interpreter.cellType(cell);
-    printf("Setting cell type to %i\n", cell->type);
 
     // If this changed inputs or outputs, do something here!
     changed(cell);

@@ -240,19 +240,16 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
 
     for (const auto& i : instance->sheet->cells.left)
     {
-        printf("input: %s\n", i.first.c_str());
         if (i.second->type == Graph::Cell::INPUT)
         {
             ImGui::Text("%s: ", i.first.c_str());
             ImGui::SameLine();
 
-            assert(instance->inputs.count(i.second) != 0);
-            auto& expr = instance->inputs[i.second];
+            const auto& expr = instance->inputs.at(i.second);
             if (expr.size() + 256 > editor_buf.size())
             {
                 editor_buf.resize(editor_buf.size() + 4096);
             }
-            printf("Got expr %s\n", expr.c_str());
             std::copy(expr.begin(), expr.end() + 1, editor_buf.begin());
 
             const auto height = ImGui::CalcTextSize(expr.c_str()).y +
