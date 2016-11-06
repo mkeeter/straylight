@@ -259,4 +259,20 @@ TEST_CASE("Root: inputs")
     REQUIRE(x->values[env].str == "0");
 
     REQUIRE(ia->inputs.count(x));
+    REQUIRE(ia->inputs.at(x) == "0");
+}
+
+TEST_CASE("Root::editInput")
+{
+    Graph::Root root;
+
+    auto a = root.createSheet(root.sheet.get(), "a");
+    auto x = root.insertCell(a, "x", "(input 0)");
+
+    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+
+    root.editInput(ia, x, "12");
+
+    Graph::Env env = {root.instance.get(), ia};
+    REQUIRE(x->values[env].str == "12");
 }

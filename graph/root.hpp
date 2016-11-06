@@ -26,6 +26,11 @@ public:
     void eraseCell(Cell* cell);
 
     /*
+     *  Edits an instance input expression
+     */
+    void editInput(Instance* i, Cell* cell, const Expr& expr);
+
+    /*
      *  Insert a new instance to a given Sheet
      */
     Instance* insertInstance(Sheet* sheet, const Name& name, Sheet* target);

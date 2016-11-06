@@ -58,6 +58,11 @@ void Root::eraseCell(Cell* cell)
     changed(parent, name);
 }
 
+void Root::editInput(Instance* i, Cell* cell, const Expr& expr)
+{
+    // TODO
+}
+
 void Root::eraseInstance(Instance* i)
 {
     Sheet* parent = i->parent;
