@@ -177,11 +177,11 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         {
             // If the parent instance doesn't have an expression for this cell,
             // use the default expression, e.g. "0" for (input 0)
-            if (!env.back()->inputs.count(cell))
+            if (!key.first.back()->inputs.count(cell))
             {
-                env.back()->inputs[cell] = defaultExpr(cell);
+                key.first.back()->inputs[cell] = defaultExpr(cell);
             }
-            expr = env.back()->inputs[cell];
+            expr = key.first.back()->inputs[cell];
         }
     }
     else

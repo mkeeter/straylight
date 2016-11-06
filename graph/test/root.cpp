@@ -243,3 +243,18 @@ TEST_CASE("Root::insertInstance")
         REQUIRE(iabc->parent == iab->sheet);
     }
 }
+
+TEST_CASE("Root: inputs")
+{
+    Graph::Root root;
+
+    auto a = root.createSheet(root.sheet.get(), "a");
+    auto x = root.insertCell(a, "x", "(input 0)");
+
+    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+
+    Graph::Env env = {root.instance.get(), ia};
+    REQUIRE(x->values.size() == 1);
+    REQUIRE(x->values.count(env) == 1);
+    REQUIRE(x->values[env].str == "0");
+}
