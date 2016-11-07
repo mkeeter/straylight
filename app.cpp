@@ -259,7 +259,7 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
                     {ImGui::GetContentRegionAvailWidth(),
                      ImGui::GetTextLineHeight() * 1.3f + height}))
             {
-                printf("Editing input to say %s\n", &editor_buf[0]);
+                root.editInput(instance, i.second, &editor_buf[0]);
             }
         }
     }
