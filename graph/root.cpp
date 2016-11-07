@@ -58,9 +58,33 @@ void Root::eraseCell(Cell* cell)
     changed(parent, name);
 }
 
-void Root::editInput(Instance* i, Cell* cell, const Expr& expr)
+void Root::editInput(Instance* ins, Cell* cell, const Expr& expr)
 {
-    // TODO
+    assert(ins->inputs.count(cell));
+    ins->inputs[cell] = expr;
+
+    std::list<Env> todo = {{instance.get()}};
+
+    // Recurse down the graph, marking every instance of this Cell as dirty
+    while (todo.size())
+    {
+        const auto& i = todo.front();
+        if (i.back() == ins)
+        {
+            pushDirty({i, cell});
+        }
+
+        auto s = i.back()->sheet;
+        for (const auto& j : s->instances.left)
+        {
+            auto i_ = i;
+            i_.push_back(j.second);
+            todo.push_back(i_);
+        }
+        todo.pop_front();
+    }
+
+    sync();
 }
 
 void Root::eraseInstance(Instance* i)
