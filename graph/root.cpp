@@ -45,6 +45,7 @@ void Root::eraseCell(Cell* cell)
 
     // Release Scheme values for GC
     interpreter.release(cell);
+    deps.clearAll(cell);
 
     auto name = parent->cells.right.at(cell);
     parent->cells.right.erase(cell);

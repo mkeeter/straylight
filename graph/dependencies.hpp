@@ -24,6 +24,12 @@ struct Dependencies
      */
     void clear(const CellKey& looker);
 
+    /*
+     *  Clear all recorded lookups involving this cell in all environments.
+     *  This should be called when a cell is erased
+     */
+    void clearAll(const Cell* cell);
+
     /*  forward[cell] records all of the lookups that cell made
      *  (by name, as that's how lookups work)    */
     std::map<CellKey, std::set<NameKey>> forward;

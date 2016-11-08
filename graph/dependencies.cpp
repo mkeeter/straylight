@@ -33,4 +33,22 @@ void Dependencies::clear(const CellKey& looker)
     upstream[looker] = {looker};
 }
 
+void Dependencies::clearAll(const Cell* cell)
+{
+    std::list<CellKey> keys;
+
+    for (auto k : forward)
+    {
+        if (k.first.second == cell)
+        {
+            keys.push_back(k.first);
+        }
+    }
+
+    for (auto k : keys)
+    {
+        clear(k);
+    }
+}
+
 }   // namespace Graph
