@@ -189,6 +189,16 @@ TEST_CASE("Root::eraseCell")
         root.eraseCell(x);
         REQUIRE(!a->values[{root.instance.get()}].valid);
     }
+
+    SECTION("Dependency cleanup")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
+        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
+
+        root.eraseCell(a);
+        root.editCell(x, "15");
+        REQUIRE(x->values[{root.instance.get()}].str == "15");
+    }
 }
 
 TEST_CASE("Root::createSheet")
