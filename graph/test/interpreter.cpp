@@ -83,4 +83,14 @@ TEST_CASE("Interpreter::eval")
         REQUIRE(cell.values[key.first].str == "Input at top level");
         REQUIRE(cell.values[key.first].valid == false);
     }
+
+    SECTION("Multiple clauses")
+    {
+        cell.expr = "(define (f x) (+ 1 x))"
+                    "(f 3)";
+        interp.eval(key, &deps);
+
+        REQUIRE(cell.values[key.first].str == "4");
+        REQUIRE(cell.values[key.first].valid == true);
+    }
 }
