@@ -63,8 +63,24 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
         ImGui::EndPopup();
     }
 
-    {   // Draw the cell's expression and handle changes here
-        ImGui::SameLine(offset);
+    ImGui::SameLine(offset);
+    static Graph::Cell* active_cell = nullptr;
+    bool just_focused = false;
+
+    if (cell->type == Graph::Cell::INPUT &&
+        active_cell != cell)
+    {
+        if (ImGui::Button(ICON_FA_ARROW_RIGHT " (input)"))
+        {
+            active_cell = cell;
+            ImGui::SetKeyboardFocusHere();
+            just_focused = true;
+        }
+    }
+    // Draw the cell's expression and handle changes here
+    else if (cell->type != Graph::Cell::INPUT ||
+             active_cell == cell)
+    {
         if (cell->expr.size() + 256 > editor_buf.size())
         {
             editor_buf.resize(editor_buf.size() + 4096);
@@ -78,10 +94,24 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
                 {ImGui::GetContentRegionAvailWidth(),
                  ImGui::GetTextLineHeight() * 1.3f + height}))
         {
+            auto type_before = cell->type;
             root.editCell(cell, std::string(&editor_buf[0]));
+
+            // If this cell just became an input, then don't turn it into
+            // a button right away
+            if (cell->type == Graph::Cell::INPUT &&
+                type_before != Graph::Cell::INPUT)
+            {
+                active_cell = cell;
+            }
         }
     }
 
+    // If the text field isn't active anymore, turn it into a pumpkin
+    if (!ImGui::IsItemActive() && active_cell == cell && !just_focused)
+    {
+        active_cell = nullptr;
+    }
 
     // Draw the value if it's different (as a string) from the expr
     if (cell->expr != cell->values[env].str)
@@ -238,14 +268,39 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         ImGui::EndPopup();
     }
 
-    for (const auto& i : instance->sheet->cells.left)
+    // Get all input or output cells that should be drawn
+    std::list<Graph::Cell*> cells;
+    for (const auto& k : instance->sheet->order)
     {
-        if (i.second->type == Graph::Cell::INPUT)
+        if (auto c = instance->sheet->isCell(k))
         {
-            ImGui::Text("%s: ", i.first.c_str());
-            ImGui::SameLine();
+            if (c->type == Graph::Cell::INPUT ||
+                c->type == Graph::Cell::OUTPUT)
+            {
+                cells.push_back(c);
+            }
+        }
+    }
 
-            const auto& expr = instance->inputs.at(i.second);
+    float max_width = 0.0f;
+    for (const auto& c : cells)
+    {
+        auto s = ImGui::CalcTextSize(instance->sheet->cells.right.at(c).c_str());
+        max_width = fmax(s.x + 30.0f, max_width);
+    }
+
+    for (auto& c : cells)
+    {
+        ImGui::Dummy({0,0});
+        ImGui::SameLine(20.0f);
+
+        ImGui::PushID(c);
+        if (c->type == Graph::Cell::INPUT)
+        {
+            ImGui::Text("%s: ", instance->sheet->cells.right.at(c).c_str());
+            ImGui::SameLine(max_width);
+
+            const auto& expr = instance->inputs.at(c);
             if (expr.size() + 256 > editor_buf.size())
             {
                 editor_buf.resize(editor_buf.size() + 4096);
@@ -259,9 +314,10 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
                     {ImGui::GetContentRegionAvailWidth(),
                      ImGui::GetTextLineHeight() * 1.3f + height}))
             {
-                root.editInput(instance, i.second, &editor_buf[0]);
+                root.editInput(instance, c, &editor_buf[0]);
             }
         }
+        ImGui::PopID();
     }
 
 
@@ -327,7 +383,6 @@ void App::drawSheet(const Graph::Env& env, float offset)
         items.push_back(d);
     }
 
-    bool drawn = false;
     float max_width = 0.0f;
     for (const auto& k : items)
     {
@@ -338,6 +393,7 @@ void App::drawSheet(const Graph::Env& env, float offset)
         }
     }
 
+    bool drawn = false;
     for (const auto& k : items)
     {
         if (drawn)
@@ -421,6 +477,12 @@ void App::drawAddMenu(const Graph::Env& env)
                 instance_target = s.second;
                 strcpy(name_buf, "instance-name");
             }
+            else if (ImGui::BeginPopupContextItem("wtf"))
+            {
+                ImGui::EndPopup();
+            }
+
+
             ImGui::PopStyleColor(1);
         }
 
