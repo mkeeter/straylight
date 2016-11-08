@@ -83,10 +83,16 @@ Interpreter::Interpreter()
           )")),
       eval_func(s7_eval_c_string(interpreter, R"(
         (lambda (str env)
+          (define (read-all port)
+            (let recurse ()
+              (let ((r (read port)))
+                    (if (eq? r #<eof>)
+                '()
+                (cons r (recurse))))))
           (catch #t
             (lambda ()
-              (let* ((i (read (open-input-string str)))
-                     (r (cons 'begin (list i))))
+              (let* ((i (read-all (open-input-string str)))
+                     (r (cons 'begin i)))
                 (cons 'value (eval r env))))
             (lambda args
                 (if (string=? "~A: unbound variable" (caadr args))
