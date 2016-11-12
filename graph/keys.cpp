@@ -16,4 +16,9 @@ CellKey toCellKey(const NameKey& c)
     return {c.first, c.first.back()->sheet->cells.left.at(c.second)};
 }
 
+bool isCellKey(const NameKey& c)
+{
+    return c.first.back()->sheet->cells.left.count(c.second);
+}
+
 }

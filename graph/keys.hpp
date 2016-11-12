@@ -11,4 +11,5 @@ typedef std::pair<Env, Cell*> CellKey;
 
 NameKey toNameKey(const CellKey& c);
 CellKey toCellKey(const NameKey& n);
+bool isCellKey(const NameKey& n);
 }
