@@ -12,7 +12,7 @@ namespace Graph
 {
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions
-static s7_pointer encode_key(s7_scheme* interpreter, const CellKey& k)
+static s7_pointer encode_cell_key(s7_scheme* interpreter, const CellKey& k)
 {
     auto out = s7_nil(interpreter);
     for (auto& i : k.first)
@@ -23,7 +23,18 @@ static s7_pointer encode_key(s7_scheme* interpreter, const CellKey& k)
     return out;
 }
 
-static CellKey decode_key(s7_scheme* interpreter, s7_pointer v)
+static s7_pointer encode_name_key(s7_scheme* interpreter, const NameKey& k)
+{
+    auto out = s7_nil(interpreter);
+    for (auto& i : k.first)
+    {
+        out = s7_cons(interpreter, s7_make_c_pointer(interpreter, i), out);
+    }
+    out = s7_cons(interpreter, s7_make_string(interpreter, k.second.c_str()), out);
+    return out;
+}
+
+static CellKey decode_cell_key(s7_scheme* interpreter, s7_pointer v)
 {
     CellKey out;
     out.second = static_cast<Cell*>(s7_c_pointer(s7_car(v)));
@@ -40,21 +51,38 @@ static CellKey decode_key(s7_scheme* interpreter, s7_pointer v)
     return out;
 }
 
+static NameKey decode_name_key(s7_scheme* interpreter, s7_pointer v)
+{
+    NameKey out;
+    out.second = std::string(s7_string(s7_car(v)));
+    v = s7_cdr(v);
+
+    // Because of the list's order, we fill the key from back to front
+    out.first.resize(s7_list_length(interpreter, v));
+    for (auto itr = out.first.rbegin(); itr != out.first.rend();
+         ++itr, v = s7_cdr(v))
+    {
+        *itr = static_cast<Instance*>(s7_c_pointer(s7_car(v)));
+    }
+
+    return out;
+}
+
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
 {
     auto& deps = *static_cast<Dependencies*>(s7_c_pointer(s7_car(args)));
-    auto lookee = decode_key(interpreter, s7_cadr(args));
-    auto looker = decode_key(interpreter, s7_caddr(args));
+    auto lookee = decode_name_key(interpreter, s7_cadr(args));
+    auto looker = decode_cell_key(interpreter, s7_caddr(args));
 
     // Success
     int out = 0;
 
-    if (deps.insert(looker, toNameKey(lookee)))
+    if (deps.insert(looker, lookee))
     {
         // Failure due to recursive lookup
         out = 1;
     }
-    else if (lookee.second->values.count(looker.first) == 0)
+    else if (toCellKey(lookee).second->values.count(looker.first) == 0)
     {
         // Failure due to non-existent value
         out = -1;
@@ -224,8 +252,8 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
             // Construct a lookup thunk using value_thunk_factory
             auto args = s7_list(interpreter, 5,
                 s7_make_c_pointer(interpreter, deps),
-                encode_key(interpreter, {env, c.second}),
-                encode_key(interpreter, key),
+                encode_name_key(interpreter, {env, c.first}),
+                encode_cell_key(interpreter, key),
                 check_upstream,
                 c.second->values.count(env) ? c.second->values.at(env).value
                                             : s7_nil(interpreter));
