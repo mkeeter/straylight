@@ -114,25 +114,25 @@ void App::drawCell(const Graph::Name& name, const Graph::Env& env, float offset)
     }
 
     // Draw the value if it's different (as a string) from the expr
-    if (cell->expr != cell->values[env].str)
+    if (cell->expr != cell->values.at(env).str)
     {
         ImGui::Dummy({0,0});
         ImGui::SameLine(offset);
         ImGui::PushItemWidth(-1.0f);
         ImGui::PushStyleColor(ImGuiCol_Text,
-                cell->values[env].valid
+                cell->values.at(env).valid
                 ? ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]
                 : ImGui::GetStyle().Colors[ImGuiCol_Text]);
         ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
             Colors::transparent(ImGui::GetStyle().Colors[ImGuiCol_TextSelectedBg]));
         ImGui::PushStyleColor(ImGuiCol_FrameBg,
-                cell->values[env].valid ?
+                cell->values.at(env).valid ?
                 ImGui::GetStyle().Colors[ImGuiCol_FrameBg] : ImVec4(Colors::red));
 
         ImGui::PushAllowKeyboardFocus(false);
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        ImGui::InputText("##result", &cell->values[env].str[0],
-                         cell->values[env].str.size(),
+        ImGui::InputText("##result", &cell->values.at(env).str[0],
+                         cell->values.at(env).str.size(),
                          ImGuiInputTextFlags_ReadOnly);
         ImGui::PopAllowKeyboardFocus();
         ImGui::PopStyleColor(3);
@@ -317,9 +317,35 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
                 root.editInput(instance, c, &editor_buf[0]);
             }
         }
+        else if (c->type == Graph::Cell::OUTPUT)
+        {
+            ImGui::Text("%s: ", instance->sheet->cells.right.at(c).c_str());
+            auto env_ = env;
+            env_.push_back(instance);
+
+            ImGui::SameLine(max_width);
+            ImGui::PushItemWidth(-1.0f);
+            ImGui::PushStyleColor(ImGuiCol_Text,
+                    c->values.at(env_).valid
+                    ? ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]
+                    : ImGui::GetStyle().Colors[ImGuiCol_Text]);
+            ImGui::PushStyleColor(ImGuiCol_TextSelectedBg,
+                Colors::transparent(ImGui::GetStyle().Colors[ImGuiCol_TextSelectedBg]));
+            ImGui::PushStyleColor(ImGuiCol_FrameBg,
+                    c->values.at(env_).valid ?
+                    ImGui::GetStyle().Colors[ImGuiCol_FrameBg] : ImVec4(Colors::red));
+
+            ImGui::PushAllowKeyboardFocus(false);
+            ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+            ImGui::InputText("##result", &c->values.at(env_).str[0],
+                             c->values.at(env_).str.size(),
+                             ImGuiInputTextFlags_ReadOnly);
+            ImGui::PopAllowKeyboardFocus();
+            ImGui::PopStyleColor(3);
+            ImGui::PopItemWidth();
+        }
         ImGui::PopID();
     }
-
 
     if (erased)
     {
@@ -349,7 +375,7 @@ float App::drawSheet(const Graph::Env& env, float offset)
     // Set window size
     if (col_width.count(env))
     {
-        ImGui::SetNextWindowSize({col_width[env], float(height)},
+        ImGui::SetNextWindowSize({col_width.at(env), float(height)},
                 ImGuiSetCond_Always);
     }
     else
@@ -427,7 +453,7 @@ float App::drawSheet(const Graph::Env& env, float offset)
     else
     {
         col_width[env] = ImGui::GetWindowSize().x;
-        output = col_width[env];
+        output = col_width.at(env);
     }
     ImGui::End();
     ImGui::PopID();
