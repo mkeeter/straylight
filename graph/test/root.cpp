@@ -301,7 +301,7 @@ TEST_CASE("Root: outputs")
         REQUIRE(x->values[env].str == "0");
     }
 
-    SECTION("References")
+    SECTION("Valid reference")
     {
         auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
 
@@ -309,6 +309,16 @@ TEST_CASE("Root: outputs")
         REQUIRE(y->values.size() == 1);
         REQUIRE(y->values.count(env) == 1);
         REQUIRE(y->values[env].str == "1");
+    }
+
+    SECTION("Invalid reference")
+    {
+        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'y))");
+
+        Graph::Env env = {root.instance.get()};
+        REQUIRE(y->values.size() == 1);
+        REQUIRE(y->values.count(env) == 1);
+        REQUIRE(y->values[env].str == "Invalid variable name");
     }
 }
 
