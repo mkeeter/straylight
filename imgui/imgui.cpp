@@ -4313,7 +4313,9 @@ bool ImGui::Begin(const char* name, bool* p_open, const ImVec2& size_on_first_us
             {
                 const float pad = 2.0f;
                 const float rad = (window->TitleBarHeight() - pad*2.0f) * 0.5f;
-                if (CloseButton(window->GetID("#CLOSE"), window->Rect().GetTR() + ImVec2(-pad - rad, pad + rad), rad))
+                const float offset = (window->Collapsed && (window->Flags & ImGuiWindowFlags_CollapseHorizontal)) ?
+                    g.FontSize*1.4f + pad : 0.0f;
+                if (CloseButton(window->GetID("#CLOSE"), window->Rect().GetTR() + ImVec2(-pad - rad, pad + rad + offset), rad))
                     *p_open = false;
             }
 
@@ -4321,17 +4323,52 @@ bool ImGui::Begin(const char* name, bool* p_open, const ImVec2& size_on_first_us
             if (!(flags & ImGuiWindowFlags_NoCollapse))
                 RenderCollapseTriangle(window->Pos + style.FramePadding, !window->Collapsed, 1.0f);
 
-            ImVec2 text_min = window->Pos;
-            ImVec2 text_max = window->Pos + ImVec2(window->Size.x, style.FramePadding.y*2 + text_size.y);
-            ImRect clip_rect;
-            clip_rect.Max = ImVec2(window->Pos.x + window->Size.x - (p_open ? title_bar_rect.GetHeight() - 3 : style.FramePadding.x), text_max.y); // Match the size of CloseWindowButton()
-            float pad_left = (flags & ImGuiWindowFlags_NoCollapse) == 0 ? (style.FramePadding.x + g.FontSize + style.ItemInnerSpacing.x) : 0.0f;
-            float pad_right = (p_open != NULL) ? (style.FramePadding.x + g.FontSize + style.ItemInnerSpacing.x) : 0.0f;
-            if (style.WindowTitleAlign.x > 0.0f) pad_right = ImLerp(pad_right, pad_left, style.WindowTitleAlign.x);
-            text_min.x += pad_left;
-            text_max.x -= pad_right;
-            clip_rect.Min = ImVec2(text_min.x, window->Pos.y);
-            RenderTextClipped(text_min, text_max, name, NULL, &text_size, style.WindowTitleAlign, &clip_rect);
+            if (window->Collapsed && (flags & ImGuiWindowFlags_CollapseHorizontal))
+            {
+                // Hide anything after a '##' string
+                const char* end = FindRenderedTextEnd(name, NULL);
+                ImVec2 text_size = CalcTextSize(name, end);
+
+                const ImU32 text_color = ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]);
+                ImFont *font = GImGui->Font;
+                const ImFont::Glyph *glyph;
+                auto pos = window->Pos + ImVec2(style.FramePadding.y,
+                        text_size.x + g.FontSize*1.4f + (p_open ? title_bar_rect.GetWidth() + 5.0f : 0.0f));
+
+                for (const char* c=name; *c && c != end; ++c)
+                {
+                    if ((glyph = font->FindGlyph(*c)))
+                    {
+                        window->DrawList->PrimReserve(6, 4);
+                        window->DrawList->PrimQuadUV(
+                                pos + ImVec2(glyph->Y0, -glyph->X0)*font->Scale,
+                                pos + ImVec2(glyph->Y0, -glyph->X1)*font->Scale,
+                                pos + ImVec2(glyph->Y1, -glyph->X1)*font->Scale,
+                                pos + ImVec2(glyph->Y1, -glyph->X0)*font->Scale,
+
+                                ImVec2(glyph->U0, glyph->V0),
+                                ImVec2(glyph->U1, glyph->V0),
+                                ImVec2(glyph->U1, glyph->V1),
+                                ImVec2(glyph->U0, glyph->V1),
+                                text_color);
+                        pos.y -= glyph->XAdvance*font->Scale;
+                    }
+                }
+            }
+            else
+            {
+                ImVec2 text_min = window->Pos;
+                ImVec2 text_max = window->Pos + ImVec2(window->Size.x, style.FramePadding.y*2 + text_size.y);
+                ImRect clip_rect;
+                clip_rect.Max = ImVec2(window->Pos.x + window->Size.x - (p_open ? title_bar_rect.GetHeight() - 3 : style.FramePadding.x), text_max.y); // Match the size of CloseWindowButton()
+                float pad_left = (flags & ImGuiWindowFlags_NoCollapse) == 0 ? (style.FramePadding.x + g.FontSize + style.ItemInnerSpacing.x) : 0.0f;
+                float pad_right = (p_open != NULL) ? (style.FramePadding.x + g.FontSize + style.ItemInnerSpacing.x) : 0.0f;
+                if (style.WindowTitleAlign.x > 0.0f) pad_right = ImLerp(pad_right, pad_left, style.WindowTitleAlign.x);
+                text_min.x += pad_left;
+                text_max.x -= pad_right;
+                clip_rect.Min = ImVec2(text_min.x, window->Pos.y);
+                RenderTextClipped(text_min, text_max, name, NULL, &text_size, style.WindowTitleAlign, &clip_rect);
+            }
         }
 
         // Save clipped aabb so we can access it in constant-time in FindHoveredWindow()
