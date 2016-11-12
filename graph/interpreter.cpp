@@ -277,7 +277,7 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
                     {
                         auto pair = s7_cons(interpreter,
                                 s7_make_symbol(interpreter, c.first.c_str()),
-                                s7_nil(interpreter));
+                                valueThunk({env_, c.second}, key, deps));
                         values = s7_cons(interpreter, pair, values);
                     }
                 }
