@@ -287,24 +287,21 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
             }
 
             // If this interpreter has outputs, then build a thunk
-            if (!s7_is_eq(values, s7_nil(interpreter)))
-            {
-                auto args = s7_list(interpreter, 5,
-                    s7_make_c_pointer(interpreter, deps),
-                    encode_name_key(interpreter, {env, i.first}),
-                    encode_cell_key(interpreter, key),
-                    check_upstream,
-                    values);
-                s7_pointer thunk = s7_call(interpreter, instance_thunk_factory, args);
+            auto args = s7_list(interpreter, 5,
+                s7_make_c_pointer(interpreter, deps),
+                encode_name_key(interpreter, {env, i.first}),
+                encode_cell_key(interpreter, key),
+                check_upstream,
+                values);
+            s7_pointer thunk = s7_call(interpreter, instance_thunk_factory, args);
 
-                // Then push it to the list
-                bindings = s7_cons(interpreter, thunk, bindings);
+            // Then push it to the list
+            bindings = s7_cons(interpreter, thunk, bindings);
 
-                // Prepend the symbol name to the bindings list
-                bindings = s7_cons(interpreter,
-                        s7_make_symbol(interpreter, i.first.c_str()),
-                        bindings);
-            }
+            // Prepend the symbol name to the bindings list
+            bindings = s7_cons(interpreter,
+                    s7_make_symbol(interpreter, i.first.c_str()),
+                    bindings);
         }
 
         // Run the evaluation and get out a value
@@ -333,6 +330,9 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         {
             auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
             auto instance = s7_string(s7_cadddr(value));
+
+            // If we failed to get a variable from an instance, then we need
+            // to push a nested dependency into that instance
             auto env_ = env;
             env_.push_back(env.back()->sheet->instances.left.at(instance));
             deps->insert(key, {env_, std::string(target)});

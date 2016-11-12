@@ -313,12 +313,12 @@ TEST_CASE("Root: outputs")
 
     SECTION("Invalid reference")
     {
-        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'y))");
+        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'z))");
 
         Graph::Env env = {root.instance.get()};
         REQUIRE(y->values.size() == 1);
         REQUIRE(y->values.count(env) == 1);
-        REQUIRE(y->values[env].str == "y: missing instance lookup in ia");
+        REQUIRE(y->values[env].str == "z: missing instance lookup in ia");
     }
 
     SECTION("Change detection")
@@ -327,9 +327,11 @@ TEST_CASE("Root: outputs")
         auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
 
         Graph::Env env = {root.instance.get()};
+        CAPTURE(y->values[env].str);
         REQUIRE(y->values[env].valid == false);
 
         root.editCell(x, "(output 15)");
+        CAPTURE(y->values[env].str);
         REQUIRE(y->values[env].valid == true);
         REQUIRE(y->values[env].str == "16");
     }
