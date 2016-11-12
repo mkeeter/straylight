@@ -49,6 +49,12 @@ private:
     bool isInput(const Cell* cell) const;
     bool isOutput(const Cell* cell) const;
 
+    /*
+     *  Returns a value thunk for looker looking up lookee
+     */
+    s7_pointer valueThunk(const CellKey& lookee, const CellKey& looker,
+                          Dependencies* deps);
+
     /*  Scheme function pointers */
     s7_pointer const check_upstream;
     s7_pointer const value_thunk_factory;

@@ -251,15 +251,8 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         auto bindings = s7_nil(interpreter);
         for (auto& c : env.back()->sheet->cells.left)
         {
-            // Construct a lookup thunk using value_thunk_factory
-            auto args = s7_list(interpreter, 5,
-                s7_make_c_pointer(interpreter, deps),
-                encode_name_key(interpreter, {env, c.first}),
-                encode_cell_key(interpreter, key),
-                check_upstream,
-                c.second->values.count(env) ? c.second->values.at(env).value
-                                            : s7_nil(interpreter));
-            auto thunk = s7_call(interpreter, value_thunk_factory, args);
+            // Get a value thunk for this cell
+            auto thunk = valueThunk({env, c.second}, key, deps);
 
             // Then push it to the list
             bindings = s7_cons(interpreter, thunk, bindings);
@@ -384,6 +377,23 @@ bool Interpreter::isOutput(const Cell* cell) const
             s7_call(interpreter, is_output,
                 s7_list(interpreter, 1,
                     s7_make_string(interpreter, cell->expr.c_str()))));
+}
+
+s7_pointer Interpreter::valueThunk(const CellKey& lookee, const CellKey& looker,
+                                   Dependencies* deps)
+{
+    const auto& c = lookee.second;
+    const auto& env = lookee.first;
+
+    // Construct a lookup thunk using value_thunk_factory
+    auto args = s7_list(interpreter, 5,
+        s7_make_c_pointer(interpreter, deps),
+        encode_name_key(interpreter, toNameKey(lookee)),
+        encode_cell_key(interpreter, looker),
+        check_upstream,
+        c->values.count(env) ? c->values.at(env).value
+                             : s7_nil(interpreter));
+    return s7_call(interpreter, value_thunk_factory, args);
 }
 
 std::string Interpreter::defaultExpr(const Cell* cell) const
