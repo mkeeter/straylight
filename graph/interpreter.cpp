@@ -83,7 +83,7 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
         out = 1;
     }
     else if (isCellKey(lookee) &&
-             toCellKey(lookee).second->values.count(looker.first) == 0)
+             toCellKey(lookee).second->values.count(lookee.first) == 0)
     {
         // Failure due to non-existent value
         out = -1;
