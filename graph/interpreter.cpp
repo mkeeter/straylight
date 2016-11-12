@@ -112,7 +112,6 @@ Interpreter::Interpreter()
           )")),
       instance_thunk_factory(s7_eval_c_string(interpreter, R"(
           (lambda (deps target looker check-upstream values)
-            (format #t "Got values ~a\n" values)
             (let ((lookup (apply hash-table values))
                   (keys (apply hash-table
                     (map (lambda (v) (cons (car v) #t)) values))))
