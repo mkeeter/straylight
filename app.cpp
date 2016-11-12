@@ -334,8 +334,10 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
     ImGui::PopID();
 }
 
-void App::drawSheet(const Graph::Env& env, float offset)
+float App::drawSheet(const Graph::Env& env, float offset)
 {
+    static std::map<Graph::Env, float> col_width;
+
     Graph::Sheet* sheet = env.back()->sheet;
     bool stay_open = true;
 
@@ -358,7 +360,8 @@ void App::drawSheet(const Graph::Env& env, float offset)
 
     ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
     ImGui::Begin(windowName(env).c_str(),
-                 env.size() == 1 ? nullptr : &stay_open);
+                 env.size() == 1 ? nullptr : &stay_open,
+                 ImGuiWindowFlags_CollapseHorizontal);
 
     /*
     if (offset > 0)
@@ -416,7 +419,16 @@ void App::drawSheet(const Graph::Env& env, float offset)
     ImGui::Separator();
     drawAddMenu(env);
 
-    col_width[env] = ImGui::GetWindowSize().x;
+    float output;
+    if (ImGui::IsWindowCollapsed())
+    {
+        output = ImGui::GetWindowSize().x;
+    }
+    else
+    {
+        col_width[env] = ImGui::GetWindowSize().x;
+        output = col_width[env];
+    }
     ImGui::End();
     ImGui::PopID();
 
@@ -425,6 +437,8 @@ void App::drawSheet(const Graph::Env& env, float offset)
         focused.erase(std::find(focused.begin(), focused.end(), env.back()),
                       focused.end());
     }
+
+    return output;
 }
 
 void App::drawAddMenu(const Graph::Env& env)
@@ -635,8 +649,7 @@ void App::draw()
     for (unsigned i=0; i < focused.size(); ++i)
     {
         current_env.push_back(focused[i]);
-        drawSheet(current_env, offset);
-        offset += col_width[current_env];
+        offset += drawSheet(current_env, offset);
     }
 
     ImGui::PopStyleVar(1);

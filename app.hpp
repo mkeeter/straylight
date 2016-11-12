@@ -13,7 +13,13 @@ public:
 private:
     void drawCell(const Graph::Name& name, const Graph::Env& env, float offset);
     void drawInstance(const Graph::Name& name, const Graph::Env& env);
-    void drawSheet(const Graph::Env& env, float offset=0.0f);
+
+    /*
+     *  Draws an individual sheet as a column
+     *  Returns the width of that sheet
+     */
+    float drawSheet(const Graph::Env& env, float offset=0.0f);
+
     void drawAddMenu(const Graph::Env& env);
 
     void renamePopup(Graph::Sheet* sheet, const Graph::Name& name,
@@ -30,5 +36,4 @@ private:
     // UI state
     Graph::Env focused;
     std::vector<char> editor_buf;
-    std::map<Graph::Env, float> col_width;
 };
