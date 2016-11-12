@@ -262,14 +262,57 @@ TEST_CASE("Root: inputs")
     auto x = root.insertCell(a, "x", "(input 0)");
 
     auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-
     Graph::Env env = {root.instance.get(), ia};
-    REQUIRE(x->values.size() == 1);
-    REQUIRE(x->values.count(env) == 1);
-    REQUIRE(x->values[env].str == "0");
 
-    REQUIRE(ia->inputs.count(x));
-    REQUIRE(ia->inputs.at(x) == "0");
+    SECTION("Evaluation")
+    {
+        REQUIRE(x->values.size() == 1);
+        REQUIRE(x->values.count(env) == 1);
+        REQUIRE(x->values[env].str == "0");
+
+        REQUIRE(ia->inputs.count(x));
+        REQUIRE(ia->inputs.at(x) == "0");
+    }
+
+    SECTION("References")
+    {
+        auto y = root.insertCell(a, "y", "(+ 1 (x))");
+        REQUIRE(y->values.size() == 1);
+        REQUIRE(y->values.count(env) == 1);
+        REQUIRE(y->values[env].str == "1");
+    }
+}
+
+TEST_CASE("Root: outputs")
+{
+    Graph::Root root;
+
+    auto a = root.createSheet(root.sheet.get(), "a");
+    auto x = root.insertCell(a, "x", "(output 0)");
+
+    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+
+    SECTION("Evaluation")
+    {
+        Graph::Env env = {root.instance.get(), ia};
+
+        REQUIRE(x->values.size() == 1);
+        REQUIRE(x->values.count(env) == 1);
+        REQUIRE(x->values[env].str == "0");
+
+        REQUIRE(ia->inputs.count(x));
+        REQUIRE(ia->inputs.at(x) == "0");
+    }
+
+    SECTION("References")
+    {
+        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
+
+        Graph::Env env = {root.instance.get()};
+        REQUIRE(y->values.size() == 1);
+        REQUIRE(y->values.count(env) == 1);
+        REQUIRE(y->values[env].str == "1");
+    }
 }
 
 TEST_CASE("Root::editInput")
