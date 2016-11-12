@@ -318,7 +318,20 @@ TEST_CASE("Root: outputs")
         Graph::Env env = {root.instance.get()};
         REQUIRE(y->values.size() == 1);
         REQUIRE(y->values.count(env) == 1);
-        REQUIRE(y->values[env].str == "Invalid variable name");
+        REQUIRE(y->values[env].str == "y: missing instance lookup in ia");
+    }
+
+    SECTION("Change detection")
+    {
+        root.editCell(x, "12");
+        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
+
+        Graph::Env env = {root.instance.get()};
+        REQUIRE(y->values[env].valid == false);
+
+        root.editCell(x, "(output 15)");
+        REQUIRE(y->values[env].valid == true);
+        REQUIRE(y->values[env].str == "16");
     }
 }
 

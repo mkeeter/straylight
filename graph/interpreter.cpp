@@ -119,7 +119,7 @@ Interpreter::Interpreter()
               (let ((res (check-upstream deps target looker)))
                 (cond  ((=  1 res) (error 'circular-lookup "Circular lookup"))
                        ((not (hash-table-ref keys key))
-                         (error "Invalid variable name"))
+                         (error 'missing-lookup "~A: missing instance lookup in ~A" key (car target)))
                        (else ((hash-table-ref lookup key))))))))
       )")),
       eval_func(s7_eval_c_string(interpreter, R"(
@@ -146,9 +146,12 @@ Interpreter::Interpreter()
                      (r (cons 'begin j)))
                 (cons 'value (eval r env))))
             (lambda args
-                (if (string=? "~A: unbound variable" (caadr args))
-                    (copy (cons 'unbound (cadr args)))
-                    (copy (cons 'error (cadr args)))))))
+              (cond ((string=? "~A: unbound variable" (caadr args))
+                        (copy (cons 'unbound-var (cadr args))))
+                    ((string=? "~A: missing instance lookup in ~A" (caadr args))
+                        (copy (cons 'unbound-instance (cadr args))))
+                    (else
+                        (copy (cons 'error (cadr args))))))))
       )")),
       is_input(s7_eval_c_string(interpreter, R"(
         (lambda (str)
@@ -319,10 +322,20 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         // If the error was due to an unbound variable, then record the
         // attempted lookup in our dependencies table.
         if (s7_is_eqv(s7_car(value),
-                      s7_make_symbol(interpreter, "unbound")))
+                      s7_make_symbol(interpreter, "unbound-var")))
         {
             auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
             deps->insert(key, {env, std::string(target)});
+            free(target);
+        }
+        else if (s7_is_eqv(s7_car(value),
+                      s7_make_symbol(interpreter, "unbound-instance")))
+        {
+            auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
+            auto instance = s7_string(s7_cadddr(value));
+            auto env_ = env;
+            env_.push_back(env.back()->sheet->instances.left.at(instance));
+            deps->insert(key, {env_, std::string(target)});
             free(target);
         }
     }
