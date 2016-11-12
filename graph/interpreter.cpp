@@ -111,8 +111,10 @@ Interpreter::Interpreter()
           )")),
       instance_thunk_factory(s7_eval_c_string(interpreter, R"(
           (lambda (deps target looker check-upstream values)
+            (format #t "Got values ~a\n" values)
             (let ((lookup (apply hash-table values))
-                  (keys (apply hash-table (map (lambda (v) (cons (car v) #t))))))
+                  (keys (apply hash-table
+                    (map (lambda (v) (cons (car v) #t)) values))))
             (lambda (key)
               (let ((res (check-upstream deps target looker)))
                 (cond  ((=  1 res) (error 'circular-lookup "Circular lookup"))
@@ -271,39 +273,42 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         // Then, install instances into the inlet
         for (auto& i : env.back()->sheet->instances.left)
         {
-            /*
             s7_pointer values = s7_nil(interpreter);
 
-            {
-                // Create a temporary environment inside the instance
+            {   // Create a temporary environment inside the instance
                 auto env_ = env;
                 env_.push_back(i.second);
                 for (const auto& c : i.second->sheet->cells.left)
                 {
                     if (c.second->type == Cell::OUTPUT)
                     {
-
+                        auto pair = s7_cons(interpreter,
+                                s7_make_symbol(interpreter, c.first.c_str()),
+                                s7_nil(interpreter));
+                        values = s7_cons(interpreter, pair, values);
                     }
                 }
             }
 
-            auto args = s7_list(interpreter, 5,
-                s7_make_c_pointer(interpreter, deps),
-                //encode_key(interpreter, {env, i.second}),
-                s7_nil(interpreter),
-                encode_key(interpreter, key),
-                check_upstream,
-                values);
-            s7_pointer thunk = s7_call(interpreter, instance_thunk_factory, args);
+            // If this interpreter has outputs, then build a thunk
+            if (!s7_is_eq(values, s7_nil(interpreter)))
+            {
+                auto args = s7_list(interpreter, 5,
+                    s7_make_c_pointer(interpreter, deps),
+                    encode_name_key(interpreter, {env, i.first}),
+                    encode_cell_key(interpreter, key),
+                    check_upstream,
+                    values);
+                s7_pointer thunk = s7_call(interpreter, instance_thunk_factory, args);
 
-            // Then push it to the list
-            bindings = s7_cons(interpreter, thunk, bindings);
+                // Then push it to the list
+                bindings = s7_cons(interpreter, thunk, bindings);
 
-            // Prepend the symbol name to the bindings list
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, i.first.c_str()),
-                    bindings);
-            */
+                // Prepend the symbol name to the bindings list
+                bindings = s7_cons(interpreter,
+                        s7_make_symbol(interpreter, i.first.c_str()),
+                        bindings);
+            }
         }
 
         // Run the evaluation and get out a value
