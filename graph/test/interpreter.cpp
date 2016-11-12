@@ -93,4 +93,31 @@ TEST_CASE("Interpreter::eval")
         REQUIRE(cell.values[key.first].str == "4");
         REQUIRE(cell.values[key.first].valid == true);
     }
+
+    SECTION("output")
+    {
+        cell.expr = "(output 12)";
+        interp.eval(key, &deps);
+
+        REQUIRE(cell.values[key.first].str == "12");
+        REQUIRE(cell.values[key.first].valid == true);
+    }
+
+    SECTION("output with internal clauses")
+    {
+        cell.expr = "(output (define (f x) (+ 1 x)) (f 12))";
+        interp.eval(key, &deps);
+
+        REQUIRE(cell.values[key.first].str == "13");
+        REQUIRE(cell.values[key.first].valid == true);
+    }
+
+    SECTION("output with external clauses (invalid)")
+    {
+        cell.expr = "(output 12)(+ 1 2)";
+        interp.eval(key, &deps);
+
+        REQUIRE(cell.values[key.first].str == "Output must only have one clause");
+        REQUIRE(cell.values[key.first].valid == false);
+    }
 }
