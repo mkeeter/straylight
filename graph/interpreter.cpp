@@ -81,6 +81,17 @@ Interpreter::Interpreter()
                          ((eqv? 'value (car value)) (cdr value))
                          (else (error 'invalid-lookup "Invalid lookup"))))))
           )")),
+      instance_thunk_factory(s7_eval_c_string(interpreter, R"(
+          (lambda (deps target looker check-upstream values)
+            (let ((lookup (apply hash-table values))
+                  (keys (apply hash-table (map (lambda (v) (cons (car v) #t))))))
+            (lambda (key)
+              (let ((res (check-upstream deps target looker)))
+                (cond  ((=  1 res) (error 'circular-lookup "Circular lookup"))
+                       ((not (hash-table-ref keys key))
+                         (error "Invalid variable name"))
+                       (else ((hash-table-ref lookup key))))))))
+      )")),
       eval_func(s7_eval_c_string(interpreter, R"(
         (lambda (str env)
           (define (read-all port)
@@ -232,31 +243,39 @@ bool Interpreter::eval(const CellKey& key, Dependencies* deps)
         // Then, install instances into the inlet
         for (auto& i : env.back()->sheet->instances.left)
         {
-            // Create a temporary environment inside the instance
-            auto env_ = env;
-            env_.push_back(i.second);
+            /*
+            s7_pointer values = s7_nil(interpreter);
 
-            s7_pointer callback=nullptr;
-
-            /* TODO make outputs work here
-            for (auto o : i.second->sheet->outputs())
             {
-                if (deps->upstream[key].count({env_, o}))
+                // Create a temporary environment inside the instance
+                auto env_ = env;
+                env_.push_back(i.second);
+                for (const auto& c : i.second->sheet->cells.left)
                 {
-                    // Insert callback that calls an error
-                }
-                else
-                {
-                    // Insert callback beep boop
+                    if (c.second->type == Cell::OUTPUT)
+                    {
+
+                    }
                 }
             }
-            */
-            bindings = s7_cons(interpreter, callback, bindings);
 
-            // Push the symbol name to the bindings list
+            auto args = s7_list(interpreter, 5,
+                s7_make_c_pointer(interpreter, deps),
+                //encode_key(interpreter, {env, i.second}),
+                s7_nil(interpreter),
+                encode_key(interpreter, key),
+                check_upstream,
+                values);
+            s7_pointer thunk = s7_call(interpreter, instance_thunk_factory, args);
+
+            // Then push it to the list
+            bindings = s7_cons(interpreter, thunk, bindings);
+
+            // Prepend the symbol name to the bindings list
             bindings = s7_cons(interpreter,
                     s7_make_symbol(interpreter, i.first.c_str()),
                     bindings);
+            */
         }
 
         // Run the evaluation and get out a value

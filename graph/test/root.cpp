@@ -299,9 +299,6 @@ TEST_CASE("Root: outputs")
         REQUIRE(x->values.size() == 1);
         REQUIRE(x->values.count(env) == 1);
         REQUIRE(x->values[env].str == "0");
-
-        REQUIRE(ia->inputs.count(x));
-        REQUIRE(ia->inputs.at(x) == "0");
     }
 
     SECTION("References")

@@ -52,6 +52,7 @@ private:
     /*  Scheme function pointers */
     s7_pointer const check_upstream;
     s7_pointer const value_thunk_factory;
+    s7_pointer const instance_thunk_factory;
     s7_pointer const eval_func;
 
     s7_pointer const is_input;
