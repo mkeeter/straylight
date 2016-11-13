@@ -383,7 +383,10 @@ float App::drawSheet(const Graph::Env& env, float offset)
                  ImGuiWindowFlags_CollapseHorizontal);
 
     const bool hovered = ImGui::IsMouseHoveringRect(
-            {offset, 0}, {offset + width, float(window_height)});
+            {offset, 0}, {offset + width, float(window_height)}) ||
+        ImGui::IsPopupOpen("addSheet") ||
+        ImGui::IsPopupOpen("addInstance") ||
+        ImGui::IsPopupOpen("addCell");
 
     /*
     if (offset > 0)
@@ -471,88 +474,23 @@ float App::drawSheet(const Graph::Env& env, float offset)
 
 void App::drawAddMenu(const Graph::Env& env)
 {
-    if (ImGui::Button("Add " ICON_FA_PLUS, {-1, -1}))
-    {
-        ImGui::OpenPopup("add");
-    }
+    const auto sheet = env.back()->sheet;
 
-    if (ImGui::BeginPopup("add"))
-    {
+    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::Text(ICON_FA_PLUS);
+    ImGui::SameLine();
+    auto width = (ImGui::GetContentRegionAvailWidth() - 2*ImGui::GetStyle().WindowPadding.x)/3;
+
+    {   // Submenu to add a cell
         static char name_buf[128];
-        static char sheet_buf[128];
         bool set_focus = false;
-        const auto sheet = env.back()->sheet;
-        static Graph::Sheet* instance_target = nullptr;
-
-        // Accumulate a list of all possible sheets
-        // (recursively upwards through the document)
-        std::set<std::pair<std::string, Graph::Sheet*>> library;
-        auto p = env.back()->sheet;
-        while (p)
-        {
-            for (auto& s : p->library.left)
-            {
-                std::pair<std::string, Graph::Sheet*> key = {s.first, s.second};
-                if (!library.count(key))
-                {
-                    library.insert(key);
-                }
-            }
-            p = p->parent;
-        }
-
-        // Draw all potential sheets in the library
-        for (auto& s : library)
-        {
-            const bool can_insert = root.canInsertInstance(sheet, s.second);
-            ImGui::PushStyleColor(ImGuiCol_Text,
-                    can_insert ?
-                    ImGui::GetStyle().Colors[ImGuiCol_Text] :
-                    ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-            if (ImGui::Selectable(s.first.c_str(),
-                                  ImGui::IsPopupOpen(s.first.c_str()),
-                                  ImGuiSelectableFlags_DontClosePopups) &&
-                can_insert)
-            {
-                ImGui::OpenPopup(s.first.c_str());
-                set_focus = true;
-                instance_target = s.second;
-                strcpy(name_buf, "instance-name");
-            }
-            else if (ImGui::BeginPopupContextItem("wtf"))
-            {
-                ImGui::EndPopup();
-            }
-
-
-            ImGui::PopStyleColor(1);
-        }
-
-        if (library.size())
-        {
-            ImGui::Separator();
-        }
-
-        // Draw normal menus for adding Cells and Sheets
-        if (ImGui::Selectable("Cell", ImGui::IsPopupOpen("addCell"),
-                              ImGuiSelectableFlags_DontClosePopups))
+        if (ImGui::Button("Cell", {width, -1.0f}))
         {
             ImGui::OpenPopup("addCell");
-            set_focus = true;
             strcpy(name_buf, "cell-name");
-        }
-        else if (ImGui::Selectable("Sheet", ImGui::IsPopupOpen("addSheet"),
-                                   ImGuiSelectableFlags_DontClosePopups))
-        {
-            ImGui::OpenPopup("addSheet");
             set_focus = true;
-            strcpy(name_buf, "instance-name");
-            strcpy(sheet_buf, "Sheet name");
+
         }
-
-        bool close_parent = false;
-
-        // Submenu for adding a cell
         if (ImGui::BeginPopup("addCell"))
         {
             if (set_focus)
@@ -569,7 +507,6 @@ void App::drawAddMenu(const Graph::Env& env)
                 {
                     root.insertCell(sheet, name_buf, "(+ 1 2)");
                     ImGui::CloseCurrentPopup();
-                    close_parent = true;
                 }
             }
             else
@@ -578,8 +515,23 @@ void App::drawAddMenu(const Graph::Env& env)
             }
             ImGui::EndPopup();
         }
-        // Submenu for adding a sheet
-        else if (ImGui::BeginPopup("addSheet"))
+    }
+
+    ImGui::SameLine();
+    {   // Submenu to add a new sheet + instance
+        static char name_buf[128];
+        static char sheet_buf[128];
+        bool set_focus = false;
+
+        if (ImGui::Button("Sheet", {width, -1.0f}))
+        {
+            ImGui::OpenPopup("addSheet");
+            set_focus = true;
+            strcpy(name_buf, "instance-name");
+            strcpy(sheet_buf, "Sheet name");
+        }
+
+        if (ImGui::BeginPopup("addSheet"))
         {
             ImGui::Dummy({300, 0});
             bool ret = false;
@@ -614,15 +566,74 @@ void App::drawAddMenu(const Graph::Env& env)
                     auto s = root.createSheet(sheet, sheet_buf);
                     root.insertInstance(sheet, name_buf, s);
                     ImGui::CloseCurrentPopup();
-                    close_parent = true;
                 }
             }
             ImGui::PopItemWidth();
             ImGui::EndPopup();
         }
-        // Submenu for adding an instance
-        else
+    }   // End submenu to add an instance
+
+    ImGui::SameLine();
+    {   // Submenu to add an instance from the library
+        static char name_buf[128];
+        bool set_focus = false;
+        static Graph::Sheet* instance_target = nullptr;
+
+        if (ImGui::Button("Instance", {width, -1.0f}))
         {
+            ImGui::OpenPopup("addInstance");
+        }
+
+        if (ImGui::BeginPopup("addInstance"))
+        {
+            // Accumulate a list of all possible sheets
+            // (recursively upwards through the document)
+            std::set<std::pair<std::string, Graph::Sheet*>> library;
+            auto p = env.back()->sheet;
+            while (p)
+            {
+                for (auto& s : p->library.left)
+                {
+                    std::pair<std::string, Graph::Sheet*> key = {s.first, s.second};
+                    if (!library.count(key))
+                    {
+                        library.insert(key);
+                    }
+                }
+                p = p->parent;
+            }
+
+            // Draw all potential sheets in the library
+            for (auto& s : library)
+            {
+                const bool can_insert = root.canInsertInstance(sheet, s.second);
+                ImGui::PushStyleColor(ImGuiCol_Text,
+                        can_insert ?
+                        ImGui::GetStyle().Colors[ImGuiCol_Text] :
+                        ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                if (ImGui::Selectable(s.first.c_str(),
+                                      ImGui::IsPopupOpen(s.first.c_str()),
+                                      ImGuiSelectableFlags_DontClosePopups) &&
+                    can_insert)
+                {
+                    ImGui::OpenPopup(s.first.c_str());
+                    set_focus = true;
+                    instance_target = s.second;
+                    strcpy(name_buf, "instance-name");
+                }
+                ImGui::PopStyleColor(1);
+            }
+            if (!library.size())
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text,
+                        ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                ImGui::Selectable("No sheets available");
+                ImGui::PopStyleColor(1);
+            }
+
+            bool close_parent = false;
+
+            // Submenu for adding an instance
             for (auto& s : library)
             {
                 if (ImGui::BeginPopup(s.first.c_str()))
@@ -653,13 +664,13 @@ void App::drawAddMenu(const Graph::Env& env)
                     ImGui::EndPopup();
                 }
             }
-        }
 
-        if (close_parent)
-        {
-            ImGui::CloseCurrentPopup();
+            if (close_parent)
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
-        ImGui::EndPopup();
     }
 }
 
