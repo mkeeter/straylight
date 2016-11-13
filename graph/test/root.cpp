@@ -252,6 +252,17 @@ TEST_CASE("Root::insertInstance")
         REQUIRE(iac->parent == ia->sheet);
         REQUIRE(iabc->parent == iab->sheet);
     }
+
+    SECTION("Change detection")
+    {
+        auto x = root.insertCell(root.sheet.get(), "x", "(ia 'x)");
+        REQUIRE(x->values[{root.instance.get()}].str == "ia: unbound variable");
+
+        auto a = root.createSheet(root.sheet.get(), "a");
+        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+
+        REQUIRE(x->values[{root.instance.get()}].str == "x: missing instance lookup in ia");
+    }
 }
 
 TEST_CASE("Root: inputs")
