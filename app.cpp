@@ -370,24 +370,20 @@ float App::drawSheet(const Graph::Env& env, float offset)
     ImGui::PushID(env.back());
     ImGui::SetNextWindowPos({offset, 0});
 
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
+    int window_height;
+    glfwGetWindowSize(window, nullptr, &window_height);
     // Set window size
-    if (col_width.count(env))
-    {
-        ImGui::SetNextWindowSize({col_width.at(env), float(height)},
-                ImGuiSetCond_Always);
-    }
-    else
-    {
-        ImGui::SetNextWindowSize({300, float(height)},
-                ImGuiSetCond_Always);
-    }
+
+    float width = col_width.count(env) ? col_width.at(env) : 300.0f;
+    ImGui::SetNextWindowSize({width, float(window_height)}, ImGuiSetCond_Always);
 
     ImGui::SetNextWindowSizeConstraints({0, -1}, {FLT_MAX, -1});
     ImGui::Begin(windowName(env).c_str(),
                  env.size() == 1 ? nullptr : &stay_open,
                  ImGuiWindowFlags_CollapseHorizontal);
+
+    const bool hovered = ImGui::IsMouseHoveringRect(
+            {offset, 0}, {offset + width, float(window_height)});
 
     /*
     if (offset > 0)
@@ -402,7 +398,9 @@ float App::drawSheet(const Graph::Env& env, float offset)
     }
     */
 
-    ImGui::BeginChild("CellsSub", ImVec2(-1, ImGui::GetWindowHeight() - ImGui::GetTextLineHeightWithSpacing() - 50));
+    const float child_height = ImGui::GetWindowHeight() -
+        ImGui::GetTextLineHeightWithSpacing() - (hovered ? 50 : 15);
+    ImGui::BeginChild("CellsSub", ImVec2(-1, child_height));
 
     // Reserve keys and erased keys in a separate list here to avoid
     // glitches when we iterate over a changing map
@@ -443,7 +441,11 @@ float App::drawSheet(const Graph::Env& env, float offset)
     ImGui::EndChild();
 
     ImGui::Separator();
-    drawAddMenu(env);
+
+    if (hovered)
+    {
+        drawAddMenu(env);
+    }
 
     float output;
     if (ImGui::IsWindowCollapsed())
