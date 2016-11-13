@@ -297,6 +297,7 @@ void App::drawInstance(const Graph::Name& name, const Graph::Env& env)
         ImGui::PushID(c);
         if (c->type == Graph::Cell::INPUT)
         {
+            ImGui::AlignFirstTextHeightToWidgets();
             ImGui::Text("%s: ", instance->sheet->cells.right.at(c).c_str());
             ImGui::SameLine(max_width);
 
