@@ -219,6 +219,10 @@ Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
                 // of the cells that we found earlier underneath the instance
                 if (j.second == added)
                 {
+                    // First, mark the instance itself dirty (by name)
+                    markDirty({i, j.first});
+
+                    // Then, mark all of its children cells as dirty
                     for (auto k : changed)
                     {
                         k.first.insert(k.first.begin(), i.begin(), i.end());
