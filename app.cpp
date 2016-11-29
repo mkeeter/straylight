@@ -519,62 +519,6 @@ void App::drawAddMenu(const Graph::Env& env)
     }
 
     ImGui::SameLine();
-    {   // Submenu to add a new sheet + instance
-        static char name_buf[128];
-        static char sheet_buf[128];
-        bool set_focus = false;
-
-        if (ImGui::Button("Sheet", {width, -1.0f}))
-        {
-            ImGui::OpenPopup("addSheet");
-            set_focus = true;
-            strcpy(name_buf, "instance-name");
-            strcpy(sheet_buf, "Sheet name");
-        }
-
-        if (ImGui::BeginPopup("addSheet"))
-        {
-            ImGui::Dummy({300, 0});
-            bool ret = false;
-
-            if (set_focus)
-            {
-                ImGui::SetKeyboardFocusHere();
-            }
-            ret = ImGui::InputText("Instance name", name_buf, sizeof(name_buf),
-                    ImGuiInputTextFlags_EnterReturnsTrue);
-
-            if (ret)
-            {
-                ImGui::SetKeyboardFocusHere();
-            }
-            ret = ImGui::InputText("Sheet name", sheet_buf, sizeof(sheet_buf),
-                    ImGuiInputTextFlags_EnterReturnsTrue);
-
-            ImGui::PushItemWidth(-1);
-            if (!root.canInsert(sheet, name_buf))
-            {
-                ImGui::Text("Invalid instance name");
-            }
-            else if (!root.canCreateSheet(sheet, sheet_buf))
-            {
-                ImGui::Text("Invalid sheet name");
-            }
-            else
-            {
-                if (ImGui::Button("Create", {-1, 0}) || ret)
-                {
-                    auto s = root.createSheet(sheet, sheet_buf);
-                    root.insertInstance(sheet, name_buf, s);
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            ImGui::PopItemWidth();
-            ImGui::EndPopup();
-        }
-    }   // End submenu to add an instance
-
-    ImGui::SameLine();
     {   // Submenu to add an instance from the library
         static char name_buf[128];
         bool set_focus = false;
@@ -673,6 +617,62 @@ void App::drawAddMenu(const Graph::Env& env)
             ImGui::EndPopup();
         }
     }
+
+    ImGui::SameLine();
+    {   // Submenu to add a new sheet + instance
+        static char name_buf[128];
+        static char sheet_buf[128];
+        bool set_focus = false;
+
+        if (ImGui::Button("Sheet", {width, -1.0f}))
+        {
+            ImGui::OpenPopup("addSheet");
+            set_focus = true;
+            strcpy(name_buf, "instance-name");
+            strcpy(sheet_buf, "Sheet name");
+        }
+
+        if (ImGui::BeginPopup("addSheet"))
+        {
+            ImGui::Dummy({300, 0});
+            bool ret = false;
+
+            if (set_focus)
+            {
+                ImGui::SetKeyboardFocusHere();
+            }
+            ret = ImGui::InputText("Instance name", name_buf, sizeof(name_buf),
+                    ImGuiInputTextFlags_EnterReturnsTrue);
+
+            if (ret)
+            {
+                ImGui::SetKeyboardFocusHere();
+            }
+            ret = ImGui::InputText("Sheet name", sheet_buf, sizeof(sheet_buf),
+                    ImGuiInputTextFlags_EnterReturnsTrue);
+
+            ImGui::PushItemWidth(-1);
+            if (!root.canInsert(sheet, name_buf))
+            {
+                ImGui::Text("Invalid instance name");
+            }
+            else if (!root.canCreateSheet(sheet, sheet_buf))
+            {
+                ImGui::Text("Invalid sheet name");
+            }
+            else
+            {
+                if (ImGui::Button("Create", {-1, 0}) || ret)
+                {
+                    auto s = root.createSheet(sheet, sheet_buf);
+                    root.insertInstance(sheet, name_buf, s);
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::PopItemWidth();
+            ImGui::EndPopup();
+        }
+    }   // End submenu to add an instance
 }
 
 void App::draw()
