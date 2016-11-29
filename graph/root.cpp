@@ -117,7 +117,7 @@ Sheet* Root::createSheet(Sheet* sheet, const Name& name)
 
 bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
 {
-    return sheet->library.left.count(name) == 0;
+    return name.size() > 0 && sheet->library.left.count(name) == 0;
 }
 
 void Root::renameSheet(Sheet* sheet, const Name& orig, const Name& name)

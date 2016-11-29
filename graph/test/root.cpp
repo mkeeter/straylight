@@ -106,6 +106,7 @@ TEST_CASE("Root::canCreateSheet")
     REQUIRE(root.canCreateSheet(root.sheet.get(), "b"));
     auto s = root.createSheet(root.sheet.get(), "b");
     REQUIRE(!root.canCreateSheet(root.sheet.get(), "b"));
+    REQUIRE(!root.canCreateSheet(root.sheet.get(), ""));
     REQUIRE(root.canCreateSheet(root.sheet.get(), "a"));
 }
 
