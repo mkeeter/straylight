@@ -11,6 +11,11 @@ class Sheet
 {
 public:
     /*
+     *  On destruction, free all items
+     */
+    ~Sheet();
+
+    /*
      *  Check to see whether we can insert a cell or instance
      */
     bool canInsert(std::string name) const;
@@ -39,7 +44,7 @@ public:
      *  Get an item by index
      */
     const Item& operator[](ItemIndex i) const
-        { return items.at(i).i; }
+        { return items.at(i); }
 
     /*
      *  Get a item's name
@@ -54,19 +59,8 @@ public:
         { return order; }
 
 protected:
-    /*
-     *  RAII handle for an Item
-     *  (which usually needs manual deallocation)
-     */
-    struct ItemHandle
-    {
-        ItemHandle(Item i) : i(i) {}
-        ~ItemHandle() { i.dealloc(); }
-        Item i;
-    };
-
     /*  Master storage of all Items in the sheet  */
-    std::map<ItemIndex, ItemHandle> items;
+    std::map<ItemIndex, Item> items;
 
     /*  Map of names to item indices  */
     boost::bimap<std::string, ItemIndex> names;

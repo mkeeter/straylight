@@ -3,6 +3,14 @@
 #include "graph/cell.hpp"
 #include "graph/instance.hpp"
 
+Sheet::~Sheet()
+{
+    for (auto& i : items)
+    {
+        i.second.dealloc();
+    }
+}
+
 bool Sheet::canInsert(std::string name) const
 {
     return name.size() &&
