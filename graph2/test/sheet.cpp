@@ -33,7 +33,7 @@ TEST_CASE("Sheet::rename")
 {
     Sheet s;
     auto a = s.insertInstance("a", {0});
-    auto b = s.insertCell("a", "(+ 1 2)");
+    auto b = s.insertCell("b", "(+ 1 2)");
 
     s.rename(a, "c");
     s.rename(b, "d");

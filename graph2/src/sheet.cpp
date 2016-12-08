@@ -24,6 +24,7 @@ ItemIndex Sheet::nextIndex() const
 
 ItemIndex Sheet::insertCell(std::string name, std::string expr)
 {
+    assert(canInsert(name));
     ItemIndex out = nextIndex();
 
     items.insert({out, Item(expr)});
@@ -35,6 +36,7 @@ ItemIndex Sheet::insertCell(std::string name, std::string expr)
 
 ItemIndex Sheet::insertInstance(std::string name, SheetIndex sheet)
 {
+    assert(canInsert(name));
     ItemIndex out = nextIndex();
 
     items.insert({out, Item(sheet)});
