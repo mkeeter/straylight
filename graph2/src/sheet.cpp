@@ -17,10 +17,14 @@ bool Sheet::canInsert(std::string name) const
            names.left.find(name) == names.left.end();
 }
 
+ItemIndex Sheet::nextIndex() const
+{
+    return {items.size() ? items.rbegin()->first.i + 1 : 0};
+}
+
 ItemIndex Sheet::insertCell(std::string name, std::string expr)
 {
-    unsigned next = items.rbegin()->first.i + 1;
-    ItemIndex out = {next};
+    ItemIndex out = nextIndex();
 
     items.insert({out, Item(expr)});
     names.left.insert({name, out});
@@ -31,8 +35,7 @@ ItemIndex Sheet::insertCell(std::string name, std::string expr)
 
 ItemIndex Sheet::insertInstance(std::string name, SheetIndex sheet)
 {
-    unsigned next = items.rbegin()->first.i + 1;
-    ItemIndex out = {next};
+    ItemIndex out = nextIndex();
 
     items.insert({out, Item(sheet)});
     names.left.insert({name, out});

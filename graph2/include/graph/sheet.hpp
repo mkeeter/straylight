@@ -59,6 +59,11 @@ public:
         { return order; }
 
 protected:
+    /*
+     *  Returns the next item index
+     */
+    ItemIndex nextIndex() const;
+
     /*  Master storage of all Items in the sheet  */
     std::map<ItemIndex, Item> items;
 
