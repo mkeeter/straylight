@@ -38,7 +38,7 @@ public:
     /*
      *  Get a sheet by index
      */
-    const Sheet& operator[](SheetIndex i) const
+    const Sheet& at(SheetIndex i) const
         { return sheets.at(i); }
 
     /*

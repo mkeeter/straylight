@@ -43,8 +43,27 @@ public:
     /*
      *  Get an item by index
      */
-    const Item& operator[](ItemIndex i) const
+    const Item& at(ItemIndex i) const
         { return items.at(i); }
+
+    /*
+     *  Get an item by index
+     */
+    const Item& at(const std::string& name) const
+        { return items.at(indexOf(name)); }
+
+    /*
+     *  Get an index by name
+     *  Fails if no such name exists
+     */
+    ItemIndex indexOf(const std::string& name) const
+        { return names.left.at(name); }
+
+    /*
+     *  Checks whether an item exists, by name
+     */
+    bool hasItem(const std::string& name) const
+        { return names.left.find(name) != names.left.end(); }
 
     /*
      *  Get a item's name

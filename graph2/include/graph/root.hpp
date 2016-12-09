@@ -2,16 +2,39 @@
 
 #include "graph/library.hpp"
 #include "graph/interpreter.hpp"
+#include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
-
-struct Sheet;
-struct Instance;
-struct CellKey;
+#include "graph/keys.hpp"
 
 class Root
 {
+public:
+    Root() : deps(*this) { /* Nothing to do here */ }
+
+    /*
+     *  Returns true if the given name key points to a cell
+     */
+    bool isCell(const NameKey& k) const;
+
+    /*
+     *  Looks up a name key and converts it to a cell key
+     *  Requires that isCell(k) be true
+     */
+    CellKey toCellKey(const NameKey& k) const;
+
+    /*
+     *  Converts a cell key into a name key
+     *  Requires that the cell key be valid
+     */
+    NameKey toNameKey(const CellKey& k) const;
 
 protected:
+    /*
+     *  Looks up an instance by index
+     *  Requires that all indices points to an Instance
+     */
+    const Instance* getInstance(const std::list<ItemIndex>& i) const;
+
     /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)

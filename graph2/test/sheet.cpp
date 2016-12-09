@@ -23,7 +23,7 @@ TEST_CASE("Sheet::insertCell")
 TEST_CASE("Sheet::insertInstance")
 {
     Sheet s;
-    auto a = s.insertInstance("a", {0});
+    auto a = s.insertInstance("a", 0);
 
     REQUIRE(a.i == 0);
     REQUIRE(!s.canInsert("a"));
@@ -32,7 +32,7 @@ TEST_CASE("Sheet::insertInstance")
 TEST_CASE("Sheet::rename")
 {
     Sheet s;
-    auto a = s.insertInstance("a", {0});
+    auto a = s.insertInstance("a", 0);
     auto b = s.insertCell("b", "(+ 1 2)");
 
     s.rename(a, "c");
@@ -40,4 +40,24 @@ TEST_CASE("Sheet::rename")
 
     REQUIRE(!s.canInsert("c"));
     REQUIRE(!s.canInsert("d"));
+}
+
+TEST_CASE("Sheet::at(ItemIndex)")
+{
+    // TODO
+}
+
+TEST_CASE("Sheet::at(std::string)")
+{
+    // TODO
+}
+
+TEST_CASE("Sheet::hasItem")
+{
+    // TODO
+}
+
+TEST_CASE("Sheet::nameOf")
+{
+    // TODO
 }
