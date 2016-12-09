@@ -44,20 +44,65 @@ TEST_CASE("Sheet::rename")
 
 TEST_CASE("Sheet::at(ItemIndex)")
 {
-    // TODO
+    Sheet s;
+    auto a = s.insertInstance("a", 0);
+    auto b = s.insertCell("b", "(+ 1 2)");
+
+    s.at(a);
+    s.at(b);
+    REQUIRE(true); // Didn't crash!
+
+    bool threw = false;
+    try
+    {
+        auto c = s.at(2);
+    }
+    catch (const std::out_of_range&)
+    {
+        threw = true;
+    }
+    REQUIRE(threw);
 }
 
 TEST_CASE("Sheet::at(std::string)")
 {
-    // TODO
+    Sheet s;
+    auto a = s.insertInstance("a", 0);
+    auto b = s.insertCell("b", "(+ 1 2)");
+
+    s.at("a");
+    s.at("b");
+    REQUIRE(true); // Didn't crash!
+
+    bool threw = false;
+    try
+    {
+        auto c = s.at("c");
+    }
+    catch (const std::out_of_range&)
+    {
+        threw = true;
+    }
+    REQUIRE(threw);
 }
 
 TEST_CASE("Sheet::hasItem")
 {
-    // TODO
+    Sheet s;
+    auto a = s.insertInstance("a", 0);
+    auto b = s.insertCell("b", "(+ 1 2)");
+
+    REQUIRE(s.hasItem("a"));
+    REQUIRE(s.hasItem("b"));
+    REQUIRE(!s.hasItem("c"));
 }
 
 TEST_CASE("Sheet::nameOf")
 {
-    // TODO
+    Sheet s;
+    auto a = s.insertInstance("a", 0);
+    auto b = s.insertCell("b", "(+ 1 2)");
+
+    REQUIRE(s.nameOf(a) == "a");
+    REQUIRE(s.nameOf(b) == "b");
 }

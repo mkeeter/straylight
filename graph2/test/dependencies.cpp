@@ -8,10 +8,7 @@ TEST_CASE("Dependencies::insert")
     Root r;
     Dependencies deps(r);
 
-    REQUIRE(!deps.insert({{0}, 0}, {{0}, "a"}));
-    REQUIRE(!deps.insert({{1}, 0}, {{0}, "a"}));
-    REQUIRE(!deps.insert({{1}, 0}, {{1}, "a"}));
+    REQUIRE(!deps.insert({{}, 0}, {{}, "a"}));
 
-    // TODO: test this more once we can create circular loops
-    // in Root
+    // TODO: test this more once we can create circular loops in Root
 }

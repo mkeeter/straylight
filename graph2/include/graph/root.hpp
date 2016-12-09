@@ -9,7 +9,8 @@
 class Root
 {
 public:
-    Root() : deps(*this) { /* Nothing to do here */ }
+    Root() : instance(new Instance(0)), deps(*this)
+        { /* Nothing to do here */ }
 
     /*
      *  Returns true if the given name key points to a cell

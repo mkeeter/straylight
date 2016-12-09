@@ -12,9 +12,9 @@ TEST_CASE("Library::canInsert")
         REQUIRE(lib.canInsert("b", 0));
         REQUIRE(lib.canInsert("c", 0));
 
-        REQUIRE(lib.canInsert("", 0));
-        REQUIRE(lib.canInsert("a", 1));
-        REQUIRE(lib.canInsert("", 1));
+        REQUIRE(!lib.canInsert("", 0));
+        REQUIRE(!lib.canInsert("a", 1));
+        REQUIRE(!lib.canInsert("", 1));
     }
 
     SECTION("With other sheets")
