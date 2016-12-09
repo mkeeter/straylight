@@ -8,19 +8,19 @@ TEST_CASE("Library::canInsert")
 
     SECTION("Into empty library")
     {
-        REQUIRE(lib.canInsert({{0}, "a"}));
-        REQUIRE(lib.canInsert({{0}, "b"}));
-        REQUIRE(lib.canInsert({{0}, "c"}));
+        REQUIRE(lib.canInsert("a", {0}));
+        REQUIRE(lib.canInsert("b", {0}));
+        REQUIRE(lib.canInsert("c", {0}));
 
-        REQUIRE(!lib.canInsert({{0}, ""}));
-        REQUIRE(!lib.canInsert({{1}, "a"}));
-        REQUIRE(!lib.canInsert({{1}, ""}));
+        REQUIRE(lib.canInsert("", {0}));
+        REQUIRE(lib.canInsert("a", {1}));
+        REQUIRE(lib.canInsert("", {1}));
     }
 
     SECTION("With other sheets")
     {
         lib.insert("a", {0});
-        REQUIRE(!lib.canInsert({{0}, "a"}));
+        REQUIRE(!lib.canInsert("a", {0}));
     }
 }
 
@@ -43,10 +43,10 @@ TEST_CASE("Library::erase")
     Library lib;
 
     auto a = lib.insert("a", {0});
-    REQUIRE(!lib.canInsert({{0}, "a"}));
+    REQUIRE(!lib.canInsert("a", {0}));
 
     lib.erase(a);
-    REQUIRE(lib.canInsert({{0}, "a"}));
+    REQUIRE(lib.canInsert("a", {0}));
 }
 
 TEST_CASE("Library::nameOf")
@@ -73,7 +73,7 @@ TEST_CASE("Library::rename")
     lib.rename(a, "b");
     REQUIRE(lib.nameOf(a) == "b");
 
-    REQUIRE(!lib.canInsert({{0}, "b"}));
+    REQUIRE(!lib.canInsert("b", {0}));
 }
 
 TEST_CASE("Library::operator[]")

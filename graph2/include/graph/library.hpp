@@ -18,17 +18,17 @@ public:
     /*
      *  Check to see whether we can insert the given sheet
      */
-    bool canInsert(NameKey key) const;
+    bool canInsert(const std::string& name, SheetIndex parent={0}) const;
 
     /*
      *  Inserts the given sheet, returning its index
      */
-    SheetIndex insert(std::string name, SheetIndex parent={0});
+    SheetIndex insert(const std::string& name, SheetIndex parent={0});
 
     /*
      *  Renames a particular sheet
      */
-    void rename(SheetIndex sheet, std::string new_name);
+    void rename(SheetIndex sheet, const std::string& new_name);
 
     /*
      *  Erases the given sheet
@@ -45,7 +45,7 @@ public:
      *  Get a sheet's name
      */
     const std::string& nameOf(SheetIndex i) const
-        { return names.right.at(i).second; }
+        { return names.right.at(i).first; }
 
     /*
      *  Iterate over sheets in alphabetical order for a given parent
@@ -57,5 +57,5 @@ protected:
     std::map<SheetIndex, Sheet> sheets;
 
     /*  This maps name + parent pairs to sheet indices */
-    boost::bimap<NameKey, SheetIndex> names;
+    boost::bimap<std::pair<std::string, SheetIndex>, SheetIndex> names;
 };

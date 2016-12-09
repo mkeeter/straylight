@@ -5,18 +5,18 @@ Library::Library()
     sheets.insert({{0}, {}});
 }
 
-bool Library::canInsert(NameKey key) const
+bool Library::canInsert(const std::string& name, SheetIndex parent) const
 {
     // Require that the sheet exists and that the name isn't taken
-    return key.second.size() &&
-           sheets.find(key.first) != sheets.end() &&
-           names.left.find(key) == names.left.end();
+    return name.size() &&
+           sheets.find(parent) != sheets.end() &&
+           names.left.find(std::make_pair(name, parent)) == names.left.end();
 }
 
-SheetIndex Library::insert(std::string name, SheetIndex parent)
+SheetIndex Library::insert(const std::string& name, SheetIndex parent)
 {
-    NameKey nk = {parent, name};
-    assert(canInsert(nk));
+    decltype(names.left)::key_type nk = {name, parent};
+    assert(canInsert(name, parent));
 
     unsigned next = sheets.rbegin()->first.i + 1;
     SheetIndex out = {next};
@@ -27,14 +27,14 @@ SheetIndex Library::insert(std::string name, SheetIndex parent)
     return out;
 }
 
-void Library::rename(SheetIndex s, std::string new_name)
+void Library::rename(SheetIndex s, const std::string& new_name)
 {
     auto prev = names.right.at(s);
-    auto parent = prev.first;
-    assert(canInsert({parent, new_name}));
+    auto parent = prev.second;
+    assert(canInsert(new_name, parent));
 
     names.left.erase(prev);
-    names.insert({{parent, new_name}, s});
+    names.insert({{new_name, parent}, s});
 }
 
 void Library::erase(SheetIndex s)
@@ -51,10 +51,10 @@ void Library::erase(SheetIndex s)
 
 std::list<SheetIndex> Library::iterSheets(SheetIndex parent) const
 {
-    auto itr = names.left.upper_bound(std::make_pair(parent, ""));
+    auto itr = names.left.upper_bound(std::make_pair("", parent));
 
     std::list<SheetIndex> out;
-    while (itr != names.left.end() && itr->first.first == parent)
+    while (itr != names.left.end() && itr->first.second == parent)
     {
         out.push_back((itr++)->second);
     }

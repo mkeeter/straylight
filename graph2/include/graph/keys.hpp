@@ -1,9 +1,17 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 #include "graph/index.hpp"
+#include "graph/env.hpp"
 
-/*  These keys are only valid for a particular Root instance */
-typedef std::pair<SheetIndex, std::string> NameKey;
-typedef std::pair<SheetIndex, ItemIndex> CellKey;
+/*
+ *  Refers to a particular cell in the graph
+ *
+ *  Though a cell only exists once the library, here, we care about unique
+ *  instances of the cell, so we use the environment (which is a list of
+ *  ItemIndex) to localize the cell.
+ */
+typedef std::pair<Env, std::string> NameKey;
+typedef std::pair<Env, ItemIndex> CellKey;
