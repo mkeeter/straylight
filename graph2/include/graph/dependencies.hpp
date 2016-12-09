@@ -24,9 +24,14 @@ public:
      */
     void clear(const CellKey& looker);
 
+    /*
+     *  Clear all references to the given sheet and item
+     */
+    void clearAll(const SheetIndex& sheet, const ItemIndex& item);
+
 protected:
     /*
-     *  Pointer to parent root object, which we'll query for cell data
+     *  Reference to parent root object, which we'll query for cell data
      */
     const Root& root;
 

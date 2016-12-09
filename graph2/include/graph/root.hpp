@@ -29,6 +29,11 @@ public:
      */
     NameKey toNameKey(const CellKey& k) const;
 
+    /*
+     *  Returns every environment in which the given sheet is instanced
+     */
+    std::list<Env> envsOf(const SheetIndex& i) const;
+
 protected:
     /*
      *  Looks up an instance by index

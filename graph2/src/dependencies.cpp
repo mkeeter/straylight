@@ -28,3 +28,12 @@ void Dependencies::clear(const CellKey& looker)
     forward[looker].clear();
     upstream[looker] = {looker};
 }
+
+void Dependencies::clearAll(const SheetIndex& sheet, const ItemIndex& item)
+{
+    auto envs = root.envsOf(sheet);
+    for (auto env : envs)
+    {
+        clear({env, item});
+    }
+}

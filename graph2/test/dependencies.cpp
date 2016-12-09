@@ -12,3 +12,13 @@ TEST_CASE("Dependencies::insert")
 
     // TODO: test this more once we can create circular loops in Root
 }
+
+TEST_CASE("Dependencies::clear")
+{
+    // TODO
+}
+
+TEST_CASE("Dependencies::clearAll")
+{
+    // TODO
+}
