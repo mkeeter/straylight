@@ -45,7 +45,7 @@ public:
      *  Get a sheet's name
      */
     const std::string& nameOf(SheetIndex i) const
-        { return names.right.at(i).first; }
+        { return names.right.at(i).second; }
 
     /*
      *  Iterate over sheets in alphabetical order for a given parent
@@ -56,6 +56,8 @@ protected:
     /*  Master storage for all sheets.  Indices are unique.  */
     std::map<SheetIndex, Sheet> sheets;
 
-    /*  This maps name + parent pairs to sheet indices */
-    boost::bimap<std::pair<std::string, SheetIndex>, SheetIndex> names;
+    /*  This maps name + parent pairs to sheet indices
+     *  Sorting of the pairs means that sheets with the same parent are
+     *  stored together in order */
+    boost::bimap<std::pair<SheetIndex, std::string>, SheetIndex> names;
 };
