@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include "graph/interpreter.hpp"
+#include "graph/ptr.hpp"
 
 struct Value
 {
-    Interpreter::ValueType value=nullptr;
+    ValuePtr value=nullptr;
     std::string str="";
     bool valid=false;
 };
