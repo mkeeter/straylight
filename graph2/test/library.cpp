@@ -95,7 +95,7 @@ TEST_CASE("Library::operator[]")
     REQUIRE(threw);
 }
 
-TEST_CASE("Library::iterSheets")
+TEST_CASE("Library::childrenOf")
 {
     Library lib;
 
@@ -106,7 +106,7 @@ TEST_CASE("Library::iterSheets")
 
     SECTION("Following alphabetical order")
     {
-        auto abc = lib.iterSheets(0);
+        auto abc = lib.childrenOf(0);
         REQUIRE(abc.size() == 3);
         REQUIRE(abc.front() == a);
         abc.pop_front();
@@ -117,7 +117,7 @@ TEST_CASE("Library::iterSheets")
 
     SECTION("Inside nested sheet")
     {
-        auto d_ = lib.iterSheets(1);
+        auto d_ = lib.childrenOf(1);
         REQUIRE(d_.size() == 1);
         REQUIRE(d_.front() == d);
     }
@@ -126,7 +126,7 @@ TEST_CASE("Library::iterSheets")
     {
         lib.rename(a, "e");
 
-        auto bce = lib.iterSheets(0);
+        auto bce = lib.childrenOf(0);
         REQUIRE(bce.size() == 3);
         REQUIRE(bce.front() == b);
         bce.pop_front();

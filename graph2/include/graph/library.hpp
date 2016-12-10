@@ -6,7 +6,9 @@
 #include "keys.hpp"
 #include "sheet.hpp"
 
-class Library
+#include "keynamestore.hpp"
+
+class Library : public KeyNameStore<Sheet, SheetIndex, SheetIndex>
 {
 public:
     /*
@@ -16,48 +18,7 @@ public:
     Library();
 
     /*
-     *  Check to see whether we can insert the given sheet
-     */
-    bool canInsert(const std::string& name, SheetIndex parent={0}) const;
-
-    /*
      *  Inserts the given sheet, returning its index
      */
     SheetIndex insert(const std::string& name, SheetIndex parent={0});
-
-    /*
-     *  Renames a particular sheet
-     */
-    void rename(SheetIndex sheet, const std::string& new_name);
-
-    /*
-     *  Erases the given sheet
-     */
-    void erase(SheetIndex s);
-
-    /*
-     *  Get a sheet by index
-     */
-    const Sheet& at(SheetIndex i) const
-        { return sheets.at(i); }
-
-    /*
-     *  Get a sheet's name
-     */
-    const std::string& nameOf(SheetIndex i) const
-        { return names.right.at(i).second; }
-
-    /*
-     *  Iterate over sheets in alphabetical order for a given parent
-     */
-    std::list<SheetIndex> iterSheets(SheetIndex parent) const;
-
-protected:
-    /*  Master storage for all sheets.  Indices are unique.  */
-    std::map<SheetIndex, Sheet> sheets;
-
-    /*  This maps name + parent pairs to sheet indices
-     *  Sorting of the pairs means that sheets with the same parent are
-     *  stored together in order */
-    boost::bimap<std::pair<SheetIndex, std::string>, SheetIndex> names;
 };
