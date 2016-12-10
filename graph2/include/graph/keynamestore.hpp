@@ -10,27 +10,25 @@ public:
     /*
      *  Check to see whether we can insert the given item's name
      */
-    bool canInsert(const std::string& name, ParentIndex parent={0}) const
+    bool canInsert(const std::string& name, ParentIndex parent) const
     {
-        // Require that the sheet exists and that the name isn't taken
+        // Require that the name is valid and not taken
         return name.size() &&
-               storage.find(parent) != storage.end() &&
                names.left.find(std::make_pair(parent, name)) == names.left.end();
     }
 
     /*
      *  Store an item in the system
      */
-    StoredIndex insert(const std::string& name, Stored s,
-                       ParentIndex parent={0})
+    StoredIndex insert(const std::string& name, Stored s, ParentIndex parent)
     {
         assert(canInsert(name, parent));
 
-        auto name_key = std::make_pair(parent, name);
-        StoredIndex next = {storage.rbegin()->first.i + 1};
+        StoredIndex next = {storage.size() ? storage.rbegin()->first.i + 1
+                                           : 0};
 
         storage.insert({next, s});
-        names.left.insert({name_key, next});
+        names.left.insert({std::make_pair(parent, name), next});
 
         return next;
     }
@@ -67,6 +65,25 @@ public:
      */
     const Stored& at(StoredIndex i) const
         { return storage.at(i); }
+
+    /*
+     *  Get an item by name and parent
+     */
+    const Stored& at(const std::string& name, const ParentIndex& p) const
+        { return storage.at(indexOf(name, p)); }
+
+    /*
+     *  Get an index by name
+     *  Fails if no such name exists
+     */
+    const StoredIndex& indexOf(const std::string& name, const ParentIndex& p) const
+        { return names.left.at(std::make_pair(p, name)); }
+
+    /*
+     *  Checks whether an item exists, by name
+     */
+    bool hasItem(const std::string& name, const ParentIndex& p) const
+        { return names.left.find(std::make_pair(p, name)) != names.left.end(); }
 
     /*
      *  Get a item's name
