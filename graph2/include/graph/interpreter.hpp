@@ -12,7 +12,7 @@ class Root;
 class Interpreter
 {
 public:
-    Interpreter();
+    Interpreter(const Root& parent);
     ~Interpreter();
 
     /*
@@ -36,6 +36,9 @@ private:
      */
     bool isInput(const std::string& expr) const;
     bool isOutput(const std::string& expr) const;
+
+    /*  Reference to graph root  */
+    const Root& root;
 
     /*  This is the main interpreter process  */
     s7_scheme* const interpreter;

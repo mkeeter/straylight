@@ -1,10 +1,12 @@
 #include "catch/catch.hpp"
 
 #include "graph/interpreter.hpp"
+#include "graph/root.hpp"
 
 TEST_CASE("Interpreter::cellType")
 {
-    auto interp = Interpreter();
+    Root r;
+    auto interp = Interpreter(r);
 
     REQUIRE(interp.cellType("(input 12)") == Cell::INPUT);
     REQUIRE(interp.cellType("(input (+ 1 2))") == Cell::INPUT);
@@ -17,9 +19,9 @@ TEST_CASE("Interpreter::cellType")
 
 TEST_CASE("Interpreter::defaultExpr")
 {
-    auto interp = Interpreter();
+    Root r;
+    auto interp = Interpreter(r);
 
     REQUIRE(interp.defaultExpr("(input 12)") == "12");
     REQUIRE(interp.defaultExpr("(input (+ 1 2))") == "(+ 1 2)");
 }
-

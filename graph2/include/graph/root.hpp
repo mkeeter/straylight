@@ -9,7 +9,7 @@
 class Root
 {
 public:
-    Root() : instance(new Instance(0)), deps(*this)
+    Root() : instance(new Instance(0)), interpreter(*this), deps(*this)
         { /* Nothing to do here */ }
 
     /*

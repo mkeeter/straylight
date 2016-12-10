@@ -4,8 +4,8 @@
 
 #include "graph/interpreter.hpp"
 
-Interpreter::Interpreter()
-    : interpreter(s7_init()),
+Interpreter::Interpreter(const Root& parent)
+    : root(parent), interpreter(s7_init()),
       is_input(s7_eval_c_string(interpreter, R"(
         (lambda (str)
           (catch #t
