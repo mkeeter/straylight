@@ -35,12 +35,14 @@ public:
     /*
      *  Looks up an item by index
      */
-    const Item& getItem(const ItemIndex& item) const;
+    const Item& getItem(const ItemIndex& item) const
+        { return tree.at(item); }
 
     /*
      *  Look up a sheet by index
      */
-    const Sheet& getSheet(const SheetIndex& sheet) const;
+    const Sheet& getSheet(const SheetIndex& sheet) const
+        { return lib.at(sheet); }
 
 protected:
     /*

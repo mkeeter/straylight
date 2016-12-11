@@ -8,6 +8,12 @@ CellKey Root::toCellKey(const NameKey& k) const
     return {k.first, sheet.indexOf(k.second)};
 }
 
+NameKey Root::toNameKey(const CellKey& k) const
+{
+    auto sheet = getSheet(getItem(k.first.back()).instance()->sheet);
+    return {k.first, sheet.nameOf(k.second)};
+}
+
 std::list<Env> Root::envsOf(const SheetIndex& s) const
 {
     std::list<std::pair<Env, SheetIndex>> todo;
