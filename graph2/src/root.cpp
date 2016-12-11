@@ -75,5 +75,11 @@ void Root::setExpr(const ItemIndex& i, const std::string& expr)
 
 void Root::setValue(const CellKey& cell, const Value& v)
 {
-    getMutableItem(cell.second).cell()->values.insert({cell.first, v});
+    auto c = getMutableItem(cell.second).cell();
+    if (c->values.count(cell.first))
+    {
+        interpreter.release(c->values.at(cell.first).value);
+        c->values.erase(c->values.find(cell.first));
+    }
+    c->values.insert({cell.first, v});
 }

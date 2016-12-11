@@ -49,16 +49,15 @@ TEST_CASE("Interpreter::eval")
     SECTION("Changing value")
     {
         r.setExpr(cell, "12");
-        interp.eval(key);
-
-        r.setExpr(cell, "13");
+        r.setValue(key, interp.eval(key));
 
         // On the first evaluation, the value changes
+        r.setExpr(cell, "13");
         auto v = interp.eval(key);
         REQUIRE(v.value != nullptr);
+        r.setValue(key, v);
 
         // On the second evaluation, the value stays the same
-        r.setValue(key, v);
         REQUIRE(interp.eval(key).value == nullptr);
     }
 
@@ -66,9 +65,9 @@ TEST_CASE("Interpreter::eval")
     {
         r.setExpr(cell, "omg"); // invalid script
         r.setValue(key, interp.eval(key));
-        r.setExpr(cell, "wtf"); // also invalid script
 
         // On the first evaluation, the value changes
+        r.setExpr(cell, "wtf"); // also invalid script
         auto v = interp.eval(key);
         REQUIRE(v.value != nullptr);
         r.setValue(key, v);
