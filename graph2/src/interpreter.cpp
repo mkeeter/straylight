@@ -276,6 +276,11 @@ Value Interpreter::eval(const CellKey& key)
     }
 }
 
+void Interpreter::release(ValuePtr v)
+{
+    s7_gc_unprotect(interpreter, v);
+}
+
 s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
                                const CellKey& looker)
 {
