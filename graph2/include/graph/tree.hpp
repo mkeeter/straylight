@@ -8,6 +8,12 @@ class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
 public:
     /*
+     *  On creation, insert item 0, which is an instance pointing to sheet 0
+     *  with no parent and no name
+     */
+    Tree();
+
+    /*
      *  On destruction, free all items
      */
     ~Tree();

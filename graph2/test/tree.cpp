@@ -16,7 +16,7 @@ TEST_CASE("Tree::insertCell")
     Tree s;
     auto a = s.insertCell("a", "(+ 1 2)", 0);
 
-    REQUIRE(a.i == 0);
+    REQUIRE(a.i == 1);
     REQUIRE(!s.canInsert("a", 0));
 }
 
@@ -25,7 +25,7 @@ TEST_CASE("Tree::insertInstance")
     Tree s;
     auto a = s.insertInstance("a", 0, 0);
 
-    REQUIRE(a.i == 0);
+    REQUIRE(a.i == 1);
     REQUIRE(!s.canInsert("a", 0));
 }
 
@@ -55,7 +55,7 @@ TEST_CASE("Tree::at(ItemIndex)")
     bool threw = false;
     try
     {
-        auto c = s.at(3);
+        auto c = s.at(99);
     }
     catch (const std::out_of_range&)
     {

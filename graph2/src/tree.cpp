@@ -1,5 +1,11 @@
 #include "graph/tree.hpp"
 
+Tree::Tree()
+{
+    SheetIndex default_sheet(0);
+    storage.insert({0, default_sheet});
+}
+
 Tree::~Tree()
 {
     for (auto& i : storage)
