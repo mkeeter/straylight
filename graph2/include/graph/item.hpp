@@ -15,7 +15,9 @@ public:
     void dealloc();
 
     const Instance* instance() const;
+    Instance* instance();
     const Cell* cell() const;
+    Cell* cell();
 
     enum Type {ITEM_CELL, ITEM_INSTANCE};
 private:

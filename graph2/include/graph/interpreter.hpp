@@ -6,13 +6,13 @@
 struct s7_cell;
 struct s7_scheme;
 
-class Dependencies;
 class Root;
+class Dependencies;
 
 class Interpreter
 {
 public:
-    Interpreter(const Root& parent);
+    Interpreter(const Root& parent, Dependencies* deps);
     ~Interpreter();
 
     /*
@@ -34,7 +34,7 @@ public:
      *  Evaluates a in the given environment
      *  If the result is unchanged, returns a Value with value = nullptr
      */
-    Value eval(const CellKey& key, Dependencies* deps);
+    Value eval(const CellKey& key);
 
     /*
      *  Releases the given value's pointer
@@ -63,10 +63,11 @@ private:
      *  (for an instance)
      */
     s7_cell* getThunk(const Env& env, const ItemIndex& item,
-                      const CellKey& caller, Dependencies* deps);
+                      const CellKey& caller);
 
     /*  Reference to graph root  */
     const Root& root;
+    Dependencies* deps;
 
     /*  This is the main interpreter process  */
     s7_scheme* const interpreter;

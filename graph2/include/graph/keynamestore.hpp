@@ -61,9 +61,11 @@ public:
     }
 
     /*
-     *  Get an item by index
+     *  Get an item by index (const and non-const versions)
      */
     const Stored& at(StoredIndex i) const
+        { return storage.at(i); }
+    Stored& at(StoredIndex i)
         { return storage.at(i); }
 
     /*

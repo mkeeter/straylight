@@ -24,7 +24,25 @@ const Instance* Item::instance() const
     }
 }
 
+Instance* Item::instance()
+{
+    switch (type)
+    {
+        case ITEM_CELL: return nullptr;
+        case ITEM_INSTANCE: return item.instance;
+    }
+}
+
 const Cell* Item::cell() const
+{
+    switch (type)
+    {
+        case ITEM_CELL: return item.cell;
+        case ITEM_INSTANCE: return nullptr;
+    }
+}
+
+Cell* Item::cell()
 {
     switch (type)
     {

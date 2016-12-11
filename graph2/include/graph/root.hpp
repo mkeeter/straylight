@@ -12,7 +12,7 @@
 class Root
 {
 public:
-    Root() : instance(new Instance(0)), interpreter(*this), deps(*this)
+    Root() : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
         { /* Nothing to do here */ }
 
     /*
@@ -44,7 +44,17 @@ public:
     const Sheet& getSheet(const SheetIndex& sheet) const
         { return lib.at(sheet); }
 
-protected:
+    /*
+     *  Insert a new cell into the graph, re-evaluating as necessary
+     */
+    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
+                         const std::string& expr="");
+
+    /*
+     *  Changes a cell's expression, re-evaluating as necessary
+     */
+    void setExpr(const ItemIndex& cell, const std::string& expr);
+
     /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)
@@ -64,13 +74,18 @@ protected:
     };
     Lock_ Lock() { return Lock_(this); }
 
-    ////////////////////////////////////////////////////////////////////////////
-
+protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
      *  (if frozen is true, then this is a no-op)
      */
-    void sync();
+    void sync() { /* TODO */ }
+
+    /*
+     *  Looks up an item by index (non-const version)
+     */
+    Item& getMutableItem(const ItemIndex& item)
+        { return tree.at(item); }
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -83,11 +98,11 @@ protected:
      *  (though the dirty list is still populated)  */
     bool locked=false;
 
-    /*  This is our embedded Scheme interpreter  */
-    Interpreter interpreter;
-
     /*  struct that stores lookups in both directions  */
     Dependencies deps;
+
+    /*  This is our embedded Scheme interpreter  */
+    Interpreter interpreter;
 
     /*  List of keys that need re-evaluation  */
     std::list<CellKey> dirty;

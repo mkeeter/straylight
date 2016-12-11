@@ -55,3 +55,20 @@ std::list<Env> Root::envsOf(const SheetIndex& s) const
 
     return found;
 }
+
+ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
+                           const std::string& expr)
+{
+    auto cell = tree.insertCell(name, expr, sheet);
+
+    // TODO: Push dirty things here
+
+    return cell;
+}
+
+void Root::setExpr(const ItemIndex& i, const std::string& expr)
+{
+    getMutableItem(i).cell()->expr = expr;
+    // TODO: Set cell type
+    // TODO: Mark dirty items and sync
+}

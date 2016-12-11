@@ -11,8 +11,8 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Interpreter::Interpreter(const Root& parent)
-    : root(parent), interpreter(s7_init()),
+Interpreter::Interpreter(const Root& parent, Dependencies* deps)
+    : root(parent), deps(deps), interpreter(s7_init()),
       is_input(s7_eval_c_string(interpreter, R"(
         (lambda (str)
           (catch #t
@@ -167,7 +167,7 @@ bool Interpreter::nameValid(const std::string& str) const
                     s7_make_string(interpreter, str.c_str()))));
 }
 
-Value Interpreter::eval(const CellKey& key, Dependencies* deps)
+Value Interpreter::eval(const CellKey& key)
 {
     deps->clear(key);
 
@@ -205,7 +205,7 @@ Value Interpreter::eval(const CellKey& key, Dependencies* deps)
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(interpreter,
                     s7_make_symbol(interpreter, sheet.nameOf(i).c_str()),
-                    s7_cons(interpreter, getThunk(env, i, key, deps),
+                    s7_cons(interpreter, getThunk(env, i, key),
                     bindings));
         }
 
@@ -277,7 +277,7 @@ Value Interpreter::eval(const CellKey& key, Dependencies* deps)
 }
 
 s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
-                               const CellKey& looker, Dependencies* deps)
+                               const CellKey& looker)
 {
     const auto& item = root.getItem(index);
     if (auto cell = item.cell())
@@ -313,7 +313,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
                         auto pair = s7_cons(interpreter,
                                 s7_make_symbol(
                                     interpreter, sheet.nameOf(c).c_str()),
-                                getThunk(env_, c, looker, deps));
+                                getThunk(env_, c, looker));
                         values = s7_cons(interpreter, pair, values);
                     }
                 }
