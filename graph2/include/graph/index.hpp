@@ -5,6 +5,7 @@
 template <class T>
 struct Index
 {
+    Index() : i(-1) { /* Default constructor */ }
     Index(unsigned i) : i(i) { /* Nothing to do here */ }
     bool operator<(const Index<T>& other) const {
         return i < other.i;

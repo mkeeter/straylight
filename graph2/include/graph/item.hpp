@@ -17,9 +17,9 @@ public:
     const Instance* instance() const;
     const Cell* cell() const;
 
-    enum ItemType {ITEM_CELL, ITEM_INSTANCE};
+    enum Type {ITEM_CELL, ITEM_INSTANCE};
 private:
-    const ItemType type;
+    const Type type;
     union {
         Cell* cell;
         Instance* instance;

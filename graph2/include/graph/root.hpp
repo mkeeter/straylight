@@ -1,21 +1,19 @@
 #pragma once
 
 #include "graph/library.hpp"
+#include "graph/cell.hpp"
+#include "graph/item.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
 #include "graph/keys.hpp"
+#include "graph/tree.hpp"
 
 class Root
 {
 public:
     Root() : instance(new Instance(0)), interpreter(*this), deps(*this)
         { /* Nothing to do here */ }
-
-    /*
-     *  Returns true if the given name key points to a cell
-     */
-    bool isCell(const NameKey& k) const;
 
     /*
      *  Looks up a name key and converts it to a cell key
@@ -34,13 +32,17 @@ public:
      */
     std::list<Env> envsOf(const SheetIndex& i) const;
 
-protected:
     /*
-     *  Looks up an instance by index
-     *  Requires that all indices points to an Instance
+     *  Looks up an item by index
      */
-    const Instance* getInstance(const std::list<ItemIndex>& i) const;
+    const Item& getItem(const ItemIndex& item) const;
 
+    /*
+     *  Look up a sheet by index
+     */
+    const Sheet& getSheet(const SheetIndex& sheet) const;
+
+protected:
     /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)
@@ -71,6 +73,7 @@ protected:
     ////////////////////////////////////////////////////////////////////////////
 
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
+    Tree tree;
     std::unique_ptr<Instance> instance;
     Library lib;
 
