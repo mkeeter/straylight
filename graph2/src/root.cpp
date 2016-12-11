@@ -72,3 +72,8 @@ void Root::setExpr(const ItemIndex& i, const std::string& expr)
     // TODO: Set cell type
     // TODO: Mark dirty items and sync
 }
+
+void Root::setValue(const CellKey& cell, const Value& v)
+{
+    getMutableItem(cell.second).cell()->values.insert({cell.first, v});
+}

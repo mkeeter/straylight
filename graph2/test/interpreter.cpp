@@ -36,13 +36,13 @@ TEST_CASE("Interpreter::eval")
 
     auto interp = Interpreter(r, &d);
     auto cell = r.insertCell(0, "c", "");
-    const auto& value = r.getItem(cell).cell()->values.at({0});
+    auto c = r.getItem(cell).cell();
     CellKey key = {{0}, cell};
 
     SECTION("Basic eval")
     {
         r.setExpr(cell, "12");
-        interp.eval(key);
+        auto value = interp.eval(key);
         REQUIRE(value.str == "12");
     }
 
@@ -54,28 +54,33 @@ TEST_CASE("Interpreter::eval")
         r.setExpr(cell, "13");
 
         // On the first evaluation, the value changes
-        REQUIRE(interp.eval(key).value != nullptr);
+        auto v = interp.eval(key);
+        REQUIRE(v.value != nullptr);
+
         // On the second evaluation, the value stays the same
+        r.setValue(key, v);
         REQUIRE(interp.eval(key).value == nullptr);
-        REQUIRE(value.str == "13");
     }
 
     SECTION("Changing error")
     {
-        r.setExpr(cell, "omg");
-        interp.eval(key);
-        r.setExpr(cell, "wtf");
+        r.setExpr(cell, "omg"); // invalid script
+        r.setValue(key, interp.eval(key));
+        r.setExpr(cell, "wtf"); // also invalid script
 
-        // On the first evaluation, the error changes
-        REQUIRE(interp.eval(key).value != nullptr);
-        // On the second evaluation, the error stays the same
+        // On the first evaluation, the value changes
+        auto v = interp.eval(key);
+        REQUIRE(v.value != nullptr);
+        r.setValue(key, v);
+
+        // On the second evaluation, the value stays the same
         REQUIRE(interp.eval(key).value == nullptr);
     }
 
     SECTION("Input at top level")
     {
-        r.setExpr(cell, "omg");
-        interp.eval(key);
+        r.setExpr(cell, "(input 12)");
+        auto value = interp.eval(key);
 
         REQUIRE(value.str == "Input at top level");
         REQUIRE(value.valid == false);
@@ -85,7 +90,7 @@ TEST_CASE("Interpreter::eval")
     {
         r.setExpr(cell, "(define (f x) (+ 1 x))"
                         "(f 3)");
-        interp.eval(key);
+        auto value = interp.eval(key);
 
         REQUIRE(value.str == "4");
         REQUIRE(value.valid == true);
@@ -94,7 +99,7 @@ TEST_CASE("Interpreter::eval")
     SECTION("output")
     {
         r.setExpr(cell, "(output 12)");
-        interp.eval(key);
+        auto value = interp.eval(key);
 
         REQUIRE(value.str == "12");
         REQUIRE(value.valid == true);
@@ -103,7 +108,7 @@ TEST_CASE("Interpreter::eval")
     SECTION("output with internal clauses")
     {
         r.setExpr(cell, "(output (define (f x) (+ 1 x)) (f 12))");
-        interp.eval(key);
+        auto value = interp.eval(key);
 
         REQUIRE(value.str == "13");
         REQUIRE(value.valid == true);
@@ -112,7 +117,7 @@ TEST_CASE("Interpreter::eval")
     SECTION("output with external clauses (invalid)")
     {
         r.setExpr(cell, "(output 12)(+ 1 2)");
-        interp.eval(key);
+        auto value = interp.eval(key);
 
         REQUIRE(value.str == "Output must only have one clause");
         REQUIRE(value.valid == false);

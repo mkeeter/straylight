@@ -56,6 +56,11 @@ public:
     void setExpr(const ItemIndex& cell, const std::string& expr);
 
     /*
+     *  Assigns the given value to a cell
+     */
+    void setValue(const CellKey& cell, const Value& v);
+
+    /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)
      */
