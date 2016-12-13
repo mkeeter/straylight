@@ -197,3 +197,41 @@ TEST_CASE("Tree::envsOf")
         }
     }
 }
+
+TEST_CASE("Tree::instancesOf")
+{
+    Tree t;
+    SheetIndex sheet = 15; // dummy value
+
+    SECTION("Single instance")
+    {
+        auto a = t.insertInstance("a", sheet, 0);
+
+        auto ins = t.instancesOf(sheet);
+        REQUIRE(ins.size() == 1);
+        REQUIRE(ins.front() == a);
+    }
+
+    SECTION("Nested instances")
+    {
+        // Here, we create a 2-layer tree, with 2 then 3 branches
+        SheetIndex parent = 57; // another dummy value
+        auto i1 = t.insertInstance("a", sheet, parent);
+        auto i2 = t.insertInstance("b", sheet, parent);
+        auto i3 = t.insertInstance("c", sheet, parent);
+        REQUIRE(i1 != i2);
+
+        auto a = t.insertInstance("a", parent, 0);
+        auto b = t.insertInstance("b", parent, 0);
+
+        {
+            auto ins = t.instancesOf(sheet);
+            REQUIRE(ins.size() == 3);
+        }
+        {
+            auto ins = t.instancesOf(parent);
+            REQUIRE(ins.size() == 2);
+        }
+    }
+
+}
