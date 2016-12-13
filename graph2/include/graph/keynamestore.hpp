@@ -108,6 +108,11 @@ public:
         return out;
     }
 
+    ParentIndex parentOf(const StoredIndex& i) const
+    {
+        return names.right.at(i).first;
+    }
+
 protected:
     /*  Master storage for all items.  Indices are unique.  */
     std::map<StoredIndex, Stored> storage;

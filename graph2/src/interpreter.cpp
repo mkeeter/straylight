@@ -198,13 +198,12 @@ Value Interpreter::eval(const CellKey& key)
     if (value == nullptr)
     {
         auto bindings = s7_nil(interpreter); // empty list
-        const auto& sheet =
-            root.getSheet(root.getItem(env.back()).instance()->sheet);
-        for (auto& i : sheet.iterItems())
+        const auto& sheet = root.getItem(env.back()).instance()->sheet;
+        for (auto& i : root.iterItems(sheet))
         {
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, sheet.nameOf(i).c_str()),
+                    s7_make_symbol(interpreter, root.nameOf(i).c_str()),
                     s7_cons(interpreter, getThunk(env, i, key),
                     bindings));
         }
@@ -307,8 +306,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
             // build up a list of OUTPUT cells within this instance
             auto env_ = env;
             env_.push_back(index);
-            const auto& sheet = root.getSheet(instance->sheet);
-            for (const auto& c : sheet.iterItems())
+            for (const auto& c : root.iterItems(instance->sheet))
             {
                 if (auto cell = root.getItem(c).cell())
                 {
@@ -317,7 +315,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
                         // Prepend (name, value thunk) to the args list
                         auto pair = s7_cons(interpreter,
                                 s7_make_symbol(
-                                    interpreter, sheet.nameOf(c).c_str()),
+                                    interpreter, root.nameOf(c).c_str()),
                                 getThunk(env_, c, looker));
                         values = s7_cons(interpreter, pair, values);
                     }

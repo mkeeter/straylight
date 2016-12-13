@@ -30,7 +30,8 @@ public:
     /*
      *  Returns every environment in which the given sheet is instanced
      */
-    std::list<Env> envsOf(const SheetIndex& i) const;
+    std::list<Env> envsOf(const SheetIndex& i) const
+        { return tree.envsOf(i); }
 
     /*
      *  Looks up an item by index
@@ -39,16 +40,28 @@ public:
         { return tree.at(item); }
 
     /*
-     *  Look up a sheet by index
+     *  Looks up the name of an item
      */
-    const Sheet& getSheet(const SheetIndex& sheet) const
-        { return lib.at(sheet); }
+    const std::string& nameOf(const ItemIndex& item) const
+        { return tree.nameOf(item); }
+
+    /*
+     *  Check to see whether the given sheet has a particular item
+     */
+    bool hasItem(const SheetIndex& sheet, const std::string& name) const
+        {   return tree.hasItem(name, sheet); }
 
     /*
      *  Insert a new cell into the graph, re-evaluating as necessary
      */
     ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr="");
+
+    /*
+     *  Iterate over items belonging to a particular sheet
+     */
+    const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
+        { return tree.iterItems(parent); }
 
     /*
      *  Changes a cell's expression, re-evaluating as necessary
@@ -84,13 +97,28 @@ protected:
      *  Flushes the dirty buffer, ensuring that everything is up to date
      *  (if frozen is true, then this is a no-op)
      */
-    void sync() { /* TODO */ }
+    void sync();
 
     /*
      *  Looks up an item by index (non-const version)
      */
     Item& getMutableItem(const ItemIndex& item)
         { return tree.at(item); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    /*
+     *  Mark a particular key as dirty (if it exists); otherwise, marks
+     *  everything that looked at it (the second case matters when we're
+     *  deleting items from the graph)
+     */
+    void markDirty(const NameKey& k);
+
+    /*
+     *  Push a particular key to the dirty list, inserting it at the correct
+     *  position in the list to minimize re-evaluation.
+     */
+    void pushDirty(const CellKey& k);
 
     ////////////////////////////////////////////////////////////////////////////
 

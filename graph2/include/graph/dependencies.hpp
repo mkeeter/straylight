@@ -29,6 +29,17 @@ public:
      */
     void clearAll(const SheetIndex& sheet, const ItemIndex& item);
 
+    /*
+     *  Lookup in the inverse map
+     */
+    const std::set<CellKey>& inverseDeps(const NameKey& k) const;
+
+    /*
+     *  Checks whether b is upstream of a
+     */
+    bool isUpstream(const CellKey& a, const CellKey& b) const
+        {   return upstream.count(a) && upstream.at(a).count(b); }
+
 protected:
     /*
      *  Reference to parent root object, which we'll query for cell data

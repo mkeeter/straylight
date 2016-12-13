@@ -4,9 +4,15 @@
 
 #include "index.hpp"
 #include "keys.hpp"
-#include "sheet.hpp"
 
 #include "keynamestore.hpp"
+
+struct Sheet {
+    /*
+     *  Dummy struct for Library
+     *  Sheet members are stored in Tree
+     */
+};
 
 class Library : public KeyNameStore<Sheet, SheetIndex, SheetIndex>
 {

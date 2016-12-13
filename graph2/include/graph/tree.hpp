@@ -3,6 +3,7 @@
 #include "graph/item.hpp"
 #include "graph/index.hpp"
 #include "graph/keynamestore.hpp"
+#include "graph/env.hpp"
 
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
@@ -30,7 +31,19 @@ public:
     ItemIndex insertInstance(std::string name, SheetIndex sheet,
                              SheetIndex parent);
 
+    /*
+     *  Iterate over items for a given parent
+     */
+    const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const;
+
+    /*
+     *  Returns all the environments that the given sheet is instanced into
+     */
+    std::list<Env> envsOf(const SheetIndex& s) const;
+
 protected:
-    /*  Order of items for rendering  */
-    std::list<ItemIndex> order;
+    /*
+     *  Rendering order for items in a given sheet
+     */
+    std::map<SheetIndex, std::list<ItemIndex>> order;
 };

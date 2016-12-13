@@ -16,8 +16,3 @@ TEST_CASE("Root::toNameKey")
 {
     // TODO
 }
-
-TEST_CASE("Root::envsOf")
-{
-    // TODO
-}

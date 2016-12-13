@@ -8,7 +8,7 @@ int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
 
     // If the target exists, then check for recursive lookups
     const auto sheet = root.getItem(lookee.first.back()).instance()->sheet;
-    if (root.getSheet(sheet).hasItem(lookee.second))
+    if (root.hasItem(sheet, lookee.second))
     {
         const auto ck = root.toCellKey(lookee);
         upstream[looker].insert(upstream[ck].begin(), upstream[ck].end());
@@ -37,4 +37,10 @@ void Dependencies::clearAll(const SheetIndex& sheet, const ItemIndex& item)
     {
         clear({env, item});
     }
+}
+
+const std::set<CellKey>& Dependencies::inverseDeps(const NameKey& k) const
+{
+    const static std::set<CellKey> empty;
+    return inverse.count(k) ? inverse.at(k) : empty;
 }

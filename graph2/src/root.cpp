@@ -3,57 +3,13 @@
 CellKey Root::toCellKey(const NameKey& k) const
 {
     auto i = getItem(k.first.back()).instance();
-    auto sheet = lib.at(i->sheet);
 
-    return {k.first, sheet.indexOf(k.second)};
+    return {k.first, tree.indexOf(k.second, i->sheet)};
 }
 
 NameKey Root::toNameKey(const CellKey& k) const
 {
-    auto sheet = getSheet(getItem(k.first.back()).instance()->sheet);
-    return {k.first, sheet.nameOf(k.second)};
-}
-
-std::list<Env> Root::envsOf(const SheetIndex& s) const
-{
-    std::list<std::pair<Env, SheetIndex>> todo;
-    std::list<Env> found;
-
-    for (auto i : lib.at(0).iterItems())
-    {
-        if (auto instance = lib.at(0).at(i).instance())
-        {
-            todo.push_back({{i}, instance->sheet});
-        }
-    }
-
-    while (todo.size())
-    {
-        const auto t = todo.front();
-        todo.pop_front();
-
-        const auto env = t.first;
-        const auto sheet = t.second;
-
-        if (sheet == s)
-        {
-            found.push_back(env);
-        }
-        else
-        {
-            for (auto i : lib.at(sheet).iterItems())
-            {
-                auto env_ = env;
-                if (auto instance = lib.at(sheet).at(i).instance())
-                {
-                    env_.push_back(i);
-                    todo.push_back({env_, instance->sheet});
-                }
-            }
-        }
-    }
-
-    return found;
+    return {k.first, tree.nameOf(k.second)};
 }
 
 ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
@@ -61,7 +17,11 @@ ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
 {
     auto cell = tree.insertCell(name, expr, sheet);
 
-    // TODO: Push dirty things here
+    for (const auto& e : envsOf(sheet))
+    {
+        markDirty({e, name});
+    }
+    sync();
 
     return cell;
 }
@@ -70,7 +30,12 @@ void Root::setExpr(const ItemIndex& i, const std::string& expr)
 {
     getMutableItem(i).cell()->expr = expr;
     // TODO: Set cell type
-    // TODO: Mark dirty items and sync
+    // TODO: mess with input expr if it has changed
+    for (const auto& e : envsOf(tree.parentOf(i)))
+    {
+        markDirty({e, nameOf(i)});
+    }
+    sync();
 }
 
 void Root::setValue(const CellKey& cell, const Value& v)
@@ -82,4 +47,42 @@ void Root::setValue(const CellKey& cell, const Value& v)
         c->values.erase(c->values.find(cell.first));
     }
     c->values.insert({cell.first, v});
+}
+
+void Root::markDirty(const NameKey& k)
+{
+    // If this cell still exists, then push it to the dirty list
+    auto sheet = getItem(k.first.back()).instance()->sheet;
+    if (hasItem(sheet, k.second))
+    {
+        pushDirty(toCellKey(k));
+    }
+    else
+    {
+        // Otherwise push everything downstream of it to the list
+        for (auto& i : deps.inverseDeps(k))
+        {
+            pushDirty(i);
+        }
+    }
+}
+
+void Root::sync()
+{
+    while (!locked && dirty.size())
+    {
+        dirty.pop_front();
+        // TODO
+    }
+}
+
+void Root::pushDirty(const CellKey& c)
+{
+    auto itr = std::find_if(dirty.begin(), dirty.end(),
+        [&](CellKey& o){ return deps.isUpstream(o, c); });
+
+    if (itr == dirty.end() || *itr != c)
+    {
+        dirty.insert(itr, c);
+    }
 }
