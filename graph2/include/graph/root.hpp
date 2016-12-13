@@ -70,6 +70,7 @@ public:
 
     /*
      *  Assigns the given value to a cell
+     *  TODO: this is only used in test harnesses
      */
     void setValue(const CellKey& cell, const Value& v);
 

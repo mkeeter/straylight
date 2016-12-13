@@ -93,8 +93,18 @@ void Root::sync()
 {
     while (!locked && dirty.size())
     {
+        const auto k = dirty.front();
+        auto result = interpreter.eval(k);
         dirty.pop_front();
-        // TODO
+
+        if (result.value)
+        {
+            setValue(k, result);
+            for (const auto& d : deps.inverseDeps(toNameKey(k)))
+            {
+                pushDirty(d);
+            }
+        }
     }
 }
 
