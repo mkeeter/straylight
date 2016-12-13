@@ -71,6 +71,11 @@ void Root::setValue(const CellKey& cell, const Value& v)
     c->values.insert({cell.first, v});
 }
 
+const Value& Root::getValue(const CellKey& cell) const
+{
+    return getItem(cell.second).cell()->values.at(cell.first);
+}
+
 void Root::markDirty(const NameKey& k)
 {
     // If this cell still exists, then push it to the dirty list

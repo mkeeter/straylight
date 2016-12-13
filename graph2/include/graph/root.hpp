@@ -17,7 +17,7 @@ public:
 
     /*
      *  Looks up a name key and converts it to a cell key
-     *  Requires that isCell(k) be true
+     *  Requires that hasItem(k) be true
      */
     CellKey toCellKey(const NameKey& k) const;
 
@@ -26,6 +26,30 @@ public:
      *  Requires that the cell key be valid
      */
     NameKey toNameKey(const CellKey& k) const;
+
+    /*
+     *  Insert a new cell into the graph, re-evaluating as necessary
+     */
+    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
+                         const std::string& expr="");
+
+    /*
+     *  Changes a cell's expression, re-evaluating as necessary
+     */
+    void setExpr(const ItemIndex& cell, const std::string& expr);
+
+    /*
+     *  Assigns the given value to a cell
+     *  TODO: this is only used in test harnesses
+     */
+    void setValue(const CellKey& cell, const Value& v);
+
+    /*
+     *  Looks up the value of a particular env + cell
+     */
+    const Value& getValue(const CellKey& cell) const;
+
+    ////////////////////////////////////////////////////////////////////////////
 
     /*
      *  Returns every environment in which the given sheet is instanced
@@ -52,27 +76,12 @@ public:
         {   return tree.hasItem(name, sheet); }
 
     /*
-     *  Insert a new cell into the graph, re-evaluating as necessary
-     */
-    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
-                         const std::string& expr="");
-
-    /*
      *  Iterate over items belonging to a particular sheet
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
         { return tree.iterItems(parent); }
 
-    /*
-     *  Changes a cell's expression, re-evaluating as necessary
-     */
-    void setExpr(const ItemIndex& cell, const std::string& expr);
-
-    /*
-     *  Assigns the given value to a cell
-     *  TODO: this is only used in test harnesses
-     */
-    void setValue(const CellKey& cell, const Value& v);
+    ////////////////////////////////////////////////////////////////////////////
 
     /*
      *  RAII-style system for locking the tree
