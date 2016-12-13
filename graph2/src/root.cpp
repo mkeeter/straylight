@@ -28,9 +28,31 @@ ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
 
 void Root::setExpr(const ItemIndex& i, const std::string& expr)
 {
-    getMutableItem(i).cell()->expr = expr;
-    // TODO: Set cell type
-    // TODO: mess with input expr if it has changed
+    auto cell = getMutableItem(i).cell();
+    cell->expr = expr;
+
+    // Update cell type, saving previous type
+    auto prev_type = cell->type;
+    cell->type = interpreter.cellType(expr);
+
+    // Handle default expressions for input cells
+    if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
+    {
+        auto d = interpreter.defaultExpr(expr);
+        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        {
+            getMutableItem(instance).instance()->inputs[i] = d;
+        }
+    }
+    else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
+    {
+        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        {
+            getMutableItem(instance).instance()->inputs.erase(i);
+        }
+    }
+
+    // Mark all envs containing this cell as dirty
     for (const auto& e : envsOf(tree.parentOf(i)))
     {
         markDirty({e, nameOf(i)});

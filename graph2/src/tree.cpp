@@ -78,3 +78,15 @@ std::list<Env> Tree::envsOf(const SheetIndex& s) const
     return found;
 }
 
+std::list<ItemIndex> Tree::instancesOf(const SheetIndex& s) const
+{
+    std::list<ItemIndex> out;
+    for (const auto& i : storage)
+    {
+        if (i.second.instance() && i.second.instance()->sheet == s)
+        {
+            out.push_back(i.first);
+        }
+    }
+    return out;
+}

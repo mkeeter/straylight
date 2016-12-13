@@ -41,6 +41,11 @@ public:
      */
     std::list<Env> envsOf(const SheetIndex& s) const;
 
+    /*
+     *  Returns all of the instances that use the given sheet
+     */
+    std::list<ItemIndex> instancesOf(const SheetIndex& s) const;
+
 protected:
     /*
      *  Rendering order for items in a given sheet
