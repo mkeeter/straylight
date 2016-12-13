@@ -108,6 +108,9 @@ public:
         return out;
     }
 
+    /*
+     *  Looks up the parent of a particular stored item
+     */
     ParentIndex parentOf(const StoredIndex& i) const
     {
         return names.right.at(i).first;
