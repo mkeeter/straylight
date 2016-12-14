@@ -4,7 +4,7 @@ CellKey Root::toCellKey(const NameKey& k) const
 {
     auto i = getItem(k.first.back()).instance();
 
-    return {k.first, tree.indexOf(k.second, i->sheet)};
+    return {k.first, tree.indexOf(i->sheet, k.second)};
 }
 
 NameKey Root::toNameKey(const CellKey& k) const
@@ -15,7 +15,7 @@ NameKey Root::toNameKey(const CellKey& k) const
 ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
-    auto cell = tree.insertCell(name, expr, sheet);
+    auto cell = tree.insertCell(sheet, name, expr);
 
     for (const auto& e : envsOf(sheet))
     {

@@ -6,47 +6,47 @@ TEST_CASE("Tree::canInsert")
 {
     Tree s;
 
-    REQUIRE(s.canInsert("a", 0));
-    REQUIRE(s.canInsert("b", 0));
-    REQUIRE(!s.canInsert("", 0));
+    REQUIRE(s.canInsert(0, "a"));
+    REQUIRE(s.canInsert(0, "b"));
+    REQUIRE(!s.canInsert(0, ""));
 }
 
 TEST_CASE("Tree::insertCell")
 {
     Tree s;
-    auto a = s.insertCell("a", "(+ 1 2)", 0);
+    auto a = s.insertCell(0, "a", "(+ 1 2)");
 
     REQUIRE(a.i == 1);
-    REQUIRE(!s.canInsert("a", 0));
+    REQUIRE(!s.canInsert(0, "a"));
 }
 
 TEST_CASE("Tree::insertInstance")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
+    auto a = s.insertInstance(0, "a", 0);
 
     REQUIRE(a.i == 1);
-    REQUIRE(!s.canInsert("a", 0));
+    REQUIRE(!s.canInsert(0, "a"));
 }
 
 TEST_CASE("Tree::rename")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
-    auto b = s.insertCell("b", "(+ 1 2)", 0);
+    auto a = s.insertInstance(0, "a", 0);
+    auto b = s.insertCell(0, "b", "(+ 1 2)");
 
     s.rename(a, "c");
     s.rename(b, "d");
 
-    REQUIRE(!s.canInsert("c", 0));
-    REQUIRE(!s.canInsert("d", 0));
+    REQUIRE(!s.canInsert(0, "c"));
+    REQUIRE(!s.canInsert(0, "d"));
 }
 
 TEST_CASE("Tree::at(ItemIndex)")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
-    auto b = s.insertCell("b", "(+ 1 2)", 0);
+    auto a = s.insertInstance(0, "a", 0);
+    auto b = s.insertCell(0, "b", "(+ 1 2)");
 
     s.at(a);
     s.at(b);
@@ -67,17 +67,17 @@ TEST_CASE("Tree::at(ItemIndex)")
 TEST_CASE("Tree::at(std::string)")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
-    auto b = s.insertCell("b", "(+ 1 2)", 0);
+    auto a = s.insertInstance(0, "a", 0);
+    auto b = s.insertCell(0, "b", "(+ 1 2)");
 
-    s.at("a", 0);
-    s.at("b", 0);
+    s.at(0, "a");
+    s.at(0, "b");
     REQUIRE(true); // Didn't crash!
 
     bool threw = false;
     try
     {
-        auto c = s.at("c", 0);
+        auto c = s.at(0, "c");
     }
     catch (const std::out_of_range&)
     {
@@ -89,19 +89,19 @@ TEST_CASE("Tree::at(std::string)")
 TEST_CASE("Tree::hasItem")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
-    auto b = s.insertCell("b", "(+ 1 2)", 0);
+    auto a = s.insertInstance(0, "a", 0);
+    auto b = s.insertCell(0, "b", "(+ 1 2)");
 
-    REQUIRE(s.hasItem("a", 0));
-    REQUIRE(s.hasItem("b", 0));
-    REQUIRE(!s.hasItem("c", 0));
+    REQUIRE(s.hasItem(0, "a"));
+    REQUIRE(s.hasItem(0, "b"));
+    REQUIRE(!s.hasItem(0, "c"));
 }
 
 TEST_CASE("Tree::nameOf")
 {
     Tree s;
-    auto a = s.insertInstance("a", 0, 0);
-    auto b = s.insertCell("b", "(+ 1 2)", 0);
+    auto a = s.insertInstance(0, "a", 0);
+    auto b = s.insertCell(0, "b", "(+ 1 2)");
 
     REQUIRE(s.nameOf(a) == "a");
     REQUIRE(s.nameOf(b) == "b");
@@ -113,8 +113,8 @@ TEST_CASE("Tree::iterItems")
 
     SECTION("Top level")
     {
-        auto a = t.insertInstance("a", 0, 0);
-        auto b = t.insertCell("b", "(+ 1 2)", 0);
+        auto a = t.insertInstance(0, "a", 0);
+        auto b = t.insertCell(0, "b", "(+ 1 2)");
         auto iter = t.iterItems(0);
         REQUIRE(iter.size() == 2);
         REQUIRE(iter.front() == 1); // a
@@ -127,8 +127,8 @@ TEST_CASE("Tree::iterItems")
 
     SECTION("Nested")
     {
-        auto a = t.insertInstance("a", 0, 1);
-        auto b = t.insertCell("b", "(+ 1 2)", 2);
+        auto a = t.insertInstance(1, "a", 0);
+        auto b = t.insertCell(2, "b", "(+ 1 2)");
 
         auto i0 = t.iterItems(0);
         REQUIRE(i0.size() == 0);
@@ -147,8 +147,8 @@ TEST_CASE("Tree::parentOf")
 {
     Tree t;
 
-    auto a = t.insertInstance("a", 0, 1);
-    auto b = t.insertCell("b", "(+ 1 2)", 2);
+    auto a = t.insertInstance(1, "a", 0);
+    auto b = t.insertCell(2, "b", "(+ 1 2)");
 
     REQUIRE(t.parentOf(a) == 1);
     REQUIRE(t.parentOf(b) == 2);
@@ -161,7 +161,7 @@ TEST_CASE("Tree::envsOf")
 
     SECTION("Single instance")
     {
-        auto a = t.insertInstance("a", sheet, 0);
+        auto a = t.insertInstance(0, "a", sheet);
 
         auto envs = t.envsOf(sheet);
         REQUIRE(envs.size() == 1);
@@ -177,13 +177,13 @@ TEST_CASE("Tree::envsOf")
     {
         // Here, we create a 2-layer tree, with 2 then 3 branches
         SheetIndex parent = 57; // another dummy value
-        auto i1 = t.insertInstance("a", sheet, parent);
-        auto i2 = t.insertInstance("b", sheet, parent);
-        auto i3 = t.insertInstance("c", sheet, parent);
+        auto i1 = t.insertInstance(parent, "a", sheet);
+        auto i2 = t.insertInstance(parent, "b", sheet);
+        auto i3 = t.insertInstance(parent, "c", sheet);
         REQUIRE(i1 != i2);
 
-        auto a = t.insertInstance("a", parent, 0);
-        auto b = t.insertInstance("b", parent, 0);
+        auto a = t.insertInstance(0, "a", parent);
+        auto b = t.insertInstance(0, "b", parent);
 
         {
             auto envs = t.envsOf(sheet);
@@ -205,7 +205,7 @@ TEST_CASE("Tree::instancesOf")
 
     SECTION("Single instance")
     {
-        auto a = t.insertInstance("a", sheet, 0);
+        auto a = t.insertInstance(0, "a", sheet);
 
         auto ins = t.instancesOf(sheet);
         REQUIRE(ins.size() == 1);
@@ -216,13 +216,13 @@ TEST_CASE("Tree::instancesOf")
     {
         // Here, we create a 2-layer tree, with 2 then 3 branches
         SheetIndex parent = 57; // another dummy value
-        auto i1 = t.insertInstance("a", sheet, parent);
-        auto i2 = t.insertInstance("b", sheet, parent);
-        auto i3 = t.insertInstance("c", sheet, parent);
+        auto i1 = t.insertInstance(parent, "a", sheet);
+        auto i2 = t.insertInstance(parent, "b", sheet);
+        auto i3 = t.insertInstance(parent, "c", sheet);
         REQUIRE(i1 != i2);
 
-        auto a = t.insertInstance("a", parent, 0);
-        auto b = t.insertInstance("b", parent, 0);
+        auto a = t.insertInstance(0, "a", parent);
+        auto b = t.insertInstance(0, "b", parent);
 
         {
             auto ins = t.instancesOf(sheet);
@@ -233,5 +233,22 @@ TEST_CASE("Tree::instancesOf")
             REQUIRE(ins.size() == 2);
         }
     }
+}
+
+TEST_CASE("Tree::canInsertCell")
+{
+    Tree t;
+    REQUIRE(t.canInsertCell(0, "a"));
+    t.insertCell(0, "a", "12");
+    REQUIRE(!t.canInsertCell(0, "a"));
+}
+
+TEST_CASE("Tree::canInsertInstance")
+{
+
+}
+
+TEST_CASE("Tree::canRename")
+{
 
 }

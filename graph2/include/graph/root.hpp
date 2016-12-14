@@ -50,6 +50,7 @@ public:
     const Value& getValue(const CellKey& cell) const;
 
     ////////////////////////////////////////////////////////////////////////////
+    // Forwarding functions from stored Tree
 
     /*
      *  Returns every environment in which the given sheet is instanced
@@ -73,13 +74,34 @@ public:
      *  Check to see whether the given sheet has a particular item
      */
     bool hasItem(const SheetIndex& sheet, const std::string& name) const
-        {   return tree.hasItem(name, sheet); }
+        {   return tree.hasItem(sheet, name); }
 
     /*
      *  Iterate over items belonging to a particular sheet
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
         { return tree.iterItems(parent); }
+
+    /*
+     *  Checks to see whether we can insert the given cell
+     */
+    bool canInsertCell(const SheetIndex& parent,
+                       const std::string& name) const
+        { return tree.canInsertCell(parent, name); }
+
+    /*
+     *  Checks to see whether we can insert the given instance
+     *  (checking both name collisions and recursive loops)
+     */
+    bool canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
+                           const std::string& name) const
+        { return tree.canInsertInstance(parent, target, name); }
+
+    /*
+     *  Check whether we can rename a cell or instance
+     */
+    bool canRename(const ItemIndex& item, const std::string& new_name) const
+        { return tree.canRename(item, new_name); }
 
     ////////////////////////////////////////////////////////////////////////////
 

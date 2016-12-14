@@ -5,7 +5,7 @@ Library::Library()
     storage.insert({{0}, {}});
 }
 
-SheetIndex Library::insert(const std::string& name, SheetIndex parent)
+SheetIndex Library::insert(SheetIndex parent, const std::string& name)
 {
-    return KeyNameStore::insert(name, {}, parent);
+    return KeyNameStore::insert(parent, name, {});
 }

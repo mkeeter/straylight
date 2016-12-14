@@ -26,5 +26,5 @@ public:
     /*
      *  Inserts the given sheet, returning its index
      */
-    SheetIndex insert(const std::string& name, SheetIndex parent={0});
+    SheetIndex insert(SheetIndex parent, const std::string& name);
 };

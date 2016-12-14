@@ -18,10 +18,10 @@ Tree::~Tree()
 /*
  *  Insert a new cell with the given expression
  */
-ItemIndex Tree::insertCell(std::string name, std::string expr,
-                           SheetIndex parent)
+ItemIndex Tree::insertCell(const SheetIndex& parent, const std::string& name,
+                           const std::string& expr)
 {
-    auto c = insert(name, Item(expr), parent);
+    auto c = insert(parent, name, Item(expr));
     order[parent].push_back(c);
     return c;
 }
@@ -29,12 +29,28 @@ ItemIndex Tree::insertCell(std::string name, std::string expr,
 /*
  *  Insert a new instance of the given sheet
  */
-ItemIndex Tree::insertInstance(std::string name, SheetIndex sheet,
-                               SheetIndex parent)
+ItemIndex Tree::insertInstance(const SheetIndex& parent, const std::string& name,
+                               const SheetIndex& target)
 {
-    auto i = insert(name, Item(sheet), parent);
+    auto i = insert(parent, name, Item(target));
     order[parent].push_back(i);
     return i;
+}
+
+bool Tree::canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
+                             const std::string& name) const
+{
+    // TODO: check for recursion here
+    (void)target;
+    return names.left.find(std::make_pair(parent, name)) == names.left.end();
+}
+
+bool Tree::canRename(const ItemIndex& item, const std::string& new_name) const
+{
+    auto k = names.right.at(item);
+    return
+        k.second == new_name ||
+        names.left.find(std::make_pair(k.first, new_name)) == names.left.end();
 }
 
 const std::list<ItemIndex>& Tree::iterItems(const SheetIndex& parent) const

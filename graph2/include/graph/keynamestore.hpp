@@ -10,7 +10,7 @@ public:
     /*
      *  Check to see whether we can insert the given item's name
      */
-    bool canInsert(const std::string& name, ParentIndex parent) const
+    bool canInsert(const ParentIndex& parent, const std::string& name) const
     {
         // Require that the name is valid and not taken
         return name.size() &&
@@ -20,9 +20,10 @@ public:
     /*
      *  Store an item in the system
      */
-    StoredIndex insert(const std::string& name, Stored s, ParentIndex parent)
+    StoredIndex insert(const ParentIndex& parent, const std::string& name,
+                       Stored s)
     {
-        assert(canInsert(name, parent));
+        assert(canInsert(parent, name));
 
         StoredIndex next = {storage.size() ? storage.rbegin()->first.i + 1
                                            : 0};
@@ -39,7 +40,7 @@ public:
     void rename(StoredIndex s, const std::string& new_name)
     {
         ParentIndex parent = names.right.at(s).first;
-        assert(canInsert(new_name, parent));
+        assert(canInsert(parent, new_name));
 
         names.right.erase(s);
         names.insert({{parent, new_name}, s});
@@ -71,20 +72,20 @@ public:
     /*
      *  Get an item by name and parent
      */
-    const Stored& at(const std::string& name, const ParentIndex& p) const
-        { return storage.at(indexOf(name, p)); }
+    const Stored& at(const ParentIndex& p, const std::string& name) const
+        { return storage.at(indexOf(p, name)); }
 
     /*
      *  Get an index by name
      *  Fails if no such name exists
      */
-    const StoredIndex& indexOf(const std::string& name, const ParentIndex& p) const
+    const StoredIndex& indexOf(const ParentIndex& p, const std::string& name) const
         { return names.left.at(std::make_pair(p, name)); }
 
     /*
      *  Checks whether an item exists, by name
      */
-    bool hasItem(const std::string& name, const ParentIndex& p) const
+    bool hasItem(const ParentIndex& p, const std::string& name) const
         { return names.left.find(std::make_pair(p, name)) != names.left.end(); }
 
     /*

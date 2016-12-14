@@ -8,17 +8,17 @@ TEST_CASE("Library::canInsert")
 
     SECTION("Into empty library")
     {
-        REQUIRE(lib.canInsert("a", 0));
-        REQUIRE(lib.canInsert("b", 0));
-        REQUIRE(lib.canInsert("c", 0));
+        REQUIRE(lib.canInsert(0, "a"));
+        REQUIRE(lib.canInsert(0, "b"));
+        REQUIRE(lib.canInsert(0, "c"));
 
-        REQUIRE(!lib.canInsert("", 0));
+        REQUIRE(!lib.canInsert(0, ""));
     }
 
     SECTION("With other sheets")
     {
-        lib.insert("a", 0);
-        REQUIRE(!lib.canInsert("a", 0));
+        lib.insert(0, "a");
+        REQUIRE(!lib.canInsert(0, "a"));
     }
 }
 
@@ -26,13 +26,13 @@ TEST_CASE("Library::insert")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
+    auto a = lib.insert(0, "a");
     REQUIRE(a.i == 1);
 
-    auto b = lib.insert("b", 0);
+    auto b = lib.insert(0, "b");
     REQUIRE(b.i == 2);
 
-    auto sub = lib.insert("c", a);
+    auto sub = lib.insert(a, "c");
     REQUIRE(sub.i == 3);
 }
 
@@ -40,24 +40,24 @@ TEST_CASE("Library::erase")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
-    REQUIRE(!lib.canInsert("a", 0));
+    auto a = lib.insert(0, "a");
+    REQUIRE(!lib.canInsert(0, "a"));
 
     lib.erase(a);
-    REQUIRE(lib.canInsert("a", 0));
+    REQUIRE(lib.canInsert(0, "a"));
 }
 
 TEST_CASE("Library::nameOf")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
+    auto a = lib.insert(0, "a");
     REQUIRE(lib.nameOf(a) == "a");
 
-    auto b = lib.insert("b", 0);
+    auto b = lib.insert(0, "b");
     REQUIRE(lib.nameOf(b) == "b");
 
-    auto sub = lib.insert("c", a);
+    auto sub = lib.insert(a, "c");
     REQUIRE(lib.nameOf(sub) == "c");
 }
 
@@ -65,20 +65,20 @@ TEST_CASE("Library::rename")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
+    auto a = lib.insert(0, "a");
     REQUIRE(lib.nameOf(a) == "a");
 
     lib.rename(a, "b");
     REQUIRE(lib.nameOf(a) == "b");
 
-    REQUIRE(!lib.canInsert("b", 0));
+    REQUIRE(!lib.canInsert(0, "b"));
 }
 
-TEST_CASE("Library::operator[]")
+TEST_CASE("Library::at")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
+    auto a = lib.insert(0, "a");
     const Sheet& s = lib.at(a);
 
     bool threw = false;
@@ -97,10 +97,10 @@ TEST_CASE("Library::childrenOf")
 {
     Library lib;
 
-    auto a = lib.insert("a", 0);
-    auto b = lib.insert("b", 0);
-    auto c = lib.insert("c", 0);
-    auto d = lib.insert("d", 1);
+    auto a = lib.insert(0, "a");
+    auto b = lib.insert(0, "b");
+    auto c = lib.insert(0, "c");
+    auto d = lib.insert(1, "d");
 
     SECTION("Following alphabetical order")
     {

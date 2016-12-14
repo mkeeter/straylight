@@ -22,14 +22,33 @@ public:
     /*
      *  Insert a new cell with the given expression
      */
-    ItemIndex insertCell(std::string name, std::string expr,
-                         SheetIndex parent);
+    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
+                         const std::string& expr);
 
     /*
      *  Insert a new instance of the given sheet
      */
-    ItemIndex insertInstance(std::string name, SheetIndex sheet,
-                             SheetIndex parent);
+    ItemIndex insertInstance(const SheetIndex& parent, const std::string& name,
+                             const SheetIndex& target);
+
+    /*
+     *  Checks to see whether we can insert the given cell
+     */
+    bool canInsertCell(const SheetIndex& parent,
+                       const std::string& name) const
+        { return canInsert(parent, name); }
+
+    /*
+     *  Checks to see whether we can insert the given instance
+     *  (checking both name collisions and recursive loops)
+     */
+    bool canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
+                           const std::string& name) const;
+
+    /*
+     *  Check whether we can rename a cell or instance
+     */
+    bool canRename(const ItemIndex& item, const std::string& new_name) const;
 
     /*
      *  Iterate over items for a given parent
