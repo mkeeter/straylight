@@ -252,3 +252,12 @@ TEST_CASE("Tree::canRename")
 {
 
 }
+
+TEST_CASE("Tree::erase")
+{
+    Tree t;
+    auto c = t.insertCell(0, "c", "12");
+    REQUIRE(t.iterItems(0).size() == 1);
+    t.erase(c);
+    REQUIRE(t.iterItems(0).size() == 0);
+}

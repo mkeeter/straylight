@@ -107,3 +107,10 @@ std::list<ItemIndex> Tree::instancesOf(const SheetIndex& s) const
     }
     return out;
 }
+
+void Tree::erase(const ItemIndex& i)
+{
+    auto sheet = parentOf(i);
+    KeyNameStore::erase(i);
+    order[sheet].remove(i);
+}

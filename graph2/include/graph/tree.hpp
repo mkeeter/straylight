@@ -66,6 +66,11 @@ public:
      */
     std::list<ItemIndex> instancesOf(const SheetIndex& s) const;
 
+    /*
+     *  Erase an item from the tree and the order
+     */
+    void erase(const ItemIndex& i);
+
 protected:
     /*
      *  Rendering order for items in a given sheet
