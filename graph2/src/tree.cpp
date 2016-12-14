@@ -18,23 +18,24 @@ Tree::~Tree()
 /*
  *  Insert a new cell with the given expression
  */
-ItemIndex Tree::insertCell(const SheetIndex& parent, const std::string& name,
+CellIndex Tree::insertCell(const SheetIndex& parent, const std::string& name,
                            const std::string& expr)
 {
     auto c = insert(parent, name, Item(expr));
     order[parent].push_back(c);
-    return c;
+    return CellIndex(c.i); // manual conversion!
 }
 
 /*
  *  Insert a new instance of the given sheet
  */
-ItemIndex Tree::insertInstance(const SheetIndex& parent, const std::string& name,
-                               const SheetIndex& target)
+InstanceIndex Tree::insertInstance(const SheetIndex& parent,
+                                   const std::string& name,
+                                   const SheetIndex& target)
 {
     auto i = insert(parent, name, Item(target));
     order[parent].push_back(i);
-    return i;
+    return InstanceIndex(i.i);
 }
 
 bool Tree::canInsertInstance(const SheetIndex& parent, const SheetIndex& target,

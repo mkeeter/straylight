@@ -20,7 +20,27 @@ struct Index
 };
 
 struct ItemIndex_ {};
+struct CellIndex_ {};
+struct InstanceIndex_ {};
 struct SheetIndex_ {};
 
-typedef Index<ItemIndex_> ItemIndex;
+typedef Index<CellIndex_> CellIndex;
+typedef Index<InstanceIndex_> InstanceIndex;
 typedef Index<SheetIndex_> SheetIndex;
+
+struct ItemIndex : public Index<ItemIndex_>
+{
+    ItemIndex() : Index(-1) {}
+    ItemIndex(unsigned i) : Index(i) {}
+    ItemIndex(const CellIndex& j) : Index(j.i) {}
+    ItemIndex(const InstanceIndex& j) : Index(j.i) {}
+    bool operator<(const ItemIndex& other) const {
+        return i < other.i;
+    }
+    bool operator!=(const ItemIndex& other) const {
+        return i != other.i;
+    }
+    bool operator==(const ItemIndex& other) const {
+        return i == other.i;
+    }
+};

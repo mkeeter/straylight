@@ -12,7 +12,7 @@ NameKey Root::toNameKey(const CellKey& k) const
     return {k.first, tree.nameOf(k.second)};
 }
 
-ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
+CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
@@ -26,7 +26,7 @@ ItemIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
     return cell;
 }
 
-void Root::setExpr(const ItemIndex& i, const std::string& expr)
+void Root::setExpr(const CellIndex& i, const std::string& expr)
 {
     auto cell = getMutableItem(i).cell();
     cell->expr = expr;

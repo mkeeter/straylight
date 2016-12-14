@@ -30,13 +30,13 @@ public:
     /*
      *  Insert a new cell into the graph, re-evaluating as necessary
      */
-    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
+    CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr="");
 
     /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
-    void setExpr(const ItemIndex& cell, const std::string& expr);
+    void setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
      *  Assigns the given value to a cell

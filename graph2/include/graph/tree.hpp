@@ -22,14 +22,15 @@ public:
     /*
      *  Insert a new cell with the given expression
      */
-    ItemIndex insertCell(const SheetIndex& parent, const std::string& name,
+    CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr);
 
     /*
      *  Insert a new instance of the given sheet
      */
-    ItemIndex insertInstance(const SheetIndex& parent, const std::string& name,
-                             const SheetIndex& target);
+    InstanceIndex insertInstance(const SheetIndex& parent,
+                                 const std::string& name,
+                                 const SheetIndex& target);
 
     /*
      *  Checks to see whether we can insert the given cell
