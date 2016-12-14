@@ -83,7 +83,7 @@ std::list<Env> Tree::envsOf(const SheetIndex& s) const
                 auto env_ = env;
                 if (auto instance = at(i).instance())
                 {
-                    env_.push_back(i);
+                    env_.push_back(InstanceIndex(i.i));
                     todo.push_back({env_, instance->sheet});
                 }
             }

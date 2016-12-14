@@ -305,7 +305,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
         {   // Create a temporary environment inside the instance, and
             // build up a list of OUTPUT cells within this instance
             auto env_ = env;
-            env_.push_back(index);
+            env_.push_back(InstanceIndex(index.i));
             for (const auto& c : root.iterItems(instance->sheet))
             {
                 if (auto cell = root.getItem(c).cell())
