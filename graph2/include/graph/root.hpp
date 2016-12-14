@@ -34,6 +34,11 @@ public:
                          const std::string& expr="");
 
     /*
+     *  Erases a cell, triggering re-evaluation
+     */
+    void eraseCell(const CellIndex& cell);
+
+    /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
     void setExpr(const CellIndex& cell, const std::string& expr);

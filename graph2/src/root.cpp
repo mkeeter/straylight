@@ -26,6 +26,38 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
     return cell;
 }
 
+void Root::eraseCell(const CellIndex& cell)
+{
+    auto sheet = tree.parentOf(cell);
+    auto name = tree.nameOf(cell);
+    bool was_input = getItem(cell).cell()->type == Cell::INPUT;
+
+    // Release all interpreter-allocated values
+    for (const auto& v : getItem(cell).cell()->values)
+    {
+        interpreter.release(v.second.value);
+    }
+
+    // Mark this cell as dirty in all its environments, and clear
+    // anything that has it marked as downstream
+    tree.erase(cell);
+    for (const auto& e : envsOf(sheet))
+    {
+        deps.clear({e, cell});
+        markDirty({e, name});
+    }
+
+    // Erase all input data associated with this cell
+    if (was_input)
+    {
+        for (const auto& i : tree.instancesOf(sheet))
+        {
+            getMutableItem(i).instance()->inputs.erase(cell);
+        }
+    }
+    sync();
+}
+
 void Root::setExpr(const CellIndex& i, const std::string& expr)
 {
     auto cell = getMutableItem(i).cell();

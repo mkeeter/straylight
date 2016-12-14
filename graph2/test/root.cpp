@@ -75,6 +75,38 @@ TEST_CASE("Root::insertCell")
     }
 }
 
+TEST_CASE("Root::eraseCell")
+{
+    Root r;
+
+    SECTION("Basic erasing")
+    {
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        REQUIRE(!r.canInsertCell(0, "x"));
+        r.eraseCell(x);
+        REQUIRE(r.canInsertCell(0, "x"));
+    }
+
+    SECTION("Change detection")
+    {
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        auto a = r.insertCell(0, "a", "(+ 1 (x))");
+
+        r.eraseCell(x);
+        REQUIRE(!r.getValue({{0}, a}).valid);
+    }
+
+    SECTION("Dependency cleanup")
+    {
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        auto a = r.insertCell(0, "a", "(+ 1 (x))");
+
+        r.eraseCell(a);
+        r.setExpr(x, "15");
+        REQUIRE(r.getValue({{0}, x}).str == "15");
+    }
+}
+
 TEST_CASE("Root::setExpr")
 {
     Root r;
