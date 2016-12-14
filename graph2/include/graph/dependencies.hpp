@@ -25,11 +25,6 @@ public:
     void clear(const CellKey& looker);
 
     /*
-     *  Clear all references to the given sheet and item
-     */
-    void clearAll(const SheetIndex& sheet, const ItemIndex& item);
-
-    /*
      *  Lookup in the inverse map
      */
     const std::set<CellKey>& inverseDeps(const NameKey& k) const;

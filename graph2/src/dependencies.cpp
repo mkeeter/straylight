@@ -30,15 +30,6 @@ void Dependencies::clear(const CellKey& looker)
     upstream[looker] = {looker};
 }
 
-void Dependencies::clearAll(const SheetIndex& sheet, const ItemIndex& item)
-{
-    auto envs = root.envsOf(sheet);
-    for (auto env : envs)
-    {
-        clear({env, item});
-    }
-}
-
 const std::set<CellKey>& Dependencies::inverseDeps(const NameKey& k) const
 {
     const static std::set<CellKey> empty;
