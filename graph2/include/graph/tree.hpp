@@ -4,6 +4,7 @@
 #include "graph/index.hpp"
 #include "graph/keynamestore.hpp"
 #include "graph/env.hpp"
+#include "graph/keys.hpp"
 
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
@@ -70,6 +71,11 @@ public:
      *  Erase an item from the tree and the order
      */
     void erase(const ItemIndex& i);
+
+    /*
+     *  Returns a list of cell keys relative to the given sheet
+     */
+    std::list<CellKey> cellsOf(const SheetIndex& s) const;
 
 protected:
     /*

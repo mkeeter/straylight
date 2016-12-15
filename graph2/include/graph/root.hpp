@@ -34,6 +34,13 @@ public:
                          const std::string& expr="");
 
     /*
+     *  Inserts a new instance into the graph
+     */
+    InstanceIndex insertInstance(const SheetIndex& parent,
+                                 const std::string& name,
+                                 const SheetIndex& target);
+
+    /*
      *  Erases a cell, triggering re-evaluation
      */
     void eraseCell(const CellIndex& cell);

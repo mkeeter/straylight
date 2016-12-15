@@ -26,6 +26,28 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
     return cell;
 }
 
+InstanceIndex Root::insertInstance(const SheetIndex& parent,
+                                   const std::string& name,
+                                   const SheetIndex& target)
+{
+    auto i = tree.insertInstance(parent, name, target);
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        // TODO: Mark the instance itself as dirty
+        // (for anything that tried to get an input or output)
+
+        // Then, mark all cells as dirty
+        for (const auto& c : tree.cellsOf(target))
+        {
+            auto env = e; // copy
+            env.insert(e.end(), c.first.begin(), c.first.end());
+            markDirty({env, nameOf(c.second)});
+        }
+    }
+    return i;
+}
+
 void Root::eraseCell(const CellIndex& cell)
 {
     auto sheet = tree.parentOf(cell);

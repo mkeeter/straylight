@@ -114,3 +114,24 @@ void Tree::erase(const ItemIndex& i)
     KeyNameStore::erase(i);
     order[sheet].remove(i);
 }
+
+std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
+{
+    std::list<CellKey> out;
+    for (auto i : iterItems(s))
+    {
+        if (at(i).cell())
+        {
+            out.push_back({{}, CellIndex(i.i)});
+        }
+        else if (auto n = at(i).instance())
+        {
+            for (auto k : cellsOf(n->sheet))
+            {
+                k.first.push_front(InstanceIndex(i.i));
+                out.push_back(k);
+            }
+        }
+    }
+    return out;
+}
