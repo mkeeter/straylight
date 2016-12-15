@@ -58,12 +58,6 @@ public:
     // Forwarding functions from stored Tree
 
     /*
-     *  Returns every environment in which the given sheet is instanced
-     */
-    std::list<Env> envsOf(const SheetIndex& i) const
-        { return tree.envsOf(i); }
-
-    /*
      *  Looks up an item by index
      */
     const Item& getItem(const ItemIndex& item) const

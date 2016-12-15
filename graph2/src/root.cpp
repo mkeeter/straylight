@@ -17,7 +17,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
 {
     auto cell = tree.insertCell(sheet, name, expr);
 
-    for (const auto& e : envsOf(sheet))
+    for (const auto& e : tree.envsOf(sheet))
     {
         markDirty({e, name});
     }
@@ -41,7 +41,7 @@ void Root::eraseCell(const CellIndex& cell)
     // Mark this cell as dirty in all its environments, and clear
     // anything that has it marked as downstream
     tree.erase(cell);
-    for (const auto& e : envsOf(sheet))
+    for (const auto& e : tree.envsOf(sheet))
     {
         deps.clear({e, cell});
         markDirty({e, name});
@@ -85,9 +85,9 @@ void Root::setExpr(const CellIndex& i, const std::string& expr)
     }
 
     // Mark all envs containing this cell as dirty
-    for (const auto& e : envsOf(tree.parentOf(i)))
+    for (const auto& e : tree.envsOf(tree.parentOf(i)))
     {
-        markDirty({e, nameOf(i)});
+        markDirty({e, tree.nameOf(i)});
     }
     sync();
 }
