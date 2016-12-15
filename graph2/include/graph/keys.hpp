@@ -14,4 +14,4 @@
  *  ItemIndex) to localize the cell.
  */
 typedef std::pair<Env, std::string> NameKey;
-typedef std::pair<Env, ItemIndex> CellKey;
+typedef std::pair<Env, CellIndex> CellKey;

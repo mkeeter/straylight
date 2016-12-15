@@ -83,6 +83,12 @@ public:
         {   return tree.hasItem(sheet, name); }
 
     /*
+     *  Looks up an item by name
+     */
+    const Item& getItem(const SheetIndex& sheet, const std::string& name) const
+        {   return tree.at(sheet, name); }
+
+    /*
      *  Iterate over items belonging to a particular sheet
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const

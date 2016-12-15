@@ -2,9 +2,12 @@
 
 CellKey Root::toCellKey(const NameKey& k) const
 {
-    auto i = getItem(k.first.back()).instance();
+    auto sheet = getItem(k.first.back()).instance()->sheet;
+    auto i = tree.indexOf(sheet, k.second);
 
-    return {k.first, tree.indexOf(i->sheet, k.second)};
+    assert(getItem(i).cell());
+
+    return {k.first, CellIndex(i.i)};
 }
 
 NameKey Root::toNameKey(const CellKey& k) const

@@ -286,7 +286,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
     const auto& item = root.getItem(index);
     if (auto cell = item.cell())
     {
-        CellKey lookee = {env, index};
+        CellKey lookee = {env, CellIndex(index.i)};
 
         // Construct a lookup thunk using value_thunk_factory
         auto args = s7_list(interpreter, 5,
@@ -326,7 +326,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
         // Build a thunk with instance_thunk_factory
         auto args = s7_list(interpreter, 6,
             s7_make_c_pointer(interpreter, deps),
-            encodeNameKey(root.toNameKey({env, index})),
+            encodeNameKey({env, root.nameOf(index)}),
             s7_make_integer(interpreter, index.i),
             encodeCellKey(looker),
             check_upstream,
