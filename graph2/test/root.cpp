@@ -160,6 +160,19 @@ TEST_CASE("Root::setExpr")
 
         REQUIRE(r.getValue({{0}, b}).str == "6");
     }
+
+    SECTION("Cell becoming an output (same value)")
+    {
+        auto sum = r.insertSheet(0, "sum");
+
+        auto a = r.insertCell(sum, "a", "10");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        r.setExpr(a, "(output 10)");
+
+        REQUIRE(r.getValue({{0}, b}).str == "11");
+    }
 }
 
 TEST_CASE("Root::canInsertSheet")
