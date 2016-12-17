@@ -51,6 +51,12 @@ public:
     void setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
+     *  Changes the input expression for a particular instance
+     */
+    void setInput(const InstanceIndex& instance, const CellIndex& cell,
+                  const std::string& expr);
+
+    /*
      *  Assigns the given value to a cell
      *  TODO: this is only used in test harnesses
      */
@@ -114,6 +120,15 @@ public:
      */
     bool canRename(const ItemIndex& item, const std::string& new_name) const
         { return tree.canRename(item, new_name); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    bool canInsertSheet(const SheetIndex& parent,
+                        const std::string& name) const
+        { return lib.canInsert(parent, name); }
+
+    SheetIndex insertSheet(const SheetIndex& parent, const std::string& name)
+        { return lib.insert(parent, name); }
 
     ////////////////////////////////////////////////////////////////////////////
 

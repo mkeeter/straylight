@@ -148,3 +148,78 @@ TEST_CASE("Root::setExpr")
         REQUIRE(v.str == "8");
     }
 }
+
+TEST_CASE("Root::canInsertSheet")
+{
+    Root r;
+    REQUIRE(r.canInsertSheet(0, "sum"));
+    REQUIRE(!r.canInsertSheet(0, ""));
+
+    r.insertSheet(0, "sum");
+    REQUIRE(!r.canInsertSheet(0, "sum"));
+}
+
+TEST_CASE("Root::insertSheet")
+{
+    Root r;
+    auto sum = r.insertSheet(0, "sum");
+    REQUIRE(sum.i == 1);
+
+    auto mul = r.insertSheet(0, "mul");
+    REQUIRE(mul.i == 2);
+}
+
+TEST_CASE("Root::insertInstance")
+{
+    Root r;
+
+    auto sum = r.insertSheet(0, "sum");
+
+    SECTION("Cells within sheet")
+    {
+        auto a = r.insertCell(sum, "a", "1");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
+
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).str == "3");
+    }
+
+    SECTION("Multiple instances")
+    {
+        auto a = r.insertCell(sum, "a", "1");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
+
+        auto i = r.insertInstance(0, "instance", sum);
+        auto j = r.insertInstance(0, "jnstance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).value !=
+                r.getValue({{0, j}, out}).value);
+    }
+
+    SECTION("Sheet input default")
+    {
+        auto a = r.insertCell(sum, "a", "(input 10)");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
+
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).str == "12");
+    }
+}
+
+TEST_CASE("Root::setInput")
+{
+    Root r;
+
+    auto sum = r.insertSheet(0, "sum");
+
+    auto a = r.insertCell(sum, "a", "(input 10)");
+    auto b = r.insertCell(sum, "b", "2");
+    auto out = r.insertCell(sum, "out", "(+ (a) (b))");
+
+    auto i = r.insertInstance(0, "instance", sum);
+    r.setInput(i, a, "12");
+
+    REQUIRE(r.getValue({{0, i}, out}).str == "14");
+}

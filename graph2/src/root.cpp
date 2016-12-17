@@ -19,6 +19,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
+    getMutableItem(cell).cell()->type = interpreter.cellType(expr);
 
     for (const auto& e : tree.envsOf(sheet))
     {
@@ -44,10 +45,26 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
         for (const auto& c : tree.cellsOf(target))
         {
             auto env = e; // copy
+            env.push_back(i);
             env.insert(e.end(), c.first.begin(), c.first.end());
             markDirty({env, nameOf(c.second)});
         }
     }
+
+    // Assign default expressions for inputs
+    for (const auto& t : iterItems(target))
+    {
+        if (auto c = getItem(t).cell())
+        {
+            if (c->type == Cell::INPUT)
+            {
+                getMutableItem(i).instance()->inputs[t] =
+                    interpreter.defaultExpr(c->expr);
+            }
+        }
+    }
+
+    sync();
     return i;
 }
 
@@ -114,6 +131,25 @@ void Root::setExpr(const CellIndex& i, const std::string& expr)
     {
         markDirty({e, tree.nameOf(i)});
     }
+    sync();
+}
+
+void Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
+                    const std::string& expr)
+{
+    assert(getItem(cell).cell()->type == Cell::INPUT);
+    assert(instance.i != 0);
+
+    auto i = getMutableItem(instance).instance();
+    assert(i->inputs.find(cell) != i->inputs.end());
+
+    i->inputs[cell] = expr;
+    for (auto env : tree.envsOf(tree.parentOf(instance)))
+    {
+        env.push_back(instance);
+        markDirty(toNameKey({env, cell}));
+    }
+
     sync();
 }
 

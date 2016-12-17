@@ -180,8 +180,7 @@ Value Interpreter::eval(const CellKey& key)
     s7_pointer value = nullptr;
     if (isInput(expr))
     {
-        env.pop_back();
-        if (!env.size())
+        if (env.size() == 1)
         {
             value = s7_eval_c_string(interpreter,
                     "(list 'error \"Input at top level\")");
@@ -192,6 +191,7 @@ Value Interpreter::eval(const CellKey& key)
             // (which lives in the parent instance)
             const auto& parent = root.getItem(env.back());
             expr = parent.instance()->inputs.at(cell);
+            env.pop_back();
         }
     }
 
