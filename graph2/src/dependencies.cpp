@@ -8,7 +8,8 @@ int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
 
     // If the target exists, then check for recursive lookups
     const auto sheet = root.getItem(lookee.first.back()).instance()->sheet;
-    if (root.hasItem(sheet, lookee.second))
+    if (root.hasItem(sheet, lookee.second) &&
+        root.getItem(sheet, lookee.second).cell())
     {
         const auto ck = root.toCellKey(lookee);
         upstream[looker].insert(upstream[ck].begin(), upstream[ck].end());

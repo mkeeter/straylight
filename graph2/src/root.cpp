@@ -38,8 +38,7 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
 
     for (const auto& e : tree.envsOf(parent))
     {
-        // TODO: Mark the instance itself as dirty
-        // (for anything that tried to get an input or output)
+        markDirty({e, name});
 
         // Then, mark all cells as dirty
         for (const auto& c : tree.cellsOf(target))
@@ -171,9 +170,11 @@ const Value& Root::getValue(const CellKey& cell) const
 
 void Root::markDirty(const NameKey& k)
 {
-    // If this cell still exists, then push it to the dirty list
+    // If the key refers to a cell that still exists,
+    // then push it to the dirty list
     auto sheet = getItem(k.first.back()).instance()->sheet;
-    if (hasItem(sheet, k.second))
+    if (hasItem(sheet, k.second) &&
+        getItem(sheet, k.second).cell())
     {
         pushDirty(toCellKey(k));
     }
