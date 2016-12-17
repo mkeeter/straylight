@@ -234,8 +234,9 @@ Value Interpreter::eval(const CellKey& key)
         {
             // If we failed to get a variable from an instance, then we need
             // to push a nested dependency into that instance
-            auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
-            auto instance_index = s7_integer(s7_cadddr(value));
+            auto args = s7_cddr(value);
+            auto target = s7_object_to_c_string(interpreter, s7_car(args));
+            auto instance_index = s7_integer(s7_caddr(args));
 
             // Look up the instance index by name and push it into the env
             auto env_ = env;
