@@ -104,7 +104,7 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
                         (copy (cons 'unbound-var (cadr args))))
-                    ((string=? "~A: missing instance lookup in ~A" (caadr args))
+                    ((string=? "~A: missing instance lookup in ~A (~A) " (caadr args))
                         (copy (cons 'unbound-instance (cadr args))))
                     (else
                         (copy (cons 'error (cadr args))))))))
