@@ -147,6 +147,19 @@ TEST_CASE("Root::setExpr")
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "8");
     }
+
+    SECTION("Cell becoming an output")
+    {
+        auto sum = r.insertSheet(0, "sum");
+
+        auto a = r.insertCell(sum, "a", "10");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        r.setExpr(a, "(output 5)");
+
+        REQUIRE(r.getValue({{0}, b}).str == "6");
+    }
 }
 
 TEST_CASE("Root::canInsertSheet")
@@ -205,6 +218,25 @@ TEST_CASE("Root::insertInstance")
 
         auto i = r.insertInstance(0, "instance", sum);
         REQUIRE(r.getValue({{0, i}, out}).str == "12");
+    }
+
+    SECTION("Output values")
+    {
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        REQUIRE(r.getValue({{0}, b}).str == "11");
+    }
+
+    SECTION("Detecting a new instance + output")
+    {
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
+
+        REQUIRE(r.getValue({{0}, b}).str == "11");
     }
 }
 
