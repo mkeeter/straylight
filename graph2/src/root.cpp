@@ -125,6 +125,23 @@ void Root::setExpr(const CellIndex& i, const std::string& expr)
         }
     }
 
+    // Force all dependencies to be recalculated if we've changed
+    // from non-output to output or vice versa.
+    //
+    // This kind of change could preserve the cell's value but change
+    // dependencies, which are either allowed or no longer allowed to
+    // look at its value.
+    if ((prev_type == Cell::OUTPUT) ^ (cell->type == Cell::OUTPUT))
+    {
+        for (const auto& e : tree.envsOf(tree.parentOf(i)))
+        {
+            for (const auto& d : deps.inverseDeps(toNameKey({e, i})))
+            {
+                pushDirty(d);
+            }
+        }
+    }
+
     // Mark all envs containing this cell as dirty
     for (const auto& e : tree.envsOf(tree.parentOf(i)))
     {
