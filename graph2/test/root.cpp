@@ -233,6 +233,15 @@ TEST_CASE("Root::insertInstance")
         REQUIRE(r.getValue({{0, i}, out}).str == "12");
     }
 
+    SECTION("Input evaluation environment")
+    {
+        auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
+        auto i = r.insertInstance(0, "instance", sum);
+
+        auto a = r.insertCell(0, "a", "12");
+        REQUIRE(r.getValue({{0, i}, input}).str == "13");
+    }
+
     SECTION("Output values")
     {
         auto a = r.insertCell(sum, "a", "(output 10)");
