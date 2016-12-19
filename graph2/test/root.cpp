@@ -240,6 +240,9 @@ TEST_CASE("Root::insertInstance")
 
         auto a = r.insertCell(0, "a", "12");
         REQUIRE(r.getValue({{0, i}, input}).str == "13");
+
+        r.setExpr(a, "13");
+        REQUIRE(r.getValue({{0, i}, input}).str == "14");
     }
 
     SECTION("Output values")
@@ -294,5 +297,17 @@ TEST_CASE("Root::eraseInstance")
         r.eraseInstance(i);
         CAPTURE(r.getValue({{0}, b}).str);
         REQUIRE(r.getValue({{0}, b}).valid == false);
+    }
+
+    SECTION("Cleaning of dependency list")
+    {
+        auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
+        auto i = r.insertInstance(0, "instance", sum);
+
+        auto a = r.insertCell(0, "a", "12"); // used in input
+        r.eraseInstance(i);
+
+        r.setExpr(a, "13");
+        /*  If this crashes, then the test fails!  */
     }
 }
