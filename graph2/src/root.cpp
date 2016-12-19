@@ -99,6 +99,39 @@ void Root::eraseCell(const CellIndex& cell)
     sync();
 }
 
+void Root::eraseInstance(const InstanceIndex& instance)
+{
+    // Find all output cells in this instance
+    std::set<std::string> outputs;
+    for (auto i : iterItems(getItem(instance).instance()->sheet))
+    {
+        if (auto cell = getItem(i).cell())
+        {
+            if (cell->type == Cell::OUTPUT)
+            {
+                outputs.insert(tree.nameOf(i));
+            }
+        }
+    }
+
+    const std::string name = tree.nameOf(instance);
+    const auto parent = tree.parentOf(instance);
+    tree.erase(instance); // Bye!
+    for (auto env : tree.envsOf(parent))
+    {
+        // Mark the instance itself as dirty
+        markDirty({env, name});
+
+        // Then mark all outputs as dirty
+        env.push_back(instance);
+        for (const auto& o : outputs)
+        {
+            markDirty({env, o});
+        }
+    }
+    sync();
+}
+
 void Root::setExpr(const CellIndex& i, const std::string& expr)
 {
     auto cell = getMutableItem(i).cell();
@@ -185,23 +218,38 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
+bool Root::checkEnv(const Env& env) const
+{
+    for (const auto& i : env)
+    {
+        if (!tree.isValid(i) ||
+            getItem(i).instance() == nullptr)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Root::markDirty(const NameKey& k)
 {
-    // If the key refers to a cell that still exists,
-    // then push it to the dirty list
-    auto sheet = getItem(k.first.back()).instance()->sheet;
-    if (hasItem(sheet, k.second) &&
-        getItem(sheet, k.second).cell())
+    // If the key refers to a valid environment and a cell that still
+    // exists, then push it to the dirty list directly
+    if (checkEnv(k.first))
     {
-        pushDirty(toCellKey(k));
-    }
-    else
-    {
-        // Otherwise push everything downstream of it to the list
-        for (auto& i : deps.inverseDeps(k))
+        auto sheet = getItem(k.first.back()).instance()->sheet;
+        if (hasItem(sheet, k.second) &&
+            getItem(sheet, k.second).cell())
         {
-            pushDirty(i);
+            pushDirty(toCellKey(k));
+            return;
         }
+    }
+
+    // Otherwise push everything downstream of it to the list
+    for (auto& i : deps.inverseDeps(k))
+    {
+        pushDirty(i);
     }
 }
 

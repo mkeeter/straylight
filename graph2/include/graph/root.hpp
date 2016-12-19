@@ -46,6 +46,11 @@ public:
     void eraseCell(const CellIndex& cell);
 
     /*
+     *  Erases an instance, triggering re-evaluation
+     */
+    void eraseInstance(const InstanceIndex& instance);
+
+    /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
     void setExpr(const CellIndex& cell, const std::string& expr);
@@ -165,6 +170,12 @@ protected:
         { return tree.at(item); }
 
     ////////////////////////////////////////////////////////////////////////////
+
+    /*
+     *  Checks to see whether the given env is valid
+     *  (i.e. that every item in it exists and is an instance)
+     */
+    bool checkEnv(const Env& env) const;
 
     /*
      *  Mark a particular key as dirty (if it exists); otherwise, marks

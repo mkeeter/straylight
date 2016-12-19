@@ -268,3 +268,22 @@ TEST_CASE("Root::setInput")
 
     REQUIRE(r.getValue({{0, i}, out}).str == "14");
 }
+
+TEST_CASE("Root::eraseInstance")
+{
+    Root r;
+
+    auto sum = r.insertSheet(0, "sum");
+
+    SECTION("Re-evaluating outputs")
+    {
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
+
+        r.eraseInstance(i);
+        CAPTURE(r.getValue({{0}, b}).str);
+        REQUIRE(r.getValue({{0}, b}).valid == false);
+    }
+}

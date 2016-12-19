@@ -89,6 +89,12 @@ public:
         { return names.left.find(std::make_pair(p, name)) != names.left.end(); }
 
     /*
+     *  Checks to see whether the given item is stored
+     */
+    bool isValid(const StoredIndex& i) const
+        { return storage.find(i) != storage.end(); }
+
+    /*
      *  Get a item's name
      */
     const std::string& nameOf(StoredIndex i) const
