@@ -299,6 +299,20 @@ TEST_CASE("Root::eraseInstance")
         REQUIRE(r.getValue({{0}, b}).valid == false);
     }
 
+    SECTION("Cleaning of values")
+    {
+        auto a = r.insertCell(sum, "a", " 12");
+        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+
+        // Insert an instance; one value should be created
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getItem(a).cell()->values.size() == 1);
+
+        // After erasing the instance, that values should be cleaned up
+        r.eraseInstance(i);
+        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+    }
+
     SECTION("Cleaning of dependency list")
     {
         auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");

@@ -103,7 +103,10 @@ void Root::eraseInstance(const InstanceIndex& instance)
 {
     // Find all output cells in this instance
     std::set<std::string> outputs;
-    for (auto i : iterItems(getItem(instance).instance()->sheet))
+
+    auto sheet = getItem(instance).instance()->sheet;
+    auto cells = tree.cellsOf(sheet);
+    for (auto i : iterItems(sheet))
     {
         if (auto cell = getItem(i).cell())
         {
@@ -127,6 +130,21 @@ void Root::eraseInstance(const InstanceIndex& instance)
         for (const auto& o : outputs)
         {
             markDirty({env, o});
+        }
+        for (const auto& c : cells)
+        {
+            // Make a new cell key with the nested environment
+            auto env_ = env;
+            env_.insert(env_.end(), c.first.begin(), c.first.end());
+
+            auto cell = getMutableItem(c.second).cell();
+            assert(cell != nullptr);
+
+            // Release the allocated value, then erase by key
+            interpreter.release(cell->values.at(env_).value);
+            cell->values.erase(env_);
+
+            // TODO: clean up dependencies here
         }
     }
     sync();
