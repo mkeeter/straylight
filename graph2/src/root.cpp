@@ -144,7 +144,9 @@ void Root::eraseInstance(const InstanceIndex& instance)
             interpreter.release(cell->values.at(env_).value);
             cell->values.erase(env_);
 
-            // TODO: clean up dependencies here
+            // Then clear dependencies for this cell, so that we don't
+            // end up trying to evaluate it
+            deps.clear({env_, c.second});
         }
     }
     sync();
