@@ -21,6 +21,7 @@ Item {
         id: libraryView
         anchors.top: header.bottom
         anchors.bottom: root.bottom
+        width: parent.width
 
         property ListModel libraryModel
         style: ScrollViewStyle {
