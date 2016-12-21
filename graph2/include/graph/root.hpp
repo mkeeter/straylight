@@ -6,6 +6,7 @@
 #include "graph/interpreter.hpp"
 #include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
+#include "graph/serializer.hpp"
 #include "graph/keys.hpp"
 #include "graph/tree.hpp"
 
@@ -71,6 +72,11 @@ public:
      *  Looks up the value of a particular env + cell
      */
     const Value& getValue(const CellKey& cell) const;
+
+    /*
+     *  Exports the graph to any object implementing the TreeSerializer API
+     */
+    void serialize(TreeSerializer* s) const;
 
     ////////////////////////////////////////////////////////////////////////////
     // Forwarding functions from stored Tree

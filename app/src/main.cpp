@@ -29,7 +29,7 @@ class FbItemRenderer : public QQuickFramebufferObject::Renderer
 
 class FbItem : public QQuickFramebufferObject
 {
-    QQuickFramebufferObject::Renderer *createRenderer() const
+    QQuickFramebufferObject::Renderer *createRenderer() const override
     {
         return new FbItemRenderer;
     }
@@ -45,6 +45,7 @@ int main(int argc, char**argv)
     QQmlApplicationEngine engine;
     qmlRegisterType<FbItem>("FbItem", 1, 0, "FbItem");
     qmlRegisterType<NameValidator>("NameValidator", 1, 0, "NameValidator");
+    qmlRegisterSingletonType(QUrl("qrc:/qml/Colors.qml"), "Colors", 1, 0, "Colors");
     engine.load(QUrl("qrc:/qml/main.qml"));
 
     return app.exec();

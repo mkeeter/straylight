@@ -6,12 +6,12 @@ import QtQuick.Controls.Styles 1.4
 import Colors 1.0
 
 Column {
-    height: childrenRect.height
+    id: root
     width: parent.width
 
     Text {
         id: header
-        width: parent.width
+        width: root.width
         text: "<b>Library:<b>"
         color: Colors.base0
         padding: 5
@@ -26,31 +26,30 @@ Column {
             transientScrollBars: true
         }
         */
-        width: parent.width
         clip: true
+        verticalScrollBarPolicy: Qt.ScrollBarAlwaysOn
 
         Column {
-            height: childrenRect.height
-            width: parent.width
-
-            Text {
+            Rectangle {
                 id: newCell
-                width: parent.width
-                text: "New cell..."
-                color: Colors.base0
-                padding: 5
+                width: root.width
+                height: childrenRect.height
+                color: Colors.base02
+                Text {
+                    text: "New cell..."
+                    color: Colors.base0
+                    padding: 5
+                }
             }
 
             ListView {
                 id: sheetList
-                anchors.top: newCell.bottom
                 model: libraryModel
                 height: childrenRect.height
-                width: parent.width
                 delegate: Rectangle {
-                    width: parent.width
+                    width: root.width
                     height: childrenRect.height
-                    color: index % 2 == 0 ? Colors.base03 : Colors.base02
+                    color: index % 2 == 0 ? Colors.base02 : Colors.base03
                     Text {
                         text: name
                         color: Colors.base0
@@ -61,13 +60,16 @@ Column {
                 }
             }
 
-            Text {
-                id: newSheet
-                anchors.top: sheetList.bottom
-                width: parent.width
-                text: "New sheet..."
-                color: Colors.base0
-                padding: 5
+            Rectangle {
+                width: root.width
+                height: childrenRect.height
+                color: libraryModel.count % 2 == 0 ? Colors.base03 : Colors.base02
+                Text {
+                    id: newSheet
+                    text: "New sheet..."
+                    color: Colors.base0
+                    padding: 5
+                }
             }
         }
     }
