@@ -47,13 +47,12 @@ Item {
                 Layout.row: 1
                 text: '<b>Expr: </b>'
             }
-            TextEdit {
+            CellExpr {
                 Layout.column: 1
                 Layout.row: 1
                 Layout.fillWidth: true
 
-                text: expr
-                selectByMouse: true
+                expr: expr
             }
             Rectangle {
                 Layout.column: 2

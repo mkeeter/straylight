@@ -54,25 +54,19 @@ Column {
         width: parent.width
     }
 
-    Rectangle {
-        color: 'transparent'
-        height: childrenRect.height
-        width: parent.width
-        Text {
-            color: Colors.red
-            height: (textItem.cursorVisible && !validator.checkName(textItem.text)) ? contentHeight + padding : 0
+    Text {
+        color: Colors.red
+        height: (textItem.cursorVisible && !validator.checkName(textItem.text)) ? contentHeight + padding : 0
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: 50
-                }
+        Behavior on height {
+            NumberAnimation {
+                duration: 50
             }
-            topPadding: 2
-            bottomPadding: 2
-            text: 'Error'
-            clip: true
         }
-        visible: height > 0
+        topPadding: 2
+        bottomPadding: 2
+        text: 'Error'
+        clip: true
     }
     property alias text: textItem.text
 }

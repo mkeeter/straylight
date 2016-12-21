@@ -13,6 +13,7 @@ SplitView {
 
     LibraryView {
         id: libraryView
+        Layout.minimumHeight: 100
     }
 
     property alias sheetModel: itemsView.itemsModel

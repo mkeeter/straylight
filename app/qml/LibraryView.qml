@@ -8,7 +8,6 @@ import Colors 1.0
 Item {
     id: root
     width: parent.width
-    Layout.minimumHeight: 100
 
     Text {
         id: header
@@ -34,13 +33,19 @@ Item {
             delegate: Rectangle {
                 width: root.width
                 height: childrenRect.height
-                color: ((index % 2) == 0) ? Colors.base02 : Colors.base03
+                color: hover.containsMouse ? Colors.base01 : (index % 2 == 0 ? Colors.base02 : Colors.base03)
                 Text {
                     text: name
-                    color: Colors.base0
+                    color: Colors.base1
                     topPadding: 3
                     leftPadding: 5
                     bottomPadding: topPadding
+                }
+
+                MouseArea {
+                    id: hover
+                    anchors.fill: parent
+                    hoverEnabled: true
                 }
             }
         }

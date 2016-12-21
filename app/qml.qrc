@@ -7,5 +7,6 @@
         <file>qml/ItemsView.qml</file>
         <file>qml/LibraryView.qml</file>
         <file>qml/Colors.qml</file>
+        <file>qml/CellExpr.qml</file>
     </qresource>
 </RCC>
