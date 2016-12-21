@@ -5,9 +5,10 @@ import QtQuick.Controls.Styles 1.4
 
 import Colors 1.0
 
-Column {
+Item {
     id: root
     width: parent.width
+    Layout.minimumHeight: 100
 
     Text {
         id: header
@@ -19,56 +20,27 @@ Column {
 
     ScrollView {
         id: libraryView
+        anchors.top: header.bottom
+        anchors.bottom: root.bottom
 
         property ListModel libraryModel
-        /*
         style: ScrollViewStyle {
             transientScrollBars: true
         }
-        */
-        clip: true
-        verticalScrollBarPolicy: Qt.ScrollBarAlwaysOn
 
-        Column {
-            Rectangle {
-                id: newCell
+        ListView {
+            id: sheetList
+            model: libraryModel
+            delegate: Rectangle {
                 width: root.width
                 height: childrenRect.height
-                color: Colors.base02
+                color: ((index % 2) == 0) ? Colors.base02 : Colors.base03
                 Text {
-                    text: "New cell..."
+                    text: name
                     color: Colors.base0
-                    padding: 5
-                }
-            }
-
-            ListView {
-                id: sheetList
-                model: libraryModel
-                height: childrenRect.height
-                delegate: Rectangle {
-                    width: root.width
-                    height: childrenRect.height
-                    color: index % 2 == 0 ? Colors.base02 : Colors.base03
-                    Text {
-                        text: name
-                        color: Colors.base0
-                        topPadding: 3
-                        leftPadding: 5
-                        bottomPadding: topPadding
-                    }
-                }
-            }
-
-            Rectangle {
-                width: root.width
-                height: childrenRect.height
-                color: libraryModel.count % 2 == 0 ? Colors.base03 : Colors.base02
-                Text {
-                    id: newSheet
-                    text: "New sheet..."
-                    color: Colors.base0
-                    padding: 5
+                    topPadding: 3
+                    leftPadding: 5
+                    bottomPadding: topPadding
                 }
             }
         }

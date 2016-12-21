@@ -8,6 +8,7 @@ SplitView {
 
     ItemsView {
         id: itemsView
+        Layout.fillHeight: true
     }
 
     LibraryView {

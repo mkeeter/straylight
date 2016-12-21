@@ -45,16 +45,36 @@ ApplicationWindow {
 
             libraryModel: ListModel {
                 ListElement {
+                    name: "New cell..."
+                    sheetIndex: -1
+                }
+                ListElement {
                     name: "Circle"
-                    index: 1
+                    sheetIndex: 1
                 }
                 ListElement {
                     name: "Sphere"
-                    index: 4
+                    sheetIndex: 4
                 }
                 ListElement {
                     name: "Cube"
-                    index: 5
+                    sheetIndex: 5
+                }
+                ListElement {
+                    name: "beep"
+                    sheetIndex: 5
+                }
+                ListElement {
+                    name: "boop"
+                    sheetIndex: 5
+                }
+                ListElement {
+                    name: "wat"
+                    sheetIndex: 5
+                }
+                ListElement {
+                    name: "New sheet..."
+                    sheetIndex: -1
                 }
             }
 
