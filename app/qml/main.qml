@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import FbItem 1.0
+import Colors 1.0
 
 ApplicationWindow {
     visible: true
@@ -11,6 +12,12 @@ ApplicationWindow {
 
     width: 640
     height: 480
+
+    style: ApplicationWindowStyle {
+        background: Rectangle {
+            color: Colors.base03
+        }
+    }
 
     //menu containing two menu items
     menuBar: MenuBar {
@@ -35,7 +42,21 @@ ApplicationWindow {
 
         SheetView {
             id: root
-            sheetIndex: [0]
+
+            libraryModel: ListModel {
+                ListElement {
+                    name: "Circle"
+                    index: 1
+                }
+                ListElement {
+                    name: "Sphere"
+                    index: 4
+                }
+                ListElement {
+                    name: "Cube"
+                    index: 5
+                }
+            }
 
             sheetModel: ListModel {
                 ListElement {

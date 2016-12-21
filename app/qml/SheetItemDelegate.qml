@@ -1,6 +1,8 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.0
 
+import Colors 1.0
+
 Item {
     id: sheetItemDelegate
     width: parent.width
@@ -20,6 +22,7 @@ Item {
             columns: 3
 
             Text {
+                color: Colors.base0
                 Layout.column: 0
                 Layout.row: 0
                 text: '<b>Name: </b>'
@@ -29,7 +32,6 @@ Item {
                 Layout.row: 0
                 Layout.fillWidth: true
 
-                indexPath: sheetView.sheetIndex.concat(index)
                 text: name
             }
             Rectangle {
@@ -40,6 +42,7 @@ Item {
             }
 
             Text {
+                color: Colors.base0
                 Layout.column: 0
                 Layout.row: 1
                 text: '<b>Expr: </b>'
@@ -55,7 +58,9 @@ Item {
             Rectangle {
                 Layout.column: 2
                 Layout.row: 1
-                color:'black';width:10;height:10
+                color:'black'
+                width:10
+                height:10
             }
         }
     }

@@ -4,5 +4,8 @@
         <file>qml/SheetView.qml</file>
         <file>qml/SheetItemDelegate.qml</file>
         <file>qml/ItemName.qml</file>
+        <file>qml/ItemsView.qml</file>
+        <file>qml/LibraryView.qml</file>
+        <file>qml/Colors.qml</file>
     </qresource>
 </RCC>

@@ -2,24 +2,24 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 
 import NameValidator 1.0
+import Colors 1.0
 
 Column {
-    property int index
-    property var indexPath
-
     NameValidator {
         id: validator
     }
     Rectangle {
-        color: '#c0c0c0'
+        color: Colors.base02
         id: nameRect
 
         TextInput {
+            color: Colors.base0
             id: textItem
             text: 'Hello, world'
             selectByMouse: true
             anchors.left: parent.left
             anchors.right: parent.right
+            padding: 5
 
             property string oldName
             onActiveFocusChanged: {
@@ -39,7 +39,7 @@ Column {
                 ColorAnimation {
                     target: nameRect
                     property: 'color'
-                    to: 'red'
+                    to: Colors.red
                     duration: 100
                 }
                 ColorAnimation {
@@ -55,10 +55,11 @@ Column {
     }
 
     Rectangle {
-        color: '#d0a0a0'
+        color: 'transparent'
         height: childrenRect.height
         width: parent.width
         Text {
+            color: Colors.red
             height: (textItem.cursorVisible && !validator.checkName(textItem.text)) ? contentHeight + padding : 0
 
             Behavior on height {
@@ -66,6 +67,8 @@ Column {
                     duration: 50
                 }
             }
+            topPadding: 2
+            bottomPadding: 2
             text: 'Error'
             clip: true
         }
