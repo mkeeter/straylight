@@ -1,76 +1,148 @@
 #pragma once
 
-#include <memory>
-#include <list>
-
-#include "types.hpp"
-#include "dependencies.hpp"
-#include "interpreter.hpp"
-#include "sheet.hpp"
-#include "instance.hpp"
-
-namespace Graph
-{
-struct Cell;
+#include "graph/library.hpp"
+#include "graph/cell.hpp"
+#include "graph/item.hpp"
+#include "graph/interpreter.hpp"
+#include "graph/instance.hpp"
+#include "graph/dependencies.hpp"
+#include "graph/serializer.hpp"
+#include "graph/keys.hpp"
+#include "graph/tree.hpp"
 
 class Root
 {
 public:
-    Root();
+    Root() : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
+        { /* Nothing to do here */ }
 
     /*
-     *  Insert a cell into a particular Sheet
+     *  Looks up a name key and converts it to a cell key
+     *  Requires that hasItem(k) be true
      */
-    Cell* insertCell(Sheet* sheet, const Name& name, const Expr& expr);
-    void editCell(Cell* cell, const Expr& expr);
-    void eraseCell(Cell* cell);
+    CellKey toCellKey(const NameKey& k) const;
 
     /*
-     *  Edits an instance input expression
+     *  Converts a cell key into a name key
+     *  Requires that the cell key be valid
      */
-    void editInput(Instance* i, Cell* cell, const Expr& expr);
+    NameKey toNameKey(const CellKey& k) const;
 
     /*
-     *  Insert a new instance to a given Sheet
+     *  Insert a new cell into the graph, re-evaluating as necessary
      */
-    Instance* insertInstance(Sheet* sheet, const Name& name, Sheet* target);
-    void eraseInstance(Instance* i);
+    CellIndex insertCell(const SheetIndex& parent, const std::string& name,
+                         const std::string& expr="");
 
     /*
-     *  Checks to see whether we can insert the given sheet
-     *  by examining whether this would create a recursive loop.
+     *  Inserts a new instance into the graph
      */
-    bool canInsertInstance(Sheet* sheet, Sheet* target) const;
+    InstanceIndex insertInstance(const SheetIndex& parent,
+                                 const std::string& name,
+                                 const SheetIndex& target);
 
     /*
-     *  Renames a cell or instance
-     *  Requires canInsert(sheet, name) to be true
+     *  Erases a cell, triggering re-evaluation
      */
-    void rename(Sheet* sheet, const Name& orig, const Name& name);
+    void eraseCell(const CellIndex& cell);
 
     /*
-     *  Checks whether we can insert a cell or instance
-     *  of the given name (since that namespace is shared)
+     *  Erases an instance, triggering re-evaluation
      */
-    bool canInsert(Sheet* const sheet, const Name& name) const;
+    void eraseInstance(const InstanceIndex& instance);
 
     /*
-     *  Create a new Sheet in an existing Sheet's library
+     *  Changes a cell's expression, re-evaluating as necessary
      */
-    Sheet* createSheet(Sheet* sheet, const Name& name);
-    bool canCreateSheet(Sheet* sheet, const Name& name) const;
-    void renameSheet(Sheet* sheet, const Name& orig, const Name& name);
+    void setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
-     *  Delete a sheet from a library
+     *  Changes the input expression for a particular instance
      */
-    void deleteSheet(Sheet* sheet, const Name& name);
+    void setInput(const InstanceIndex& instance, const CellIndex& cell,
+                  const std::string& expr);
 
-    /*  Encapsulation?  Never heard of it!  */
-    std::unique_ptr<Sheet> sheet;
-    std::unique_ptr<Instance> instance;
+    /*
+     *  Assigns the given value to a cell
+     *  TODO: this is only used in test harnesses
+     */
+    void setValue(const CellKey& cell, const Value& v);
 
-private:
+    /*
+     *  Looks up the value of a particular env + cell
+     */
+    const Value& getValue(const CellKey& cell) const;
+
+    /*
+     *  Exports the graph to any object implementing the TreeSerializer API
+     */
+    void serialize(TreeSerializer* s) const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Forwarding functions from stored Tree
+
+    /*
+     *  Looks up an item by index
+     */
+    const Item& getItem(const ItemIndex& item) const
+        { return tree.at(item); }
+
+    /*
+     *  Looks up the name of an item
+     */
+    const std::string& nameOf(const ItemIndex& item) const
+        { return tree.nameOf(item); }
+
+    /*
+     *  Check to see whether the given sheet has a particular item
+     */
+    bool hasItem(const SheetIndex& sheet, const std::string& name) const
+        {   return tree.hasItem(sheet, name); }
+
+    /*
+     *  Looks up an item by name
+     */
+    const Item& getItem(const SheetIndex& sheet, const std::string& name) const
+        {   return tree.at(sheet, name); }
+
+    /*
+     *  Iterate over items belonging to a particular sheet
+     */
+    const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
+        { return tree.iterItems(parent); }
+
+    /*
+     *  Checks to see whether we can insert the given cell
+     */
+    bool canInsertCell(const SheetIndex& parent,
+                       const std::string& name) const
+        { return tree.canInsertCell(parent, name); }
+
+    /*
+     *  Checks to see whether we can insert the given instance
+     *  (checking both name collisions and recursive loops)
+     */
+    bool canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
+                           const std::string& name) const
+        { return tree.canInsertInstance(parent, target, name); }
+
+    /*
+     *  Check whether we can rename a cell or instance
+     */
+    bool canRename(const ItemIndex& item, const std::string& new_name) const
+        { return tree.canRename(item, new_name); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    bool canInsertSheet(const SheetIndex& parent,
+                        const std::string& name) const
+        { return lib.canInsert(parent, name); }
+
+    SheetIndex insertSheet(const SheetIndex& parent, const std::string& name)
+        { return lib.insert(parent, name); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
     /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)
@@ -90,6 +162,7 @@ private:
     };
     Lock_ Lock() { return Lock_(this); }
 
+protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
      *  (if frozen is true, then this is a no-op)
@@ -97,14 +170,18 @@ private:
     void sync();
 
     /*
-     *  Call when the given item has been changed
-     *
-     *  This recurses down every instance and marks the given cell or
-     *  sheet/name pair as dirty (the second case is used when deleting
-     *  or renaming cells).
+     *  Looks up an item by index (non-const version)
      */
-    void changed(Cell* cell);
-    void changed(Sheet* sheet, const Name& name);
+    Item& getMutableItem(const ItemIndex& item)
+        { return tree.at(item); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    /*
+     *  Checks to see whether the given env is valid
+     *  (i.e. that every item in it exists and is an instance)
+     */
+    bool checkEnv(const Env& env) const;
 
     /*
      *  Mark a particular key as dirty (if it exists); otherwise, marks
@@ -119,17 +196,23 @@ private:
      */
     void pushDirty(const CellKey& k);
 
-    /*  struct that stores lookups in both directions  */
-    Dependencies deps;
+    ////////////////////////////////////////////////////////////////////////////
 
-    /*  List of keys that need re-evaluation  */
-    std::list<CellKey> dirty;
+    /*  Here's all the data in the graph.  Our default sheet is lib[0] */
+    Tree tree;
+    std::unique_ptr<Instance> instance;
+    Library lib;
 
     /*  When locked, changes don't provoke evaluation
      *  (though the dirty list is still populated)  */
     bool locked=false;
 
+    /*  struct that stores lookups in both directions  */
+    Dependencies deps;
+
     /*  This is our embedded Scheme interpreter  */
     Interpreter interpreter;
+
+    /*  List of keys that need re-evaluation  */
+    std::list<CellKey> dirty;
 };
-}   // namespace Graph

@@ -3,15 +3,15 @@
 #include <map>
 #include <set>
 
-#include "types.hpp"
 #include "keys.hpp"
 
-namespace Graph
-{
-struct Cell;
+class Root;
 
-struct Dependencies
+class Dependencies
 {
+public:
+    Dependencies(const Root& parent) : root(parent) {}
+
     /*
      *  Insert a lookup
      *  Returns 1 if the lookup is recursive, 0 otherwise
@@ -25,10 +25,21 @@ struct Dependencies
     void clear(const CellKey& looker);
 
     /*
-     *  Clear all recorded lookups involving this cell in all environments.
-     *  This should be called when a cell is erased
+     *  Lookup in the inverse map
      */
-    void clearAll(const Cell* cell);
+    const std::set<CellKey>& inverseDeps(const NameKey& k) const;
+
+    /*
+     *  Checks whether b is upstream of a
+     */
+    bool isUpstream(const CellKey& a, const CellKey& b) const
+        {   return upstream.count(a) && upstream.at(a).count(b); }
+
+protected:
+    /*
+     *  Reference to parent root object, which we'll query for cell data
+     */
+    const Root& root;
 
     /*  forward[cell] records all of the lookups that cell made
      *  (by name, as that's how lookups work)    */
@@ -46,5 +57,3 @@ struct Dependencies
      *  detect circular dependencies. */
     std::map<CellKey, std::set<CellKey>> upstream;
 };
-
-}   // namespace Graph

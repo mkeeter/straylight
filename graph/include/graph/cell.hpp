@@ -1,25 +1,21 @@
 #pragma once
 
+#include <string>
 #include <map>
 
-#include "types.hpp"
-#include "value.hpp"
-
-namespace Graph
-{
-struct Sheet;
+#include "graph/env.hpp"
+#include "graph/value.hpp"
 
 struct Cell
 {
-    Cell(const Expr& expr, Sheet* parent) : expr(expr), parent(parent) {}
+    Cell(const std::string& e) : expr(e) {}
 
-    /*  Expression to be evaluated! */
-    Expr expr;
+    /*  Expression to be evaluated  */
+    std::string expr;
+
     /*  type should be changed at the same time as expr  */
     enum Type { UNKNOWN, BASIC, INPUT, OUTPUT } type=UNKNOWN;
 
+    /*  Per-environment value list  */
     std::map<Env, Value> values;
-
-    Sheet* const parent;
 };
-}   // namespace Graph

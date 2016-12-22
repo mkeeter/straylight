@@ -2,14 +2,14 @@
 
 #include <string>
 
-struct s7_cell;
+#include "graph/ptr.hpp"
 
-namespace Graph
-{
 struct Value
 {
-    s7_cell* value=nullptr;
+    Value(ValuePtr value, std::string str, bool valid)
+        : value(value), str(str), valid(valid) {}
+
+    ValuePtr value=nullptr;
     std::string str="";
     bool valid=false;
 };
-}   // namespace Graph

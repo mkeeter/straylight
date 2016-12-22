@@ -1,15 +1,17 @@
 #pragma once
 
-#include "types.hpp"
+#include <string>
+#include <list>
 
-namespace Graph
-{
-struct Cell;
+#include "graph/index.hpp"
+#include "graph/env.hpp"
 
-typedef std::pair<Env, Name> NameKey;
-typedef std::pair<Env, Cell*> CellKey;
-
-NameKey toNameKey(const CellKey& c);
-CellKey toCellKey(const NameKey& n);
-bool isCellKey(const NameKey& n);
-}
+/*
+ *  Refers to a particular cell in the graph
+ *
+ *  Though a cell only exists once the library, here, we care about unique
+ *  instances of the cell, so we use the environment (which is a list of
+ *  ItemIndex) to localize the cell.
+ */
+typedef std::pair<Env, std::string> NameKey;
+typedef std::pair<Env, CellIndex> CellKey;

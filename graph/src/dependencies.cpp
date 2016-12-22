@@ -1,19 +1,17 @@
-#include "graph/instance.hpp"
-#include "graph/sheet.hpp"
 #include "graph/dependencies.hpp"
-
-namespace Graph
-{
+#include "graph/root.hpp"
 
 int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
 {
     forward[looker].insert(lookee);
     inverse[lookee].insert(looker);
 
-    // If this value exists, then check for recursive lookups
-    if (lookee.first.back()->sheet->cells.left.count(lookee.second))
+    // If the target exists, then check for recursive lookups
+    const auto sheet = root.getItem(lookee.first.back()).instance()->sheet;
+    if (root.hasItem(sheet, lookee.second) &&
+        root.getItem(sheet, lookee.second).cell())
     {
-        const auto ck = toCellKey(lookee);
+        const auto ck = root.toCellKey(lookee);
         upstream[looker].insert(upstream[ck].begin(), upstream[ck].end());
 
         return upstream[ck].count(looker) > 0;
@@ -33,22 +31,8 @@ void Dependencies::clear(const CellKey& looker)
     upstream[looker] = {looker};
 }
 
-void Dependencies::clearAll(const Cell* cell)
+const std::set<CellKey>& Dependencies::inverseDeps(const NameKey& k) const
 {
-    std::list<CellKey> keys;
-
-    for (auto k : forward)
-    {
-        if (k.first.second == cell)
-        {
-            keys.push_back(k.first);
-        }
-    }
-
-    for (auto k : keys)
-    {
-        clear(k);
-    }
+    const static std::set<CellKey> empty;
+    return inverse.count(k) ? inverse.at(k) : empty;
 }
-
-}   // namespace Graph

@@ -1,365 +1,327 @@
 #include "catch/catch.hpp"
 
 #include "graph/root.hpp"
-#include "graph/cell.hpp"
 
-TEST_CASE("Simple evaluation")
+TEST_CASE("Root::toCellKey")
 {
-    Graph::Root root;
-    auto c = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-    REQUIRE(c->values.size() == 1);
-    REQUIRE(c->values.count({root.instance.get()}) == 1);
-    REQUIRE(c->values[{root.instance.get()}].str == "3");
+    Root r;
+    auto a = r.insertCell(0, "a", "(+ 1 2)");
+    auto ck = r.toCellKey({{0}, "a"});
+    REQUIRE(ck.first.size() == 1);
+    REQUIRE(ck.first.front() == 0);
+    REQUIRE(ck.second == a);
 }
 
-TEST_CASE("Evaluation with lookups")
+TEST_CASE("Root::toNameKey")
 {
-    Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "1");
-    auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
-    REQUIRE(y->values[{root.instance.get()}].str == "2");
+    Root r;
+    auto a = r.insertCell(0, "a", "(+ 1 2)");
+    auto nk = r.toNameKey({{0}, a});
+    REQUIRE(nk.first.size() == 1);
+    REQUIRE(nk.first.front() == 0);
+    REQUIRE(nk.second == "a");
 }
 
-TEST_CASE("Re-evaluation on parent change")
+TEST_CASE("Root::getValue")
 {
-    Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "1");
-    auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
-    root.editCell(x, "2");
-    REQUIRE(y->values[{root.instance.get()}].str == "3");
+    Root r;
+    auto a = r.insertCell(0, "a", "(+ 1 2)");
+    auto v = r.getValue({{0}, a});
+    REQUIRE(v.value != nullptr);
+    REQUIRE(v.valid == true);
+    REQUIRE(v.str == "3");
 }
 
-TEST_CASE("Parent becoming invalid")
+TEST_CASE("Root::insertCell")
 {
-    Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-    auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
-    root.editCell(x, "(+ 1 2");
-    REQUIRE(!y->values[{root.instance.get()}].valid);
-}
+    Root r;
 
-TEST_CASE("Multiple evaluation paths")
-{
-    Graph::Root root;
-    auto x = root.insertCell(root.sheet.get(), "x", "1");
-    auto a = root.insertCell(root.sheet.get(), "a", "(+ 2 (x))");
-    auto y = root.insertCell(root.sheet.get(), "y", "(+ (a) (x))");
-    root.editCell(x, "3");
-    REQUIRE(y->values[{root.instance.get()}].str == "8");
-}
-
-TEST_CASE("Re-evaluation on cell insertion")
-{
-    Graph::Root root;
-    auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (x))");
-    auto x = root.insertCell(root.sheet.get(), "x", "1");
-    REQUIRE(y->values[{root.instance.get()}].str == "2");
-}
-
-TEST_CASE("Root::canInsert")
-{
-    Graph::Root root;
-    SECTION("Cell name collision")
+    SECTION("Basic")
     {
-        auto x = root.insertCell(root.sheet.get(), "x", "1");
-        REQUIRE(!root.canInsert(root.sheet.get(), "x"));
-        REQUIRE(root.canInsert(root.sheet.get(), "y"));
+        auto a = r.insertCell(0, "a", "(+ 1 2)");
+        auto v = r.getValue({{0}, a});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == true);
+        REQUIRE(v.str == "3");
     }
 
-    SECTION("Instance name collision")
+    SECTION("With lookups (ordered)")
     {
-        auto s = root.createSheet(root.sheet.get(), "b");
-        root.insertInstance(root.sheet.get(), "x", s);
-        REQUIRE(!root.canInsert(root.sheet.get(), "x"));
-        REQUIRE(root.canInsert(root.sheet.get(), "y"));
+        auto x = r.insertCell(0, "x", "1");
+        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+        auto v = r.getValue({{0}, y});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == true);
+        REQUIRE(v.str == "2");
     }
 
-    SECTION("Valid and invalid names")
+    SECTION("With lookups (unordered)")
     {
-        REQUIRE(root.canInsert(root.sheet.get(), "x"));
-        REQUIRE(root.canInsert(root.sheet.get(), "name-with-dashes"));
-        REQUIRE(root.canInsert(root.sheet.get(), "a123"));
-        REQUIRE(root.canInsert(root.sheet.get(), "123a"));
-        REQUIRE(!root.canInsert(root.sheet.get(), "123"));
-        REQUIRE(!root.canInsert(root.sheet.get(), "name with spaces"));
-        REQUIRE(!root.canInsert(root.sheet.get(), "trailing-space "));
-        REQUIRE(!root.canInsert(root.sheet.get(), "trailing-spaces   "));
-        REQUIRE(!root.canInsert(root.sheet.get(), "    preceeding-spaces"));
-        REQUIRE(!root.canInsert(root.sheet.get(), "(name-with-parens)"));
-        REQUIRE(!root.canInsert(root.sheet.get(), ""));
-    }
-}
-
-TEST_CASE("Cell.values.valid")
-{
-    Graph::Root root;
-    SECTION("Auto-recursive lookup")
-    {
-        auto x = root.insertCell(root.sheet.get(), "x", "(x)");
-        REQUIRE(!x->values[{root.instance.get()}].valid);
-    }
-}
-
-TEST_CASE("Root::canCreateSheet")
-{
-    Graph::Root root;
-    REQUIRE(root.canCreateSheet(root.sheet.get(), "b"));
-    auto s = root.createSheet(root.sheet.get(), "b");
-    REQUIRE(!root.canCreateSheet(root.sheet.get(), "b"));
-    REQUIRE(!root.canCreateSheet(root.sheet.get(), ""));
-    REQUIRE(root.canCreateSheet(root.sheet.get(), "a"));
-}
-
-TEST_CASE("Root::canInsertInstance")
-{
-    Graph::Root root;
-
-    SECTION("Recursive")
-    {
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        REQUIRE(!root.canInsertInstance(ia->sheet, a));
+        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+        auto x = r.insertCell(0, "x", "1");
+        auto v = r.getValue({{0}, y});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == true);
+        REQUIRE(v.str == "2");
     }
 
-    SECTION("More recursive")
+    SECTION("Single-item circular lookup")
     {
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        auto b = root.createSheet(ia->sheet, "b");
-        auto ib = root.insertInstance(ia->sheet, "ib", b);
-        REQUIRE(!root.canInsertInstance(ib->sheet, b));
-        REQUIRE(!root.canInsertInstance(ib->sheet, a));
-    }
-}
-
-TEST_CASE("Root::rename")
-{
-    Graph::Root root;
-    SECTION("Renaming")
-    {
-        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-        root.rename(root.sheet.get(), "x", "y");
-        REQUIRE(root.sheet->cells.left.count("y") == 1);
-        REQUIRE(root.sheet->cells.left.at("y") == x);
-    }
-
-    SECTION("Change detection")
-    {
-        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-
-        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
-        REQUIRE(a->values[{root.instance.get()}].str == "4");
-        REQUIRE(a->values[{root.instance.get()}].valid);
-
-        auto b = root.insertCell(root.sheet.get(), "b", "(+ (y) 2)");
-        REQUIRE(!b->values[{root.instance.get()}].valid);
-
-        root.rename(root.sheet.get(), "x", "y");
-        REQUIRE(!a->values[{root.instance.get()}].valid);
-        REQUIRE(b->values[{root.instance.get()}].str == "5");
-        REQUIRE(b->values[{root.instance.get()}].valid);
-    }
-
-    SECTION("Renaming instances")
-    {
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        root.rename(root.sheet.get(), "ia", "ja");
-        REQUIRE(root.sheet->instances.left.count("ja") == 1);
-        REQUIRE(root.sheet->instances.left.at("ja") == ia);
+        auto a = r.insertCell(0, "a", "(a)");
+        auto v = r.getValue({{0}, a});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == false);
+        REQUIRE(v.str == "Circular lookup");
     }
 }
 
 TEST_CASE("Root::eraseCell")
 {
-    Graph::Root root;
+    Root r;
 
     SECTION("Basic erasing")
     {
-        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-        REQUIRE(root.sheet->cells.right.count(x));
-        root.eraseCell(x);
-        REQUIRE(!root.sheet->cells.right.count(x));
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        REQUIRE(!r.canInsertCell(0, "x"));
+        r.eraseCell(x);
+        REQUIRE(r.canInsertCell(0, "x"));
     }
 
     SECTION("Change detection")
     {
-        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        auto a = r.insertCell(0, "a", "(+ 1 (x))");
 
-        root.eraseCell(x);
-        REQUIRE(!a->values[{root.instance.get()}].valid);
+        r.eraseCell(x);
+        REQUIRE(!r.getValue({{0}, a}).valid);
     }
 
     SECTION("Dependency cleanup")
     {
-        auto x = root.insertCell(root.sheet.get(), "x", "(+ 1 2)");
-        auto a = root.insertCell(root.sheet.get(), "a", "(+ 1 (x))");
+        auto x = r.insertCell(0, "x", "(+ 1 2)");
+        auto a = r.insertCell(0, "a", "(+ 1 (x))");
 
-        root.eraseCell(a);
-        root.editCell(x, "15");
-        REQUIRE(x->values[{root.instance.get()}].str == "15");
+        r.eraseCell(a);
+        r.setExpr(x, "15");
+        REQUIRE(r.getValue({{0}, x}).str == "15");
     }
 }
 
-TEST_CASE("Root::createSheet")
+TEST_CASE("Root::setExpr")
 {
-    Graph::Root root;
-    auto a = root.createSheet(root.sheet.get(), "a");
-    auto b = root.createSheet(root.sheet.get(), "b");
+    Root r;
 
-    REQUIRE(a != nullptr);
-    REQUIRE(a->parent == root.sheet.get());
-    REQUIRE(b != nullptr);
-    REQUIRE(b->parent == root.sheet.get());
+    SECTION("Re-evaluation on parent change")
+    {
+        auto x = r.insertCell(0, "x", "1");
+        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+
+        r.setExpr(x, "10");
+        auto v = r.getValue({{0}, y});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == true);
+        REQUIRE(v.str == "11");
+    }
+
+    SECTION("Upstream becoming invalid")
+    {
+        auto x = r.insertCell(0, "x", "1");
+        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+
+        r.setExpr(x, "this isn't a valid expression");
+        auto v = r.getValue({{0}, y});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == false);
+        REQUIRE(v.str == "Invalid lookup");
+    }
+
+    SECTION("Multiple evaluation paths")
+    {
+        auto x = r.insertCell(0, "x", "1");
+        r.insertCell(0, "a", "(+ 2 (x))");
+        auto y = r.insertCell(0, "y", "(+ (a) (x))");
+        r.setExpr(x, "3");
+
+        auto v = r.getValue({{0}, y});
+        REQUIRE(v.value != nullptr);
+        REQUIRE(v.valid == true);
+        REQUIRE(v.str == "8");
+    }
+
+    SECTION("Cell becoming an output")
+    {
+        auto sum = r.insertSheet(0, "sum");
+
+        auto a = r.insertCell(sum, "a", "10");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        r.setExpr(a, "(output 5)");
+
+        REQUIRE(r.getValue({{0}, b}).str == "6");
+    }
+
+    SECTION("Cell becoming an output (same value)")
+    {
+        auto sum = r.insertSheet(0, "sum");
+
+        auto a = r.insertCell(sum, "a", "10");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        r.setExpr(a, "(output 10)");
+
+        REQUIRE(r.getValue({{0}, b}).str == "11");
+    }
+}
+
+TEST_CASE("Root::canInsertSheet")
+{
+    Root r;
+    REQUIRE(r.canInsertSheet(0, "sum"));
+    REQUIRE(!r.canInsertSheet(0, ""));
+
+    r.insertSheet(0, "sum");
+    REQUIRE(!r.canInsertSheet(0, "sum"));
+}
+
+TEST_CASE("Root::insertSheet")
+{
+    Root r;
+    auto sum = r.insertSheet(0, "sum");
+    REQUIRE(sum.i == 1);
+
+    auto mul = r.insertSheet(0, "mul");
+    REQUIRE(mul.i == 2);
 }
 
 TEST_CASE("Root::insertInstance")
 {
-    Graph::Root root;
+    Root r;
 
-    SECTION("Flat")
+    auto sum = r.insertSheet(0, "sum");
+
+    SECTION("Cells within sheet")
     {
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto b = root.createSheet(root.sheet.get(), "b");
+        auto a = r.insertCell(sum, "a", "1");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        auto ib = root.insertInstance(root.sheet.get(), "ib", b);
-
-        REQUIRE(ia->sheet == a);
-        REQUIRE(ib->sheet == b);
-        REQUIRE(ia->sheet->parent == root.sheet.get());
-        REQUIRE(ib->sheet->parent == root.sheet.get());
-        REQUIRE(ia->parent == root.sheet.get());
-        REQUIRE(ib->parent == root.sheet.get());
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).str == "3");
     }
 
-    SECTION("Nested")
+    SECTION("Multiple instances")
     {
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-        auto ab = root.createSheet(ia->sheet, "b");
-        auto iab = root.insertInstance(ia->sheet, "ib", ab);
+        auto a = r.insertCell(sum, "a", "1");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto c = root.createSheet(root.sheet.get(), "c");
-        auto iac = root.insertInstance(ia->sheet, "iac", c);
-        auto iabc = root.insertInstance(iab->sheet, "iabc", c);
-
-        REQUIRE(a->parent == root.sheet.get());
-        REQUIRE(ia->parent == root.sheet.get());
-        REQUIRE(ab->parent == a);
-        REQUIRE(iab->parent == a);
-        REQUIRE(c->parent == root.sheet.get());
-        REQUIRE(iac->parent == ia->sheet);
-        REQUIRE(iabc->parent == iab->sheet);
+        auto i = r.insertInstance(0, "instance", sum);
+        auto j = r.insertInstance(0, "jnstance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).value !=
+                r.getValue({{0, j}, out}).value);
     }
 
-    SECTION("Change detection")
+    SECTION("Sheet input default")
     {
-        auto x = root.insertCell(root.sheet.get(), "x", "(ia 'x)");
-        REQUIRE(x->values[{root.instance.get()}].str == "ia: unbound variable");
+        auto a = r.insertCell(sum, "a", "(input 10)");
+        auto b = r.insertCell(sum, "b", "2");
+        auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto a = root.createSheet(root.sheet.get(), "a");
-        auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-
-        REQUIRE(x->values[{root.instance.get()}].str == "x: missing instance lookup in ia");
-    }
-}
-
-TEST_CASE("Root: inputs")
-{
-    Graph::Root root;
-
-    auto a = root.createSheet(root.sheet.get(), "a");
-    auto x = root.insertCell(a, "x", "(input 0)");
-
-    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
-    Graph::Env env = {root.instance.get(), ia};
-
-    SECTION("Evaluation")
-    {
-        REQUIRE(x->values.size() == 1);
-        REQUIRE(x->values.count(env) == 1);
-        REQUIRE(x->values[env].str == "0");
-
-        REQUIRE(ia->inputs.count(x));
-        REQUIRE(ia->inputs.at(x) == "0");
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getValue({{0, i}, out}).str == "12");
     }
 
-    SECTION("References")
+    SECTION("Input evaluation environment")
     {
-        auto y = root.insertCell(a, "y", "(+ 1 (x))");
-        REQUIRE(y->values.size() == 1);
-        REQUIRE(y->values.count(env) == 1);
-        REQUIRE(y->values[env].str == "1");
+        auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
+        auto i = r.insertInstance(0, "instance", sum);
+
+        auto a = r.insertCell(0, "a", "12");
+        REQUIRE(r.getValue({{0, i}, input}).str == "13");
+
+        r.setExpr(a, "13");
+        REQUIRE(r.getValue({{0, i}, input}).str == "14");
+    }
+
+    SECTION("Output values")
+    {
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
+
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        REQUIRE(r.getValue({{0}, b}).str == "11");
+    }
+
+    SECTION("Detecting a new instance + output")
+    {
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
+
+        REQUIRE(r.getValue({{0}, b}).str == "11");
     }
 }
 
-TEST_CASE("Root: outputs")
+TEST_CASE("Root::setInput")
 {
-    Graph::Root root;
+    Root r;
 
-    auto a = root.createSheet(root.sheet.get(), "a");
-    auto x = root.insertCell(a, "x", "(output 0)");
+    auto sum = r.insertSheet(0, "sum");
 
-    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+    auto a = r.insertCell(sum, "a", "(input 10)");
+    auto b = r.insertCell(sum, "b", "2");
+    auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-    SECTION("Evaluation")
-    {
-        Graph::Env env = {root.instance.get(), ia};
+    auto i = r.insertInstance(0, "instance", sum);
+    r.setInput(i, a, "12");
 
-        REQUIRE(x->values.size() == 1);
-        REQUIRE(x->values.count(env) == 1);
-        REQUIRE(x->values[env].str == "0");
-    }
-
-    SECTION("Valid reference")
-    {
-        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
-
-        Graph::Env env = {root.instance.get()};
-        REQUIRE(y->values.size() == 1);
-        REQUIRE(y->values.count(env) == 1);
-        REQUIRE(y->values[env].str == "1");
-    }
-
-    SECTION("Invalid reference")
-    {
-        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'z))");
-
-        Graph::Env env = {root.instance.get()};
-        REQUIRE(y->values.size() == 1);
-        REQUIRE(y->values.count(env) == 1);
-        REQUIRE(y->values[env].str == "z: missing instance lookup in ia");
-    }
-
-    SECTION("Change detection")
-    {
-        root.editCell(x, "12");
-        auto y = root.insertCell(root.sheet.get(), "y", "(+ 1 (ia 'x))");
-
-        Graph::Env env = {root.instance.get()};
-        CAPTURE(y->values[env].str);
-        REQUIRE(y->values[env].valid == false);
-
-        root.editCell(x, "(output 15)");
-        CAPTURE(y->values[env].str);
-        REQUIRE(y->values[env].valid == true);
-        REQUIRE(y->values[env].str == "16");
-    }
+    REQUIRE(r.getValue({{0, i}, out}).str == "14");
 }
 
-TEST_CASE("Root::editInput")
+TEST_CASE("Root::eraseInstance")
 {
-    Graph::Root root;
+    Root r;
 
-    auto a = root.createSheet(root.sheet.get(), "a");
-    auto x = root.insertCell(a, "x", "(input 0)");
+    auto sum = r.insertSheet(0, "sum");
 
-    auto ia = root.insertInstance(root.sheet.get(), "ia", a);
+    SECTION("Re-evaluating outputs")
+    {
+        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
 
-    root.editInput(ia, x, "12");
+        auto a = r.insertCell(sum, "a", "(output 10)");
+        auto i = r.insertInstance(0, "i", sum);
 
-    Graph::Env env = {root.instance.get(), ia};
-    REQUIRE(x->values[env].str == "12");
+        r.eraseInstance(i);
+        CAPTURE(r.getValue({{0}, b}).str);
+        REQUIRE(r.getValue({{0}, b}).valid == false);
+    }
+
+    SECTION("Cleaning of values")
+    {
+        auto a = r.insertCell(sum, "a", " 12");
+        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+
+        // Insert an instance; one value should be created
+        auto i = r.insertInstance(0, "instance", sum);
+        REQUIRE(r.getItem(a).cell()->values.size() == 1);
+
+        // After erasing the instance, that values should be cleaned up
+        r.eraseInstance(i);
+        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+    }
+
+    SECTION("Cleaning of dependency list")
+    {
+        auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
+        auto i = r.insertInstance(0, "instance", sum);
+
+        auto a = r.insertCell(0, "a", "12"); // used in input
+        r.eraseInstance(i);
+
+        r.setExpr(a, "13");
+        /*  If this crashes, then the test fails!  */
+    }
 }

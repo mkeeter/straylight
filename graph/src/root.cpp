@@ -1,403 +1,304 @@
-#include <cassert>
-
 #include "graph/root.hpp"
-#include "graph/sheet.hpp"
-#include "graph/instance.hpp"
-#include "graph/cell.hpp"
 
-namespace Graph
+CellKey Root::toCellKey(const NameKey& k) const
 {
+    auto sheet = getItem(k.first.back()).instance()->sheet;
+    auto i = tree.indexOf(sheet, k.second);
 
-Root::Root()
-    : sheet(new Sheet(nullptr)), instance(new Instance(sheet.get(), nullptr))
-{
-    // Nothing to do here
+    assert(getItem(i).cell());
+
+    return {k.first, CellIndex(i.i)};
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-Cell* Root::insertCell(Sheet* sheet, const Name& name, const Expr& expr)
+NameKey Root::toNameKey(const CellKey& k) const
 {
-    assert(canInsert(sheet, name));
-
-    auto c = new Cell(expr, sheet);
-    c->type = interpreter.cellType(c);
-    sheet->cells.insert({name, c});
-    sheet->order.push_back(c);
-    changed(c);
-
-    return c;
+    return {k.first, tree.nameOf(k.second)};
 }
 
-void Root::editCell(Cell* cell, const Expr& expr)
+CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
+                           const std::string& expr)
 {
-    cell->expr = expr;
-    cell->type = interpreter.cellType(cell);
+    auto cell = tree.insertCell(sheet, name, expr);
+    getMutableItem(cell).cell()->type = interpreter.cellType(expr);
 
-    // If this changed inputs or outputs, do something here!
-    changed(cell);
-}
-
-void Root::eraseCell(Cell* cell)
-{
-    Sheet* parent = cell->parent;
-    assert(parent != nullptr);
-
-    // Release Scheme values for GC
-    interpreter.release(cell);
-    deps.clearAll(cell);
-
-    auto name = parent->cells.right.at(cell);
-    parent->cells.right.erase(cell);
-    parent->order.erase(std::find(parent->order.begin(),
-                                  parent->order.end(), cell));
-    delete cell;
-
-    // Mark that this cell has changed (by name, rather than pointer, since
-    // we just deleted the cell itself).  This will cause all downstream cells
-    // to re-evaluate themselves.
-    changed(parent, name);
-}
-
-void Root::editInput(Instance* ins, Cell* cell, const Expr& expr)
-{
-    assert(ins->inputs.count(cell));
-    ins->inputs[cell] = expr;
-
-    std::list<Env> todo = {{instance.get()}};
-
-    // Recurse down the graph, marking every instance of this Cell as dirty
-    while (todo.size())
+    for (const auto& e : tree.envsOf(sheet))
     {
-        const auto& i = todo.front();
-        if (i.back() == ins)
-        {
-            pushDirty({i, cell});
-        }
+        markDirty({e, name});
+    }
+    sync();
 
-        auto s = i.back()->sheet;
-        for (const auto& j : s->instances.left)
+    return cell;
+}
+
+InstanceIndex Root::insertInstance(const SheetIndex& parent,
+                                   const std::string& name,
+                                   const SheetIndex& target)
+{
+    auto i = tree.insertInstance(parent, name, target);
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+
+        // Then, mark all cells as dirty
+        for (const auto& c : tree.cellsOf(target))
         {
-            auto i_ = i;
-            i_.push_back(j.second);
-            todo.push_back(i_);
+            auto env = e; // copy
+            env.push_back(i);
+            env.insert(e.end(), c.first.begin(), c.first.end());
+            markDirty({env, nameOf(c.second)});
         }
-        todo.pop_front();
+    }
+
+    // Assign default expressions for inputs
+    for (const auto& t : iterItems(target))
+    {
+        if (auto c = getItem(t).cell())
+        {
+            if (c->type == Cell::INPUT)
+            {
+                getMutableItem(i).instance()->inputs[t] =
+                    interpreter.defaultExpr(c->expr);
+            }
+        }
+    }
+
+    sync();
+    return i;
+}
+
+void Root::eraseCell(const CellIndex& cell)
+{
+    auto sheet = tree.parentOf(cell);
+    auto name = tree.nameOf(cell);
+    bool was_input = getItem(cell).cell()->type == Cell::INPUT;
+
+    // Release all interpreter-allocated values
+    for (const auto& v : getItem(cell).cell()->values)
+    {
+        interpreter.release(v.second.value);
+    }
+
+    // Mark this cell as dirty in all its environments, and clear
+    // anything that has it marked as downstream
+    tree.erase(cell);
+    for (const auto& e : tree.envsOf(sheet))
+    {
+        deps.clear({e, cell});
+        markDirty({e, name});
+    }
+
+    // Erase all input data associated with this cell
+    if (was_input)
+    {
+        for (const auto& i : tree.instancesOf(sheet))
+        {
+            getMutableItem(i).instance()->inputs.erase(cell);
+        }
+    }
+    sync();
+}
+
+void Root::eraseInstance(const InstanceIndex& instance)
+{
+    // Find all output cells in this instance
+    std::set<std::string> outputs;
+
+    auto sheet = getItem(instance).instance()->sheet;
+    auto cells = tree.cellsOf(sheet);
+    for (auto i : iterItems(sheet))
+    {
+        if (auto cell = getItem(i).cell())
+        {
+            if (cell->type == Cell::OUTPUT)
+            {
+                outputs.insert(tree.nameOf(i));
+            }
+        }
+    }
+
+    const std::string name = tree.nameOf(instance);
+    const auto parent = tree.parentOf(instance);
+    tree.erase(instance); // Bye!
+    for (auto env : tree.envsOf(parent))
+    {
+        // Mark the instance itself as dirty
+        markDirty({env, name});
+
+        // Then mark all outputs as dirty
+        env.push_back(instance);
+        for (const auto& o : outputs)
+        {
+            markDirty({env, o});
+        }
+        for (const auto& c : cells)
+        {
+            // Make a new cell key with the nested environment
+            auto env_ = env;
+            env_.insert(env_.end(), c.first.begin(), c.first.end());
+
+            auto cell = getMutableItem(c.second).cell();
+            assert(cell != nullptr);
+
+            // Release the allocated value, then erase by key
+            interpreter.release(cell->values.at(env_).value);
+            cell->values.erase(env_);
+
+            // Then clear dependencies for this cell, so that we don't
+            // end up trying to evaluate it
+            deps.clear({env_, c.second});
+        }
+    }
+    sync();
+}
+
+void Root::setExpr(const CellIndex& i, const std::string& expr)
+{
+    auto cell = getMutableItem(i).cell();
+    cell->expr = expr;
+
+    // Update cell type, saving previous type
+    auto prev_type = cell->type;
+    cell->type = interpreter.cellType(expr);
+
+    // Handle default expressions for input cells
+    if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
+    {
+        auto d = interpreter.defaultExpr(expr);
+        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        {
+            getMutableItem(instance).instance()->inputs[i] = d;
+        }
+    }
+    else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
+    {
+        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        {
+            getMutableItem(instance).instance()->inputs.erase(i);
+        }
+    }
+
+    // Force all dependencies to be recalculated if we've changed
+    // from non-output to output or vice versa.
+    //
+    // This kind of change could preserve the cell's value but change
+    // dependencies, which are either allowed or no longer allowed to
+    // look at its value.
+    if ((prev_type == Cell::OUTPUT) ^ (cell->type == Cell::OUTPUT))
+    {
+        for (const auto& e : tree.envsOf(tree.parentOf(i)))
+        {
+            for (const auto& d : deps.inverseDeps(toNameKey({e, i})))
+            {
+                pushDirty(d);
+            }
+        }
+    }
+
+    // Mark all envs containing this cell as dirty
+    for (const auto& e : tree.envsOf(tree.parentOf(i)))
+    {
+        markDirty({e, tree.nameOf(i)});
+    }
+    sync();
+}
+
+void Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
+                    const std::string& expr)
+{
+    assert(getItem(cell).cell()->type == Cell::INPUT);
+    assert(instance.i != 0);
+
+    auto i = getMutableItem(instance).instance();
+    assert(i->inputs.find(cell) != i->inputs.end());
+
+    i->inputs[cell] = expr;
+    for (auto env : tree.envsOf(tree.parentOf(instance)))
+    {
+        env.push_back(instance);
+        markDirty(toNameKey({env, cell}));
     }
 
     sync();
 }
 
-void Root::eraseInstance(Instance* i)
+void Root::setValue(const CellKey& cell, const Value& v)
 {
-    Sheet* parent = i->parent;
-    assert(parent != nullptr);
-
-    auto name = parent->instances.right.at(i);
-    parent->instances.right.erase(i);
-    parent->order.erase(std::find(parent->order.begin(),
-                                  parent->order.end(), i));
-    delete i;
-
-    // Mark that this cell has changed (by name, rather than pointer, since
-    // we just deleted the cell itself).  This will cause all downstream cells
-    // to re-evaluate themselves.
-    changed(parent, name);
+    auto c = getMutableItem(cell.second).cell();
+    if (c->values.count(cell.first))
+    {
+        interpreter.release(c->values.at(cell.first).value);
+        c->values.erase(c->values.find(cell.first));
+    }
+    c->values.insert({cell.first, v});
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-Sheet* Root::createSheet(Sheet* sheet, const Name& name)
+const Value& Root::getValue(const CellKey& cell) const
 {
-    assert(canCreateSheet(sheet, name));
-    auto s = new Sheet(sheet);
-    sheet->library.insert({name, s});
-    return s;
+    return getItem(cell.second).cell()->values.at(cell.first);
 }
 
-bool Root::canCreateSheet(Sheet* sheet, const Name& name) const
+bool Root::checkEnv(const Env& env) const
 {
-    return name.size() > 0 && sheet->library.left.count(name) == 0;
-}
-
-void Root::renameSheet(Sheet* sheet, const Name& orig, const Name& name)
-{
-    auto ptr = sheet->library.left.at(orig);
-    sheet->library.left.erase(orig);
-    sheet->library.insert({name, ptr});
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool Root::canInsertInstance(Sheet* sheet, Sheet* target) const
-{
-    {   // Make sure that the sheet to be inserted is above the sheet which it
-        // will be an instance in.
-        bool above = false;
-        auto sheet_ = sheet;
-        while (sheet_ && !above)
-        {
-            if (sheet_->library.right.count(target))
-            {
-                above = true;
-            }
-            sheet_ = sheet_->parent;
-        }
-        if (!above)
+    for (const auto& i : env)
+    {
+        if (!tree.isValid(i) ||
+            getItem(i).instance() == nullptr)
         {
             return false;
         }
     }
-
-    {   // Then, check for recursive loops from the target to the parent
-        std::set<Sheet*> checked = {target};
-        std::list<Sheet*> todo = {target};
-        while (todo.size())
-        {
-            auto s = todo.front();
-            if (s == sheet)
-            {
-                return false;
-            }
-
-            for (const auto& h : s->instances.left)
-            {
-                if (checked.count(h.second->sheet) == 0)
-                {
-                    todo.push_back(h.second->sheet);
-                    checked.insert(h.second->sheet);
-                }
-            }
-            todo.pop_front();
-        }
-    }
-
     return true;
-}
-
-Instance* Root::insertInstance(Sheet* sheet, const Name& name, Sheet* target)
-{
-    assert(canInsertInstance(sheet, target));
-    assert(canInsert(sheet, name));
-
-    auto added = new Instance(target, sheet);
-
-    sheet->instances.insert({name, added});
-    sheet->order.push_back(added);
-
-    std::list<NameKey> changed;
-    {   // Recursively find all cells in this sheet.
-        std::list<Env> todo = {{added}};
-        while (todo.size())
-        {
-            const auto& i = todo.front();
-            auto s = i.back()->sheet;
-            for (const auto& c : s->cells.left)
-            {
-                changed.push_back({i, c.first});
-            }
-            for (auto& j : s->instances.left)
-            {
-                auto i_ = i;
-                i_.push_back(j.second);
-                todo.push_back(i_);
-            }
-            todo.pop_back();
-        }
-    }
-
-    {   // Then recurse down the rest of the sheet, marking as dirty the
-        // product of the changed instances and where they're instantiated.
-        std::list<Env> todo = {{instance.get()}};
-        while (todo.size())
-        {
-            const auto& i = todo.front();
-            auto s = i.back()->sheet;
-            for (auto& j : s->instances.left)
-            {
-                // If this is an example of the added instance, then add all
-                // of the cells that we found earlier underneath the instance
-                if (j.second == added)
-                {
-                    // First, mark the instance itself dirty (by name)
-                    markDirty({i, j.first});
-
-                    // Then, mark all of its children cells as dirty
-                    for (auto k : changed)
-                    {
-                        k.first.insert(k.first.begin(), i.begin(), i.end());
-                        markDirty(k);
-                    }
-                }
-                else
-                {
-                    auto i_ = i;
-                    i_.push_back(j.second);
-                    todo.push_back(i_);
-                }
-            }
-            todo.pop_front();
-        }
-    }
-
-    sync();
-
-    return added;
-}
-
-bool Root::canInsert(Sheet* const sheet, const Name& name) const
-{
-    return (sheet->cells.left.count(name) == 0) &&
-           (sheet->instances.left.count(name) == 0) &&
-           interpreter.nameValid(name);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Root::rename(Sheet* sheet, const Name& orig, const Name& name)
-{
-    assert(sheet->cells.left.count(orig) ||
-           sheet->instances.left.count(orig));
-    assert(canInsert(sheet, name));
-
-    // Prevent sync calls until the end of this function
-    auto lock = Lock();
-
-    // Call changed now so that anything that looked for the new name will be
-    // added to the dirty list; if we called this after the new name was
-    // valid, it would re-evaluate the new name and notice that it hadn't
-    // changed and thus not mark anything else as changed.
-    changed(sheet, name);
-
-    if (sheet->cells.left.count(orig))
-    {
-        auto ptr = sheet->cells.left.at(orig);
-        sheet->cells.left.erase(orig);
-        sheet->cells.insert({name, ptr});
-    }
-    else if (sheet->instances.left.count(orig))
-    {
-        auto ptr = sheet->instances.left.at(orig);
-        sheet->instances.left.erase(orig);
-        sheet->instances.insert({name, ptr});
-    }
-
-    changed(sheet, orig);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Root::changed(Cell* cell)
-{
-    std::list<Env> todo = {{instance.get()}};
-
-    // Recurse down the graph, marking every instance of this Cell as dirty
-    while (todo.size())
-    {
-        const auto& i = todo.front();
-        auto s = i.back()->sheet;
-
-        if (s->cells.right.count(cell))
-        {
-            markDirty({i, s->cells.right.at(cell)});
-        }
-        for (const auto& j : s->instances.left)
-        {
-            auto i_ = i;
-            i_.push_back(j.second);
-            todo.push_back(i_);
-        }
-        todo.pop_front();
-    }
-
-    sync();
-}
-
-void Root::changed(Sheet* sheet, const Name& name)
-{
-    std::list<Env> todo = {{instance.get()}};
-
-    // Recurse down the graph, marking every instance of this Cell as dirty
-    while (todo.size())
-    {
-        const auto& i = todo.front();
-        auto s = i.back()->sheet;
-
-        if (s == sheet)
-        {
-            markDirty({i, name});
-        }
-        else
-        {
-            for (const auto& j : s->instances.left)
-            {
-                auto i_ = i;
-                i_.push_back(j.second);
-                todo.push_back(i_);
-            }
-        }
-        todo.pop_front();
-    }
-
-    sync();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Root::sync()
-{
-    if (!locked)
-    {
-        while (dirty.size())
-        {
-            const auto k = dirty.front();
-            auto result = interpreter.eval(k, &deps);
-            dirty.pop_front();
-
-            if (result)
-            {
-                for (const auto& d : deps.inverse[toNameKey(k)])
-                {
-                    pushDirty(d);
-                }
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Root::pushDirty(const CellKey& k)
-{
-    auto itr = std::find_if(dirty.begin(), dirty.end(),
-        [&](CellKey& o){ return deps.upstream[o].count(k) != 0; });
-
-    if (itr == dirty.end() || *itr != k)
-    {
-        dirty.insert(itr, k);
-    }
 }
 
 void Root::markDirty(const NameKey& k)
 {
-    auto& map = k.first.back()->sheet->cells.left;
-    auto c = map.find(k.second);
-
-    // If this cell still exists, then push it to the dirty list
-    if (c != map.end())
+    // If the key refers to a valid environment and a cell that still
+    // exists, then push it to the dirty list directly
+    if (checkEnv(k.first))
     {
-        pushDirty({k.first, c->second});
-    }
-    else
-    {
-        // Otherwise push everything upstream of it to the list
-        for (auto& i : deps.inverse[k])
+        auto sheet = getItem(k.first.back()).instance()->sheet;
+        if (hasItem(sheet, k.second) &&
+            getItem(sheet, k.second).cell())
         {
-            pushDirty(i);
+            pushDirty(toCellKey(k));
+            return;
+        }
+    }
+
+    // Otherwise push everything downstream of it to the list
+    for (auto& i : deps.inverseDeps(k))
+    {
+        pushDirty(i);
+    }
+}
+
+void Root::sync()
+{
+    while (!locked && dirty.size())
+    {
+        const auto k = dirty.front();
+        auto result = interpreter.eval(k);
+        dirty.pop_front();
+
+        if (result.value)
+        {
+            setValue(k, result);
+            for (const auto& d : deps.inverseDeps(toNameKey(k)))
+            {
+                pushDirty(d);
+            }
         }
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+void Root::pushDirty(const CellKey& c)
+{
+    auto itr = std::find_if(dirty.begin(), dirty.end(),
+        [&](CellKey& o){ return deps.isUpstream(o, c); });
 
-}   // namespace Graph
+    if (itr == dirty.end() || *itr != c)
+    {
+        dirty.insert(itr, c);
+    }
+}

@@ -1,24 +1,16 @@
 #pragma once
 
 #include <map>
-#include "types.hpp"
 
-namespace Graph
-{
-struct Sheet;
-struct Cell;
+#include "index.hpp"
 
 struct Instance
 {
-    /*
-     *  Default constructor
-     *  (requires inputs to be populated elsewhere)
-     */
-    Instance(Sheet* sheet, Sheet* parent) : sheet(sheet), parent(parent) {}
+    Instance(SheetIndex s) : sheet(s) {}
 
-    Sheet* const sheet;
-    std::map<Cell*, Expr> inputs;
+    /*  Map from input Cell indices to their expressions */
+    std::map<ItemIndex, std::string> inputs;
 
-    Sheet* const parent;
+    /*  Represents an index into the Sheet library */
+    SheetIndex sheet;
 };
-}   // namespace Graph
