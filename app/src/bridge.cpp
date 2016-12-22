@@ -2,6 +2,13 @@
 
 Bridge* Bridge::_instance = nullptr;
 
+Bridge::Bridge()
+    : bts(this)
+{
+    r.insertCell(0, "omg", "wtf");
+    r.insertCell(0, "bbq", "wtf");
+}
+
 bool Bridge::checkName(QString name) const
 {
     return name.count("x");

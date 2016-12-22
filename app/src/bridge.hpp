@@ -9,7 +9,7 @@ class Bridge : public QObject
 {
     Q_OBJECT
 public:
-    Bridge() : bts(this) { /* Nothing to do here */ }
+    Bridge();
 
     /*
      *  Checks a name for creation / renaming
@@ -26,7 +26,7 @@ public:
     /*
      *  Requests that the UI be synchronized to the graph
      */
-    void sync();
+    Q_INVOKABLE void sync();
 
 signals:
     /*

@@ -48,7 +48,7 @@ ApplicationWindow {
         SheetView {
             id: root
             sheetIndex: 0
-            env: [0]
+            viewEnv: [0]
 
             libraryModel: ListModel {
                 ListElement {
@@ -82,25 +82,6 @@ ApplicationWindow {
                 ListElement {
                     name: "New sheet..."
                     sheetIndex: -2
-                }
-            }
-
-            sheetModel: ListModel {
-                ListElement {
-                    type: "cell"
-                    index: 1
-                    name: "x"
-                    expr: "(+ 1 2)"
-                    value: "3"
-                    valid: true
-                }
-                ListElement {
-                    type: "cell"
-                    index: 0
-                    name: "y"
-                    expr: "(+ (x) 2)"
-                    value: "5"
-                    valid: true
                 }
             }
         }
