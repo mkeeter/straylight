@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Layouts 1.0
 
 import Colors 1.0
+import Awesome 4.7
 
 Item {
     id: sheetItemDelegate
@@ -17,49 +18,19 @@ Item {
 
     Component {
         id: cellDelegate
-        GridLayout {
-            anchors.right: parent.right
-            columns: 3
 
-            Text {
-                color: Colors.base0
-                Layout.column: 0
-                Layout.row: 0
-                text: '<b>Name: </b>'
-            }
+        Column {
+            width: parent.width
+            height: childrenRect.height
+
             ItemName {
-                Layout.column: 1
-                Layout.row: 0
-                Layout.fillWidth: true
-
+                width: parent.width
                 text: name
             }
-            Rectangle {
-                Layout.column: 2
-                Layout.row: 0
 
-                color:'black';width:10;height:10
-            }
-
-            Text {
-                color: Colors.base0
-                Layout.column: 0
-                Layout.row: 1
-                text: '<b>Expr: </b>'
-            }
             CellExpr {
-                Layout.column: 1
-                Layout.row: 1
-                Layout.fillWidth: true
-
+                width: parent.width
                 expr: expr
-            }
-            Rectangle {
-                Layout.column: 2
-                Layout.row: 1
-                color:'black'
-                width:10
-                height:10
             }
         }
     }
@@ -73,9 +44,8 @@ Item {
     Rectangle {
         width: parent.width
         height: 2
-        color: 'black'
+        color: Colors.base0
         anchors.top: itemDisplay.bottom
-        anchors.topMargin: 8
     }
 }
 

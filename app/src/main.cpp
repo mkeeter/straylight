@@ -46,6 +46,7 @@ int main(int argc, char**argv)
     qmlRegisterType<FbItem>("FbItem", 1, 0, "FbItem");
     qmlRegisterType<NameValidator>("NameValidator", 1, 0, "NameValidator");
     qmlRegisterSingletonType(QUrl("qrc:/qml/Colors.qml"), "Colors", 1, 0, "Colors");
+    qmlRegisterSingletonType(QUrl("qrc:/qml/Awesome.qml"), "Awesome", 4, 7, "Awesome");
     engine.load(QUrl("qrc:/qml/main.qml"));
 
     return app.exec();

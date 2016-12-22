@@ -8,5 +8,10 @@
         <file>qml/LibraryView.qml</file>
         <file>qml/Colors.qml</file>
         <file>qml/CellExpr.qml</file>
+        <file>qml/IconButton.qml</file>
+        <file>qml/TextRect.qml</file>
+        <file>qml/Awesome.qml</file>
+
+        <file>fonts/fontawesome-webfont.ttf</file>
     </qresource>
 </RCC>

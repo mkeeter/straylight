@@ -18,6 +18,10 @@ ApplicationWindow {
             color: Colors.base03
         }
     }
+    FontLoader {
+        id: fontAwesome
+        source: "qrc:/fonts/fontawesome-webfont.ttf"
+    }
 
     //menu containing two menu items
     menuBar: MenuBar {

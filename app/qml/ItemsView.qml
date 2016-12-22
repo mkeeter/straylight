@@ -9,7 +9,7 @@ ScrollView {
     ListView {
         anchors.fill: parent
         model: itemsModel
-        spacing: 8
+        spacing: 0
         delegate: SheetItemDelegate {}
     }
     style: ScrollViewStyle {

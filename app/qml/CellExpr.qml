@@ -4,6 +4,7 @@ import QtQuick.Controls 1.4
 import Colors 1.0
 
 Column {
+    height: childrenRect.height
     Rectangle {
         color: Colors.base02
         id: exprRect
@@ -11,7 +12,6 @@ Column {
         TextEdit {
             color: Colors.base0
             id: exprText
-            text: 'Hello, world'
             selectByMouse: true
             anchors.left: parent.left
             anchors.right: parent.right
@@ -25,6 +25,8 @@ Column {
         id: resultText
         text: 'Result:'
         color: Colors.base0
+        padding: 5
+        leftPadding: 15
     }
 
     property alias expr: exprText.text
