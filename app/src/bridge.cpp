@@ -7,6 +7,11 @@ bool Bridge::checkName(QString name) const
     return name.count("x");
 }
 
+void Bridge::insertCell(int sheet_index, const QString& name)
+{
+    r.insertCell(sheet_index, name.toStdString());
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

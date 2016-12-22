@@ -15,6 +15,7 @@ public:
      *  Checks a name for creation / renaming
      */
     Q_INVOKABLE bool checkName(QString name) const;
+    Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
 
     /*
      *  Constructor for the QML singleton
