@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 
 import FbItem 1.0
 import Colors 1.0
+import Bridge 1.0
 
 ApplicationWindow {
     visible: true
@@ -46,6 +47,8 @@ ApplicationWindow {
 
         SheetView {
             id: root
+            sheetIndex: 0
+            env: [0]
 
             libraryModel: ListModel {
                 ListElement {

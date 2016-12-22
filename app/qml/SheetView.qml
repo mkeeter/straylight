@@ -4,6 +4,9 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 SplitView {
+    property int sheetIndex
+    property var env /* should be list of ints */
+
     orientation: Qt.Vertical
 
     ItemsView {

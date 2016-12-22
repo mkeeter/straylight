@@ -3,8 +3,16 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
+import Bridge 1.0
+
 ScrollView {
     property ListModel itemsModel
+
+    Component.onCompleted: {
+        Bridge.beginSheet.connect(beepboop)
+    }
+
+    function beepboop() { console.log("beep") }
 
     ListView {
         anchors.fill: parent
