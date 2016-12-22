@@ -30,8 +30,7 @@ Item {
             text: Awesome.fa_pencil
             onClicked: {
                 editRow.editing = true
-                newName.text = nameText.text
-                newName.setFocus()
+                newName.enable(nameText.text)
             }
             enabled: editRow.height == 0
         }
@@ -69,33 +68,17 @@ Item {
             color: Colors.base1
         }
 
-        TextRect {
+        TextValidator {
             id: newName
             Layout.fillWidth: true
-            onLostFocus: {
+            validate: function(name) {
+                return validator.checkName(name)
+            }
+            onAccepted: function(t) {
+                console.log("Renaming to " + t)
                 parent.editing = false
             }
-            onAccepted: {
-                if (acceptRename.enabled)
-                {
-                    console.log("Renaming to " + text)
-                    parent.editing = false
-                }
-            }
-        }
-
-        IconButton {
-            id: acceptRename
-            text: Awesome.fa_check
-            enabled: validator.checkName(newName.text)
-        }
-        IconButton {
-            rightPadding: 3
-            id: cancelRename
-            text: Awesome.fa_times
-            onClicked: {
-                editRow.editing = false
-            }
+            onCancelled: { parent.editing = false }
         }
     }
 
