@@ -11,6 +11,7 @@
         <file>qml/IconButton.qml</file>
         <file>qml/TextRect.qml</file>
         <file>qml/TextValidator.qml</file>
+        <file>qml/SheetCreator.qml</file>
         <file>qml/Awesome.qml</file>
 
         <file>fonts/fontawesome-webfont.ttf</file>

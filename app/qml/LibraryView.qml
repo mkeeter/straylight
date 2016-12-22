@@ -5,23 +5,20 @@ import QtQuick.Controls.Styles 1.4
 
 import Colors 1.0
 
-Item {
-    id: root
-    width: parent.width
-
+ColumnLayout {
     Text {
         id: header
-        width: root.width
         text: "<b>Library:<b>"
         color: Colors.base0
         padding: 5
     }
 
     ScrollView {
-        id: libraryView
-        anchors.top: header.bottom
-        anchors.bottom: root.bottom
+        Layout.fillWidth: true
         width: parent.width
+
+        id: libraryView
+        Layout.fillHeight: true
 
         property ListModel libraryModel
         style: ScrollViewStyle {
@@ -31,9 +28,12 @@ Item {
         ListView {
             id: sheetList
             model: libraryModel
+            width: parent.width
+
             delegate: Rectangle {
-                width: root.width
                 height: childrenRect.height
+                width: parent.width
+
                 color: hover.containsMouse ? Colors.base01 : (index % 2 == 0 ? Colors.base02 : Colors.base03)
                 Text {
                     text: name
@@ -47,9 +47,30 @@ Item {
                     id: hover
                     anchors.fill: parent
                     hoverEnabled: true
+                    onClicked: {
+                        if (sheetIndex == -1)
+                            creator.activateCell()
+                        else if (sheetIndex == -2)
+                            creator.activateSheet()
+                        else
+                            creator.activateInstance(sheetIndex)
+                    }
                 }
             }
         }
+    }
+
+    Rectangle {
+        Layout.fillWidth: true
+        height: 2
+        color: Colors.base00
+        visible: creator.visible
+    }
+
+    SheetCreator {
+        id: creator
+        Layout.fillWidth: true
+        Layout.preferredHeight: preferredHeight
     }
 
     property alias libraryModel: libraryView.libraryModel

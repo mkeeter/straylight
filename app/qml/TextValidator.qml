@@ -35,6 +35,7 @@ RowLayout {
         id: accept
         text: Awesome.fa_check
         enabled: validate(txt.text)
+        onClicked: { parent.accepted(txt.text) }
     }
 
     IconButton {

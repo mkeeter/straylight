@@ -13,6 +13,7 @@ SplitView {
 
     LibraryView {
         id: libraryView
+        width: parent.width
         Layout.minimumHeight: 100
     }
 

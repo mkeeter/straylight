@@ -49,7 +49,7 @@ Item {
 
         anchors.top: nameText.bottom
         width: parent.width
-        height: editing ? nameText.height : 0
+        height: editing ? newName.height : 0
         clip: true
 
         Behavior on height {

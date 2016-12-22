@@ -78,7 +78,7 @@ ApplicationWindow {
                 }
                 ListElement {
                     name: "New sheet..."
-                    sheetIndex: -1
+                    sheetIndex: -2
                 }
             }
 
