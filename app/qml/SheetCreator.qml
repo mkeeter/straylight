@@ -2,8 +2,8 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
-import NameValidator 1.0
 import Colors 1.0
+import Bridge 1.0
 
 GridLayout
 {
@@ -70,7 +70,7 @@ GridLayout
         Layout.fillWidth: true
         Layout.fillHeight: true
         validate: function(name) {
-            return validator.checkName(name)
+            return Bridge.checkName(name)
         }
         onAccepted: function(t) {
             preferredHeight = 0
@@ -80,9 +80,5 @@ GridLayout
             preferredHeight = 0
             console.log("cancelled")
         }
-    }
-
-    NameValidator {
-        id: validator
     }
 }

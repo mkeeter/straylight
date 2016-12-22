@@ -238,6 +238,31 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
+void Root::serialize(TreeSerializer* s) const
+{
+    serialize(s, {0});
+}
+
+void Root::serialize(TreeSerializer* s, const Env& env) const
+{
+    auto sheet = getItem(env.back()).instance()->sheet;
+
+    s->beginSheet(sheet);
+    for (auto i : iterItems(sheet))
+    {
+        const auto& name = tree.nameOf(i);
+
+        if (auto c = getItem(i).cell())
+        {
+            const auto& value = c->values.at(env);
+            s->cell(CellIndex(i.i), name, c->expr, c->type,
+                    value.valid, value.str);
+        }
+    }
+
+    s->endSheet();
+}
+
 bool Root::checkEnv(const Env& env) const
 {
     for (const auto& i : env)

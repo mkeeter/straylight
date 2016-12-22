@@ -198,6 +198,11 @@ protected:
 
     ////////////////////////////////////////////////////////////////////////////
 
+    /*
+     *  Exports the graph to any object implementing the TreeSerializer API
+     */
+    void serialize(TreeSerializer* s, const Env& env) const;
+
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
     Tree tree;
     std::unique_ptr<Instance> instance;

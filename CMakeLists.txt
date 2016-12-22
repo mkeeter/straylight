@@ -20,7 +20,7 @@ endif()
 
 # Build the kernel and graph libraries
 add_subdirectory(kernel)
-add_subdirectory(graph2)
+add_subdirectory(graph)
 
 # Build the test suite
 add_subdirectory(test)

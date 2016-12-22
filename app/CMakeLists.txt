@@ -16,13 +16,14 @@ find_package(Qt5OpenGL REQUIRED)
 
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
-    src/name_validator.cpp
+    src/bridge.cpp
     qml.qrc)
 
 target_link_libraries(Straylight
     Qt5::Quick
     Qt5::Gui
     Qt5::OpenGL
+    straylight-graph
     ${OPENGL_LIBRARIES})
 target_include_directories(Straylight PRIVATE inc)
 
