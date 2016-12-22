@@ -5,83 +5,6 @@ import QtQuick.Layouts 1.3
 import NameValidator 1.0
 import Colors 1.0
 
-Item
-{
-    id: creator
-
-    property real preferredHeight
-
-    states: [
-        State {
-            name: "hidden"
-            PropertyChanges {
-                target: creator
-                preferredHeight: 0
-            }
-        },
-        State {
-            name: "visible"
-            PropertyChanges {
-                target: creator
-                preferredHeight: grid.height
-            }
-        },
-        State {
-            name: "sheet"
-            extend: "visible"
-            PropertyChanges {
-                target: sheetLabel
-                text: "Creating new sheet:"
-            }
-        },
-        State {
-            name: "cell"
-            extend: "visible"
-            PropertyChanges {
-                target: sheetLabel
-                text: "Creating new cell:"
-            }
-        },
-        State {
-            name: "instance"
-            extend: "visible"
-            PropertyChanges {
-                target: sheetLabel
-                text: "Creating new instance of " + sheetName + ":"
-            }
-        }
-    ]
-
-    transitions: Transition {
-        NumberAnimation {
-            properties: "preferredHeight"
-            duration: 5000
-        }
-    }
-
-    state: "hidden"
-
-    property string sheetName
-
-    function activateCell() {
-        state = "cell"
-        console.log("Cell")
-        sheetNamer.enable("c")
-    }
-
-    function activateSheet() {
-        state = "sheet"
-        console.log("sheet")
-        sheetNamer.enable("s")
-    }
-
-    function activateInstance(n) {
-        sheetName = n
-        state = "instance"
-        console.log("instance")
-        sheetNamer.enable("i")
-    }
-
 GridLayout
 {
     id: grid
@@ -90,12 +13,43 @@ GridLayout
     rows: 2
     columns: 2
 
+    /*
+     *  As this item is stored in a Layout, we offer height hints here
+     */
+    property real preferredHeight: 0
+    Behavior on preferredHeight {
+        NumberAnimation {
+            duration: 50
+        }
+    }
+
+    function activateCell() {
+        console.log("Cell")
+        preferredHeight = childrenRect.height
+        label.text = "Creating new cell:"
+        namer.enable("c")
+    }
+
+    function activateSheet() {
+        console.log("sheet")
+        preferredHeight = childrenRect.height
+        label.text = "Creating new sheet:"
+        namer.enable("s")
+    }
+
+    function activateInstance(n) {
+        preferredHeight = childrenRect.height
+        console.log("instance")
+        label.text = "Creating new instance of " + n + ":"
+        namer.enable("i")
+    }
+
     Text {
         Layout.row: 0
         Layout.columnSpan: 2
         padding: 5
 
-        id: sheetLabel
+        id: label
         color: Colors.base1
     }
 
@@ -110,7 +64,7 @@ GridLayout
     }
 
     TextValidator {
-        id: sheetNamer
+        id: namer
         Layout.row: 1
         Layout.column: 1
         Layout.fillWidth: true
@@ -119,11 +73,11 @@ GridLayout
             return validator.checkName(name)
         }
         onAccepted: function(t) {
+            preferredHeight = 0
             console.log("Creating new sheet with name " + t)
-            creator.state = "hidden"
         }
         onCancelled: {
-            creator.state = "hidden"
+            preferredHeight = 0
             console.log("cancelled")
         }
     }
