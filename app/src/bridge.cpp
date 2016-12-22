@@ -1,5 +1,7 @@
 #include "bridge.hpp"
 
+Bridge* Bridge::_instance = nullptr;
+
 bool Bridge::checkName(QString name) const
 {
     return name.count("x");
@@ -10,8 +12,28 @@ QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
     Q_UNUSED(engine)
     Q_UNUSED(scriptEngine)
 
-    return new Bridge();
+    if (_instance == nullptr)
+    {
+        _instance = new Bridge();
+    }
+    return _instance;
 }
+
+Root* Bridge::root()
+{
+    if (_instance == nullptr)
+    {
+        _instance = new Bridge();
+    }
+    return &_instance->r;
+}
+
+void Bridge::sync()
+{
+    r.serialize(&bts);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 bool Bridge::BridgeTreeSerializer::beginSheet(SheetIndex s)
 {

@@ -20,6 +20,12 @@ public:
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static Root* root();
+
+    /*
+     *  Requests that the UI be synchronized to the graph
+     */
+    void sync();
 
 signals:
     /*
@@ -39,7 +45,7 @@ signals:
               bool valid, const QString& val);
 
 protected:
-    Root graph;
+    Root r;
 
     /*
      *  Lightweight TreeSerializer class
@@ -66,4 +72,6 @@ protected:
     };
 
     BridgeTreeSerializer bts;
+
+    static Bridge* _instance;
 };
