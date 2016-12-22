@@ -13,7 +13,21 @@ Rectangle {
         selectByMouse: true
         id: txt
         padding: 3
+        onActiveFocusChanged: {
+            if (!activeFocus)
+                parent.lostFocus()
+        }
+        onAccepted: {
+            parent.accepted()
+        }
     }
+
+    function setFocus() {
+        txt.forceActiveFocus()
+    }
+
+    signal accepted
+    signal lostFocus
 
     property alias text: txt.text
 }

@@ -31,6 +31,7 @@ Item {
             onClicked: {
                 editRow.editing = true
                 newName.text = nameText.text
+                newName.setFocus()
             }
             enabled: editRow.height == 0
         }
@@ -71,6 +72,16 @@ Item {
         TextRect {
             id: newName
             Layout.fillWidth: true
+            onLostFocus: {
+                parent.editing = false
+            }
+            onAccepted: {
+                if (acceptRename.enabled)
+                {
+                    console.log("Renaming to " + text)
+                    parent.editing = false
+                }
+            }
         }
 
         IconButton {
