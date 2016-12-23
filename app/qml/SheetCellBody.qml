@@ -39,15 +39,15 @@ Column {
         anchors.right: parent.right
 
         Text {
-            id: warningIcon
-            visible: !valid
-
-            text: Awesome.fa_exclamation_triangle
+            id: statusIcon
+            text: valid ? Awesome.fa_long_arrow_right
+                        : Awesome.fa_exclamation_triangle
 
             color: Colors.base0
             font.family: fontAwesome.name
+            font.pointSize: 14
 
-            rightPadding: 5
+            rightPadding: 10
             anchors.verticalCenter: resultText.verticalCenter
         }
 
@@ -55,7 +55,7 @@ Column {
             id: resultText
             wrapMode: Text.Wrap
             text: value
-            width: parent.width - (warningIcon.visible ? warningIcon.width : 0)
+            width: parent.width - statusIcon.width
 
             font.family: sansSerif.name
             color: Colors.base0
