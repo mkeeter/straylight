@@ -84,8 +84,8 @@ Item {
                 return e == ""
             }
             onAccepted: function(t) {
-                console.log("Renaming to " + t)
                 parent.editing = false
+                Bridge.renameItem(itemIndex, name)
             }
             onCancelled: { parent.editing = false }
         }
@@ -97,8 +97,6 @@ Item {
 
             id: nameError
             visible: text.length != 0
-            onVisibleChanged: { console.log(visible) }
-            onTextChanged: { console.log(text) }
             color: Colors.base1
         }
     }

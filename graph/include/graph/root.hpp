@@ -81,6 +81,11 @@ public:
                    const std::string& name, std::string* err=nullptr) const;
 
     /*
+     *  Renames an item, resynching anything that looked for it
+     */
+    void renameItem(const ItemIndex& i, const std::string& name);
+
+    /*
      *  Exports the graph to any object implementing the TreeSerializer API
      */
     void serialize(TreeSerializer* s) const;

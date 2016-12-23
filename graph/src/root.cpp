@@ -279,6 +279,33 @@ bool Root::checkName(const SheetIndex& parent,
     return true;
 }
 
+void Root::renameItem(const ItemIndex& i, const std::string& name)
+{
+    auto prev_name = tree.nameOf(i);
+
+    // Skip renaming if it's a no-op
+    if (prev_name == name)
+    {
+        return;
+    }
+
+    tree.rename(i, name);
+
+    for (const auto& env : tree.envsOf(parentSheet(i)))
+    {
+        // Mark the old name as dirty
+        // (which propagates to anything that looked it up)
+        markDirty({env, prev_name});
+
+        // Then, mark anything that looked up the new name as dirty
+        for (const auto& d : deps.inverseDeps({env, name}))
+        {
+            pushDirty(d);
+        }
+    }
+    sync();
+}
+
 void Root::serialize(TreeSerializer* s) const
 {
     serialize(s, {0});

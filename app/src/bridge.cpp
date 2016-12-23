@@ -28,6 +28,12 @@ QString Bridge::checkRename(int item_index, QString name) const
     return checkName(sheet.i, name);
 }
 
+void Bridge::renameItem(int item_index, QString name)
+{
+    r.renameItem(item_index, name.toStdString());
+    sync();
+}
+
 void Bridge::insertCell(int sheet_index, const QString& name)
 {
     r.insertCell(sheet_index, name.toStdString());
@@ -37,7 +43,9 @@ void Bridge::insertCell(int sheet_index, const QString& name)
 void Bridge::setExpr(int cell_index, const QString& expr)
 {
     if (r.setExpr(cell_index, expr.toStdString()))
+    {
         sync();
+    }
 }
 
 void Bridge::eraseCell(int cell_index)

@@ -39,11 +39,15 @@ public:
      */
     void rename(StoredIndex s, const std::string& new_name)
     {
-        ParentIndex parent = names.right.at(s).first;
-        assert(canInsert(parent, new_name));
+        auto key = names.right.at(s);
+        if (key.second != new_name)
+        {
+            ParentIndex parent = key.first;
+            assert(canInsert(parent, new_name));
 
-        names.right.erase(s);
-        names.insert({{parent, new_name}, s});
+            names.right.erase(s);
+            names.insert({{parent, new_name}, s});
+        }
     }
 
     /*

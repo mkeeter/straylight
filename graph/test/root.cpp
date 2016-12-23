@@ -75,6 +75,36 @@ TEST_CASE("Root::insertCell")
     }
 }
 
+TEST_CASE("Root::renameItem")
+{
+    Root r;
+
+    SECTION("Change tracking")
+    {
+        auto a = r.insertCell(0, "a", "12");
+        auto b = r.insertCell(0, "b", "(/ (d) 2)");
+        auto c = r.insertCell(0, "c", "(+ (a) 5)");
+
+        r.renameItem(a, "d");
+
+        auto vb = r.getValue({{0}, b});
+        REQUIRE(vb.value != nullptr);
+        REQUIRE(vb.valid == true);
+        REQUIRE(vb.str == "6");
+
+        auto vc = r.getValue({{0}, c});
+        REQUIRE(vc.value != nullptr);
+        REQUIRE(vc.valid == false);
+    }
+
+    SECTION("Renaming to self")
+    {
+        auto a = r.insertCell(0, "a", "12");
+        r.renameItem(a, "a");
+        REQUIRE(true /* didn't crash */);
+    }
+}
+
 TEST_CASE("Root::eraseCell")
 {
     Root r;

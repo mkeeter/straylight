@@ -16,7 +16,8 @@ public:
      *  Returns an empty string on success and an error message otherwise
      */
     Q_INVOKABLE QString checkName(int sheet_index, QString name) const;
-    Q_INVOKABLE QString checkRename(int item_name, QString name) const;
+    Q_INVOKABLE QString checkRename(int item_index, QString name) const;
+    Q_INVOKABLE void renameItem(int item_index, QString name);
 
     Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
