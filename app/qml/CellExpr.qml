@@ -21,14 +21,6 @@ Column {
         height: childrenRect.height
         width: parent.width
     }
-    Text {
-        id: resultText
-        text: 'Result:'
-        color: Colors.base0
-        padding: 5
-        leftPadding: 15
-    }
 
     property alias expr: exprText.text
-    property alias result: resultText.text
 }

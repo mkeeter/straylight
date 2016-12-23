@@ -33,6 +33,25 @@ Item {
                 width: parent.width
             }
 
+            Row {
+                Text {
+                    visible: !valid
+                    text: Awesome.fa_exclamation_triangle
+                    color: Colors.base0
+                    font.family: fontAwesome.name
+                    padding: 5
+                    leftPadding: 15
+                    topPadding: 8
+                }
+
+                Text {
+                    id: resultText
+                    text: value
+                    color: Colors.base0
+                    padding: 5
+                }
+            }
+
             /*
              *  Dummy text field to forward changes into cell
              */
