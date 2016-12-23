@@ -20,8 +20,6 @@ ScrollView {
     }
 
     function beginSheet(i) {
-        console.log(i)
-        console.log(sheetIndex)
         if (i == sheetIndex)
         {
             listening = true;
@@ -33,7 +31,7 @@ ScrollView {
     {
         if (!listening)
             return
-        console.log("Cell called")
+
         var i = currentIndex < itemsModel.size
                     ? itemsModel.get(currentIndex)
                     : {type: 'none'}
@@ -45,9 +43,10 @@ ScrollView {
                 {type: 'cell', cellIndex: cell_index})
         }
         itemsModel.setProperty(currentIndex, "name", name)
-        itemsModel.setProperty(currentIndex, "expr", expr)
         itemsModel.setProperty(currentIndex, "valid", valid)
+        itemsModel.setProperty(currentIndex, "expr", expr)
         itemsModel.setProperty(currentIndex, "value", value)
+
         // TODO: care about type here
         currentIndex++
     }

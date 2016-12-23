@@ -6,7 +6,7 @@ Bridge::Bridge()
     : bts(this)
 {
     r.insertCell(0, "omg", "wtf");
-    r.insertCell(0, "bbq", "wtf");
+    r.insertCell(0, "bbq", "(+ 1 2)");
 }
 
 bool Bridge::checkName(QString name) const

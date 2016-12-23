@@ -29,9 +29,22 @@ Item {
             }
 
             CellExpr {
+                id: cell
                 width: parent.width
-                expr: expr
             }
+
+            /*
+             *  Dummy text field to forward changes into cell
+             */
+            Text {
+                visible: false
+                text: expr
+                onTextChanged: {
+                    cell.expr = text
+                }
+            }
+
+            function setExpr(e) { cell.expr = e }
         }
     }
 
