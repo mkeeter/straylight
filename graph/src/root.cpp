@@ -251,7 +251,15 @@ bool Root::checkName(const SheetIndex& parent,
                      const std::string& name,
                      std::string* err) const
 {
-    if (!tree.canInsert(parent, name))
+    if (name.size() == 0)
+    {
+        if (err)
+        {
+            *err = "Name cannot be empty";
+        }
+        return false;
+    }
+    else if (!tree.canInsert(parent, name))
     {
         if (err)
         {

@@ -9,9 +9,23 @@ Bridge::Bridge()
     r.insertCell(0, "bbq", "(+ 1 2)");
 }
 
-bool Bridge::checkName(int sheet_index, QString name) const
+QString Bridge::checkName(int sheet_index, QString name) const
 {
-    return r.checkName(sheet_index, name.toStdString());
+    std::string out;
+    r.checkName(sheet_index, name.toStdString(), &out);
+    return QString::fromStdString(out);
+}
+
+QString Bridge::checkRename(int item_index, QString name) const
+{
+    const auto& current_name = r.nameOf(item_index);
+    if (current_name == name.toStdString())
+    {
+        return "";
+    }
+
+    auto sheet = r.parentSheet(item_index);
+    return checkName(sheet.i, name);
 }
 
 void Bridge::insertCell(int sheet_index, const QString& name)

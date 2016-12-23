@@ -8,21 +8,20 @@ SplitView {
 
     property int sheetIndex
 
-    ItemsView {
-        id: itemsView
-        sheetIndex: sheetIndex
+    ItemsPane {
+        id: items
         Layout.fillHeight: true
+
+        sheetIndex: sheetIndex
     }
 
-    LibraryView {
-        id: libraryView
+    LibraryPane {
+        id: lib
         width: parent.width
         Layout.minimumHeight: 100
 
         sheetIndex: sheetIndex
     }
 
-    property alias viewEnv: itemsView.viewEnv
-
-    property alias libraryModel: libraryView.libraryModel
+    property alias libraryModel: lib.libraryModel
 }

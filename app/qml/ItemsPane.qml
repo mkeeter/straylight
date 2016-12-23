@@ -9,7 +9,6 @@ ScrollView {
     property ListModel itemsModel: ListModel { }
 
     property int sheetIndex
-    property var viewEnv
     property bool listening: false
     property int currentIndex: 0
 
@@ -52,6 +51,7 @@ ScrollView {
         {
             if (i.type != 'none')
                 itemsModel.remove(currentIndex)
+            console.log("Inserting item with index " + cell_index)
             itemsModel.insert(currentIndex,
                 {type: 'cell', cellIndex: cell_index})
         }

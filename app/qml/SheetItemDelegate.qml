@@ -10,8 +10,6 @@ Item {
     width: parent.width
     height: childrenRect.height
 
-    property int parentSheetIndex
-
     function bestDelegate(t) {
         if (t == "cell")
             return cellDelegate;
@@ -26,11 +24,11 @@ Item {
             width: parent.width
             height: childrenRect.height
 
-            ItemName {
+            ItemTitle {
                 width: parent.width
                 text: name
+                itemIndex: cellIndex
 
-                sheetIndex: parentSheetIndex
                 onEraseMe: {
                     Bridge.eraseCell(cellIndex)
                 }
@@ -74,8 +72,6 @@ Item {
                         cell.expr = text
                 }
             }
-
-            function setExpr(e) { cell.expr = e }
         }
     }
 

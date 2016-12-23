@@ -3,9 +3,9 @@
         <file>qml/main.qml</file>
         <file>qml/SheetView.qml</file>
         <file>qml/SheetItemDelegate.qml</file>
-        <file>qml/ItemName.qml</file>
-        <file>qml/ItemsView.qml</file>
-        <file>qml/LibraryView.qml</file>
+        <file>qml/ItemTitle.qml</file>
+        <file>qml/ItemsPane.qml</file>
+        <file>qml/LibraryPane.qml</file>
         <file>qml/Colors.qml</file>
         <file>qml/CellExpr.qml</file>
         <file>qml/IconButton.qml</file>

@@ -48,7 +48,6 @@ ApplicationWindow {
         SheetView {
             id: root
             sheetIndex: 0
-            viewEnv: [0]
 
             libraryModel: ListModel {
                 ListElement {

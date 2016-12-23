@@ -118,6 +118,12 @@ public:
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
         { return tree.iterItems(parent); }
 
+    /*
+     *  Looks up the parent sheet for an item
+     */
+    SheetIndex parentSheet(const ItemIndex& item) const
+        { return tree.parentOf(item); }
+
     ////////////////////////////////////////////////////////////////////////////
 
     bool canInsertSheet(const SheetIndex& parent,

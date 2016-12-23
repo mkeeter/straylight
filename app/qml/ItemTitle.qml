@@ -12,7 +12,7 @@ Item {
     id: base
     signal eraseMe
 
-    property int sheetIndex
+    property int itemIndex
 
     Text {
         anchors.left: parent.left
@@ -73,8 +73,15 @@ Item {
             id: newName
             Layout.fillWidth: true
             validate: function(name) {
-                return name == nameText.text ||
-                       Bridge.checkName(sheetIndex, name)
+                var err = Bridge.checkRename(itemIndex, name)
+                if (err != "")
+                {
+                    nameError.text = err
+                    nameError.visible = true
+                    return false
+                }
+                nameError.visible = false
+                return true
             }
             onAccepted: function(t) {
                 console.log("Renaming to " + t)
@@ -82,6 +89,13 @@ Item {
             }
             onCancelled: { parent.editing = false }
         }
+    }
+
+    Text {
+        anchors.top: editRow.bottom
+        id: nameError
+        visible: false
+        color: Colors.base1
     }
 
     property alias text: nameText.text
