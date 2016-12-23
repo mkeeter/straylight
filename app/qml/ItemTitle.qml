@@ -85,7 +85,7 @@ Item {
             }
             onAccepted: function(t) {
                 parent.editing = false
-                Bridge.renameItem(itemIndex, name)
+                Bridge.renameItem(itemIndex, t)
             }
             onCancelled: { parent.editing = false }
         }
