@@ -15,6 +15,7 @@ ScrollView {
 
     Component.onCompleted: {
         Bridge.beginSheet.connect(beginSheet)
+        Bridge.endSheet.connect(endSheet)
         Bridge.cell.connect(cell)
         Bridge.sync()
     }
@@ -24,6 +25,18 @@ ScrollView {
         {
             listening = true;
             currentIndex = 0;
+        }
+    }
+
+    function endSheet(i) {
+        if (listening)
+        {
+            while (currentIndex < itemsModel.count)
+            {
+                itemsModel.remove(currentIndex)
+                currentIndex++
+            }
+            listening = false
         }
     }
 
