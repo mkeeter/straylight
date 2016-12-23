@@ -82,9 +82,9 @@ TEST_CASE("Root::eraseCell")
     SECTION("Basic erasing")
     {
         auto x = r.insertCell(0, "x", "(+ 1 2)");
-        REQUIRE(!r.canInsertCell(0, "x"));
+        REQUIRE(!r.checkName(0, "x"));
         r.eraseCell(x);
-        REQUIRE(r.canInsertCell(0, "x"));
+        REQUIRE(r.checkName(0, "x"));
     }
 
     SECTION("Change detection")

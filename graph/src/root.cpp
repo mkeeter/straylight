@@ -247,6 +247,30 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
+bool Root::checkName(const SheetIndex& parent,
+                     const std::string& name,
+                     std::string* err) const
+{
+    if (!tree.canInsert(parent, name))
+    {
+        if (err)
+        {
+            *err = "Duplicate name";
+        }
+        return false;
+    }
+    else if (!interpreter.nameValid(name))
+    {
+        if (err)
+        {
+            *err = "Invalid name";
+        }
+        return false;
+    }
+
+    return true;
+}
+
 void Root::serialize(TreeSerializer* s) const
 {
     serialize(s, {0});

@@ -235,24 +235,6 @@ TEST_CASE("Tree::instancesOf")
     }
 }
 
-TEST_CASE("Tree::canInsertCell")
-{
-    Tree t;
-    REQUIRE(t.canInsertCell(0, "a"));
-    t.insertCell(0, "a", "12");
-    REQUIRE(!t.canInsertCell(0, "a"));
-}
-
-TEST_CASE("Tree::canInsertInstance")
-{
-
-}
-
-TEST_CASE("Tree::canRename")
-{
-
-}
-
 TEST_CASE("Tree::erase")
 {
     Tree t;

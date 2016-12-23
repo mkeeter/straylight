@@ -38,20 +38,13 @@ InstanceIndex Tree::insertInstance(const SheetIndex& parent,
     return InstanceIndex(i.i);
 }
 
-bool Tree::canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
-                             const std::string& name) const
+bool Tree::canInsertInstance(const SheetIndex& parent,
+                             const SheetIndex& target) const
 {
     // TODO: check for recursion here
+    (void)parent;
     (void)target;
-    return names.left.find(std::make_pair(parent, name)) == names.left.end();
-}
-
-bool Tree::canRename(const ItemIndex& item, const std::string& new_name) const
-{
-    auto k = names.right.at(item);
-    return
-        k.second == new_name ||
-        names.left.find(std::make_pair(k.first, new_name)) == names.left.end();
+    return true;
 }
 
 const std::list<ItemIndex>& Tree::iterItems(const SheetIndex& parent) const

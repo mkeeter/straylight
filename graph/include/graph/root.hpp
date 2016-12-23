@@ -74,6 +74,13 @@ public:
     const Value& getValue(const CellKey& cell) const;
 
     /*
+     *  Checks to see whether the given name is valid
+     *  (both as an identifier and in having no collisions)
+     */
+    bool checkName(const SheetIndex& parent,
+                   const std::string& name, std::string* err=nullptr) const;
+
+    /*
      *  Exports the graph to any object implementing the TreeSerializer API
      */
     void serialize(TreeSerializer* s) const;
@@ -110,27 +117,6 @@ public:
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
         { return tree.iterItems(parent); }
-
-    /*
-     *  Checks to see whether we can insert the given cell
-     */
-    bool canInsertCell(const SheetIndex& parent,
-                       const std::string& name) const
-        { return tree.canInsertCell(parent, name); }
-
-    /*
-     *  Checks to see whether we can insert the given instance
-     *  (checking both name collisions and recursive loops)
-     */
-    bool canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
-                           const std::string& name) const
-        { return tree.canInsertInstance(parent, target, name); }
-
-    /*
-     *  Check whether we can rename a cell or instance
-     */
-    bool canRename(const ItemIndex& item, const std::string& new_name) const
-        { return tree.canRename(item, new_name); }
 
     ////////////////////////////////////////////////////////////////////////////
 

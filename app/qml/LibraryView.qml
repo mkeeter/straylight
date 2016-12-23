@@ -74,4 +74,5 @@ ColumnLayout {
     }
 
     property alias libraryModel: libraryView.libraryModel
+    property alias sheetIndex: creator.sheetIndex
 }

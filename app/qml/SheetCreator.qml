@@ -10,6 +10,8 @@ GridLayout
     id: grid
     width: parent.width
 
+    property int sheetIndex
+
     rows: 2
     columns: 2
 
@@ -70,7 +72,7 @@ GridLayout
         Layout.fillWidth: true
         Layout.fillHeight: true
         validate: function(name) {
-            return Bridge.checkName(name)
+            return Bridge.checkName(sheetIndex, name)
         }
         onAccepted: function(t) {
             preferredHeight = 0

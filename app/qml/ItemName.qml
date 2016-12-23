@@ -12,6 +12,8 @@ Item {
     id: base
     signal eraseMe
 
+    property int sheetIndex
+
     Text {
         anchors.left: parent.left
         id: nameText
@@ -71,7 +73,8 @@ Item {
             id: newName
             Layout.fillWidth: true
             validate: function(name) {
-                return Bridge.checkName(name)
+                return name == nameText.text ||
+                       Bridge.checkName(sheetIndex, name)
             }
             onAccepted: function(t) {
                 console.log("Renaming to " + t)

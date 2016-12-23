@@ -34,23 +34,11 @@ public:
                                  const SheetIndex& target);
 
     /*
-     *  Checks to see whether we can insert the given cell
-     */
-    bool canInsertCell(const SheetIndex& parent,
-                       const std::string& name) const
-        { return canInsert(parent, name); }
-
-    /*
      *  Checks to see whether we can insert the given instance
-     *  (checking both name collisions and recursive loops)
+     *  (looking for recursive loops)
      */
-    bool canInsertInstance(const SheetIndex& parent, const SheetIndex& target,
-                           const std::string& name) const;
-
-    /*
-     *  Check whether we can rename a cell or instance
-     */
-    bool canRename(const ItemIndex& item, const std::string& new_name) const;
+    bool canInsertInstance(const SheetIndex& parent,
+                           const SheetIndex& target) const;
 
     /*
      *  Iterate over items for a given parent

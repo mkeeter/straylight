@@ -9,9 +9,9 @@ Bridge::Bridge()
     r.insertCell(0, "bbq", "(+ 1 2)");
 }
 
-bool Bridge::checkName(QString name) const
+bool Bridge::checkName(int sheet_index, QString name) const
 {
-    return name.count("x");
+    return r.checkName(sheet_index, name.toStdString());
 }
 
 void Bridge::insertCell(int sheet_index, const QString& name)
