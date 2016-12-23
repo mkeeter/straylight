@@ -54,8 +54,8 @@ Item {
 
         anchors.top: nameText.bottom
         width: parent.width
-        height: editing ? (nameError.visible ? (newName.height + nameError.height + 5)
-                                             : newName.height) : 0
+        height: editing ? (nameError.text.length ? childrenRect.height
+                                                 : newName.height) : 0
         clip: true
 
         Behavior on height {
@@ -96,7 +96,6 @@ Item {
             Layout.columnSpan: 2
 
             id: nameError
-            visible: text.length != 0
             color: Colors.base1
         }
     }
