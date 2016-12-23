@@ -20,18 +20,15 @@ ScrollView {
     }
 
     function beginSheet(i) {
-        if (i == sheetIndex)
-        {
+        if (i == sheetIndex) {
             listening = true;
             currentIndex = 0;
         }
     }
 
     function endSheet(i) {
-        if (listening)
-        {
-            while (currentIndex < itemsModel.count)
-            {
+        if (listening) {
+            while (currentIndex < itemsModel.count) {
                 itemsModel.remove(currentIndex)
                 currentIndex++
             }
@@ -39,19 +36,18 @@ ScrollView {
         }
     }
 
-    function cell(cell_index, name, expr, type, valid, value)
-    {
-        if (!listening)
+    function cell(cell_index, name, expr, type, valid, value) {
+        if (!listening) {
             return
+        }
 
         var i = currentIndex < itemsModel.count
                     ? itemsModel.get(currentIndex)
                     : {type: 'none', cellIndex: -1}
-        if (i.type != 'cell' || i.cellIndex != cell_index)
-        {
-            if (i.type != 'none')
+        if (i.type != 'cell' || i.cellIndex != cell_index) {
+            if (i.type != 'none') {
                 itemsModel.remove(currentIndex)
-            console.log("Inserting item with index " + cell_index)
+            }
             itemsModel.insert(currentIndex,
                 {type: 'cell', cellIndex: cell_index})
         }

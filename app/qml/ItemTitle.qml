@@ -47,14 +47,15 @@ Item {
         }
     }
 
-    RowLayout
+    GridLayout
     {
         id: editRow
         property bool editing
 
         anchors.top: nameText.bottom
         width: parent.width
-        height: editing ? newName.height : 0
+        height: editing ? (nameError.visible ? (newName.height + nameError.height + 5)
+                                             : newName.height) : 0
         clip: true
 
         Behavior on height {
@@ -64,24 +65,23 @@ Item {
         }
 
         Text {
+            Layout.row: 0
+            Layout.column: 0
             text: "Rename to"
             padding: 3
             color: Colors.base1
         }
 
         TextValidator {
-            id: newName
+            Layout.row: 0
+            Layout.column: 1
             Layout.fillWidth: true
+
+            id: newName
             validate: function(name) {
-                var err = Bridge.checkRename(itemIndex, name)
-                if (err != "")
-                {
-                    nameError.text = err
-                    nameError.visible = true
-                    return false
-                }
-                nameError.visible = false
-                return true
+                var e = Bridge.checkRename(itemIndex, name)
+                nameError.text = e
+                return e == ""
             }
             onAccepted: function(t) {
                 console.log("Renaming to " + t)
@@ -89,14 +89,20 @@ Item {
             }
             onCancelled: { parent.editing = false }
         }
+
+        Text {
+            Layout.row: 1
+            Layout.column: 0
+            Layout.columnSpan: 2
+
+            id: nameError
+            visible: text.length != 0
+            onVisibleChanged: { console.log(visible) }
+            onTextChanged: { console.log(text) }
+            color: Colors.base1
+        }
     }
 
-    Text {
-        anchors.top: editRow.bottom
-        id: nameError
-        visible: false
-        color: Colors.base1
-    }
 
     property alias text: nameText.text
 }
