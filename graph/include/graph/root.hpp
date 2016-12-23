@@ -54,7 +54,7 @@ public:
     /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
-    void setExpr(const CellIndex& cell, const std::string& expr);
+    bool setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
      *  Changes the input expression for a particular instance

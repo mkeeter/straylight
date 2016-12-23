@@ -111,6 +111,13 @@ TEST_CASE("Root::setExpr")
 {
     Root r;
 
+    SECTION("Return value")
+    {
+        auto x = r.insertCell(0, "x", "1");
+        REQUIRE(!r.setExpr(x, "1"));
+        REQUIRE(r.setExpr(x, "2"));
+    }
+
     SECTION("Re-evaluation on parent change")
     {
         auto x = r.insertCell(0, "x", "1");

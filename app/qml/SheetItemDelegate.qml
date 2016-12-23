@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.0
 
 import Colors 1.0
 import Awesome 4.7
+import Bridge 1.0
 
 Item {
     id: sheetItemDelegate
@@ -31,6 +32,9 @@ Item {
             CellExpr {
                 id: cell
                 width: parent.width
+                onExprChanged: {
+                    Bridge.setExpr(cellIndex, expr)
+                }
             }
 
             Row {
@@ -59,7 +63,8 @@ Item {
                 visible: false
                 text: expr
                 onTextChanged: {
-                    cell.expr = text
+                    if (cell.expr != text)
+                        cell.expr = text
                 }
             }
 

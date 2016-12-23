@@ -32,9 +32,9 @@ ScrollView {
         if (!listening)
             return
 
-        var i = currentIndex < itemsModel.size
+        var i = currentIndex < itemsModel.count
                     ? itemsModel.get(currentIndex)
-                    : {type: 'none'}
+                    : {type: 'none', cellIndex: -1}
         if (i.type != 'cell' || i.cellIndex != cell_index)
         {
             if (i.type != 'none')

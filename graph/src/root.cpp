@@ -152,9 +152,16 @@ void Root::eraseInstance(const InstanceIndex& instance)
     sync();
 }
 
-void Root::setExpr(const CellIndex& i, const std::string& expr)
+bool Root::setExpr(const CellIndex& i, const std::string& expr)
 {
     auto cell = getMutableItem(i).cell();
+
+    // Early exit if this is a no-op
+    if (cell->expr == expr)
+    {
+        return false;
+    }
+
     cell->expr = expr;
 
     // Update cell type, saving previous type
@@ -201,6 +208,8 @@ void Root::setExpr(const CellIndex& i, const std::string& expr)
         markDirty({e, tree.nameOf(i)});
     }
     sync();
+
+    return true;
 }
 
 void Root::setInput(const InstanceIndex& instance, const CellIndex& cell,

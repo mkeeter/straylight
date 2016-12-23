@@ -17,6 +17,13 @@ bool Bridge::checkName(QString name) const
 void Bridge::insertCell(int sheet_index, const QString& name)
 {
     r.insertCell(sheet_index, name.toStdString());
+    sync();
+}
+
+void Bridge::setExpr(int cell_index, const QString& expr)
+{
+    if (r.setExpr(cell_index, expr.toStdString()))
+        sync();
 }
 
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
