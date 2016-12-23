@@ -10,7 +10,8 @@ Column {
         id: exprRect
 
         TextEdit {
-            color: Colors.base0
+            color: Colors.base1
+            selectionColor: Colors.base00
             id: exprText
             selectByMouse: true
             anchors.left: parent.left

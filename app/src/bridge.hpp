@@ -17,6 +17,7 @@ public:
     Q_INVOKABLE bool checkName(QString name) const;
     Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
+    Q_INVOKABLE void eraseCell(int cell_index);
 
     /*
      *  Constructor for the QML singleton

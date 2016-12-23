@@ -9,7 +9,8 @@ Rectangle {
     TextInput {
         anchors.left: parent.left
         anchors.right: parent.right
-        color: Colors.base0
+        color: Colors.base1
+        selectionColor: Colors.base00
         selectByMouse: true
         id: txt
         padding: 3

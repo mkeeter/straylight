@@ -27,6 +27,9 @@ Item {
             ItemName {
                 width: parent.width
                 text: name
+                onEraseMe: {
+                    Bridge.eraseCell(cellIndex)
+                }
             }
 
             CellExpr {

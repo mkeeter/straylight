@@ -26,6 +26,12 @@ void Bridge::setExpr(int cell_index, const QString& expr)
         sync();
 }
 
+void Bridge::eraseCell(int cell_index)
+{
+    r.eraseCell(cell_index);
+    sync();
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

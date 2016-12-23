@@ -9,6 +9,9 @@ import Awesome 4.7
 Item {
     height: childrenRect.height + 5
 
+    id: base
+    signal eraseMe
+
     Text {
         anchors.left: parent.left
         id: nameText
@@ -36,9 +39,9 @@ Item {
         }
 
         IconButton {
-            id: deleteCell
             anchors.verticalCenter: parent.verticalCenter
             text: Awesome.fa_trash
+            onClicked: { base.eraseMe() }
         }
     }
 
