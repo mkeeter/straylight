@@ -63,7 +63,7 @@ ScrollView {
     ListView {
         anchors.fill: parent
         model: itemsModel
-        spacing: 0
+        spacing: 5
         delegate: SheetItemDelegate {}
     }
     style: ScrollViewStyle {

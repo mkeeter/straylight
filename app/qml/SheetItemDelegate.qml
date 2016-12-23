@@ -5,10 +5,10 @@ import Colors 1.0
 import Awesome 4.7
 import Bridge 1.0
 
-Item {
+Column {
     id: sheetItemDelegate
     width: parent.width
-    height: childrenRect.height
+    spacing: 8
 
     function bestDelegate(t) {
         if (t == "cell")
@@ -62,7 +62,6 @@ Item {
         width: parent.width
         height: 2
         color: Colors.base0
-        anchors.top: itemDisplay.bottom
     }
 }
 

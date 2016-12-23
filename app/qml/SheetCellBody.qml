@@ -6,6 +6,8 @@ import Bridge 1.0
 import Awesome 4.7
 
 Column {
+    spacing: 5
+
     Rectangle {
         color: Colors.base02
         id: exprRect
@@ -37,17 +39,23 @@ Column {
         anchors.right: parent.right
 
         Text {
+            id: warningIcon
             visible: !valid
+
             text: Awesome.fa_exclamation_triangle
+
             color: Colors.base0
             font.family: fontAwesome.name
+
             rightPadding: 5
+            anchors.verticalCenter: resultText.verticalCenter
         }
 
         Text {
             id: resultText
             wrapMode: Text.Wrap
             text: value
+            width: parent.width - (warningIcon.visible ? warningIcon.width : 0)
 
             font.family: sansSerif.name
             color: Colors.base0
