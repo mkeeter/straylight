@@ -23,7 +23,7 @@ Item {
         Column {
             spacing: 5
 
-            ItemTitle {
+            SheetItemTitle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: 5
@@ -36,45 +36,18 @@ Item {
                 }
             }
 
-            CellExpr {
-                id: cell
-                width: parent.width
-                onExprChanged: {
-                    Bridge.setExpr(cellIndex, expr)
-                }
+            SheetCellBody {
+                id: cellBody
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 5
             }
 
-            Row {
-                Text {
-                    visible: !valid
-                    text: Awesome.fa_exclamation_triangle
-                    color: Colors.base0
-                    font.family: fontAwesome.name
-                    padding: 5
-                    leftPadding: 15
-                    topPadding: 8
-                }
-
-                Text {
-                    id: resultText
-                    text: value
-
-                    font.family: sansSerif.name
-                    color: Colors.base0
-                    padding: 5
-                }
-            }
-
-            /*
-             *  Dummy text field to forward changes into cell
-             */
-            Text {
-                visible: false
-                text: expr
-                onTextChanged: {
-                    if (cell.expr != text)
-                        cell.expr = text
-                }
+            // Dummy item that forwards changes into cell body
+            Item {
+                property string text: expr
+                onTextChanged: { cellBody.setExpr(text) }
             }
         }
     }

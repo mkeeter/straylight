@@ -8,14 +8,14 @@ SplitView {
 
     property int sheetIndex
 
-    ItemsPane {
+    SheetItemsPane {
         id: items
         Layout.fillHeight: true
 
         sheetIndex: sheetIndex
     }
 
-    LibraryPane {
+    SheetLibraryPane {
         id: lib
         width: parent.width
         Layout.minimumHeight: 100
