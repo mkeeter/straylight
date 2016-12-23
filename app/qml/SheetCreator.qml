@@ -65,6 +65,7 @@ GridLayout
         Layout.fillHeight: true
     }
 
+    /*
     TextValidator {
         id: namer
         Layout.row: 1
@@ -83,4 +84,5 @@ GridLayout
             console.log("cancelled")
         }
     }
+    */
 }

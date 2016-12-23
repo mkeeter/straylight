@@ -6,100 +6,58 @@ import Colors 1.0
 import Bridge 1.0
 import Awesome 4.7
 
-Item {
-    height: childrenRect.height + 5
-
+GridLayout {
     id: base
-    signal eraseMe
 
+    signal eraseMe
     property int itemIndex
 
     Text {
-        anchors.left: parent.left
+        Layout.row: 0
+        Layout.column: 0
+        Layout.fillWidth: true
+
         id: nameText
+        font.family: sansSerif.name
+        font.pointSize: 18
         color: Colors.base1
-        padding: 5
     }
 
-    Row {
-        id: editButtons
+    IconButton {
+        Layout.row: 0
+        Layout.column: 1
 
-        anchors.right: parent.right
-        anchors.verticalCenter: nameText.verticalCenter
-        spacing: 4
-        rightPadding: 5
-
-        IconButton {
-            id: editName
-            anchors.verticalCenter: parent.verticalCenter
-            text: Awesome.fa_pencil
-            onClicked: {
-                editRow.editing = true
-                newName.enable(nameText.text)
-            }
-            enabled: editRow.height == 0
+        id: editName
+        text: Awesome.fa_pencil
+        onClicked: {
+            renamer.enable(nameText.text)
         }
-
-        IconButton {
-            anchors.verticalCenter: parent.verticalCenter
-            text: Awesome.fa_trash
-            onClicked: { base.eraseMe() }
-        }
+        enabled: !renamer.active
     }
 
-    GridLayout
-    {
-        id: editRow
-        property bool editing
+    IconButton {
+        Layout.row: 0
+        Layout.column: 2
 
-        anchors.top: nameText.bottom
+        text: Awesome.fa_trash
+        onClicked: { base.eraseMe() }
+    }
+
+    ValidatedInput {
+        Layout.row: 1
+        Layout.column: 0
+        Layout.columnSpan: 3
+
+        id: renamer
         width: parent.width
-        height: editing ? (nameError.text.length ? childrenRect.height
-                                                 : newName.height) : 0
-        clip: true
-
-        Behavior on height {
-            NumberAnimation {
-                duration: 50
-            }
+        label: "Rename to"
+        getError: function(name) {
+            return Bridge.checkRename(itemIndex, name)
         }
-
-        Text {
-            Layout.row: 0
-            Layout.column: 0
-            text: "Rename to"
-            padding: 3
-            color: Colors.base1
-        }
-
-        TextValidator {
-            Layout.row: 0
-            Layout.column: 1
-            Layout.fillWidth: true
-
-            id: newName
-            validate: function(name) {
-                var e = Bridge.checkRename(itemIndex, name)
-                nameError.text = e
-                return e == ""
-            }
-            onAccepted: function(t) {
-                parent.editing = false
-                Bridge.renameItem(itemIndex, t)
-            }
-            onCancelled: { parent.editing = false }
-        }
-
-        Text {
-            Layout.row: 1
-            Layout.column: 0
-            Layout.columnSpan: 2
-
-            id: nameError
-            color: Colors.base1
+        onAccepted: function(t) {
+            Bridge.renameItem(itemIndex, t)
         }
     }
-
 
     property alias text: nameText.text
 }

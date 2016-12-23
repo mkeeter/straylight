@@ -21,11 +21,13 @@ Item {
         id: cellDelegate
 
         Column {
-            width: parent.width
-            height: childrenRect.height
+            spacing: 5
 
             ItemTitle {
-                width: parent.width
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 5
+
                 text: name
                 itemIndex: cellIndex
 
@@ -56,6 +58,8 @@ Item {
                 Text {
                     id: resultText
                     text: value
+
+                    font.family: sansSerif.name
                     color: Colors.base0
                     padding: 5
                 }

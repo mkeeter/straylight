@@ -23,6 +23,10 @@ ApplicationWindow {
         id: fontAwesome
         source: "qrc:/fonts/fontawesome-webfont.ttf"
     }
+    FontLoader {
+        id: sansSerif
+        source: "qrc:/fonts/Inconsolata-Regular.ttf"
+    }
 
     //menu containing two menu items
     menuBar: MenuBar {

@@ -10,10 +10,11 @@
         <file>qml/CellExpr.qml</file>
         <file>qml/IconButton.qml</file>
         <file>qml/TextRect.qml</file>
-        <file>qml/TextValidator.qml</file>
+        <file>qml/ValidatedInput.qml</file>
         <file>qml/SheetCreator.qml</file>
         <file>qml/Awesome.qml</file>
 
         <file>fonts/fontawesome-webfont.ttf</file>
+        <file>fonts/Inconsolata-Regular.ttf</file>
     </qresource>
 </RCC>

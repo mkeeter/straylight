@@ -12,6 +12,7 @@ Column {
         TextEdit {
             color: Colors.base1
             selectionColor: Colors.base00
+            font.family: sansSerif.name
             id: exprText
             selectByMouse: true
             anchors.left: parent.left

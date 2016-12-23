@@ -9,11 +9,14 @@ Rectangle {
     TextInput {
         anchors.left: parent.left
         anchors.right: parent.right
-        color: Colors.base1
-        selectionColor: Colors.base00
+
         selectByMouse: true
         id: txt
         padding: 3
+
+        font.family: sansSerif.name
+        color: Colors.base1
+        selectionColor: Colors.base00
 
         onActiveFocusChanged: {
             if (!activeFocus)
