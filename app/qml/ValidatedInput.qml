@@ -5,9 +5,9 @@ import QtQuick.Layouts 1.3
 import Awesome 4.7
 import Colors 1.0
 
-GridLayout {
+ColumnLayout {
     function enable(t) {
-        visible = true
+        active = true
         editor.text = t
         editor.setFocus()
     }
@@ -15,65 +15,66 @@ GridLayout {
     property var getError
     property string error
     property bool valid: error.length == 0
+    property bool active: false
 
     signal accepted(string t)
     signal cancelled
 
-    visible: false
+    onCancelled: { active = false }
+    onAccepted:  { active = false }
 
-    onCancelled: { visible = false }
-    onAccepted:  { visible = false }
-
-    Text {
+    RowLayout {
         Layout.row: 0
-        Layout.column: 0
+        Layout.alignment: Qt.AlignTop
 
-        id: textLabel
-        color: Colors.base1
-    }
+        Text {
+            Layout.column: 0
 
-    TextRect {
-        id: editor
-
-        Layout.row: 0
-        Layout.column: 1
-        Layout.fillWidth: true
-
-        Keys.onReturnPressed: {
-            if (valid)
-                accepted(text)
-            else
-                event.accepted = false
+            id: textLabel
+            color: Colors.base1
         }
 
-        onLostFocus: {
-            cancelled()
+        TextRect {
+            id: editor
+            Layout.column: 1
+            Layout.fillWidth: true
+
+            Keys.onReturnPressed: {
+                if (valid)
+                    accepted(text)
+                else
+                    event.accepted = false
+            }
+
+            onLostFocus: {
+                cancelled()
+            }
+
+            onTextChanged: {
+                error = getError(text)
+            }
         }
 
-        onTextChanged: {
-            error = getError(text)
+        IconButton {
+            Layout.column: 2
+            Layout.alignment: Qt.AlignTop
+
+            id: accept
+            text: Awesome.fa_check
+            enabled: valid
+            onClicked: { accepted(editor.text) }
         }
-    }
 
-    IconButton {
-        Layout.row: 0
-        Layout.column: 2
+        IconButton {
+            Layout.column: 3
+            Layout.alignment: Qt.AlignTop
 
-        id: accept
-        text: Awesome.fa_check
-        enabled: valid
-        onClicked: { parent.accepted(editor.text) }
-    }
-
-    IconButton {
-        Layout.row: 0
-        Layout.column: 3
-
-        rightPadding: 3
-        id: cancel
-        text: Awesome.fa_times
-        onClicked: {
-            cancelled()
+            rightPadding: 3
+            id: cancel
+            text: Awesome.fa_times
+            onClicked: {
+                cancelled()
+            }
         }
     }
 
@@ -85,7 +86,6 @@ GridLayout {
         Layout.columnSpan: 4
 
         Text {
-            visible: !valid
             text: Awesome.fa_exclamation_triangle
             color: Colors.base0
             font.family: fontAwesome.name

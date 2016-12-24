@@ -47,6 +47,11 @@ GridLayout {
         Layout.row: 1
         Layout.column: 0
         Layout.columnSpan: 3
+        Layout.preferredHeight: active ? implicitHeight : 0
+        Behavior on Layout.preferredHeight {
+            NumberAnimation { duration: 50 }
+        }
+        clip: true
 
         id: renamer
         width: parent.width
