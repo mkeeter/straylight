@@ -41,6 +41,7 @@ signals:
      */
     void beginSheet(int s);
     void endSheet();
+
     void instance(int i, const QString& name);
     void input(int c, const QString& name,
                const QString& expr, bool valid,

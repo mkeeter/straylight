@@ -9,7 +9,7 @@ import Bridge 1.0
 
 ApplicationWindow {
     visible: true
-    title: "Beep boop"
+    title: "Straylight"
 
     width: 640
     height: 480
@@ -45,19 +45,32 @@ ApplicationWindow {
         }
     }
 
+    Component {
+        id: sheetViewComponent
+        SheetView { }
+    }
+
     SplitView {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
-        SheetView {
-            id: root
-            sheetIndex: 0
+        SplitView {
+            id: sheetStack
+
+            anchors.bottom: parent.bottom
+            anchors.top: parent.top
         }
 
         FbItem {
             id: viewport
             Layout.minimumWidth: 100
             Layout.fillWidth: true
+        }
+
+        Component.onCompleted: {
+            sheetStack.addItem(
+                sheetViewComponent.createObject(sheetStack,
+                    {sheetIndex: 0, sheetEnv: [0]}))
         }
     }
 }

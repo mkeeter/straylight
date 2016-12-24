@@ -7,6 +7,7 @@ SplitView {
     orientation: Qt.Vertical
 
     property int sheetIndex
+    property var sheetEnv
 
     SheetItemsPane {
         id: items
