@@ -41,6 +41,9 @@ ColumnLayout {
                 else
                     event.accepted = false
             }
+            Keys.onEscapePressed: {
+                cancelled()
+            }
 
             onLostFocus: {
                 cancelled()
