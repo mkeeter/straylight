@@ -5,84 +5,74 @@ import QtQuick.Layouts 1.3
 import Colors 1.0
 import Bridge 1.0
 
-GridLayout
+ColumnLayout
 {
     id: grid
-    width: parent.width
 
     property int sheetIndex
 
-    rows: 2
-    columns: 2
-
-    /*
-     *  As this item is stored in a Layout, we offer height hints here
-     */
-    property real preferredHeight: 0
-    Behavior on preferredHeight {
-        NumberAnimation {
-            duration: 50
-        }
-    }
-
     function activateCell() {
-        console.log("Cell")
-        preferredHeight = childrenRect.height
         label.text = "Creating new cell:"
-        namer.enable("c")
+        console.log("Cell")
+
+        nameInput.mode = "cell"
+        nameInput.enable("i")
     }
 
     function activateSheet() {
-        console.log("sheet")
-        preferredHeight = childrenRect.height
         label.text = "Creating new sheet:"
-        namer.enable("s")
+        console.log("sheet")
+
+        nameInput.mode = "sheet"
+        nameInput.enable("i")
     }
 
     function activateInstance(n) {
-        preferredHeight = childrenRect.height
-        console.log("instance")
         label.text = "Creating new instance of " + n + ":"
-        namer.enable("i")
+        console.log("instance")
+
+        nameInput.mode = "instance"
+        nameInput.sheetIndex = n
+        nameInput.enable("i")
     }
 
     Text {
         Layout.row: 0
-        Layout.columnSpan: 2
-        padding: 5
+        font.bold: true
 
         id: label
         color: Colors.base1
     }
 
-    Text {
-        Layout.row: 1
-        Layout.column: 0
+    ValidatedInput {
+        id: nameInput
 
-        text: "Name:"
-        color: Colors.base1
-        leftPadding: 5
-        Layout.fillHeight: true
-    }
-
-    /*
-    TextValidator {
-        id: namer
         Layout.row: 1
-        Layout.column: 1
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        validate: function(name) {
-            return Bridge.checkName(sheetIndex, name)
+        property string mode: ""
+        property int sheetIndex
+
+        label: "Name:"
+
+        getError: function(name) {
+            if (mode == "cell") {
+                return "bad cell"
+            } else if (mode == "sheet") {
+                return "bad sheet"
+            } else if (mode == "instance") {
+                return "bad instance"
+            }
         }
+
         onAccepted: function(t) {
-            preferredHeight = 0
-            console.log("Creating new sheet with name " + t)
-        }
-        onCancelled: {
-            preferredHeight = 0
-            console.log("cancelled")
+            if (mode == "cell") {
+                console.log("Making cell " + t)
+            } else if (mode == "sheet") {
+                console.log("Making sheet " + t)
+            } else if (mode == "instance") {
+                console.log("Making instance " + t)
+            }
         }
     }
-    */
+
+    property alias active: nameInput.active
 }

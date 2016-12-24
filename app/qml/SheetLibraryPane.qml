@@ -15,10 +15,9 @@ ColumnLayout {
 
     ScrollView {
         Layout.fillWidth: true
-        width: parent.width
+        Layout.fillHeight: true
 
         id: libraryView
-        Layout.fillHeight: true
 
         property ListModel libraryModel
         style: ScrollViewStyle {
@@ -28,11 +27,12 @@ ColumnLayout {
         ListView {
             id: sheetList
             model: libraryModel
-            width: parent.width
+            anchors.fill: parent
 
             delegate: Rectangle {
                 height: childrenRect.height
-                width: parent.width
+                anchors.left: parent.left
+                anchors.right: parent.right
 
                 color: hover.containsMouse ? Colors.base01 : (index % 2 == 0 ? Colors.base02 : Colors.base03)
                 Text {
@@ -60,17 +60,22 @@ ColumnLayout {
         }
     }
 
+    // Divider
     Rectangle {
         Layout.fillWidth: true
         height: 2
+        visible: creator.active
         color: Colors.base00
-        visible: creator.preferredHeight > 0
     }
 
     SheetCreator {
         id: creator
         Layout.fillWidth: true
-        Layout.preferredHeight: preferredHeight
+
+        Layout.preferredHeight: active ? implicitHeight : 0
+        Behavior on Layout.preferredHeight {
+            NumberAnimation { duration: 50 }
+        }
     }
 
     property alias libraryModel: libraryView.libraryModel

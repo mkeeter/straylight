@@ -52,7 +52,6 @@ ScrollView {
             {
                 if (searchIndex != currentIndex)
                 {
-                    console.log("Moving " + searchIndex + " to " + currentIndex)
                     itemsModel.move(searchIndex, currentIndex, 1)
                 }
                 found = true
