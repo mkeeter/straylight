@@ -11,6 +11,9 @@ ColumnLayout
 
     property int sheetIndex
 
+    // for when we're creating an instance
+    property int targetSheetIndex
+
     function activateCell() {
         label.text = "Creating new cell:"
         console.log("Cell")
@@ -32,40 +35,37 @@ ColumnLayout
         console.log("instance")
 
         nameInput.mode = "instance"
-        nameInput.sheetIndex = n
+        targetSheetIndex = n
         nameInput.enable("i")
     }
 
     Text {
-        Layout.row: 0
-        font.bold: true
-
         id: label
+        Layout.alignment: Qt.AlignTop
         color: Colors.base1
+        font.bold: true
     }
 
     ValidatedInput {
         id: nameInput
-
-        Layout.row: 1
-        property string mode: ""
-        property int sheetIndex
+        Layout.alignment: Qt.AlignTop
 
         label: "Name:"
+        property string mode: ""
 
         getError: function(name) {
             if (mode == "cell") {
-                return "bad cell"
-            } else if (mode == "sheet") {
-                return "bad sheet"
+                return Bridge.checkName(sheetIndex, name)
             } else if (mode == "instance") {
-                return "bad instance"
+                return Bridge.checkName(sheetIndex, name)
+            } else if (mode == "sheet") {
+                return Bridge.checkSheetName(sheetIndex, name)
             }
         }
 
         onAccepted: function(t) {
             if (mode == "cell") {
-                console.log("Making cell " + t)
+                Bridge.insertCell(sheetIndex, t)
             } else if (mode == "sheet") {
                 console.log("Making sheet " + t)
             } else if (mode == "instance") {
