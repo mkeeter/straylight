@@ -18,7 +18,6 @@ SplitView {
     SheetLibraryPane {
         id: lib
         width: parent.width
-        Layout.minimumHeight: 100
 
         sheetIndex: sheetIndex
     }

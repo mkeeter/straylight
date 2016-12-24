@@ -52,41 +52,6 @@ ApplicationWindow {
         SheetView {
             id: root
             sheetIndex: 0
-
-            libraryModel: ListModel {
-                ListElement {
-                    name: "New cell..."
-                    sheetIndex: -1
-                }
-                ListElement {
-                    name: "Circle"
-                    sheetIndex: 1
-                }
-                ListElement {
-                    name: "Sphere"
-                    sheetIndex: 4
-                }
-                ListElement {
-                    name: "Cube"
-                    sheetIndex: 5
-                }
-                ListElement {
-                    name: "beep"
-                    sheetIndex: 5
-                }
-                ListElement {
-                    name: "boop"
-                    sheetIndex: 5
-                }
-                ListElement {
-                    name: "wat"
-                    sheetIndex: 5
-                }
-                ListElement {
-                    name: "New sheet..."
-                    sheetIndex: -2
-                }
-            }
         }
 
         FbItem {

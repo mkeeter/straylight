@@ -19,7 +19,17 @@ ColumnLayout {
 
         id: libraryView
 
-        property ListModel libraryModel
+        property ListModel libraryModel: ListModel {
+            ListElement {
+                name: "New cell..."
+                sheetIndex: -1
+            }
+            ListElement {
+                name: "New sheet..."
+                sheetIndex: -2
+            }
+        }
+
         style: ScrollViewStyle {
             transientScrollBars: true
         }
@@ -30,12 +40,14 @@ ColumnLayout {
             anchors.fill: parent
 
             delegate: Rectangle {
-                height: childrenRect.height
+                height: itemName.height
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                color: hover.containsMouse ? Colors.base01 : (index % 2 == 0 ? Colors.base02 : Colors.base03)
+                color: hover.containsMouse ? Colors.base01 :
+                       (index % 2 == 0 ? Colors.base02 : Colors.base03)
                 Text {
+                    id: itemName
                     text: name
                     color: Colors.base1
                     topPadding: 3
