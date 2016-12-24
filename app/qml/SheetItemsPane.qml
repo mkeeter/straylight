@@ -41,16 +41,34 @@ ScrollView {
             return
         }
 
-        var i = currentIndex < itemsModel.count
-                    ? itemsModel.get(currentIndex)
-                    : {type: 'none', cellIndex: -1}
-        if (i.type != 'cell' || i.cellIndex != cell_index) {
-            if (i.type != 'none') {
-                itemsModel.remove(currentIndex)
+        // Search forward through the list of items to find our cell,
+        // moving it to the current index if it's in the wrong place
+        var searchIndex = currentIndex
+        var found = false
+        while (!found && searchIndex < itemsModel.count)
+        {
+            var item = itemsModel.get(searchIndex)
+            if (item.type == 'cell' && item.cellIndex == cell_index)
+            {
+                if (searchIndex != currentIndex)
+                {
+                    console.log("Moving " + searchIndex + " to " + currentIndex)
+                    itemsModel.move(searchIndex, currentIndex, 1)
+                }
+                found = true
             }
+            searchIndex++;
+        }
+
+        // If we reached the end of the list and didn't find anything, then
+        // insert a brand new cell at our current index
+        if (!found)
+        {
             itemsModel.insert(currentIndex,
                 {type: 'cell', cellIndex: cell_index})
         }
+
+        // Then update all of the relevant properties
         itemsModel.setProperty(currentIndex, "name", name)
         itemsModel.setProperty(currentIndex, "valid", valid)
         itemsModel.setProperty(currentIndex, "expr", expr)
@@ -65,6 +83,16 @@ ScrollView {
         model: itemsModel
         spacing: 5
         delegate: SheetItemDelegate {}
+
+        displaced: Transition {
+            NumberAnimation { properties: "x,y"; duration: 100 }
+        }
+        move: Transition {
+            NumberAnimation { properties: "x,y"; duration: 100 }
+        }
+        remove: Transition {
+            NumberAnimation { property: "opacity"; to: 0; duration: 100 }
+        }
     }
     style: ScrollViewStyle {
         transientScrollBars: true
