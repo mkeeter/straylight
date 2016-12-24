@@ -24,19 +24,15 @@ ColumnLayout {
     onAccepted:  { active = false }
 
     RowLayout {
-        Layout.row: 0
         Layout.alignment: Qt.AlignTop
 
         Text {
-            Layout.column: 0
-
             id: textLabel
             color: Colors.base1
         }
 
         TextRect {
             id: editor
-            Layout.column: 1
             Layout.fillWidth: true
 
             Keys.onReturnPressed: {
@@ -56,9 +52,6 @@ ColumnLayout {
         }
 
         IconButton {
-            Layout.column: 2
-            Layout.alignment: Qt.AlignTop
-
             id: accept
             text: Awesome.fa_check
             enabled: valid
@@ -66,9 +59,6 @@ ColumnLayout {
         }
 
         IconButton {
-            Layout.column: 3
-            Layout.alignment: Qt.AlignTop
-
             rightPadding: 3
             id: cancel
             text: Awesome.fa_times
@@ -80,10 +70,6 @@ ColumnLayout {
 
     Row {
         visible: !valid
-
-        Layout.row: 1
-        Layout.column: 0
-        Layout.columnSpan: 4
 
         Text {
             text: Awesome.fa_exclamation_triangle
