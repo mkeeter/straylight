@@ -74,5 +74,11 @@ ColumnLayout
         }
     }
 
+    // Dummy item to pad any extra height
+    // TODO: this shouldn't be necessary with Layout.alignment specified
+    Item {
+        Layout.fillHeight: true
+    }
+
     property alias active: nameInput.active
 }

@@ -92,6 +92,9 @@ ScrollView {
         remove: Transition {
             NumberAnimation { property: "opacity"; to: 0; duration: 100 }
         }
+        add: Transition {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
+        }
     }
     style: ScrollViewStyle {
         transientScrollBars: true
