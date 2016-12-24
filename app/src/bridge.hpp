@@ -39,8 +39,8 @@ signals:
      *  Set of signals for deserialization of the graph
      *  (interpreted as a tree)
      */
-    void beginSheet(int s);
-    void endSheet();
+    void push();
+    void pop();
 
     void instance(int i, const QString& name);
     void input(int c, const QString& name,
@@ -64,17 +64,19 @@ protected:
     public:
         BridgeTreeSerializer(Bridge* b) : parent(b) {}
 
-        bool beginSheet(SheetIndex s) override;
-        void endSheet() override;
+        void cell(CellIndex c, const std::string& name,
+                  const std::string& expr, Cell::Type type,
+                  bool valid, const std::string& val) override;
+
         void instance(InstanceIndex i, const std::string& name) override;
         void input(CellIndex c, const std::string& name,
                    const std::string& expr, bool valid,
                    const std::string& val) override;
         void output(CellIndex c, const std::string& name,
                     bool valid, const std::string& val) override;
-        void cell(CellIndex c, const std::string& name,
-                  const std::string& expr, Cell::Type type,
-                  bool valid, const std::string& val) override;
+
+        bool push() override;
+        void pop() override;
     private:
         Bridge* parent;
     };

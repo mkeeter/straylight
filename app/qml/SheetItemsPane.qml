@@ -8,25 +8,36 @@ import Bridge 1.0
 ScrollView {
     property ListModel itemsModel: ListModel { }
 
-    property int sheetIndex
+    property var sheetEnv
     property bool listening: false
     property int currentIndex: 0
 
+    // Keep track of bridge deserialization protocol
+    property var bridgeEnv: []
+    property int bridgeInstance
+
     Component.onCompleted: {
-        Bridge.beginSheet.connect(beginSheet)
-        Bridge.endSheet.connect(endSheet)
+        Bridge.push.connect(push)
+        Bridge.pop.connect(pop)
         Bridge.cell.connect(cell)
+        Bridge.instance.connect(instance)
         Bridge.sync()
     }
 
-    function beginSheet(i) {
-        if (i == sheetIndex) {
+    function push() {
+        bridgeEnv.push(bridgeInstance)
+        console.log(bridgeEnv)
+        console.log(sheetEnv)
+        if (sheetEnv == bridgeEnv) {
+            console.log("It's a match")
             listening = true;
             currentIndex = 0;
         }
     }
 
-    function endSheet(i) {
+    function pop() {
+        bridgeEnv.pop()
+
         if (listening) {
             while (currentIndex < itemsModel.count) {
                 itemsModel.remove(currentIndex)
@@ -36,10 +47,22 @@ ScrollView {
         }
     }
 
+    function instance(instance_index, name) {
+        bridgeInstance = instance_index
+        if (!listening) {
+            return;
+        }
+        // TODO: draw instance here
+    }
+
     function cell(cell_index, name, expr, type, valid, value) {
+        console.log("Got cell")
         if (!listening) {
             return
         }
+
+        console.log(cell_index)
+        console.log(name)
 
         // Search forward through the list of items to find our cell,
         // moving it to the current index if it's in the wrong place

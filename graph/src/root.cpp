@@ -308,27 +308,44 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
 void Root::serialize(TreeSerializer* s) const
 {
+    s->instance(0, "");
     serialize(s, {0});
 }
 
 void Root::serialize(TreeSerializer* s, const Env& env) const
 {
     auto sheet = getItem(env.back()).instance()->sheet;
+    printf("Serializing %i\n", sheet.i);
 
-    s->beginSheet(sheet);
-    for (auto i : iterItems(sheet))
+    if (s->push())
     {
-        const auto& name = tree.nameOf(i);
-
-        if (auto c = getItem(i).cell())
+        printf("pushed\n");
+        for (auto i : iterItems(sheet))
         {
-            const auto& value = c->values.at(env);
-            s->cell(CellIndex(i.i), name, c->expr, c->type,
-                    value.valid, value.str);
+            printf("serializing item %i\n", i.i);
+            const auto& name = tree.nameOf(i);
+            const auto& item = getItem(i);
+            printf("with name %s\n", name.c_str());
+
+            if (auto c = item.cell())
+            {
+                printf("It's a cell!\n");
+                const auto& value = c->values.at(env);
+                s->cell(CellIndex(i.i), name, c->expr, c->type,
+                        value.valid, value.str);
+            }
+            else if (auto n = item.instance())
+            {
+                InstanceIndex index(i.i);
+                s->instance(index, name);
+                // TODO: draw inputs and outputs here
+                auto env_ = env;
+                env_.push_back(index);
+                serialize(s, env);
+            }
         }
     }
-
-    s->endSheet();
+    s->pop();
 }
 
 bool Root::checkEnv(const Env& env) const

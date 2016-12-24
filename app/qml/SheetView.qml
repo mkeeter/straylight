@@ -6,22 +6,16 @@ import QtQuick.Controls.Styles 1.4
 SplitView {
     orientation: Qt.Vertical
 
-    property int sheetIndex
-    property var sheetEnv
-
     SheetItemsPane {
         id: items
         Layout.fillHeight: true
-
-        sheetIndex: sheetIndex
     }
 
     SheetLibraryPane {
         id: lib
         width: parent.width
-
-        sheetIndex: sheetIndex
     }
 
-    property alias libraryModel: lib.libraryModel
+    property alias sheetEnv: items.sheetEnv
+    property alias sheetIndex: lib.sheetIndex
 }

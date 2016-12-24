@@ -70,7 +70,7 @@ ApplicationWindow {
         Component.onCompleted: {
             sheetStack.addItem(
                 sheetViewComponent.createObject(sheetStack,
-                    {sheetIndex: 0, sheetEnv: [0]}))
+                    {sheetEnv: [0]}))
         }
     }
 }

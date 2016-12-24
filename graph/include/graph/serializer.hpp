@@ -9,14 +9,18 @@ class TreeSerializer
 {
 public:
     /*
-     *  If this function call returns false, then we skip the sheet
-     *  (used to minimize serializer effort)
+     *  Describes a cell within the current sheet
      */
-    virtual bool beginSheet(SheetIndex s)=0;
-    virtual void endSheet()=0;
+    virtual void cell(CellIndex c, const std::string& name,
+                      const std::string& expr, Cell::Type type,
+                      bool valid, const std::string& val)=0;
 
     /*
      *  Begin drawing an instance with the given name and index
+     *
+     *  The instance will describe a set of inputs and outputs
+     *  (calling the functions below), then a push / pop pair
+     *  (with optional more things in between)
      */
     virtual void instance(InstanceIndex i, const std::string& name)=0;
 
@@ -30,9 +34,12 @@ public:
                         bool valid, const std::string& val)=0;
 
     /*
-     *  Cells are drawn within the containing sheet
+     *  Requests a push into the most recent instance
+     *
+     *  If push returns false, then pop will be called immediately
+     *  Otherwise, we'll describe all the stuff we see in the instance
+     *  (recursively as needed)
      */
-    virtual void cell(CellIndex c, const std::string& name,
-                      const std::string& expr, Cell::Type type,
-                      bool valid, const std::string& val)=0;
+    virtual bool push()=0;
+    virtual void pop()=0;
 };
