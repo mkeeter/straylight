@@ -70,9 +70,24 @@ Column {
             }
 
             ListView {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: childrenRect.height
+
                 model: ioCells
-                onModelChanged: { console.log(model.toString()) }
-                delegate: SheetInstanceIODelegate { }
+
+                delegate: Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    text: itemIndex + " " + type
+                    color: Colors.base1
+                }//SheetInstanceIODelegate { }
+
+                Component.onCompleted: {
+                    console.log("COmpleted view")
+                    for (var i=0; i < model.count; ++i)
+                        console.log("   " + i + ": " + model.get(i).itemIndex + " " + model.get(i).type)
+                    }
             }
         }
     }

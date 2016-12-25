@@ -94,6 +94,7 @@ ScrollView {
 
     function input(cell_index, name, expr, valid, value) {
         if (inBridgeEnv()) {
+            console.log("input called with " + cell_index)
             var model = itemsModel.get(itemIndex - 1).ioCells
             var found = findItem('input', cell_index, ioIndex, model);
 
@@ -114,10 +115,10 @@ ScrollView {
 
     function output(cell_index, name, valid, value) {
         if (inBridgeEnv()) {
+            console.log("output called with " + cell_index)
             var model = itemsModel.get(itemIndex - 1).ioCells
             var found = findItem('output', cell_index, ioIndex, model);
 
-            console.log("output happening " + found)
             if (!found)
             {
                 model.insert(ioIndex,

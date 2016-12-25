@@ -19,13 +19,15 @@ Item {
         id: inputDelegate
         Rectangle { width: 100; height: 50; color: 'red'
             Component.onCompleted: { console.log("Made input delegate") }
+            Component.onDestruction: { console.log("Destroyed output delegate") }
         }
     }
 
     Component {
         id: outputDelegate
-        Rectangle { width: 100; height: 50; color: 'blue' 
+        Rectangle { width: 100; height: 50; color: 'blue'
             Component.onCompleted: { console.log("Made input delegate") }
+            Component.onDestruction: { console.log("Destroyed input delegate") }
         }
     }
 
