@@ -17,16 +17,21 @@ Item {
 
     Component {
         id: inputDelegate
-        Rectangle { width: 100; height: 50; color: 'red' }
+        Rectangle { width: 100; height: 50; color: 'red'
+            Component.onCompleted: { console.log("Made input delegate") }
+        }
     }
 
     Component {
         id: outputDelegate
-        Rectangle { width: 100; height: 50; color: 'blue' }
+        Rectangle { width: 100; height: 50; color: 'blue' 
+            Component.onCompleted: { console.log("Made input delegate") }
+        }
     }
 
     Loader {
         width: parent.width
+        height: 100
         sourceComponent: bestDelegate(type)
     }
 }

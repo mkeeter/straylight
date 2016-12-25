@@ -55,6 +55,7 @@ Column {
 
         Column {
             spacing: 5
+            height: 100
 
             SheetItemTitle {
                 anchors.left: parent.left
