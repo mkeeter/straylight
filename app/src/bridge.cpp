@@ -59,6 +59,12 @@ void Bridge::eraseCell(int cell_index)
     sync();
 }
 
+void Bridge::eraseInstance(int instance_index)
+{
+    r.eraseInstance(instance_index);
+    sync();
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

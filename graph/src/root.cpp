@@ -336,7 +336,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                 // TODO: draw inputs and outputs here
                 auto env_ = env;
                 env_.push_back(index);
-                serialize(s, env);
+                serialize(s, env_);
             }
         }
     }

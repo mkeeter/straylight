@@ -9,12 +9,14 @@ ScrollView {
     property ListModel itemsModel: ListModel { }
 
     property var sheetEnv
-    property bool listening: false
     property int currentIndex: 0
 
     // Keep track of bridge deserialization protocol
     property var bridgeEnv: []
     property int bridgeInstance
+    function inBridgeEnv() {
+        return _.isEqual(sheetEnv, bridgeEnv)
+    }
 
     Component.onCompleted: {
         Bridge.push.connect(push)
@@ -26,71 +28,81 @@ ScrollView {
 
     function push() {
         bridgeEnv.push(bridgeInstance)
-        if (_.isEqual(sheetEnv, bridgeEnv)) {
-            listening = true;
+        if (inBridgeEnv()) {
             currentIndex = 0;
         }
     }
 
     function pop() {
-        bridgeEnv.pop()
-
-        if (listening) {
+        if (inBridgeEnv()) {
             while (currentIndex < itemsModel.count) {
                 itemsModel.remove(currentIndex)
                 currentIndex++
             }
-            listening = false
         }
+        bridgeEnv.pop()
     }
 
-    function instance(instance_index, name) {
-        bridgeInstance = instance_index
-        if (!listening) {
-            return;
-        }
-        // TODO: draw instance here
-    }
-
-    function cell(cell_index, name, expr, type, valid, value) {
-        if (!listening) {
-            return
-        }
-
-        // Search forward through the list of items to find our cell,
-        // moving it to the current index if it's in the wrong place
+    // Search forward through the list of items to find our cell,
+    // moving it to the current index if it's in the wrong place
+    function findItem(item_type, item_index) {
         var searchIndex = currentIndex
-        var found = false
-        while (!found && searchIndex < itemsModel.count)
+        while (searchIndex < itemsModel.count)
         {
             var item = itemsModel.get(searchIndex)
-            if (item.type == 'cell' && item.cellIndex == cell_index)
+            if (item.type == item_type &&
+                item.itemIndex == item_index)
             {
                 if (searchIndex != currentIndex)
                 {
                     itemsModel.move(searchIndex, currentIndex, 1)
                 }
-                found = true
+                return true
             }
             searchIndex++;
         }
+        return false
+    }
 
-        // If we reached the end of the list and didn't find anything, then
-        // insert a brand new cell at our current index
-        if (!found)
-        {
-            itemsModel.insert(currentIndex,
-                {type: 'cell', cellIndex: cell_index})
+    function instance(instance_index, name) {
+        bridgeInstance = instance_index
+        if (inBridgeEnv()) {
+            var found = findItem('instance', instance_index)
+
+            // If we reached the end of the list and didn't find anything, then
+            // insert a brand new instance at our current index
+            if (!found)
+            {
+                itemsModel.insert(currentIndex,
+                    {type: 'instance', itemIndex: instance_index})
+            }
+            itemsModel.setProperty(currentIndex, "name", name)
+
+            currentIndex++
         }
+    }
 
-        // Then update all of the relevant properties
-        itemsModel.setProperty(currentIndex, "name", name)
-        itemsModel.setProperty(currentIndex, "valid", valid)
-        itemsModel.setProperty(currentIndex, "expr", expr)
-        itemsModel.setProperty(currentIndex, "value", value)
+    function cell(cell_index, name, expr, type, valid, value) {
+        if (inBridgeEnv()) {
+            var found = findItem('cell', cell_index)
 
-        // TODO: care about type here
-        currentIndex++
+            // If we reached the end of the list and didn't find anything, then
+            // insert a brand new cell at our current index
+            if (!found)
+            {
+                itemsModel.insert(currentIndex,
+                    {type: 'cell', itemIndex: cell_index})
+            }
+
+            // Then update all of the relevant properties
+            itemsModel.setProperty(currentIndex, "name", name)
+            itemsModel.setProperty(currentIndex, "valid", valid)
+            itemsModel.setProperty(currentIndex, "expr", expr)
+            itemsModel.setProperty(currentIndex, "value", value)
+
+            // TODO: care about type here
+            currentIndex++
+        }
     }
 
     ListView {

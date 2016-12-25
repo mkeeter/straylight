@@ -10,7 +10,6 @@ GridLayout {
     id: base
 
     signal eraseMe
-    property int itemIndex
 
     Text {
         Layout.row: 0

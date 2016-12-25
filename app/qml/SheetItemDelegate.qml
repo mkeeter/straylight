@@ -29,10 +29,9 @@ Column {
                 anchors.margins: 5
 
                 text: name
-                itemIndex: cellIndex
 
                 onEraseMe: {
-                    Bridge.eraseCell(cellIndex)
+                    Bridge.eraseCell(itemIndex)
                 }
             }
 
@@ -49,6 +48,28 @@ Column {
                 property string text: expr
                 onTextChanged: { cellBody.setExpr(text) }
             }
+        }
+    }
+
+    Component {
+        id: instanceDelegate
+
+        Column {
+            spacing: 5
+
+            SheetItemTitle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 5
+
+                text: name
+
+                onEraseMe: {
+                    Bridge.eraseInstance(itemIndex)
+                }
+            }
+
+            // TODO: nested ListView of inputs and outputs
         }
     }
 

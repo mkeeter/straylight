@@ -29,7 +29,7 @@ Column {
             padding: 5
 
             onTextChanged: {
-                Bridge.setExpr(cellIndex, text)
+                Bridge.setExpr(itemIndex, text)
             }
         }
     }
