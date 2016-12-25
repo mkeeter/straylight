@@ -7,6 +7,11 @@ Bridge::Bridge()
 {
     r.insertCell(0, "omg", "wtf");
     r.insertCell(0, "bbq", "(+ 1 2)");
+
+    auto s = r.insertSheet(0, "sheet");
+    r.insertCell(s, "in", "(input 12)");
+    r.insertCell(s, "out", "(output (+ 1 (in))");
+    r.insertInstance(0, "instance", s);
 }
 
 QString Bridge::checkName(int sheet_index, QString name) const
