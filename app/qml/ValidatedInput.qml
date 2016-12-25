@@ -10,6 +10,7 @@ ColumnLayout {
         active = true
         editor.text = t
         editor.setFocus()
+        error = getError(t)
     }
 
     property var getError
