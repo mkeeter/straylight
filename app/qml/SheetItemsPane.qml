@@ -74,7 +74,8 @@ ScrollView {
             if (!found)
             {
                 itemsModel.insert(currentIndex,
-                    {type: 'instance', itemIndex: instance_index})
+                    {type: 'instance', itemIndex: instance_index,
+                    ioCells: ListModel { ListElement { color: 'red'}}})
             }
             itemsModel.setProperty(currentIndex, "name", name)
 
