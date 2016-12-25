@@ -4,10 +4,7 @@ import QtQuick.Layouts 1.0
 import Colors 1.0
 import Bridge 1.0
 
-Item {
-    id: sheetInstanceIODelegate
-    height: childrenRect.height
-
+Column {
     function bestDelegate(t) {
         console.log("Getting best delegate for " + t)
         if (t == "input")
@@ -18,7 +15,7 @@ Item {
 
     Component {
         id: inputDelegate
-        Rectangle { width: 100; height: 50; color: 'red'
+        Rectangle { width: 100; height: 10; color: 'red'
             Component.onCompleted: { console.log("Made input delegate") }
             Component.onDestruction: { console.log("Destroyed output delegate") }
         }
@@ -26,7 +23,7 @@ Item {
 
     Component {
         id: outputDelegate
-        Rectangle { width: 100; height: 50; color: 'blue'
+        Rectangle { width: 100; height: 10; color: 'blue'
             Component.onCompleted: { console.log("Made input delegate") }
             Component.onDestruction: { console.log("Destroyed input delegate") }
         }
@@ -34,7 +31,11 @@ Item {
 
     Loader {
         width: parent.width
-        height: 100
         sourceComponent: bestDelegate(type)
+    }
+
+    Component.onCompleted: {
+        console.log(width)
+        console.log(height)
     }
 }

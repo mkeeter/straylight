@@ -6,7 +6,6 @@ import Awesome 4.7
 import Bridge 1.0
 
 Column {
-    id: sheetItemDelegate
     spacing: 8
 
     function bestDelegate(t) {
@@ -55,7 +54,6 @@ Column {
 
         Column {
             spacing: 5
-            height: 100
 
             SheetItemTitle {
                 anchors.left: parent.left
@@ -76,7 +74,9 @@ Column {
 
                 model: ioCells
 
-                delegate: SheetInstanceIODelegate { }
+                delegate: SheetInstanceIODelegate {
+                    width: parent.width
+                }
 
                 Component.onCompleted: {
                     console.log("COmpleted view")
