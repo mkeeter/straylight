@@ -61,7 +61,7 @@ Column {
     Rectangle {
         width: parent.width
         height: 2
-        color: Colors.base0
+        color: Colors.base02
     }
 }
 

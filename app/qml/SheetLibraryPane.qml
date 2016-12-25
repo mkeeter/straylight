@@ -77,7 +77,7 @@ ColumnLayout {
         Layout.fillWidth: true
         height: 2
         visible: creator.active
-        color: Colors.base00
+        color: Colors.base02
     }
 
     SheetCreator {
