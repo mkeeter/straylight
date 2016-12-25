@@ -16,7 +16,6 @@ ColumnLayout
 
     function activateCell() {
         label.text = "Creating new cell:"
-        console.log("Cell")
 
         nameInput.mode = "cell"
         nameInput.enable("i")
@@ -24,7 +23,6 @@ ColumnLayout
 
     function activateSheet() {
         label.text = "Creating new sheet:"
-        console.log("sheet")
 
         nameInput.mode = "sheet"
         nameInput.enable("i")
@@ -32,7 +30,6 @@ ColumnLayout
 
     function activateInstance(n) {
         label.text = "Creating new instance of " + n + ":"
-        console.log("instance")
 
         nameInput.mode = "instance"
         targetSheetIndex = n

@@ -69,6 +69,7 @@ Column {
 
             ListView {
                 anchors.left: parent.left
+                anchors.leftMargin: 10
                 anchors.right: parent.right
                 height: childrenRect.height
 
@@ -77,12 +78,6 @@ Column {
                 delegate: SheetInstanceIODelegate {
                     width: parent.width
                 }
-
-                Component.onCompleted: {
-                    console.log("COmpleted view")
-                    for (var i=0; i < model.count; ++i)
-                        console.log("   " + i + ": " + model.get(i).itemIndex + " " + model.get(i).type)
-                    }
             }
         }
     }

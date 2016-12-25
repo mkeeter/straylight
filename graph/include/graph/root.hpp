@@ -59,7 +59,7 @@ public:
     /*
      *  Changes the input expression for a particular instance
      */
-    void setInput(const InstanceIndex& instance, const CellIndex& cell,
+    bool setInput(const InstanceIndex& instance, const CellIndex& cell,
                   const std::string& expr);
 
     /*

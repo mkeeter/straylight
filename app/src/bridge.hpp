@@ -21,6 +21,8 @@ public:
 
     Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
+    Q_INVOKABLE void setInput(int instance_index, int cell_index,
+                              const QString& expr);
     Q_INVOKABLE void eraseCell(int cell_index);
     Q_INVOKABLE void eraseInstance(int instance_index);
 

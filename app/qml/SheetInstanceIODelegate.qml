@@ -3,10 +3,10 @@ import QtQuick.Layouts 1.0
 
 import Colors 1.0
 import Bridge 1.0
+import Awesome 4.7
 
-Column {
+Row {
     function bestDelegate(t) {
-        console.log("Getting best delegate for " + t)
         if (t == "input")
             return inputDelegate
         else
@@ -14,28 +14,53 @@ Column {
     }
 
     Component {
-        id: inputDelegate
-        Rectangle { width: 100; height: 10; color: 'red'
-            Component.onCompleted: { console.log("Made input delegate") }
-            Component.onDestruction: { console.log("Destroyed output delegate") }
+        id: outputDelegate
+
+        Row {
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            Text {
+                id: resultText
+                wrapMode: Text.Wrap
+                text: value
+                width: parent.width - statusIcon.width
+
+                font.family: sansSerif.name
+                color: Colors.base0
+            }
+
+            Text {
+                id: statusIcon
+                visible: valid
+                text: Awesome.fa_exclamation_triangle
+
+                color: Colors.base0
+                font.family: fontAwesome.name
+                font.pointSize: 14
+
+                rightPadding: 10
+                anchors.verticalCenter: resultText.verticalCenter
+            }
         }
     }
 
     Component {
-        id: outputDelegate
-        Rectangle { width: 100; height: 10; color: 'blue'
-            Component.onCompleted: { console.log("Made input delegate") }
-            Component.onDestruction: { console.log("Destroyed input delegate") }
-        }
+        id: inputDelegate
+        SheetInstanceInput { }
+    }
+
+
+    Text {
+        text: name + ":"
+        color: Colors.base0
+        font.bold: true
+        font.family: sansSerif.name
+        rightPadding: 10
     }
 
     Loader {
         width: parent.width
         sourceComponent: bestDelegate(type)
-    }
-
-    Component.onCompleted: {
-        console.log(width)
-        console.log(height)
     }
 }

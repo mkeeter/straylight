@@ -212,7 +212,7 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     return true;
 }
 
-void Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
+bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
                     const std::string& expr)
 {
     assert(getItem(cell).cell()->type == Cell::INPUT);
@@ -221,14 +221,22 @@ void Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
     auto i = getMutableItem(instance).instance();
     assert(i->inputs.find(cell) != i->inputs.end());
 
-    i->inputs[cell] = expr;
-    for (auto env : tree.envsOf(tree.parentOf(instance)))
+    if (i->inputs[cell] != expr)
     {
-        env.push_back(instance);
-        markDirty(toNameKey({env, cell}));
-    }
+        i->inputs[cell] = expr;
+        for (auto env : tree.envsOf(tree.parentOf(instance)))
+        {
+            env.push_back(instance);
+            markDirty(toNameKey({env, cell}));
+        }
 
-    sync();
+        sync();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void Root::setValue(const CellKey& cell, const Value& v)
@@ -345,8 +353,8 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                         const auto& v = c->values.at(env_);
                         if (c->type == Cell::INPUT)
                         {
-                            s->input(CellIndex(item.i), n->inputs.at(item),
-                                     nameOf(item), v.valid, v.str);
+                            s->input(CellIndex(item.i), nameOf(item),
+                                     n->inputs.at(item), v.valid, v.str);
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
