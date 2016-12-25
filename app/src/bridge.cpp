@@ -118,7 +118,6 @@ void Bridge::BridgeTreeSerializer::cell(CellIndex c, const std::string& name,
                   const std::string& expr, Cell::Type type,
                   bool valid, const std::string& val)
 {
-    printf("Bridge::cell\n");
     parent->cell(c.i, QString::fromStdString(name),
                  QString::fromStdString(expr), type,
                  valid, QString::fromStdString(val));

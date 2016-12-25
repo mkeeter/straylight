@@ -315,21 +315,16 @@ void Root::serialize(TreeSerializer* s) const
 void Root::serialize(TreeSerializer* s, const Env& env) const
 {
     auto sheet = getItem(env.back()).instance()->sheet;
-    printf("Serializing %i\n", sheet.i);
 
     if (s->push())
     {
-        printf("pushed\n");
         for (auto i : iterItems(sheet))
         {
-            printf("serializing item %i\n", i.i);
             const auto& name = tree.nameOf(i);
             const auto& item = getItem(i);
-            printf("with name %s\n", name.c_str());
 
             if (auto c = item.cell())
             {
-                printf("It's a cell!\n");
                 const auto& value = c->values.at(env);
                 s->cell(CellIndex(i.i), name, c->expr, c->type,
                         value.valid, value.str);

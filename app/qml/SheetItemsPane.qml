@@ -26,10 +26,7 @@ ScrollView {
 
     function push() {
         bridgeEnv.push(bridgeInstance)
-        console.log(bridgeEnv)
-        console.log(sheetEnv)
         if (_.isEqual(sheetEnv, bridgeEnv)) {
-            console.log("It's a match")
             listening = true;
             currentIndex = 0;
         }
@@ -56,13 +53,9 @@ ScrollView {
     }
 
     function cell(cell_index, name, expr, type, valid, value) {
-        console.log("Got cell")
         if (!listening) {
             return
         }
-
-        console.log(cell_index)
-        console.log(name)
 
         // Search forward through the list of items to find our cell,
         // moving it to the current index if it's in the wrong place
