@@ -10,7 +10,7 @@ Bridge::Bridge()
 
     auto s = r.insertSheet(0, "sheet");
     r.insertCell(s, "in", "(input 12)");
-    r.insertCell(s, "out", "(output (+ 1 (in))");
+    r.insertCell(s, "out", "(output (+ 1 (in)))");
     r.insertInstance(0, "instance", s);
 }
 

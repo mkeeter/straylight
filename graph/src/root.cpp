@@ -19,7 +19,9 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
+    printf("Inserting cell %s with expr %s\n", name.c_str(), expr.c_str());
     getMutableItem(cell).cell()->type = interpreter.cellType(expr);
+    printf("type: %i\n", interpreter.cellType(expr));
 
     for (const auto& e : tree.envsOf(sheet))
     {
