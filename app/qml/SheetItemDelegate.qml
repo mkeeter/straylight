@@ -55,6 +55,10 @@ Column {
         Column {
             spacing: 5
 
+            // Store the item index under a different name so that we can
+            // refer to it in IO cells (which have their own itemIndex)
+            property int instanceIndex: itemIndex
+
             SheetItemTitle {
                 anchors.left: parent.left
                 anchors.right: parent.right

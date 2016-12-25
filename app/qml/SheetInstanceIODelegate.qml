@@ -2,7 +2,6 @@ import QtQuick 2.7
 import QtQuick.Layouts 1.0
 
 import Colors 1.0
-import Bridge 1.0
 import Awesome 4.7
 
 Row {
@@ -61,7 +60,6 @@ Row {
             }
         }
     }
-
 
     Text {
         text: name + ":"

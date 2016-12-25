@@ -29,7 +29,7 @@ Column {
             padding: 5
 
             onTextChanged: {
-                Bridge.setInput(itemIndex, text)
+                Bridge.setInput(instanceIndex, itemIndex, text)
             }
         }
     }

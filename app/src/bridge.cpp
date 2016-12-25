@@ -56,7 +56,8 @@ void Bridge::setExpr(int cell_index, const QString& expr)
 void Bridge::setInput(int instance_index, int cell_index,
                       const QString& expr)
 {
-    if (r.setInput(instance_index, cell_index, expr.toStdString()))
+    if (r.setInput(InstanceIndex(instance_index), CellIndex(cell_index),
+                   expr.toStdString()))
     {
         sync();
     }
