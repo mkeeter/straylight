@@ -19,9 +19,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
-    printf("Inserting cell %s with expr %s\n", name.c_str(), expr.c_str());
     getMutableItem(cell).cell()->type = interpreter.cellType(expr);
-    printf("type: %i\n", interpreter.cellType(expr));
 
     for (const auto& e : tree.envsOf(sheet))
     {
@@ -344,7 +342,6 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                 {
                     if (auto c = getItem(item).cell())
                     {
-                        printf("got a cell %i %s %i\n", item.i, nameOf(item).c_str(), c->type);
                         const auto& v = c->values.at(env_);
                         if (c->type == Cell::INPUT)
                         {
@@ -353,7 +350,6 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
-                            printf("output is happening %s\n", v.str.c_str());
                             s->output(CellIndex(item.i), nameOf(item),
                                       v.valid, v.str);
                         }
