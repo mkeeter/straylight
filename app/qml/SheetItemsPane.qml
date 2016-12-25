@@ -28,7 +28,7 @@ ScrollView {
         bridgeEnv.push(bridgeInstance)
         console.log(bridgeEnv)
         console.log(sheetEnv)
-        if (sheetEnv == bridgeEnv) {
+        if (_.isEqual(sheetEnv, bridgeEnv)) {
             console.log("It's a match")
             listening = true;
             currentIndex = 0;
