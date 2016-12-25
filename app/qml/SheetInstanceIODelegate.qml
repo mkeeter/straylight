@@ -47,7 +47,18 @@ Row {
 
     Component {
         id: inputDelegate
-        SheetInstanceInput { }
+
+        Column {
+            SheetInstanceInput {
+                id: cellBody
+            }
+
+            // Dummy item that forwards changes into cell body
+            Item {
+                property string text: expr
+                onTextChanged: { cellBody.setExpr(text) }
+            }
+        }
     }
 
 
