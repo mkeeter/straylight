@@ -50,6 +50,7 @@ Row {
 
         Column {
             SheetInstanceInput {
+                width: parent.width
                 id: cellBody
             }
 
