@@ -93,11 +93,7 @@ ScrollView {
     }
 
     function input(cell_index, name, expr, valid, value) {
-        console.log("input:")
-        console.log("   " + cell_index + " " + name + " " + expr + " " + valid + " " + value)
         if (inBridgeEnv()) {
-            console.log("input called with " + cell_index + " " + name)
-            console.log("  input expr: " + expr)
             var model = itemsModel.get(itemIndex - 1).ioCells
             var found = findItem('input', cell_index, ioIndex, model);
 
