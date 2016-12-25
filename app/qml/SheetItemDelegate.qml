@@ -7,7 +7,6 @@ import Bridge 1.0
 
 Column {
     id: sheetItemDelegate
-    width: parent.width
     spacing: 8
 
     function bestDelegate(t) {
@@ -69,12 +68,15 @@ Column {
                 }
             }
 
-            // TODO: nested ListView of inputs and outputs
+            ListView {
+                model: ioCells
+                onModelChanged: { console.log(model.toString()) }
+                delegate: SheetInstanceIODelegate { }
+            }
         }
     }
 
     Loader {
-        id: itemDisplay
         width: parent.width
         sourceComponent: bestDelegate(type)
     }

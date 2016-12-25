@@ -333,9 +333,30 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             {
                 InstanceIndex index(i.i);
                 s->instance(index, name);
+
                 // TODO: draw inputs and outputs here
                 auto env_ = env;
                 env_.push_back(index);
+
+                for (auto item: iterItems(n->sheet))
+                {
+                    if (auto c = getItem(item).cell())
+                    {
+                        printf("got a cell %i %s %i\n", item.i, nameOf(item).c_str(), c->type);
+                        const auto& v = c->values.at(env_);
+                        if (c->type == Cell::INPUT)
+                        {
+                            s->input(CellIndex(item.i), n->inputs.at(item),
+                                     nameOf(item), v.valid, v.str);
+                        }
+                        else if (c->type == Cell::OUTPUT)
+                        {
+                            printf("output is happening %s\n", v.str.c_str());
+                            s->output(CellIndex(item.i), nameOf(item),
+                                      v.valid, v.str);
+                        }
+                    }
+                }
                 serialize(s, env_);
             }
         }

@@ -73,6 +73,19 @@ TEST_CASE("Root::insertCell")
         REQUIRE(v.valid == false);
         REQUIRE(v.str == "Circular lookup");
     }
+
+    SECTION("Ensuring correct types")
+    {
+        r.insertCell(0, "omg", "wtf");
+        r.insertCell(0, "bbq", "(+ 1 2)");
+
+        auto s = r.insertSheet(0, "sheet");
+        auto i = r.insertCell(s, "in", "(input 12)");
+        auto o = r.insertCell(s, "out", "(output (+ 1 (in))");
+
+        REQUIRE(r.getItem(i).cell()->type == Cell::INPUT);
+        REQUIRE(r.getItem(o).cell()->type == Cell::OUTPUT);
+    }
 }
 
 TEST_CASE("Root::renameItem")

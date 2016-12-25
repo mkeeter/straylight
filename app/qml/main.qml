@@ -75,6 +75,9 @@ ApplicationWindow {
             sheetStack.addItem(
                 sheetViewComponent.createObject(sheetStack,
                     {sheetEnv: [0]}))
+
+            // Force an update on startup
+            Bridge.sync()
         }
     }
 }
