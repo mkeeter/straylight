@@ -6,6 +6,7 @@ import Bridge 1.0
 
 Item {
     id: sheetInstanceIODelegate
+    height: childrenRect.height
 
     function bestDelegate(t) {
         console.log("Getting best delegate for " + t)

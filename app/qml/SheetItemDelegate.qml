@@ -76,12 +76,7 @@ Column {
 
                 model: ioCells
 
-                delegate: Text {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    text: itemIndex + " " + type
-                    color: Colors.base1
-                }//SheetInstanceIODelegate { }
+                delegate: SheetInstanceIODelegate { }
 
                 Component.onCompleted: {
                     console.log("COmpleted view")
