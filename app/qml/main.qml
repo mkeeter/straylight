@@ -7,6 +7,8 @@ import FbItem 1.0
 import Colors 1.0
 import Bridge 1.0
 
+import "vendor/underscore.js" as Underscore
+
 ApplicationWindow {
     visible: true
     title: "Straylight"
@@ -27,6 +29,8 @@ ApplicationWindow {
         id: sansSerif
         source: "qrc:/fonts/Inconsolata-Regular.ttf"
     }
+
+    property var _: Underscore.init()
 
     //menu containing two menu items
     menuBar: MenuBar {
