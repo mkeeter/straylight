@@ -114,9 +114,11 @@ void Bridge::BridgeTreeSerializer::pop()
     parent->pop();
 }
 
-void Bridge::BridgeTreeSerializer::instance(InstanceIndex i, const std::string& name)
+void Bridge::BridgeTreeSerializer::instance(
+        InstanceIndex i, const std::string& name, const std::string& sheet)
 {
-    parent->instance(i.i, QString::fromStdString(name));
+    parent->instance(i.i, QString::fromStdString(name),
+            QString::fromStdString(sheet));
 }
 
 void Bridge::BridgeTreeSerializer::input(CellIndex c, const std::string& name,

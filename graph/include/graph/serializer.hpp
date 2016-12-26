@@ -22,7 +22,8 @@ public:
      *  (calling the functions below), then a push / pop pair
      *  (with optional more things in between)
      */
-    virtual void instance(InstanceIndex i, const std::string& name)=0;
+    virtual void instance(InstanceIndex i, const std::string& name,
+                          const std::string& sheet)=0;
 
     /*
      *  Input and output cells are drawn within the containing instance

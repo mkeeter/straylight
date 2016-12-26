@@ -316,7 +316,7 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
 void Root::serialize(TreeSerializer* s) const
 {
-    s->instance(0, "");
+    s->instance(0, "", "");
     serialize(s, {0});
 }
 
@@ -340,7 +340,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             else if (auto n = item.instance())
             {
                 InstanceIndex index(i.i);
-                s->instance(index, name);
+                s->instance(index, name, lib.nameOf(n->sheet));
 
                 // TODO: draw inputs and outputs here
                 auto env_ = env;

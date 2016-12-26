@@ -71,7 +71,7 @@ ScrollView {
         return false
     }
 
-    function instance(instance_index, name) {
+    function instance(instance_index, name, sheet) {
         bridgeInstance = instance_index
         if (inBridgeEnv()) {
             var found = findItem('instance', instance_index,
@@ -86,6 +86,7 @@ ScrollView {
                     ioCells: []})
             }
             itemsModel.setProperty(itemIndex, "name", name)
+            itemsModel.setProperty(itemIndex, "sheet", sheet)
 
             itemIndex++
             ioIndex = 0

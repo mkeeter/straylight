@@ -16,7 +16,7 @@ GridLayout {
         Layout.column: 0
         Layout.fillWidth: true
 
-        id: nameText
+        text: type == 'cell' ? name : name + " [" + sheet + "]"
         font.family: sansSerif.name
         font.pointSize: 18
         color: Colors.base1
@@ -29,7 +29,7 @@ GridLayout {
         id: editName
         text: Awesome.fa_pencil
         onClicked: {
-            renamer.enable(nameText.text)
+            renamer.enable(name)
         }
         enabled: !renamer.active
     }
@@ -62,6 +62,4 @@ GridLayout {
             Bridge.renameItem(itemIndex, t)
         }
     }
-
-    property alias text: nameText.text
 }

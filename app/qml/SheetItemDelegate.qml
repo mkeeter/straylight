@@ -26,8 +26,6 @@ Column {
                 anchors.right: parent.right
                 anchors.margins: 5
 
-                text: name
-
                 onEraseMe: {
                     Bridge.eraseCell(itemIndex)
                 }
@@ -64,8 +62,6 @@ Column {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: 5
-
-                text: name
 
                 onEraseMe: {
                     Bridge.eraseInstance(itemIndex)

@@ -45,7 +45,7 @@ signals:
     void push();
     void pop();
 
-    void instance(int i, const QString& name);
+    void instance(int i, const QString& name, const QString& sheet);
     void input(int c, const QString& name,
                const QString& expr, bool valid,
                const QString& val);
@@ -71,7 +71,8 @@ protected:
                   const std::string& expr, Cell::Type type,
                   bool valid, const std::string& val) override;
 
-        void instance(InstanceIndex i, const std::string& name) override;
+        void instance(InstanceIndex i, const std::string& name,
+                      const std::string& sheet) override;
         void input(CellIndex c, const std::string& name,
                    const std::string& expr, bool valid,
                    const std::string& val) override;
