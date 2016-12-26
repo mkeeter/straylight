@@ -70,10 +70,7 @@ Column {
                 onOpenSheet: {
                     var env = sheetEnv.slice()
                     env.push(itemIndex)
-                    sheetStack.addItem(
-                        sheetViewComponent.createObject(sheetStack,
-                            {sheetEnv: env}))
-                    Bridge.sync()
+                    sheetStack.openTo(env)
                 }
             }
 

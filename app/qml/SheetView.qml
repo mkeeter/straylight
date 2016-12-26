@@ -10,6 +10,7 @@ SplitView {
 
     SheetItemsPane {
         id: items
+        width: parent.width
         Layout.fillHeight: true
     }
 
@@ -18,13 +19,11 @@ SplitView {
         width: parent.width
     }
 
-    handleDelegate: splitViewHandle
-
-    Component {
+    handleDelegate: Component {
         id: splitViewHandle
         Rectangle {
-            height: 3
-            color: Colors.base00
+            height: 1
+            color: Colors.base01
         }
     }
 

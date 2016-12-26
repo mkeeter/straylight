@@ -61,8 +61,32 @@ ApplicationWindow {
         SplitView {
             id: sheetStack
 
+            property var env: []
+            function openTo(e) {
+                while (env.length > e.length ||
+                       env[env.length - 1] != e[env.length - 1])
+                {
+                    env.pop()
+                    removeItemAt(env.length)
+                }
+                while (env.length < e.length)
+                {
+                    env.push(e[env.length])
+                    addItem(sheetViewComponent.createObject(sheetStack,
+                        {sheetEnv: env.slice() }))
+                    width += 200
+                }
+                Bridge.sync()
+            }
             anchors.bottom: parent.bottom
             anchors.top: parent.top
+
+            handleDelegate: Component {
+                Rectangle {
+                    width: 2
+                    color: Colors.base00
+                }
+            }
         }
 
         FbItem {
@@ -72,12 +96,7 @@ ApplicationWindow {
         }
 
         Component.onCompleted: {
-            sheetStack.addItem(
-                sheetViewComponent.createObject(sheetStack,
-                    {sheetEnv: [0]}))
-
-            // Force an update on startup
-            Bridge.sync()
+            sheetStack.openTo([0])
         }
     }
 }
