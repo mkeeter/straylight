@@ -8,46 +8,18 @@ import Bridge 1.0
 ScrollView {
     property ListModel itemsModel: ListModel { }
 
-    property var sheetEnv
-
     // Used when deserializing from bridge
     property int itemIndex: 0
     property int ioIndex: 0
 
-    // Keep track of bridge deserialization protocol
-    property var bridgeEnv: []
-    property int bridgeInstance
-    function inBridgeEnv() {
-        return _.isEqual(sheetEnv, bridgeEnv)
-    }
-
-    Component.onCompleted: {
-        Bridge.push.connect(push)
-        Bridge.pop.connect(pop)
-
-        // Theoretically, we could connect these only when the
-        // bridge environment matches the sheet's environment
-        Bridge.cell.connect(cell)
-        Bridge.input.connect(input)
-        Bridge.output.connect(output)
-        Bridge.instance.connect(instance)
-    }
-
     function push() {
-        bridgeEnv.push(bridgeInstance)
-        if (inBridgeEnv()) {
-            itemIndex = 0;
-        }
+        itemIndex = 0;
     }
 
     function pop() {
-        if (inBridgeEnv()) {
-            cleanPreviousInstance();
-            while (itemIndex < itemsModel.count) {
-                itemsModel.remove(itemIndex++)
-            }
+        while (itemIndex < itemsModel.count) {
+            itemsModel.remove(itemIndex++)
         }
-        bridgeEnv.pop()
     }
 
     // Search forward through the list of items to find our cell,
@@ -72,25 +44,22 @@ ScrollView {
     }
 
     function instance(instance_index, name, sheet) {
-        bridgeInstance = instance_index
-        if (inBridgeEnv()) {
-            var found = findItem('instance', instance_index,
-                                 itemIndex, itemsModel)
+        var found = findItem('instance', instance_index,
+                             itemIndex, itemsModel)
 
-            // If we reached the end of the list and didn't find anything, then
-            // insert a brand new instance at our current index
-            if (!found)
-            {
-                itemsModel.insert(itemIndex,
-                    {type: 'instance', itemIndex: instance_index,
-                    ioCells: []})
-            }
-            itemsModel.setProperty(itemIndex, "name", name)
-            itemsModel.setProperty(itemIndex, "sheet", sheet)
-
-            itemIndex++
-            ioIndex = 0
+        // If we reached the end of the list and didn't find anything, then
+        // insert a brand new instance at our current index
+        if (!found)
+        {
+            itemsModel.insert(itemIndex,
+                {type: 'instance', itemIndex: instance_index,
+                ioCells: []})
         }
+        itemsModel.setProperty(itemIndex, "name", name)
+        itemsModel.setProperty(itemIndex, "sheet", sheet)
+
+        itemIndex++
+        ioIndex = 0
     }
 
     function cleanPreviousInstance() {
@@ -105,67 +74,61 @@ ScrollView {
     }
 
     function input(cell_index, name, expr, valid, value) {
-        if (inBridgeEnv()) {
-            var model = itemsModel.get(itemIndex - 1).ioCells
-            var found = findItem('input', cell_index, ioIndex, model);
+        var model = itemsModel.get(itemIndex - 1).ioCells
+        var found = findItem('input', cell_index, ioIndex, model);
 
-            if (!found)
-            {
-                model.insert(ioIndex,
-                    {type: 'input', itemIndex: cell_index})
-            }
-
-             model.setProperty(ioIndex, "name", name)
-             model.setProperty(ioIndex, "valid", valid)
-             model.setProperty(ioIndex, "expr", expr)
-             model.setProperty(ioIndex, "value", value)
-
-             ioIndex++
+        if (!found)
+        {
+            model.insert(ioIndex,
+                {type: 'input', itemIndex: cell_index})
         }
+
+         model.setProperty(ioIndex, "name", name)
+         model.setProperty(ioIndex, "valid", valid)
+         model.setProperty(ioIndex, "expr", expr)
+         model.setProperty(ioIndex, "value", value)
+
+         ioIndex++
     }
 
     function output(cell_index, name, valid, value) {
-        if (inBridgeEnv()) {
-            var model = itemsModel.get(itemIndex - 1).ioCells
-            var found = findItem('output', cell_index, ioIndex, model);
+        var model = itemsModel.get(itemIndex - 1).ioCells
+        var found = findItem('output', cell_index, ioIndex, model);
 
-            if (!found)
-            {
-                model.insert(ioIndex,
-                    {type: 'output', itemIndex: cell_index})
-            }
-
-             model.setProperty(ioIndex, "name", name)
-             model.setProperty(ioIndex, "valid", valid)
-             model.setProperty(ioIndex, "value", value)
-
-             ioIndex++
+        if (!found)
+        {
+            model.insert(ioIndex,
+                {type: 'output', itemIndex: cell_index})
         }
+
+         model.setProperty(ioIndex, "name", name)
+         model.setProperty(ioIndex, "valid", valid)
+         model.setProperty(ioIndex, "value", value)
+
+         ioIndex++
     }
 
     function cell(cell_index, name, expr, type, valid, value) {
-        if (inBridgeEnv()) {
-            var found = findItem('cell', cell_index,
-                                 itemIndex, itemsModel)
+        var found = findItem('cell', cell_index,
+                             itemIndex, itemsModel)
 
-            // If we reached the end of the list and didn't find anything, then
-            // insert a brand new cell at our current index
-            if (!found)
-            {
-                itemsModel.insert(itemIndex,
-                    {type: 'cell', itemIndex: cell_index})
-            }
-
-            // Then update all of the relevant properties
-            itemsModel.setProperty(itemIndex, "name", name)
-            itemsModel.setProperty(itemIndex, "valid", valid)
-            itemsModel.setProperty(itemIndex, "expr", expr)
-            itemsModel.setProperty(itemIndex, "value", value)
-            itemsModel.setProperty(itemIndex, "ioType",
-                ["unknown", "basic", "input", "output"][type])
-
-            itemIndex++
+        // If we reached the end of the list and didn't find anything, then
+        // insert a brand new cell at our current index
+        if (!found)
+        {
+            itemsModel.insert(itemIndex,
+                {type: 'cell', itemIndex: cell_index})
         }
+
+        // Then update all of the relevant properties
+        itemsModel.setProperty(itemIndex, "name", name)
+        itemsModel.setProperty(itemIndex, "valid", valid)
+        itemsModel.setProperty(itemIndex, "expr", expr)
+        itemsModel.setProperty(itemIndex, "value", value)
+        itemsModel.setProperty(itemIndex, "ioType",
+            ["unknown", "basic", "input", "output"][type])
+
+        itemIndex++
     }
 
     ListView {
