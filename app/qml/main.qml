@@ -58,36 +58,11 @@ ApplicationWindow {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
-        SplitView {
+        SheetStack {
             id: sheetStack
 
-            property var env: []
-            function openTo(e) {
-                while (env.length > e.length ||
-                       env[env.length - 1] != e[env.length - 1])
-                {
-                    env.pop()
-                    removeItemAt(env.length)
-                }
-                while (env.length < e.length)
-                {
-                    env.push(e[env.length])
-                    addItem(sheetViewComponent.createObject(sheetStack,
-                        {sheetEnv: env.slice(),
-                         sheetIndex: Bridge.sheetOf(env[env.length - 1])}))
-                    width += 200
-                }
-                Bridge.sync()
-            }
             anchors.bottom: parent.bottom
             anchors.top: parent.top
-
-            handleDelegate: Component {
-                Rectangle {
-                    width: 2
-                    color: Colors.base00
-                }
-            }
         }
 
         FbItem {
