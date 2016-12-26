@@ -9,6 +9,7 @@
         <file>qml/SheetInstanceIODelegate.qml</file>
         <file>qml/SheetStack.qml</file>
         <file>qml/SheetInstanceInput.qml</file>
+        <file>qml/SheetTitle.qml</file>
         <file>qml/SheetCellBody.qml</file>
         <file>qml/SheetCreator.qml</file>
         <file>qml/ValidatedInput.qml</file>

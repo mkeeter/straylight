@@ -8,9 +8,13 @@ import Colors 1.0
 SplitView {
     orientation: Qt.Vertical
 
-    SheetItemsPane {
-        id: items
-        width: parent.width
+    ColumnLayout {
+        SheetTitle { }
+        SheetItemsPane {
+            id: items
+            width: parent.width
+            Layout.fillHeight: true
+        }
         Layout.fillHeight: true
     }
 
