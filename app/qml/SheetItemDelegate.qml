@@ -66,6 +66,10 @@ Column {
                 onEraseMe: {
                     Bridge.eraseInstance(itemIndex)
                 }
+
+                onOpenSheet: {
+                    console.log("Opening instance " + itemIndex + " in sheet " + sheetEnv)
+                }
             }
 
             ListView {

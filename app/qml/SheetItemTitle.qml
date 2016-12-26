@@ -10,6 +10,7 @@ GridLayout {
     id: base
 
     signal eraseMe
+    signal openSheet
 
     Text {
         Layout.row: 0
@@ -46,6 +47,7 @@ GridLayout {
             text: Awesome.fa_indent
             visible: type == 'instance'
             toolTip: "Edit"
+            onClicked: { base.openSheet() }
         }
     }
 
