@@ -18,7 +18,7 @@ Column {
 
         TextEdit {
             color: Colors.base1
-            font.family: sansSerif.name
+            font.family: fixedWidth.name
             selectionColor: Colors.base00
             selectByMouse: true
 
@@ -73,7 +73,7 @@ Column {
             text: value
             width: parent.width - statusIcon.width
 
-            font.family: sansSerif.name
+            font.family: fixedWidth.name
             color: Colors.base0
         }
     }

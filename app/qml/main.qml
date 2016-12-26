@@ -26,7 +26,7 @@ ApplicationWindow {
         source: "qrc:/fonts/fontawesome-webfont.ttf"
     }
     FontLoader {
-        id: sansSerif
+        id: fixedWidth
         source: "qrc:/fonts/Inconsolata-Regular.ttf"
     }
 

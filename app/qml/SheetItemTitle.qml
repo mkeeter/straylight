@@ -19,7 +19,7 @@ GridLayout {
         Layout.fillWidth: true
 
         text: type == 'cell' ? name : name + " [" + sheet + "]"
-        font.family: sansSerif.name
+        font.family: fixedWidth.name
         font.pointSize: 18
         color: Colors.base1
     }

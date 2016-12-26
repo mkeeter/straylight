@@ -14,7 +14,7 @@ Rectangle {
         id: txt
         padding: 3
 
-        font.family: sansSerif.name
+        font.family: fixedWidth.name
         color: Colors.base1
         selectionColor: Colors.base00
 

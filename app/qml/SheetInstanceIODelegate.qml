@@ -27,7 +27,7 @@ Column {
                 text: value
                 width: parent.width - statusIcon.width
 
-                font.family: sansSerif.name
+                font.family: fixedWidth.name
                 color: Colors.base0
             }
 
@@ -73,7 +73,7 @@ Column {
             width: labelPadding
             color: Colors.base0
             font.bold: true
-            font.family: sansSerif.name
+            font.family: fixedWidth.name
             rightPadding: 10
         }
 
