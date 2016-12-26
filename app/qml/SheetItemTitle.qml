@@ -22,30 +22,34 @@ GridLayout {
         color: Colors.base1
     }
 
-    IconButton {
+    Row {
         Layout.row: 0
         Layout.column: 1
+        spacing: 4
 
-        id: editName
-        text: Awesome.fa_pencil
-        onClicked: {
-            renamer.enable(name)
+        IconButton {
+            text: Awesome.fa_pencil
+            enabled: !renamer.active
+            onClicked: {
+                renamer.enable(name)
+            }
         }
-        enabled: !renamer.active
-    }
 
-    IconButton {
-        Layout.row: 0
-        Layout.column: 2
+        IconButton {
+            text: Awesome.fa_trash
+            onClicked: { base.eraseMe() }
+        }
 
-        text: Awesome.fa_trash
-        onClicked: { base.eraseMe() }
+        IconButton {
+            text: Awesome.fa_indent
+            visible: type == 'instance'
+        }
     }
 
     ValidatedInput {
         Layout.row: 1
         Layout.column: 0
-        Layout.columnSpan: 3
+        Layout.columnSpan: 2
         Layout.preferredHeight: active ? implicitHeight : 0
         Behavior on Layout.preferredHeight {
             NumberAnimation { duration: 50 }
