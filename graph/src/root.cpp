@@ -322,9 +322,11 @@ void Root::serialize(TreeSerializer* s) const
 
 void Root::serialize(TreeSerializer* s, const Env& env) const
 {
-    auto sheet = getItem(env.back()).instance()->sheet;
+    auto instance = env.back();
+    auto sheet = getItem(instance).instance()->sheet;
 
-    if (s->push())
+    if (s->push(instance.i ? tree.nameOf(instance) : "",
+                sheet.i ? lib.nameOf(sheet) : ""))
     {
         for (auto i : iterItems(sheet))
         {

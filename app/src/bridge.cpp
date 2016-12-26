@@ -108,9 +108,11 @@ void Bridge::sync()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool Bridge::BridgeTreeSerializer::push()
+bool Bridge::BridgeTreeSerializer::push(const std::string& instance_name,
+                                        const std::string& sheet_name)
 {
-    parent->push();
+    parent->push(QString::fromStdString(instance_name),
+                 QString::fromStdString(sheet_name));
     return true;
 }
 
