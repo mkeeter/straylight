@@ -73,6 +73,8 @@ Column {
             }
 
             ListView {
+                id: ioView
+
                 interactive: false
                 anchors.left: parent.left
                 anchors.leftMargin: 10
@@ -82,7 +84,7 @@ Column {
                 model: ioCells
 
                 delegate: SheetInstanceIODelegate {
-                    width: parent.width
+                    width: ioView.width
                 }
             }
         }
