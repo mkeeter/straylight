@@ -4,7 +4,9 @@ import QtQuick.Layouts 1.0
 import Colors 1.0
 import Awesome 4.7
 
-Row {
+Column {
+    spacing: 8
+
     function bestDelegate(t) {
         if (t == "input")
             return inputDelegate
@@ -31,14 +33,14 @@ Row {
 
             Text {
                 id: statusIcon
-                visible: valid
+                visible: !valid
                 text: Awesome.fa_exclamation_triangle
 
                 color: Colors.base0
                 font.family: fontAwesome.name
                 font.pointSize: 14
 
-                rightPadding: 10
+                leftPadding: 10
                 anchors.verticalCenter: resultText.verticalCenter
             }
         }
@@ -61,16 +63,34 @@ Row {
         }
     }
 
-    Text {
-        text: name + ":"
-        color: Colors.base0
-        font.bold: true
-        font.family: sansSerif.name
-        rightPadding: 10
+    Row {
+        width: parent.width
+
+        Text {
+            id: nameLabel
+            text: name + ":"
+            width: labelPadding
+            color: Colors.base0
+            font.bold: true
+            font.family: sansSerif.name
+            rightPadding: 10
+        }
+
+        Loader {
+            width: parent.width - nameLabel.width
+            sourceComponent: bestDelegate(type)
+        }
     }
 
-    Loader {
+    Rectangle {
         width: parent.width
-        sourceComponent: bestDelegate(type)
+        color: Colors.base02
+        height: 2
+    }
+
+    Rectangle {
+        height: 4
+        width: parent.width
+        color: 'transparent'
     }
 }

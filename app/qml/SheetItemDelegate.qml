@@ -58,6 +58,7 @@ Column {
             // Store the item index under a different name so that we can
             // refer to it in IO cells (which have their own itemIndex)
             property int instanceIndex: itemIndex
+            property real labelPadding: 50
 
             SheetItemTitle {
                 anchors.left: parent.left
@@ -72,6 +73,7 @@ Column {
             }
 
             ListView {
+                interactive: false
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.right: parent.right
