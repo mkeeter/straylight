@@ -23,13 +23,28 @@ Column {
             selectByMouse: true
 
             id: exprText
+            property string expr
+
+            onActiveFocusChanged: {
+                if (ioType === 'input') {
+                    var c = cursorPosition
+                    text = activeFocus ? expr : '(input ...)'
+                    cursorPosition = Math.min(text.length, c)
+                }
+            }
+            onExprChanged: {
+                text = (activeFocus || ioType != 'input') ? expr : '(input ...)'
+            }
 
             anchors.left: parent.left
             anchors.right: parent.right
             padding: 5
 
             onTextChanged: {
-                Bridge.setExpr(itemIndex, text)
+                if (activeFocus)
+                {
+                    Bridge.setExpr(itemIndex, text)
+                }
             }
         }
     }
@@ -64,8 +79,9 @@ Column {
     }
 
     function setExpr(e)  {
-        if (exprText.text != e)
-            exprText.text = e
+        if (exprText.expr != e) {
+            exprText.expr = e
+        }
     }
 
 }

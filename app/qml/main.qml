@@ -72,7 +72,6 @@ ApplicationWindow {
                 while (env.length < e.length)
                 {
                     env.push(e[env.length])
-                    console.log("Getting sheet of " + env[env.length - 1])
                     addItem(sheetViewComponent.createObject(sheetStack,
                         {sheetEnv: env.slice(),
                          sheetIndex: Bridge.sheetOf(env[env.length - 1])}))

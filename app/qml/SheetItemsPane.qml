@@ -166,8 +166,9 @@ ScrollView {
             itemsModel.setProperty(itemIndex, "valid", valid)
             itemsModel.setProperty(itemIndex, "expr", expr)
             itemsModel.setProperty(itemIndex, "value", value)
+            itemsModel.setProperty(itemIndex, "ioType",
+                ["unknown", "basic", "input", "output"][type])
 
-            // TODO: care about type here
             itemIndex++
         }
     }
