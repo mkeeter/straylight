@@ -96,10 +96,30 @@ Column {
         }
     }
 
-    Loader {
+    Row {
         width: parent.width
-        sourceComponent: bestDelegate(type)
+
+        Rectangle {
+            id: instancePadding
+            color: isInstanceOpen ? Colors.base00 : 'transparent'
+            width: 10
+            height: del.height
+        }
+
+        Loader {
+            id: del
+            width: parent.width - instancePadding.width - scrollPadding.width
+            sourceComponent: bestDelegate(type)
+        }
+
+        Rectangle {
+            id: scrollPadding
+            color: 'transparent'
+            width: 10
+            height: del.height
+        }
     }
+    property bool isInstanceOpen: sheetStack.env.indexOf(itemIndex) != -1
 
     Rectangle {
         width: parent.width

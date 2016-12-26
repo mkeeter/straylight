@@ -45,12 +45,12 @@ GridLayout {
         }
 
         IconButton {
-            property bool open: sheetStack.env.indexOf(itemIndex) != -1
-            text: open ? Awesome.fa_angle_double_left : Awesome.fa_angle_double_right
+            text: isInstanceOpen ? Awesome.fa_angle_double_left
+                                 : Awesome.fa_angle_double_right
             visible: type == 'instance'
-            toolTip: open ? "Close" : "Edit"
-            onClicked: { if (open) base.closeSheet()
-                         else      base.openSheet() }
+            toolTip: isInstanceOpen ? "Close" : "Edit"
+            onClicked: { if (isInstanceOpen) base.closeSheet()
+                         else                base.openSheet() }
         }
     }
 
