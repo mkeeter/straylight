@@ -11,6 +11,7 @@ GridLayout {
 
     signal eraseMe
     signal openSheet
+    signal closeSheet
 
     Text {
         Layout.row: 0
@@ -44,10 +45,12 @@ GridLayout {
         }
 
         IconButton {
-            text: Awesome.fa_indent
+            property bool open: sheetStack.env.indexOf(itemIndex) != -1
+            text: open ? Awesome.fa_angle_double_left : Awesome.fa_angle_double_right
             visible: type == 'instance'
-            toolTip: "Edit"
-            onClicked: { base.openSheet() }
+            toolTip: open ? "Close" : "Edit"
+            onClicked: { if (open) base.closeSheet()
+                         else      base.openSheet() }
         }
     }
 

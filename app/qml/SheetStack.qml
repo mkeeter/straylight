@@ -25,6 +25,7 @@ SplitView {
             widthAnim.to = width + 200
             widthAnim.start()
         }
+        envChanged()
         Bridge.sync()
     }
 
