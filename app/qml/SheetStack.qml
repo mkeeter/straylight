@@ -32,7 +32,7 @@ SplitView {
                 {sheetEnv: env.slice(),
                  sheetIndex: Bridge.sheetOf(env[env.length - 1])}))
             addItem(items[items.length - 1])
-            new_width += 200
+            new_width += 250
         }
 
         width = new_width

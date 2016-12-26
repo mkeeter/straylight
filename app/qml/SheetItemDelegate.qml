@@ -104,6 +104,9 @@ Column {
             color: isInstanceOpen ? Colors.base00 : 'transparent'
             width: 10
             height: del.height
+            Behavior on color {
+                ColorAnimation { duration: 100 }
+            }
         }
 
         Loader {
