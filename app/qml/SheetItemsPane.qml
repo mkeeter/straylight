@@ -42,9 +42,10 @@ ScrollView {
 
     function pop() {
         if (inBridgeEnv()) {
+            cleanPreviousInstance();
+
             while (itemIndex < itemsModel.count) {
-                itemsModel.remove(itemIndex)
-                itemIndex++
+                itemsModel.remove(itemIndex++)
             }
         }
         bridgeEnv.pop()
@@ -74,6 +75,8 @@ ScrollView {
     function instance(instance_index, name, sheet) {
         bridgeInstance = instance_index
         if (inBridgeEnv()) {
+            cleanPreviousInstance();
+
             var found = findItem('instance', instance_index,
                                  itemIndex, itemsModel)
 
@@ -90,6 +93,17 @@ ScrollView {
 
             itemIndex++
             ioIndex = 0
+        }
+    }
+
+    function cleanPreviousInstance() {
+        if (itemIndex > 0 && itemIndex <= itemsModel.count &&
+            itemsModel.get(itemIndex - 1).type == 'instance')
+        {
+            var model = itemsModel.get(itemIndex - 1).ioCells
+            while (ioIndex < model.count) {
+                model.remove(ioIndex++)
+            }
         }
     }
 
@@ -134,6 +148,8 @@ ScrollView {
 
     function cell(cell_index, name, expr, type, valid, value) {
         if (inBridgeEnv()) {
+            cleanPreviousInstance();
+
             var found = findItem('cell', cell_index,
                                  itemIndex, itemsModel)
 
