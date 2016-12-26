@@ -38,6 +38,7 @@ Column {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        visible: !(resultText.text.trim() === exprText.text.trim())
         Text {
             id: statusIcon
             text: valid ? Awesome.fa_long_arrow_right
