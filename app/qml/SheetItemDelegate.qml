@@ -72,6 +72,10 @@ Column {
                     env.push(itemIndex)
                     sheetStack.openTo(env)
                 }
+                onCloseSheet: {
+                    var env = sheetEnv.slice()
+                    sheetStack.openTo(env)
+                }
             }
 
             ListView {

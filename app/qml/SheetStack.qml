@@ -9,22 +9,33 @@ SplitView {
     width: 0
 
     property var env: []
+
+    // We have to manually track items because SplitView doesn't have
+    // a way to look up the item at a particular index.
+    property var items: []
+
     function openTo(e) {
+        var new_width = width
         while (env.length > e.length ||
                env[env.length - 1] != e[env.length - 1])
         {
+            new_width -= items[items.length - 1].width + 2
+            removeItem(items[items.length - 1])
+
             env.pop()
-            removeItemAt(env.length)
+            items.pop()
         }
         while (env.length < e.length)
         {
             env.push(e[env.length])
-            addItem(sheetViewComponent.createObject(sheetStack,
+            items.push(sheetViewComponent.createObject(sheetStack,
                 {sheetEnv: env.slice(),
                  sheetIndex: Bridge.sheetOf(env[env.length - 1])}))
-            widthAnim.to = width + 200
-            widthAnim.start()
+            addItem(items[items.length - 1])
+            new_width += 200
         }
+
+        width = new_width
         envChanged()
         Bridge.sync()
     }
