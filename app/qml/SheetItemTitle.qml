@@ -33,16 +33,19 @@ GridLayout {
             onClicked: {
                 renamer.enable(name)
             }
+            toolTip: "Rename"
         }
 
         IconButton {
             text: Awesome.fa_trash
             onClicked: { base.eraseMe() }
+            toolTip: "Delete"
         }
 
         IconButton {
             text: Awesome.fa_indent
             visible: type == 'instance'
+            toolTip: "Edit"
         }
     }
 
