@@ -41,6 +41,7 @@ Column {
                 font.pointSize: 14
 
                 leftPadding: 10
+                rightPadding: 10
                 anchors.verticalCenter: resultText.verticalCenter
             }
         }
