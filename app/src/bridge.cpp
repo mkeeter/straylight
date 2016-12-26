@@ -75,6 +75,11 @@ void Bridge::eraseInstance(int instance_index)
     sync();
 }
 
+int Bridge::sheetOf(int instance_index) const
+{
+    return r.instanceSheet(InstanceIndex(instance_index)).i;
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

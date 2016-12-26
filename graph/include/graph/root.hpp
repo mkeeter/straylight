@@ -129,6 +129,12 @@ public:
     SheetIndex parentSheet(const ItemIndex& item) const
         { return tree.parentOf(item); }
 
+    /*
+     *  Look up the target sheet for an instance
+     */
+    SheetIndex instanceSheet(const InstanceIndex& item) const
+        { return getItem(item).instance()->sheet; }
+
     ////////////////////////////////////////////////////////////////////////////
 
     bool canInsertSheet(const SheetIndex& parent,

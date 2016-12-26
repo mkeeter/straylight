@@ -26,6 +26,8 @@ public:
     Q_INVOKABLE void eraseCell(int cell_index);
     Q_INVOKABLE void eraseInstance(int instance_index);
 
+    Q_INVOKABLE int sheetOf(int instance_index) const;
+
     /*
      *  Constructor for the QML singleton
      */
