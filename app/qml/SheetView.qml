@@ -10,6 +10,11 @@ SplitView {
     orientation: Qt.Vertical
 
     property var sheetEnv
+    property alias sheetIndex: lib.sheetIndex
+
+    // Used in drawing title
+    property string instanceName: ""
+    property string sheetName: ""
 
     // Keep track of bridge deserialization protocol
     property var bridgeEnv: []
@@ -27,10 +32,12 @@ SplitView {
         Bridge.cell.connect(cell)
     }
 
-    function push() {
+    function push(instance_name, sheet_name) {
         bridgeEnv.push(bridgeInstance)
         if (inBridgeEnv()) {
             items.push()
+            instanceName = instance_name
+            sheetName = sheet_name
         }
     }
 
@@ -91,6 +98,4 @@ SplitView {
             color: Colors.base01
         }
     }
-
-    property alias sheetIndex: lib.sheetIndex
 }
