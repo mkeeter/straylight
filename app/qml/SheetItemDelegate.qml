@@ -68,7 +68,12 @@ Column {
                 }
 
                 onOpenSheet: {
-                    console.log("Opening instance " + itemIndex + " in sheet " + sheetEnv)
+                    var env = sheetEnv.slice()
+                    env.push(itemIndex)
+                    sheetStack.addItem(
+                        sheetViewComponent.createObject(sheetStack,
+                            {sheetEnv: env}))
+                    Bridge.sync()
                 }
             }
 
