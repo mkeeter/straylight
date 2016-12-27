@@ -19,7 +19,7 @@ SplitView {
         while (env.length > e.length ||
                env[env.length - 1] != e[env.length - 1])
         {
-            new_width -= items[items.length - 1].width + 2
+            new_width -= items[items.length - 1].width
             removeItem(items[items.length - 1])
 
             env.pop()
