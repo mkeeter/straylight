@@ -52,6 +52,7 @@ SplitView {
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenterOffset: 3
                 height: 5
                 width: parent.height
                 rotation: -90
