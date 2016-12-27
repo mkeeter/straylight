@@ -69,7 +69,7 @@ Column {
                     labelWidths[i] = w
                 }
                 console.log(labelWidths.toString())
-                labelPadding = _.max(labelWidths) + 5
+                labelPadding = _.max(labelWidths)
             }
 
             SheetItemTitle {

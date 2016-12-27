@@ -1,42 +1,56 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.0
 
 import Style 1.0
 import Bridge 1.0
 import Awesome 4.7
 
-Column {
-    spacing: 5
-
+GridLayout {
     Rectangle {
-        color: 'transparent' // TODO
-        id: exprRect
+        Layout.row: 0
+        Layout.column: 0
+        Layout.fillHeight: true
+        width: 2
+        color: valid ? Style.textEditValid : Style.textEditInvalid
+        opacity: exprText.lineCount > 1
+        Behavior on opacity { OpacityAnimator { duration: 100 }}
+    }
 
-        height: childrenRect.height
-        anchors.left: parent.left
-        anchors.right: parent.right
+    TextEdit {
+        Layout.row: 0
+        Layout.column: 1
+        Layout.fillWidth: true
+        Layout.fillHeight: true
 
-        TextEdit {
-            color: Style.textDarkPrimary
-            font.family: fixedWidth.name
-            selectionColor: Style.textSelect
-            selectByMouse: true
+        color: Style.textDarkPrimary
+        font.family: fixedWidth.name
+        selectionColor: Style.textSelect
+        selectByMouse: true
 
-            id: exprText
+        id: exprText
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            padding: 5
-
-            onTextChanged: {
-                Bridge.setInput(instanceIndex, itemIndex, text)
-            }
+        onTextChanged: {
+            Bridge.setInput(instanceIndex, itemIndex, text)
         }
     }
 
+    Rectangle {
+        Layout.row: 1
+        Layout.column: 1
+        Layout.fillWidth: true
+        height: 2
+        color: valid ? Style.textEditValid : Style.textEditInvalid
+        opacity: exprText.lineCount <= 1
+        Behavior on opacity { OpacityAnimator { duration: 100 }}
+    }
+
     Row {
-        anchors.left: parent.left
-        anchors.right: parent.right
+        Layout.row: 2
+        Layout.column: 1
+        Layout.fillWidth: true
+
+        visible: !(resultText.text.trim() === exprText.text.trim())
 
         Text {
             id: statusIcon

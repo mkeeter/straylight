@@ -29,6 +29,7 @@ Column {
                 text: value
                 width: parent.width - statusIcon.width
 
+                leftPadding: 7
                 font.family: fixedWidth.name
                 color: Style.textDarkPrimary
             }
