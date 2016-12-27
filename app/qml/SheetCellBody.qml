@@ -12,7 +12,7 @@ GridLayout {
         Layout.column: 0
         Layout.fillHeight: true
         width: 2
-        color: Style.accent
+        color: valid ? Style.textEditValid : Style.textEditInvalid
         opacity: exprText.lineCount > 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
@@ -55,7 +55,7 @@ GridLayout {
         Layout.column: 1
         Layout.fillWidth: true
         height: 2
-        color: Style.accent
+        color: valid ? Style.textEditValid : Style.textEditInvalid
         opacity: exprText.lineCount <= 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }

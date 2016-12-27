@@ -24,7 +24,7 @@ Column {
     Rectangle {
         height: 2
         width: txt.width
-        color: Style.accent
+        color: valid ? Style.textEditValid : Style.textEditInvalid
     }
 
     signal setFocus
