@@ -122,8 +122,8 @@ SplitView {
     handleDelegate: Component {
         id: splitViewHandle
         Rectangle {
-            height: 1
-            //TODO color: Colors.base01
+            height: 3
+            color: Style.accent
         }
     }
 }

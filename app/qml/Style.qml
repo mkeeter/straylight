@@ -15,6 +15,7 @@ readonly property color textLightHint: '#80ffffff'
 readonly property color dividerLight: '#1effffff'
 
 readonly property color primary: Material.blue_grey_500
+readonly property color accent: Material.blue_grey_800
 
 readonly property color sheetTitle: primary
 readonly property color textEditValid: Material.green_500
