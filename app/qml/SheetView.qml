@@ -101,6 +101,15 @@ SplitView {
         }
     }
 
+    // XXX This is an inelegant strategy to call renameLast
+    // after a short wait, which gives the engine time to construct
+    // the Delegate
+    Timer {
+        id: renameLastTimer
+        interval: 10
+        onTriggered: { items.renameLast() }
+    }
+
     ColumnLayout {
         SheetTitle {
             Layout.fillWidth: true
@@ -108,8 +117,8 @@ SplitView {
                 var instance = sheetEnv[sheetEnv.length - 1]
                 var sheet = Bridge.sheetOf(instance)
                 var name = Bridge.nextItemName(sheet)
-                items.wantsRename = true;
                 Bridge.insertCell(sheet, name)
+                renameLastTimer.start()
             }
         }
         SheetItemsPane {

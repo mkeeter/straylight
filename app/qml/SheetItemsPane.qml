@@ -12,8 +12,19 @@ ScrollView {
     property int itemIndex: 0
     property int ioIndex: 0
 
-    // Used to open the rename window when an item is added
-    property bool wantsRename: false
+    function renameLast() {
+        // XXX This is slightly evil, as we're poking members of the ListView
+        // directly, but should be safe enough...
+        var children = listView.contentItem.children
+        var y = 0
+        for(var i in children) {
+            y += children[i].height
+        }
+        y -= items.height
+        scrollTo.to = Math.max(y, 0)
+        scrollTo.start()
+        children[i].renameMe()
+    }
 
     function push() {
         itemIndex = 0;
@@ -144,18 +155,13 @@ ScrollView {
     }
 
     ListView {
+        id: listView
+
         anchors.fill: parent
         model: itemsModel
         spacing: 5
         delegate: SheetItemDelegate {
             width: parent.width
-
-            Component.onCompleted: {
-                if (wantsRename) {
-                    renameMe()
-                    wantsRename = false
-                }
-            }
         }
 
         displaced: Transition {
@@ -169,6 +175,12 @@ ScrollView {
         }
         add: Transition {
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
+        }
+
+        NumberAnimation {
+            id: scrollTo
+            target: items.flickableItem
+            property: 'contentY'
         }
     }
     style: ScrollViewStyle {
