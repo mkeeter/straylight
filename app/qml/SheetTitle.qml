@@ -7,6 +7,8 @@ import Awesome 4.7
 Item {
     height: childrenRect.height
 
+    signal insertCell
+
     Rectangle {
         height: sheetTitleText.height
         anchors.left: parent.left
@@ -37,6 +39,7 @@ Item {
                 text: Awesome.fa_plus_square
                 mode: "light"
                 toolTip: "Add cell"
+                onClicked: { insertCell() }
             }
             IconButton {
                 text: Awesome.fa_arrow_circle_up

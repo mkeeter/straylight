@@ -80,6 +80,12 @@ int Bridge::sheetOf(int instance_index) const
     return r.instanceSheet(InstanceIndex(instance_index)).i;
 }
 
+QString Bridge::nextItemName(int sheet_index) const
+{
+    return QString::fromStdString(
+            r.nextItemName(SheetIndex(sheet_index), "i"));
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

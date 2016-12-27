@@ -104,6 +104,12 @@ SplitView {
     ColumnLayout {
         SheetTitle {
             Layout.fillWidth: true
+            onInsertCell: {
+                var instance = sheetEnv[sheetEnv.length - 1]
+                var sheet = Bridge.sheetOf(instance)
+                var name = Bridge.nextItemName(sheet)
+                Bridge.insertCell(sheet, name)
+            }
         }
         SheetItemsPane {
             id: items
