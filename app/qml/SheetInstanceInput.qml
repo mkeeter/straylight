@@ -19,7 +19,7 @@ Column {
         TextEdit {
             color: Style.textDarkPrimary
             font.family: fixedWidth.name
-            // TODO selectionColor: Colors.base00
+            selectionColor: Style.textSelect
             selectByMouse: true
 
             id: exprText

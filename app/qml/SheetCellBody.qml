@@ -25,7 +25,7 @@ GridLayout {
 
         color: Style.textDarkPrimary
         font.family: fixedWidth.name
-        // TODO selectionColor: style.textHighlight
+        selectionColor: Style.textSelect
         selectByMouse: true
 
         id: exprText

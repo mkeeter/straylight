@@ -13,7 +13,7 @@ Column {
 
         font.family: fixedWidth.name
         color: Style.textDarkPrimary
-        // TODO selectionColor: Colors.base00
+        selectionColor: Style.textSelect
 
         onActiveFocusChanged: {
             if (!activeFocus)

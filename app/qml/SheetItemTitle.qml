@@ -45,8 +45,8 @@ GridLayout {
         }
 
         IconButton {
-            text: isInstanceOpen ? Awesome.fa_angle_double_left
-                                 : Awesome.fa_angle_double_right
+            text: isInstanceOpen ? Awesome.fa_outdent
+                                 : Awesome.fa_indent
             visible: type == 'instance'
             toolTip: isInstanceOpen ? "Close" : "Edit"
             onClicked: { if (isInstanceOpen) base.closeSheet()

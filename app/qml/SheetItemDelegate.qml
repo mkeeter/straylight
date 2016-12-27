@@ -101,12 +101,11 @@ Column {
 
         Rectangle {
             id: instancePadding
-            // TODO color: isInstanceOpen ? Colors.base00 : 'transparent'
+            color: Style.primary
             width: 10
             height: del.height
-            Behavior on color {
-                ColorAnimation { duration: 100 }
-            }
+            opacity: isInstanceOpen
+            Behavior on opacity { OpacityAnimator { duration: 100 }}
         }
 
         Loader {
