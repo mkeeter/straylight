@@ -135,6 +135,10 @@ public:
     SheetIndex instanceSheet(const InstanceIndex& item) const
         { return getItem(item).instance()->sheet; }
 
+    std::string nextItemName(const SheetIndex& sheet,
+                             const std::string& prefix="s") const
+        { return tree.nextName(sheet, prefix); }
+
     ////////////////////////////////////////////////////////////////////////////
 
     bool canInsertSheet(const SheetIndex& parent,

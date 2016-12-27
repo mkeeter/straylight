@@ -243,3 +243,12 @@ TEST_CASE("Tree::erase")
     t.erase(c);
     REQUIRE(t.iterItems(0).size() == 0);
 }
+
+TEST_CASE("Tree::nextName")
+{
+    Tree t;
+    REQUIRE(t.nextName(SheetIndex(0), "c") == "c0");
+    auto c = t.insertCell(0, "c0", "12");
+    REQUIRE(t.nextName(SheetIndex(0), "c") == "c1");
+    REQUIRE(t.nextName(SheetIndex(0), "prefix") == "prefix0");
+}

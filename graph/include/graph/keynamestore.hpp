@@ -105,6 +105,24 @@ public:
         { return names.right.at(i).second; }
 
     /*
+     *  Returns the next available name with the given prefix, constructing
+     *  the name as prefix0, prefix1, prefix2, etc.
+     */
+    std::string nextName(const ParentIndex& p, const std::string prefix) const
+    {
+        for (unsigned i=0; true; ++i)
+        {
+            std::stringstream ss;
+            ss << prefix << i;
+            auto str = ss.str();
+            if (canInsert(p, str))
+            {
+                return str;
+            }
+        }
+    }
+
+    /*
      *  Returns all of the stored items that belong to the given parent
      */
     std::list<StoredIndex> childrenOf(ParentIndex parent) const
