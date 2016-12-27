@@ -18,6 +18,7 @@ SplitView {
 
     // Keep track of bridge deserialization protocol
     property var bridgeEnv: []
+    property bool visited: false
     property int bridgeInstance
     function inBridgeEnv() {
         return _.isEqual(sheetEnv, bridgeEnv)
@@ -33,8 +34,14 @@ SplitView {
     }
 
     function push(instance_name, sheet_name) {
+        // Reset the visited flag on our first push
+        if (bridgeEnv.length == 0) {
+            visited = false
+        }
+
         bridgeEnv.push(bridgeInstance)
         if (inBridgeEnv()) {
+            visited = true
             items.push()
             instanceName = instance_name
             sheetName = sheet_name
@@ -48,6 +55,24 @@ SplitView {
         bridgeEnv.pop()
         if (inBridgeEnv()) {
             items.cleanPreviousInstance()
+        }
+
+        // If we're done and didn't visit this sheet, then
+        // request that we open to the next-highest sheet
+        if (bridgeEnv.length == 0 && !visited)
+        {
+            // TODO: we should open to the longest prefix visited here
+            Bridge.push.disconnect(push)
+            Bridge.pop.disconnect(pop)
+            Bridge.instance.disconnect(instance)
+            Bridge.input.disconnect(input)
+            Bridge.output.disconnect(output)
+            Bridge.cell.disconnect(cell)
+
+            var env_ = sheetEnv.slice()
+            env_.pop()
+
+            sheetStack.openTo(env_)
         }
     }
 
