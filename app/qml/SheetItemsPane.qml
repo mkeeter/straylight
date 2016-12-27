@@ -34,7 +34,9 @@ ScrollView {
         for (var i=0; i < model.count - 1; ++i) {
             model.setProperty(i, 'last', false)
         }
-        model.setProperty(model.count - 1, 'last', true)
+        if (i < model.count) {
+            model.setProperty(i, 'last', true)
+        }
     }
 
     function pop() {
