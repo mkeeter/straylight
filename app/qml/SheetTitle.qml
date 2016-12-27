@@ -30,7 +30,6 @@ Item {
         horizontalOffset: 0
         verticalOffset: 3
         radius: 8.0
-        samples: 17
         color: "#80000000"
         source: header
         cached: true
