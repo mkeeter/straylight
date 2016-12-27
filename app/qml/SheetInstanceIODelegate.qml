@@ -14,6 +14,8 @@ Column {
             return outputDelegate
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+
     Component {
         id: outputDelegate
 
@@ -47,6 +49,8 @@ Column {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+
     Component {
         id: inputDelegate
 
@@ -63,6 +67,8 @@ Column {
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////
 
     Row {
         width: parent.width
@@ -96,4 +102,6 @@ Column {
         width: parent.width
         color: 'transparent'
     }
+
+    property alias labelWidth: nameLabel.implicitWidth
 }

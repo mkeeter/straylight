@@ -56,7 +56,21 @@ Column {
             // Store the item index under a different name so that we can
             // refer to it in IO cells (which have their own itemIndex)
             property int instanceIndex: itemIndex
-            property real labelPadding: 50
+
+            // Here, we have a single canonical padding value
+            // (which is updated when io labels change)
+            property real labelPadding: 0
+            property var labelWidths: new Object()
+
+            function setLabelWidth(i, w) {
+                if (w == 0) {
+                    delete labelWidths[i]
+                } else {
+                    labelWidths[i] = w
+                }
+                console.log(labelWidths.toString())
+                labelPadding = _.max(labelWidths) + 5
+            }
 
             SheetItemTitle {
                 anchors.left: parent.left
@@ -91,6 +105,11 @@ Column {
 
                 delegate: SheetInstanceIODelegate {
                     width: ioView.width
+                    Component.onCompleted: {
+                        var cb = function() { setLabelWidth(index, labelWidth) }
+                        labelWidthChanged.connect(cb)
+                        cb()
+                    }
                 }
             }
         }
