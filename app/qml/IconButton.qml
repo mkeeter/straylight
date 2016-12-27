@@ -5,8 +5,13 @@ import Style 1.0
 import Awesome 4.7
 
 Text {
-    color: enabled ? (ma.containsMouse ? Style.textDarkPrimary : Style.textDarkSecondary)
-                   : Style.textDarkHint
+    property string mode: "dark"
+    color: enabled
+        ? (ma.containsMouse
+            ? (mode == "dark" ? Style.textDarkPrimary : Style.textLightPrimary)
+            : (mode == "dark" ? Style.textDarkSecondary : Style.textLightSecondary))
+        : mode == "dark" ? Style.textDarkHint : Style.textLightHint
+
     text: Awesome.fa_question_circle
     padding: 0
     font.family: fontAwesome.name

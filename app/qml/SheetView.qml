@@ -114,12 +114,10 @@ SplitView {
         Layout.fillHeight: true
     }
 
-    /*
     SheetLibraryPane {
         id: lib
         width: parent.width
     }
-    */
 
     handleDelegate: Component {
         id: splitViewHandle

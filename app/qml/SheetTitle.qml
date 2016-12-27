@@ -2,12 +2,13 @@ import QtQuick 2.7
 import QtGraphicalEffects 1.0
 
 import Style 1.0
+import Awesome 4.7
 
 Item {
     height: childrenRect.height
 
     Rectangle {
-        height: childrenRect.height
+        height: sheetTitleText.height
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -15,6 +16,8 @@ Item {
         id: header
 
         Text {
+            id: sheetTitleText
+
             text: sheetName ? (instanceName + " [" + sheetName + "]") : "Root"
             color: Style.textLightPrimary
             font.family: fixedWidth.name
@@ -22,6 +25,24 @@ Item {
             leftPadding: 5
             topPadding: 3
             bottomPadding: 3
+        }
+
+        Row {
+            anchors.right: header.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 10
+            spacing: 5
+
+            IconButton {
+                text: Awesome.fa_plus_square
+                mode: "light"
+                toolTip: "Add cell"
+            }
+            IconButton {
+                text: Awesome.fa_arrow_circle_up
+                mode: "light"
+                toolTip: "Show library"
+            }
         }
     }
 
