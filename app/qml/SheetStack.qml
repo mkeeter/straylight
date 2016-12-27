@@ -47,9 +47,19 @@ SplitView {
     }
 
     handleDelegate: Component {
-        Rectangle {
-            width: 2
-            color: Style.dividerDark
+        Item {
+            width: 0
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 5
+                width: parent.height
+                rotation: -90
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: '#40000000'}
+                    GradientStop { position: 1.0; color: '#00000000'}
+                }
+            }
         }
     }
 }
