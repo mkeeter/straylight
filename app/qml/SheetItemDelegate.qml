@@ -68,7 +68,6 @@ Column {
                 } else {
                     labelWidths[i] = w
                 }
-                console.log(labelWidths.toString())
                 labelPadding = _.max(labelWidths)
             }
 

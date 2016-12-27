@@ -84,6 +84,7 @@ SplitView {
             id: items
             width: parent.width
             Layout.fillHeight: true
+            Layout.fillWidth: true
         }
         Layout.fillHeight: true
     }
