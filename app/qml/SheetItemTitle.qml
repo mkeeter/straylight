@@ -13,6 +13,10 @@ GridLayout {
     signal openSheet
     signal closeSheet
 
+    function openRename() {
+        renamer.enable(name)
+    }
+
     Text {
         Layout.row: 0
         Layout.column: 0

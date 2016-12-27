@@ -108,6 +108,7 @@ SplitView {
                 var instance = sheetEnv[sheetEnv.length - 1]
                 var sheet = Bridge.sheetOf(instance)
                 var name = Bridge.nextItemName(sheet)
+                items.wantsRename = true;
                 Bridge.insertCell(sheet, name)
             }
         }

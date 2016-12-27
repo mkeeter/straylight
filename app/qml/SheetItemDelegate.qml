@@ -15,6 +15,8 @@ Column {
             return instanceDelegate;
     }
 
+    signal renameMe
+
     Component {
         id: cellDelegate
 
@@ -28,6 +30,10 @@ Column {
 
                 onEraseMe: {
                     Bridge.eraseCell(itemIndex)
+                }
+
+                Component.onCompleted: {
+                    renameMe.connect(openRename)
                 }
             }
 
@@ -88,6 +94,10 @@ Column {
                 onCloseSheet: {
                     var env = sheetEnv.slice()
                     sheetStack.openTo(env)
+                }
+
+                Component.onCompleted: {
+                    renameMe.connect(openRename)
                 }
             }
 

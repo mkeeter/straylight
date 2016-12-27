@@ -12,6 +12,9 @@ ScrollView {
     property int itemIndex: 0
     property int ioIndex: 0
 
+    // Used to open the rename window when an item is added
+    property bool wantsRename: false
+
     function push() {
         itemIndex = 0;
     }
@@ -146,6 +149,13 @@ ScrollView {
         spacing: 5
         delegate: SheetItemDelegate {
             width: parent.width
+
+            Component.onCompleted: {
+                if (wantsRename) {
+                    renameMe()
+                    wantsRename = false
+                }
+            }
         }
 
         displaced: Transition {
