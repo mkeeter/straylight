@@ -12,8 +12,9 @@ GridLayout {
         Layout.column: 0
         Layout.fillHeight: true
         width: 2
-        visible: exprText.lineCount > 1
         color: Style.accent
+        opacity: exprText.lineCount > 1
+        Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
     TextEdit {
@@ -55,7 +56,8 @@ GridLayout {
         Layout.fillWidth: true
         height: 2
         color: Style.accent
-        visible: exprText.lineCount <= 1
+        opacity: exprText.lineCount <= 1
+        Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
     Row {
