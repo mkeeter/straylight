@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.0
 
-import Colors 1.0
+import Style 1.0
 import Awesome 4.7
 import Bridge 1.0
 
@@ -101,7 +101,7 @@ Column {
 
         Rectangle {
             id: instancePadding
-            color: isInstanceOpen ? Colors.base00 : 'transparent'
+            // TODO color: isInstanceOpen ? Colors.base00 : 'transparent'
             width: 10
             height: del.height
             Behavior on color {
@@ -125,9 +125,10 @@ Column {
     property bool isInstanceOpen: sheetStack.env.indexOf(itemIndex) != -1
 
     Rectangle {
+        visible: !last
         width: parent.width
         height: 2
-        color: Colors.base02
+        color: Style.dividerDark
     }
 }
 

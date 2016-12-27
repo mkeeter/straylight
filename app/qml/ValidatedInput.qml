@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 import Awesome 4.7
-import Colors 1.0
+import Style 1.0
 
 ColumnLayout {
     function enable(t) {
@@ -29,7 +29,7 @@ ColumnLayout {
 
         Text {
             id: textLabel
-            color: Colors.base1
+            color: Style.textDarkSecondary
         }
 
         TextRect {
@@ -77,13 +77,14 @@ ColumnLayout {
 
         Text {
             text: Awesome.fa_exclamation_triangle
-            color: Colors.base0
+            color: errorMessage.color
             font.family: fontAwesome.name
         }
 
         Text {
+            id: errorMessage
             text: error
-            color: Colors.base1
+            color: Style.textDarkSecondary
             leftPadding: 5
         }
     }

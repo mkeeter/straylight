@@ -16,10 +16,18 @@ ScrollView {
         itemIndex = 0;
     }
 
+    function setLast(model) {
+        for (var i=0; i < model.count - 1; ++i) {
+            model.setProperty(i, 'last', false)
+        }
+        model.setProperty(model.count - 1, 'last', true)
+    }
+
     function pop() {
         while (itemIndex < itemsModel.count) {
             itemsModel.remove(itemIndex++)
         }
+        setLast(itemsModel)
     }
 
     // Search forward through the list of items to find our cell,
@@ -70,6 +78,7 @@ ScrollView {
             while (ioIndex < model.count) {
                 model.remove(ioIndex++)
             }
+            setLast(model)
         }
     }
 

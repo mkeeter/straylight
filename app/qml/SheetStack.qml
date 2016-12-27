@@ -2,7 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 
 import Bridge 1.0
-import Colors 1.0
+import Style 1.0
 
 SplitView {
     id: sstack
@@ -49,7 +49,7 @@ SplitView {
     handleDelegate: Component {
         Rectangle {
             width: 2
-            color: Colors.base00
+            color: Style.dividerDark
         }
     }
 }

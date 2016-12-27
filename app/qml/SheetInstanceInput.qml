@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.4
 
-import Colors 1.0
+import Style 1.0
 import Bridge 1.0
 import Awesome 4.7
 
@@ -9,7 +9,7 @@ Column {
     spacing: 5
 
     Rectangle {
-        color: Colors.base02
+        color: 'transparent' // TODO
         id: exprRect
 
         height: childrenRect.height
@@ -17,9 +17,9 @@ Column {
         anchors.right: parent.right
 
         TextEdit {
-            color: Colors.base1
+            color: Style.textDarkPrimary
             font.family: fixedWidth.name
-            selectionColor: Colors.base00
+            // TODO selectionColor: Colors.base00
             selectByMouse: true
 
             id: exprText
@@ -43,7 +43,7 @@ Column {
             text: valid ? Awesome.fa_long_arrow_right
                         : Awesome.fa_exclamation_triangle
 
-            color: Colors.base0
+            color: resultText.color
             font.family: fontAwesome.name
             font.pointSize: 14
 
@@ -58,7 +58,7 @@ Column {
             width: parent.width - statusIcon.width
 
             font.family: fixedWidth.name
-            color: Colors.base0
+            color: Style.textDarkSecondary
         }
     }
 

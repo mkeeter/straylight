@@ -2,7 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
-import Colors 1.0
+import Style 1.0
 import Bridge 1.0
 import Awesome 4.7
 
@@ -21,7 +21,7 @@ GridLayout {
         text: type == 'cell' ? name : name + " [" + sheet + "]"
         font.family: fixedWidth.name
         font.pointSize: 18
-        color: Colors.base1
+        color: Style.textDarkPrimary
     }
 
     Row {

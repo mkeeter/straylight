@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.0
 
-import Colors 1.0
+import Style 1.0
 import Awesome 4.7
 
 Column {
@@ -28,7 +28,7 @@ Column {
                 width: parent.width - statusIcon.width
 
                 font.family: fixedWidth.name
-                color: Colors.base0
+                color: Style.textDarkPrimary
             }
 
             Text {
@@ -36,7 +36,7 @@ Column {
                 visible: !valid
                 text: Awesome.fa_exclamation_triangle
 
-                color: Colors.base0
+                color: resultText.color
                 font.family: fontAwesome.name
                 font.pointSize: 14
 
@@ -71,7 +71,7 @@ Column {
             id: nameLabel
             text: name + ":"
             width: labelPadding
-            color: Colors.base0
+            color: Style.textDarkSecondary
             font.bold: true
             font.family: fixedWidth.name
             rightPadding: 10
@@ -84,12 +84,14 @@ Column {
     }
 
     Rectangle {
+        visible: !last
         width: parent.width
-        color: Colors.base02
+        color: Style.dividerDark
         height: 2
     }
 
     Rectangle {
+        visible: !last
         height: 4
         width: parent.width
         color: 'transparent'

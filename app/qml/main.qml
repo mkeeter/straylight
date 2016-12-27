@@ -4,7 +4,8 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import FbItem 1.0
-import Colors 1.0
+import Style 1.0
+import Material 1.0
 import Bridge 1.0
 
 import "vendor/underscore.js" as Underscore
@@ -18,7 +19,7 @@ ApplicationWindow {
 
     style: ApplicationWindowStyle {
         background: Rectangle {
-            color: Colors.base03
+            color: Material.white
         }
     }
     FontLoader {

@@ -3,14 +3,14 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
-import Colors 1.0
+import Style 1.0
 import Bridge 1.0
 
 SplitView {
     orientation: Qt.Vertical
 
     property var sheetEnv
-    property alias sheetIndex: lib.sheetIndex
+    // TODO property alias sheetIndex: lib.sheetIndex
 
     // Used in drawing title
     property string instanceName: ""
@@ -77,7 +77,9 @@ SplitView {
     }
 
     ColumnLayout {
-        SheetTitle { }
+        SheetTitle {
+            Layout.fillWidth: true
+        }
         SheetItemsPane {
             id: items
             width: parent.width
@@ -86,16 +88,18 @@ SplitView {
         Layout.fillHeight: true
     }
 
+    /*
     SheetLibraryPane {
         id: lib
         width: parent.width
     }
+    */
 
     handleDelegate: Component {
         id: splitViewHandle
         Rectangle {
             height: 1
-            color: Colors.base01
+            //TODO color: Colors.base01
         }
     }
 }
