@@ -17,8 +17,7 @@ function findItem(item_type, item_index, startIndex, model, params) {
         if (item.type == item_type &&
             item.itemIndex == item_index)
         {
-            if (searchIndex != itemIndex)
-            {
+            if (searchIndex != startIndex) {
                 model.move(searchIndex, startIndex, 1)
             }
             return
@@ -32,9 +31,12 @@ function findItem(item_type, item_index, startIndex, model, params) {
 }
 
 /*
- *  Sets the property 'last' for each item in a model
+ *  Erases remaining items and sets the 'last' property of a model
  */
-function setLast(model) {
+function pop(model, i) {
+    while (i < model.count) {
+        model.remove(i++)
+    }
     for (var i=0; i < model.count; ++i) {
         model.setProperty(i, 'last', i == model.count - 1)
     }

@@ -4,26 +4,33 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
+import "/js/model_util.js" as ModelUtil
 
 ColumnLayout {
     property ListModel libraryModel: ListModel { }
 
     // Used when deserializing from bridge
     property int itemIndex: 0
+
     function push() {
         itemIndex = 0;
     }
+
     function pop() {
-        while (itemIndex < libraryModel.count) {
-            libraryModel.remove(itemIndex++)
-        }
-        for (var i=0; i < libraryModel.count; ++i) {
-            libraryModel.setProperty(i, 'last', i == libraryModel.count - 1)
-        }
+        ModelUtil.pop(libraryModel, itemIndex)
     }
+
     function sheet(sheet_index, sheet_name, editable, insertable)
     {
+        var found = ModelUtil.findItem('sheet', sheet_index,
+                                       itemIndex, libraryModel)
+
+        libraryModel.setProperty(itemIndex, "name", sheet_name)
+        libraryModel.setProperty(itemIndex, "editable", editable)
+        libraryModel.setProperty(itemIndex, "insertable", insertable)
+
         console.log("Got sheet " + sheet_name)
+        console.log(libraryModel.count)
     }
 
     // Library title
@@ -55,13 +62,14 @@ ColumnLayout {
             model: libraryModel
             anchors.fill: parent
 
-            delegate: Rectangle {
+            delegate: Text { color: 'red'; text: "HELLO" }
+            /*Rectangle {
                 height: itemName.height
                 anchors.left: parent.left
                 anchors.right: parent.right
 
                 Text {
-                    id: itemName
+                    id: name
                     text: name
                     color: Style.textDarkSecondary
                     topPadding: 3
@@ -78,6 +86,7 @@ ColumnLayout {
                     }
                 }
             }
+            */
         }
     }
 }

@@ -19,7 +19,8 @@
         <file>qml/Material.qml</file>
         <file>qml/Style.qml</file>
 
-        <file>qml/vendor/underscore.js</file>
+        <file>js/vendor/underscore.js</file>
+        <file>js/model_util.js</file>
 
         <file>fonts/fontawesome-webfont.ttf</file>
         <file>fonts/Inconsolata-Regular.ttf</file>

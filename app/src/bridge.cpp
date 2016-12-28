@@ -7,6 +7,7 @@ Bridge::Bridge()
 {
     r.insertCell(0, "omg", "wtf");
     r.insertCell(0, "bbq", "(+ 1 2)");
+    r.insertCell(0, "whoa", "(+ 1 2)");
 
     auto s = r.insertSheet(0, "sheet");
     r.insertCell(s, "in", "(input 12)");
