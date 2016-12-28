@@ -23,15 +23,27 @@ GridLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        color: Style.textDarkPrimary
+        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
         font.family: fixedWidth.name
         selectionColor: Style.textSelect
         selectByMouse: true
 
         id: exprText
+        property string expr
+
+        onActiveFocusChanged: { syncText() }
+        onExprChanged: { syncText() }
 
         onTextChanged: {
-            Bridge.setInput(instanceIndex, itemIndex, text)
+            if (activeFocus) {
+                Bridge.setInput(instanceIndex, itemIndex, text)
+            }
+        }
+
+        function syncText() {
+            var c = cursorPosition
+            text = (activeFocus || expr.length) ? expr : 'Expression'
+            cursorPosition = Math.min(text.length, c)
         }
     }
 
@@ -77,8 +89,9 @@ GridLayout {
     }
 
     function setExpr(e)  {
-        if (exprText.text != e)
-            exprText.text = e
+        if (exprText.expr != e) {
+            exprText.expr = e
+        }
     }
 
 }
