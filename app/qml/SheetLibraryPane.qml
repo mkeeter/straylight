@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
+import Awesome 4.7
 import "/js/model_util.js" as ModelUtil
 
 ColumnLayout {
@@ -43,6 +44,17 @@ ColumnLayout {
             text: "<b>Library</b>"
             color: Style.textLightPrimary
             padding: 5
+        }
+
+        IconButton {
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.verticalCenter: header.verticalCenter
+
+            text: Awesome.fa_plus
+            mode: "light"
+            toolTip: "Add sheet"
+            onClicked: { console.log("Adding sheet") }
         }
     }
 
