@@ -31,6 +31,7 @@ Column {
     signal lostFocus
 
     onSetFocus: { txt.forceActiveFocus() }
+    function selectAll() { txt.selectAll() }
 
     property alias text: txt.text
 }

@@ -10,6 +10,7 @@ ColumnLayout {
         active = true
         editor.text = t
         editor.setFocus()
+        editor.selectAll()
         error = getError(t)
     }
 
