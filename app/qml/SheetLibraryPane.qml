@@ -29,8 +29,7 @@ ColumnLayout {
         libraryModel.setProperty(itemIndex, "editable", editable)
         libraryModel.setProperty(itemIndex, "insertable", insertable)
 
-        console.log("Got sheet " + sheet_name)
-        console.log(libraryModel.count)
+        itemIndex++
     }
 
     // Library title
@@ -62,14 +61,13 @@ ColumnLayout {
             model: libraryModel
             anchors.fill: parent
 
-            delegate: Text { color: 'red'; text: "HELLO" }
-            /*Rectangle {
-                height: itemName.height
+            delegate: Rectangle {
+                height: sheetName.height
                 anchors.left: parent.left
                 anchors.right: parent.right
 
                 Text {
-                    id: name
+                    id: sheetName
                     text: name
                     color: Style.textDarkSecondary
                     topPadding: 3
@@ -86,7 +84,6 @@ ColumnLayout {
                     }
                 }
             }
-            */
         }
     }
 }
