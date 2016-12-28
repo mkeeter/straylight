@@ -23,7 +23,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        color: Style.textDarkPrimary
+        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
         font.family: fixedWidth.name
         selectionColor: Style.textSelect
         selectByMouse: true
@@ -31,16 +31,15 @@ GridLayout {
         id: exprText
         property string expr
 
-        onActiveFocusChanged: {
-            if (ioType === 'input') {
-                var c = cursorPosition
-                text = activeFocus ? expr : '(input ...)'
-                cursorPosition = Math.min(text.length, c)
-            }
+        function syncText() {
+            var c = cursorPosition
+            text = activeFocus ? expr :
+                (ioType == 'input' ? '(input ...)' :
+                    (expr.length ? expr : 'Expression'))
+            cursorPosition = Math.min(text.length, c)
         }
-        onExprChanged: {
-            text = (activeFocus || ioType != 'input') ? expr : '(input ...)'
-        }
+        onActiveFocusChanged: { syncText() }
+        onExprChanged: { syncText() }
 
         onTextChanged: {
             if (activeFocus)
@@ -48,6 +47,8 @@ GridLayout {
                 Bridge.setExpr(itemIndex, text)
             }
         }
+
+        Component.onCompleted: { syncText() }
     }
 
     Rectangle {
