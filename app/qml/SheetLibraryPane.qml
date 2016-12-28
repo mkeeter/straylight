@@ -8,7 +8,10 @@ import Awesome 4.7
 import "/js/model_util.js" as ModelUtil
 
 ColumnLayout {
+    id: lib
     property ListModel libraryModel: ListModel { }
+
+    signal addInstance(int targetSheetIndex)
 
     // Used when deserializing from bridge
     property int itemIndex: 0
@@ -80,7 +83,12 @@ ColumnLayout {
                 anchors.right: parent.right
                 anchors.rightMargin: 15
                 anchors.leftMargin: 10
+
+                Component.onCompleted: {
+                    addInstance.connect(lib.addInstance)
+                }
             }
+
         }
     }
 }

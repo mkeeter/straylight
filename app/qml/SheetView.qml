@@ -118,7 +118,7 @@ SplitView {
     // after a short wait, which gives the engine time to construct
     // the Delegate
     Timer {
-        id: renameLastTimer
+        id: renameLastItemTimer
         interval: 10
         onTriggered: { items.renameLast() }
     }
@@ -132,7 +132,7 @@ SplitView {
                 var sheet = Bridge.sheetOf(instance)
                 var name = Bridge.nextItemName(sheet)
                 Bridge.insertCell(sheet, name)
-                renameLastTimer.restart()
+                renameLastItemTimer.restart()
             }
             onToggleLibrary: {
                 if (lib.visible) {
@@ -179,6 +179,14 @@ SplitView {
             }
         }
         visible: false
+
+        onAddInstance: {
+            var instance = sheetEnv[sheetEnv.length - 1]
+            var sheet = Bridge.sheetOf(instance)
+            var name = Bridge.nextItemName(sheet)
+            Bridge.insertInstance(sheet, name, targetSheetIndex)
+            renameLastItemTimer.restart()
+        }
     }
 
     handleDelegate: Component {

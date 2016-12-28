@@ -67,6 +67,12 @@ void Bridge::renameSheet(int sheet_index, QString name)
     sync();
 }
 
+void Bridge::insertSheet(int sheet_index, QString name)
+{
+    r.insertSheet(sheet_index, name.toStdString());
+    sync();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void Bridge::insertCell(int sheet_index, const QString& name)
@@ -96,6 +102,15 @@ void Bridge::setInput(int instance_index, int cell_index,
 void Bridge::eraseCell(int cell_index)
 {
     r.eraseCell(cell_index);
+    sync();
+}
+
+void Bridge::insertInstance(
+            int parent_sheet_index, int target_sheet_index,
+            QString name)
+{
+    r.insertInstance(parent_sheet_index, name.toStdString(),
+                     target_sheet_index);
     sync();
 }
 

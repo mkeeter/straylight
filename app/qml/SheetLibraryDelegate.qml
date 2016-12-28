@@ -6,6 +6,8 @@ import Awesome 4.7
 import Bridge 1.0
 
 GridLayout {
+    signal addInstance(int sheet_index)
+
     Text {
         Layout.row: 0
         Layout.column: 0
@@ -36,6 +38,7 @@ GridLayout {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
             enabled: insertable
+            onClicked: { addInstance(itemIndex) }
         }
         IconButton {
             text: Awesome.fa_pencil
