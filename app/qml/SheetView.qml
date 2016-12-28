@@ -118,7 +118,7 @@ SplitView {
                 var sheet = Bridge.sheetOf(instance)
                 var name = Bridge.nextItemName(sheet)
                 Bridge.insertCell(sheet, name)
-                renameLastTimer.start()
+                renameLastTimer.restart()
             }
         }
         SheetItemsPane {
