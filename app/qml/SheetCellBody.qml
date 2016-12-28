@@ -7,12 +7,15 @@ import Bridge 1.0
 import Awesome 4.7
 
 GridLayout {
+
+    property color indicatorColor: valid ? Style.textEditValid : Style.textEditInvalid
+
     Rectangle {
         Layout.row: 0
         Layout.column: 0
         Layout.fillHeight: true
         width: 2
-        color: valid ? Style.textEditValid : Style.textEditInvalid
+        color: indicatorColor
         opacity: exprText.lineCount > 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
@@ -56,7 +59,7 @@ GridLayout {
         Layout.column: 1
         Layout.fillWidth: true
         height: 2
-        color: valid ? Style.textEditValid : Style.textEditInvalid
+        color: indicatorColor
         opacity: exprText.lineCount <= 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
@@ -72,7 +75,7 @@ GridLayout {
             text: valid ? Awesome.fa_long_arrow_right
                         : Awesome.fa_exclamation_triangle
 
-            color: resultText.color
+            color: indicatorColor
             font.family: fontAwesome.name
             font.pointSize: 14
 

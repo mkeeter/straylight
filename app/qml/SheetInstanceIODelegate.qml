@@ -39,7 +39,7 @@ Column {
                 visible: !valid
                 text: Awesome.fa_exclamation_triangle
 
-                color: resultText.color
+                color: Style.textEditInvalid
                 font.family: fontAwesome.name
                 font.pointSize: 14
 
