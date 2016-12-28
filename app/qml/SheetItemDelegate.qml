@@ -153,10 +153,9 @@ Column {
     property bool isInstanceOpen: sheetStack.env.indexOf(itemIndex) != -1
 
     Rectangle {
-        visible: !last
         width: parent.width
         height: 2
-        color: Style.dividerDark
+        color: last ? 'transparent' : Style.dividerDark
     }
 }
 
