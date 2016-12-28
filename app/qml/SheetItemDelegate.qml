@@ -6,6 +6,7 @@ import Awesome 4.7
 import Bridge 1.0
 
 Column {
+    objectName: "SheetItemDelegate"
     spacing: 8
 
     function bestDelegate(t) {

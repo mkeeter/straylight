@@ -17,13 +17,17 @@ ScrollView {
         // directly, but should be safe enough...
         var children = listView.contentItem.children
         var y = 0
+        var lastIndex = 0
         for(var i in children) {
-            y += children[i].height
+            if (children[i].objectName === "SheetItemDelegate") {
+                y += children[i].height
+                lastIndex = i
+            }
         }
         y -= items.height
         scrollTo.to = Math.max(y, 0)
         scrollTo.start()
-        children[i].renameMe()
+        children[lastIndex].renameMe()
     }
 
     function push() {
