@@ -8,6 +8,9 @@ Item {
     height: childrenRect.height
 
     signal insertCell
+    signal toggleLibrary
+
+    property bool libOpen: false
 
     Rectangle {
         height: sheetTitleText.height
@@ -42,9 +45,10 @@ Item {
                 onClicked: { insertCell() }
             }
             IconButton {
-                text: Awesome.fa_arrow_circle_up
+                text: libOpen ? Awesome.fa_arrow_circle_down : Awesome.fa_arrow_circle_up
                 mode: "light"
-                toolTip: "Show library"
+                toolTip: libOpen ? "Hide library" : "Show library"
+                onClicked: { toggleLibrary() }
             }
         }
     }

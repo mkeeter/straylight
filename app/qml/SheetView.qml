@@ -113,12 +113,20 @@ SplitView {
     ColumnLayout {
         SheetTitle {
             Layout.fillWidth: true
+            libOpen: lib.visible
             onInsertCell: {
                 var instance = sheetEnv[sheetEnv.length - 1]
                 var sheet = Bridge.sheetOf(instance)
                 var name = Bridge.nextItemName(sheet)
                 Bridge.insertCell(sheet, name)
                 renameLastTimer.restart()
+            }
+            onToggleLibrary: {
+                if (lib.visible) {
+                    lib.slideClose()
+                } else {
+                    lib.slideOpen()
+                }
             }
         }
         SheetItemsPane {
@@ -133,6 +141,31 @@ SplitView {
     SheetLibraryPane {
         id: lib
         width: parent.width
+
+        function slideOpen() {
+            anim.from = 0
+            anim.to = 200
+            anim.start()
+            visible = true
+        }
+
+        function slideClose() {
+            anim.from = height
+            anim.to = 0
+            anim.start()
+        }
+
+        property var anim: NumberAnimation {
+            target: lib
+            properties: 'Layout.minimumHeight, Layout.maximumHeight'
+            duration: 100
+            onStopped: {
+                lib.Layout.minimumHeight = -1
+                lib.Layout.maximumHeight = -1
+                lib.visible = (to > 0)
+            }
+        }
+        visible: false
     }
 
     handleDelegate: Component {
