@@ -105,9 +105,8 @@ void Bridge::eraseCell(int cell_index)
     sync();
 }
 
-void Bridge::insertInstance(
-            int parent_sheet_index, int target_sheet_index,
-            QString name)
+void Bridge::insertInstance(int parent_sheet_index, QString name,
+                            int target_sheet_index)
 {
     r.insertInstance(parent_sheet_index, name.toStdString(),
                      target_sheet_index);

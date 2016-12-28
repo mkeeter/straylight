@@ -30,9 +30,8 @@ public:
                               const QString& expr);
     Q_INVOKABLE void eraseCell(int cell_index);
 
-    Q_INVOKABLE void insertInstance(
-            int parent_sheet_index, int target_sheet_index,
-            QString name);
+    Q_INVOKABLE void insertInstance(int parent_sheet_index, QString name,
+                                    int target_sheet_index);
     Q_INVOKABLE void eraseInstance(int instance_index);
 
     Q_INVOKABLE int sheetOf(int instance_index) const;
