@@ -6,6 +6,26 @@ import QtQuick.Controls.Styles 1.4
 import Style 1.0
 
 ColumnLayout {
+    property ListModel libraryModel: ListModel { }
+
+    // Used when deserializing from bridge
+    property int itemIndex: 0
+    function push() {
+        itemIndex = 0;
+    }
+    function pop() {
+        while (itemIndex < libraryModel.count) {
+            libraryModel.remove(itemIndex++)
+        }
+        for (var i=0; i < libraryModel.count; ++i) {
+            libraryModel.setProperty(i, 'last', i == libraryModel.count - 1)
+        }
+    }
+    function sheet(sheet_index, sheet_name, editable, insertable)
+    {
+        console.log("Got sheet " + sheet_name)
+    }
+
     // Library title
     Rectangle {
         anchors.left: parent.left
@@ -19,8 +39,6 @@ ColumnLayout {
             padding: 5
         }
     }
-
-    property ListModel libraryModel: ListModel { }
 
     ScrollView {
         Layout.fillWidth: true

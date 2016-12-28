@@ -58,6 +58,8 @@ signals:
               const QString& expr, int type,
               bool valid, const QString& val);
 
+    void sheet(int s, const QString& name, bool editable, bool insertable);
+
 protected:
     Root r;
 
@@ -85,6 +87,9 @@ protected:
         bool push(const std::string& instance_name,
                   const std::string& sheet_name) override;
         void pop() override;
+
+        void sheet(SheetIndex s, const std::string& sheet_name,
+                   bool editable, bool insertable) override;
     private:
         Bridge* parent;
     };

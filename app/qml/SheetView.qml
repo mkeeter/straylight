@@ -27,10 +27,14 @@ SplitView {
     Component.onCompleted: {
         Bridge.push.connect(push)
         Bridge.pop.connect(pop)
+
+        // TODO: these connections should be made / broken when we
+        // get into the bridge env, removing all the conditionals
         Bridge.instance.connect(instance)
         Bridge.input.connect(input)
         Bridge.output.connect(output)
         Bridge.cell.connect(cell)
+        Bridge.sheet.connect(sheet)
     }
 
     function push(instance_name, sheet_name) {
@@ -43,6 +47,7 @@ SplitView {
         if (inBridgeEnv()) {
             visited = true
             items.push()
+            lib.push()
             instanceName = instance_name
             sheetName = sheet_name
         }
@@ -51,6 +56,7 @@ SplitView {
     function pop() {
         if (inBridgeEnv()) {
             items.pop()
+            lib.pop()
         }
         bridgeEnv.pop()
         if (inBridgeEnv()) {
@@ -61,17 +67,18 @@ SplitView {
         // request that we open to the next-highest sheet
         if (bridgeEnv.length == 0 && !visited)
         {
-            // TODO: we should open to the longest prefix visited here
             Bridge.push.disconnect(push)
             Bridge.pop.disconnect(pop)
             Bridge.instance.disconnect(instance)
             Bridge.input.disconnect(input)
             Bridge.output.disconnect(output)
             Bridge.cell.disconnect(cell)
+            Bridge.sheet.disconnect(sheet)
 
             var env_ = sheetEnv.slice()
             env_.pop()
 
+            // TODO: we should open to the longest prefix visited here
             sheetStack.closeTo(env_)
         }
     }
@@ -98,6 +105,12 @@ SplitView {
     function cell(cell_index, name, expr, type, valid, value) {
         if (inBridgeEnv()) {
             items.cell(cell_index, name, expr, type, valid, value)
+        }
+    }
+
+    function sheet(sheet_index, name, editable, insertable) {
+        if (inBridgeEnv()) {
+            lib.sheet(sheet_index, name, editable, insertable)
         }
     }
 

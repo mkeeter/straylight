@@ -158,3 +158,9 @@ void Bridge::BridgeTreeSerializer::cell(CellIndex c, const std::string& name,
                  QString::fromStdString(expr), type,
                  valid, QString::fromStdString(val));
 }
+
+void Bridge::BridgeTreeSerializer::sheet(SheetIndex s, const std::string& name,
+                bool editable, bool insertable)
+{
+    parent->sheet(s.i, QString::fromStdString(name), editable, insertable);
+}

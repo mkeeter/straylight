@@ -35,11 +35,8 @@ ScrollView {
     }
 
     function setLast(model) {
-        for (var i=0; i < model.count - 1; ++i) {
-            model.setProperty(i, 'last', false)
-        }
-        if (i < model.count) {
-            model.setProperty(i, 'last', true)
+        for (var i=0; i < model.count; ++i) {
+            model.setProperty(i, 'last', i == model.count - 1)
         }
     }
 

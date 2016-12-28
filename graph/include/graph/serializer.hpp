@@ -43,5 +43,16 @@ public:
      */
     virtual bool push(const std::string& instance_name,
                       const std::string& sheet_name)=0;
+
+    /*
+     *  Called to note that the current environment contains the given sheet
+     *
+     *  The sheet is marked as editable if it lives within the environment
+     *  (rather than a parent environment), and is insertable if inserting an
+     *  instance will not create a loop
+     */
+    virtual void sheet(SheetIndex s, const std::string& sheet_name,
+                       bool editable, bool insertable)=0;
+
     virtual void pop()=0;
 };

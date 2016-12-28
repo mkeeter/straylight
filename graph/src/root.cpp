@@ -368,6 +368,13 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                 serialize(s, env_);
             }
         }
+
+        // Record all sheets here
+        // TODO: also record parent sheets, etc
+        for (auto e : lib.childrenOf(sheet))
+        {
+            s->sheet(e.i, lib.nameOf(e), true, true);
+        }
     }
     s->pop();
 }
