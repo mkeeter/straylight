@@ -102,7 +102,9 @@ ScrollView {
         model: itemsModel
         spacing: 5
         delegate: SheetItemDelegate {
-            width: parent.width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.rightMargin: 15
         }
 
         displaced: Transition {

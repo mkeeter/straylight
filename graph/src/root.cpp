@@ -46,7 +46,7 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
             auto env = e; // copy
             env.push_back(i);
             env.insert(e.end(), c.first.begin(), c.first.end());
-            markDirty({env, nameOf(c.second)});
+            markDirty({env, itemName(c.second)});
         }
     }
 
@@ -255,9 +255,9 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
-bool Root::checkName(const SheetIndex& parent,
-                     const std::string& name,
-                     std::string* err) const
+bool Root::checkItemName(const SheetIndex& parent,
+                         const std::string& name,
+                         std::string* err) const
 {
     if (name.size() == 0)
     {
@@ -299,7 +299,7 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
     tree.rename(i, name);
 
-    for (const auto& env : tree.envsOf(parentSheet(i)))
+    for (const auto& env : tree.envsOf(itemParent(i)))
     {
         // Mark the old name as dirty
         // (which propagates to anything that looked it up)
@@ -355,12 +355,12 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                         const auto& v = c->values.at(env_);
                         if (c->type == Cell::INPUT)
                         {
-                            s->input(CellIndex(item.i), nameOf(item),
+                            s->input(CellIndex(item.i), itemName(item),
                                      n->inputs.at(item), v.valid, v.str);
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
-                            s->output(CellIndex(item.i), nameOf(item),
+                            s->output(CellIndex(item.i), itemName(item),
                                       v.valid, v.str);
                         }
                     }
@@ -377,6 +377,30 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
         }
     }
     s->pop();
+}
+
+bool Root::checkSheetName(const SheetIndex& parent,
+                          const std::string& name,
+                          std::string* err) const
+{
+    if (name.size() == 0)
+    {
+        if (err)
+        {
+            *err = "Name cannot be empty";
+        }
+        return false;
+    }
+    else if (!lib.canInsert(parent, name))
+    {
+        if (err)
+        {
+            *err = "Duplicate name";
+        }
+        return false;
+    }
+
+    return true;
 }
 
 bool Root::checkEnv(const Env& env) const

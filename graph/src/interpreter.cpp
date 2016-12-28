@@ -203,7 +203,7 @@ Value Interpreter::eval(const CellKey& key)
         {
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, root.nameOf(i).c_str()),
+                    s7_make_symbol(interpreter, root.itemName(i).c_str()),
                     s7_cons(interpreter, getThunk(env, i, key),
                     bindings));
         }
@@ -316,7 +316,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
                         // Prepend (name, value thunk) to the args list
                         auto pair = s7_cons(interpreter,
                                 s7_make_symbol(
-                                    interpreter, root.nameOf(c).c_str()),
+                                    interpreter, root.itemName(c).c_str()),
                                 getThunk(env_, c, looker));
                         values = s7_cons(interpreter, pair, values);
                     }
@@ -327,7 +327,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
         // Build a thunk with instance_thunk_factory
         auto args = s7_list(interpreter, 6,
             s7_make_c_pointer(interpreter, deps),
-            encodeNameKey({env, root.nameOf(index)}),
+            encodeNameKey({env, root.itemName(index)}),
             s7_make_integer(interpreter, index.i),
             encodeCellKey(looker),
             check_upstream,

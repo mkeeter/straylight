@@ -35,9 +35,11 @@ ColumnLayout {
 
     // Library title
     Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
+        id: titleRect
+
+        Layout.fillWidth: true
         height: childrenRect.height
+
         color: Style.primary
         Text {
             id: header
@@ -47,7 +49,7 @@ ColumnLayout {
         }
 
         IconButton {
-            anchors.right: parent.right
+            anchors.right: titleRect.right
             anchors.rightMargin: 10
             anchors.verticalCenter: header.verticalCenter
 
@@ -70,31 +72,14 @@ ColumnLayout {
 
         ListView {
             id: sheetList
-            model: libraryModel
-            anchors.fill: parent
 
-            delegate: Rectangle {
-                height: sheetName.height
+            model: libraryModel
+
+            delegate: SheetLibraryDelegate {
                 anchors.left: parent.left
                 anchors.right: parent.right
-
-                Text {
-                    id: sheetName
-                    text: name
-                    color: Style.textDarkSecondary
-                    topPadding: 3
-                    leftPadding: 5
-                    bottomPadding: topPadding
-                }
-
-                MouseArea {
-                    id: hover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        console.log("Tried to do something")
-                    }
-                }
+                anchors.rightMargin: 15
+                anchors.leftMargin: 10
             }
         }
     }

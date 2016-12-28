@@ -74,11 +74,11 @@ public:
     const Value& getValue(const CellKey& cell) const;
 
     /*
-     *  Checks to see whether the given name is valid
+     *  Checks to see whether the given sheet name is valid
      *  (both as an identifier and in having no collisions)
      */
-    bool checkName(const SheetIndex& parent,
-                   const std::string& name, std::string* err=nullptr) const;
+    bool checkItemName(const SheetIndex& parent,
+                       const std::string& name, std::string* err=nullptr) const;
 
     /*
      *  Renames an item, resynching anything that looked for it
@@ -102,7 +102,7 @@ public:
     /*
      *  Looks up the name of an item
      */
-    const std::string& nameOf(const ItemIndex& item) const
+    const std::string& itemName(const ItemIndex& item) const
         { return tree.nameOf(item); }
 
     /*
@@ -126,7 +126,7 @@ public:
     /*
      *  Looks up the parent sheet for an item
      */
-    SheetIndex parentSheet(const ItemIndex& item) const
+    SheetIndex itemParent(const ItemIndex& item) const
         { return tree.parentOf(item); }
 
     /*
@@ -141,12 +141,38 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////
 
+    /*
+     *  Checks to see whether the given sheet name is valid
+     *
+     *  If err is given, it is populated with an error message
+     */
+    bool checkSheetName(const SheetIndex& parent,
+                        const std::string& name, std::string* err=nullptr) const;
+
     bool canInsertSheet(const SheetIndex& parent,
                         const std::string& name) const
         { return lib.canInsert(parent, name); }
 
     SheetIndex insertSheet(const SheetIndex& parent, const std::string& name)
         { return lib.insert(parent, name); }
+
+    /*
+     *  Looks up the parent sheet for a sheet
+     */
+    SheetIndex sheetParent(const SheetIndex& s) const
+        { return lib.parentOf(s); }
+
+    /*
+     *  Looks up the parent sheet for a sheet
+     */
+    const std::string& sheetName(const SheetIndex& s) const
+        { return lib.nameOf(s); }
+
+    /*
+     *  Renames a sheet
+     */
+    void renameSheet(const SheetIndex& i, const std::string& name)
+        { lib.rename(i, name); }
 
     ////////////////////////////////////////////////////////////////////////////
 

@@ -15,23 +15,23 @@ Bridge::Bridge()
     r.insertInstance(0, "instance", s);
 }
 
-QString Bridge::checkName(int sheet_index, QString name) const
+QString Bridge::checkItemName(int sheet_index, QString name) const
 {
     std::string out;
-    r.checkName(sheet_index, name.toStdString(), &out);
+    r.checkItemName(sheet_index, name.toStdString(), &out);
     return QString::fromStdString(out);
 }
 
-QString Bridge::checkRename(int item_index, QString name) const
+QString Bridge::checkItemRename(int item_index, QString name) const
 {
-    const auto& current_name = r.nameOf(item_index);
+    const auto& current_name = r.itemName(item_index);
     if (current_name == name.toStdString())
     {
         return "";
     }
 
-    auto sheet = r.parentSheet(item_index);
-    return checkName(sheet.i, name);
+    auto sheet = r.itemParent(item_index);
+    return checkItemName(sheet.i, name);
 }
 
 void Bridge::renameItem(int item_index, QString name)
@@ -39,6 +39,35 @@ void Bridge::renameItem(int item_index, QString name)
     r.renameItem(item_index, name.toStdString());
     sync();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+QString Bridge::checkSheetName(int parent_sheet, QString name) const
+{
+    std::string out;
+    r.checkSheetName(parent_sheet, name.toStdString(), &out);
+    return QString::fromStdString(out);
+}
+
+QString Bridge::checkSheetRename(int sheet_index, QString name) const
+{
+    const auto& current_name = r.sheetName(sheet_index);
+    if (current_name == name.toStdString())
+    {
+        return "";
+    }
+
+    auto sheet = r.sheetParent(sheet_index);
+    return checkSheetName(sheet.i, name);
+}
+
+void Bridge::renameSheet(int sheet_index, QString name)
+{
+    r.renameSheet(sheet_index, name.toStdString());
+    sync();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void Bridge::insertCell(int sheet_index, const QString& name)
 {

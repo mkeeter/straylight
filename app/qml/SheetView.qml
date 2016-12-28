@@ -153,7 +153,7 @@ SplitView {
 
     SheetLibraryPane {
         id: lib
-        width: parent.width
+        Layout.fillWidth: true
 
         function slideOpen() {
             anim.from = 0

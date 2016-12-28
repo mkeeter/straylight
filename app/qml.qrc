@@ -6,6 +6,7 @@
         <file>qml/SheetItemTitle.qml</file>
         <file>qml/SheetItemsPane.qml</file>
         <file>qml/SheetLibraryPane.qml</file>
+        <file>qml/SheetLibraryDelegate.qml</file>
         <file>qml/SheetInstanceIODelegate.qml</file>
         <file>qml/SheetStack.qml</file>
         <file>qml/SheetInstanceInput.qml</file>

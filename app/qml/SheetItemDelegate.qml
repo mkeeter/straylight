@@ -139,15 +139,8 @@ Column {
 
         Loader {
             id: del
-            width: parent.width - instancePadding.width - scrollPadding.width
+            width: parent.width - instancePadding.width
             sourceComponent: bestDelegate(type)
-        }
-
-        Rectangle {
-            id: scrollPadding
-            color: 'transparent'
-            width: 10
-            height: del.height
         }
     }
     property bool isInstanceOpen: sheetStack.env.indexOf(itemIndex) != -1
