@@ -94,7 +94,7 @@ Column {
                 }
                 onCloseSheet: {
                     var env = sheetEnv.slice()
-                    sheetStack.openTo(env)
+                    sheetStack.closeTo(env)
                 }
 
                 Component.onCompleted: {

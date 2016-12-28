@@ -72,7 +72,7 @@ SplitView {
             var env_ = sheetEnv.slice()
             env_.pop()
 
-            sheetStack.openTo(env_)
+            sheetStack.closeTo(env_)
         }
     }
 

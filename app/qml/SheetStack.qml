@@ -13,18 +13,27 @@ SplitView {
     // We have to manually track items because SplitView doesn't have
     // a way to look up the item at a particular index.
     property var items: []
+    property var toErase: []
 
-    function openTo(e) {
+    function closeTo(e) {
         var new_width = width
         while (env.length > e.length ||
                env[env.length - 1] != e[env.length - 1])
         {
             new_width -= items[items.length - 1].width
-            removeItem(items[items.length - 1])
 
             env.pop()
-            items.pop()
+            toErase.push(items.pop())
         }
+        envChanged()
+
+        widthAnim.to = new_width
+        widthAnim.start()
+        // widthAnim will clean out toErase when it's done
+    }
+
+    function openTo(e) {
+        var new_width = width
         while (env.length < e.length)
         {
             env.push(e[env.length])
@@ -34,16 +43,23 @@ SplitView {
             addItem(items[items.length - 1])
             new_width += 250
         }
-
-        width = new_width
         envChanged()
         Bridge.sync()
+
+        widthAnim.to = new_width
+        widthAnim.start()
     }
 
     property var widthAnim: NumberAnimation {
         target: sstack
         property: 'width'
         duration: 50
+        onStopped: {
+            for (var i in toErase) {
+                removeItem(toErase[i])
+            }
+            toErase = []
+        }
     }
 
     handleDelegate: Component {
