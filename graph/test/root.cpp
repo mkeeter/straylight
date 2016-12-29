@@ -232,6 +232,18 @@ TEST_CASE("Root::insertSheet")
     REQUIRE(mul.i == 2);
 }
 
+TEST_CASE("Root::eraseSheet")
+{
+    Root r;
+    auto sum = r.insertSheet(0, "sum");
+
+    auto i = r.insertInstance(0, "i", sum);
+    REQUIRE(!r.checkItemName(0, "i"));
+
+    r.eraseSheet(sum);
+    REQUIRE(r.checkItemName(0, "i"));
+}
+
 TEST_CASE("Root::insertInstance")
 {
     Root r;

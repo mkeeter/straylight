@@ -181,6 +181,11 @@ public:
                               const std::string& prefix="s") const
         { return lib.nextName(sheet, prefix); }
 
+    /*
+     *  Erases a sheet and any instances thereof
+     */
+    void eraseSheet(const SheetIndex& s);
+
     ////////////////////////////////////////////////////////////////////////////
 
     /*

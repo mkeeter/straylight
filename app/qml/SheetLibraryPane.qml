@@ -12,6 +12,7 @@ ColumnLayout {
     property ListModel libraryModel: ListModel { }
 
     signal addInstance(int targetSheetIndex)
+    signal eraseSheet(int targetSheetIndex)
     signal addSheet()
 
     function renameLast() {
@@ -105,6 +106,7 @@ ColumnLayout {
 
                 Component.onCompleted: {
                     addInstance.connect(lib.addInstance)
+                    eraseSheet.connect(lib.eraseSheet)
                 }
             }
 

@@ -199,6 +199,10 @@ SplitView {
             Bridge.insertSheet(sheet, name)
             renameLastSheetTimer.restart()
         }
+
+        onEraseSheet: {
+            Bridge.eraseSheet(targetSheetIndex)
+        }
     }
 
     handleDelegate: Component {

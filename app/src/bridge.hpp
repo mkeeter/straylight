@@ -18,11 +18,14 @@ public:
     Q_INVOKABLE QString checkItemName(int sheet_index, QString name) const;
     Q_INVOKABLE QString checkItemRename(int item_index, QString name) const;
     Q_INVOKABLE void renameItem(int item_index, QString name);
+    Q_INVOKABLE QString nextItemName(int sheet_index) const;
 
     Q_INVOKABLE QString checkSheetName(int parent_sheet, QString name) const;
     Q_INVOKABLE QString checkSheetRename(int sheet_index, QString name) const;
     Q_INVOKABLE void renameSheet(int sheet_index, QString name);
     Q_INVOKABLE void insertSheet(int sheet_index, QString name);
+    Q_INVOKABLE QString nextSheetName(int sheet_index) const;
+    Q_INVOKABLE void eraseSheet(int sheet_index);
 
     Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
@@ -35,8 +38,6 @@ public:
     Q_INVOKABLE void eraseInstance(int instance_index);
 
     Q_INVOKABLE int sheetOf(int instance_index) const;
-    Q_INVOKABLE QString nextItemName(int sheet_index) const;
-    Q_INVOKABLE QString nextSheetName(int sheet_index) const;
 
     /*
      *  Constructor for the QML singleton

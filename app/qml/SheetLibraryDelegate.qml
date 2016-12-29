@@ -8,6 +8,7 @@ import Bridge 1.0
 GridLayout {
     objectName: "SheetLibraryDelegate"
     signal addInstance(int targetSheetIndex)
+    signal eraseSheet(int targetSheetIndex)
 
     Text {
         Layout.row: 0
@@ -54,6 +55,7 @@ GridLayout {
             text: Awesome.fa_trash
             toolTip: "Delete"
             visible: editable
+            onClicked: { eraseSheet(itemIndex) }
         }
     }
 

@@ -53,7 +53,7 @@ public:
     /*
      *  Returns all of the instances that use the given sheet
      */
-    std::list<ItemIndex> instancesOf(const SheetIndex& s) const;
+    std::list<InstanceIndex> instancesOf(const SheetIndex& s) const;
 
     /*
      *  Erase an item from the tree and the order

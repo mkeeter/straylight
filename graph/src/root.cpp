@@ -403,6 +403,18 @@ bool Root::checkSheetName(const SheetIndex& parent,
     return true;
 }
 
+void Root::eraseSheet(const SheetIndex& s)
+{
+    auto lock = Lock();
+    auto instances = tree.instancesOf(s);
+    for (const auto& i : instances)
+    {
+        eraseInstance(i);
+    }
+    lib.erase(s);
+    // Sync is called on lock destruction
+}
+
 bool Root::checkEnv(const Env& env) const
 {
     for (const auto& i : env)

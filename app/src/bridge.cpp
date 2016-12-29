@@ -73,6 +73,12 @@ void Bridge::insertSheet(int sheet_index, QString name)
     sync();
 }
 
+void Bridge::eraseSheet(int sheet_index)
+{
+    r.eraseSheet(SheetIndex(sheet_index));
+    sync();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void Bridge::insertCell(int sheet_index, const QString& name)
