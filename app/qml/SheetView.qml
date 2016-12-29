@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
 import Bridge 1.0
+import Awesome 4.7
 
 SplitView {
     orientation: Qt.Vertical
@@ -128,38 +129,46 @@ SplitView {
         onTriggered: { lib.renameLast() }
     }
 
-    ColumnLayout {
-        SheetTitle {
-            Layout.fillWidth: true
-            libOpen: lib.visible
-            onInsertCell: {
-                var instance = sheetEnv[sheetEnv.length - 1]
-                var sheet = Bridge.sheetOf(instance)
-                var name = Bridge.nextItemName(sheet)
-                Bridge.insertCell(sheet, name)
-                renameLastItemTimer.restart()
-            }
-            onToggleLibrary: {
-                if (lib.visible) {
-                    lib.slideClose()
-                } else {
-                    lib.slideOpen()
+    Item {
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+
+        ColumnLayout {
+            anchors.fill: parent
+
+            SheetTitle {
+                Layout.fillWidth: true
+                onInsertCell: {
+                    var instance = sheetEnv[sheetEnv.length - 1]
+                    var sheet = Bridge.sheetOf(instance)
+                    var name = Bridge.nextItemName(sheet)
+                    Bridge.insertCell(sheet, name)
+                    renameLastItemTimer.restart()
                 }
             }
+            Text {
+                visible: items.itemsModel.count == 0
+                text: "Nothing here yet..."
+                color: Style.textDarkHint
+                padding: 10
+            }
+            SheetItemsPane {
+                id: items
+                width: parent.width
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
         }
-        Text {
-            visible: items.itemsModel.count == 0
-            text: "Nothing here yet..."
-            color: Style.textDarkHint
-            padding: 10
+
+        IconButton {
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.margins: 10
+            text: Awesome.fa_arrow_circle_up
+            visible: !lib.visible
+            onClicked: { lib.slideOpen() }
+            toolTip: "Show library"
         }
-        SheetItemsPane {
-            id: items
-            width: parent.width
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
-        Layout.fillHeight: true
     }
 
     SheetLibraryPane {
@@ -210,6 +219,8 @@ SplitView {
         onEraseSheet: {
             Bridge.eraseSheet(targetSheetIndex)
         }
+
+        onClosePane: { slideClose() }
     }
 
     handleDelegate: Component {

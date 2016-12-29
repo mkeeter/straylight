@@ -14,6 +14,7 @@ ColumnLayout {
     signal addInstance(int targetSheetIndex)
     signal eraseSheet(int targetSheetIndex)
     signal addSheet()
+    signal closePane()
 
     function renameLast() {
         // XXX This is slightly evil, as we're poking members of the ListView
@@ -71,15 +72,24 @@ ColumnLayout {
             padding: 5
         }
 
-        IconButton {
+        Row {
             anchors.right: titleRect.right
             anchors.rightMargin: 10
             anchors.verticalCenter: header.verticalCenter
+            spacing: 5
 
-            text: Awesome.fa_plus
-            mode: "light"
-            toolTip: "Add sheet"
-            onClicked: { addSheet() }
+            IconButton {
+                text: Awesome.fa_plus
+                mode: "light"
+                toolTip: "Add sheet"
+                onClicked: { addSheet() }
+            }
+            IconButton {
+                text: Awesome.fa_arrow_circle_down
+                mode: "light"
+                toolTip: "Hide library"
+                onClicked: { closePane() }
+            }
         }
     }
 
