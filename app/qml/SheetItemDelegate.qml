@@ -10,10 +10,11 @@ Column {
     spacing: 8
 
     function bestDelegate(t) {
-        if (t == "cell")
+        if (t == "cell") {
             return cellDelegate;
-        else
+        } else {
             return instanceDelegate;
+        }
     }
 
     signal renameMe
