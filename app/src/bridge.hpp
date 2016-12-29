@@ -54,7 +54,8 @@ signals:
      *  Set of signals for deserialization of the graph
      *  (interpreted as a tree)
      */
-    void push(const QString& instance_name, const QString& sheet_name);
+    void push(const int instance_index, const QString& instance_name,
+              const QString& sheet_name);
     void pop();
 
     void instance(int i, const QString& name, const QString& sheet);
@@ -93,7 +94,7 @@ protected:
         void output(CellIndex c, const std::string& name,
                     bool valid, const std::string& val) override;
 
-        bool push(const std::string& instance_name,
+        bool push(InstanceIndex i, const std::string& instance_name,
                   const std::string& sheet_name) override;
         void pop() override;
 

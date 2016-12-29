@@ -19,7 +19,6 @@ SplitView {
     // Keep track of bridge deserialization protocol
     property var bridgeEnv: []
     property bool visited: false
-    property int bridgeInstance
     function inBridgeEnv() {
         return _.isEqual(sheetEnv, bridgeEnv)
     }
@@ -27,9 +26,9 @@ SplitView {
     Component.onCompleted: {
         Bridge.push.connect(push)
         Bridge.pop.connect(pop)
+    }
 
-        // TODO: these connections should be made / broken when we
-        // get into the bridge env, removing all the conditionals
+    function connectBridge() {
         Bridge.instance.connect(instance)
         Bridge.input.connect(input)
         Bridge.output.connect(output)
@@ -37,19 +36,32 @@ SplitView {
         Bridge.sheet.connect(sheet)
     }
 
-    function push(instance_name, sheet_name) {
+    function disconnectBridge() {
+        Bridge.instance.disconnect(instance)
+        Bridge.input.disconnect(input)
+        Bridge.output.disconnect(output)
+        Bridge.cell.disconnect(cell)
+        Bridge.sheet.disconnect(sheet)
+    }
+
+    function push(instance_index, instance_name, sheet_name) {
         // Reset the visited flag on our first push
         if (bridgeEnv.length == 0) {
             visited = false
         }
 
-        bridgeEnv.push(bridgeInstance)
+        bridgeEnv.push(instance_index)
         if (inBridgeEnv()) {
             visited = true
-            items.push()
-            lib.push()
             instanceName = instance_name
             sheetName = sheet_name
+
+            items.push()
+            lib.push()
+
+            connectBridge()
+        } else {
+            disconnectBridge()
         }
     }
 
@@ -61,6 +73,9 @@ SplitView {
         bridgeEnv.pop()
         if (inBridgeEnv()) {
             items.cleanPreviousInstance()
+            connectBridge()
+        } else {
+            disconnectBridge()
         }
 
         // If we're done and didn't visit this sheet, then
@@ -69,11 +84,6 @@ SplitView {
         {
             Bridge.push.disconnect(push)
             Bridge.pop.disconnect(pop)
-            Bridge.instance.disconnect(instance)
-            Bridge.input.disconnect(input)
-            Bridge.output.disconnect(output)
-            Bridge.cell.disconnect(cell)
-            Bridge.sheet.disconnect(sheet)
 
             var env_ = sheetEnv.slice()
             env_.pop()
@@ -84,34 +94,23 @@ SplitView {
     }
 
     function instance(instance_index, name, sheet) {
-        bridgeInstance = instance_index
-        if (inBridgeEnv()) {
-            items.instance(instance_index, name, sheet)
-        }
+        items.instance(instance_index, name, sheet)
     }
 
     function input(cell_index, name, expr, valid, value) {
-        if (inBridgeEnv()) {
-            items.input(cell_index, name, expr, valid, value)
-        }
+        items.input(cell_index, name, expr, valid, value)
     }
 
     function output(cell_index, name, valid, value) {
-        if (inBridgeEnv()) {
-            items.output(cell_index, name, valid, value)
-        }
+        items.output(cell_index, name, valid, value)
     }
 
     function cell(cell_index, name, expr, type, valid, value) {
-        if (inBridgeEnv()) {
-            items.cell(cell_index, name, expr, type, valid, value)
-        }
+        items.cell(cell_index, name, expr, type, valid, value)
     }
 
     function sheet(sheet_index, name, editable, insertable) {
-        if (inBridgeEnv()) {
-            lib.sheet(sheet_index, name, editable, insertable)
-        }
+        lib.sheet(sheet_index, name, editable, insertable)
     }
 
     // XXX This is an inelegant strategy to call renameLast

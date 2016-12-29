@@ -41,7 +41,7 @@ public:
      *  Otherwise, we'll describe all the stuff we see in the instance
      *  (recursively as needed)
      */
-    virtual bool push(const std::string& instance_name,
+    virtual bool push(InstanceIndex i, const std::string& instance_name,
                       const std::string& sheet_name)=0;
 
     /*
