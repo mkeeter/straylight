@@ -41,22 +41,11 @@ InstanceIndex Tree::insertInstance(const SheetIndex& parent,
 bool Tree::canInsertInstance(const SheetIndex& parent,
                              const SheetIndex& target) const
 {
-    // TODO: check for recursion here
     for (const auto& e : envsOf(parent))
     {
         for (const auto& s : e)
         {
             if (target == at(s).instance()->sheet)
-            {
-                return false;
-            }
-        }
-    }
-    for (const auto& e : envsOf(target))
-    {
-        for (const auto& s : e)
-        {
-            if (parent == at(s).instance()->sheet)
             {
                 return false;
             }
