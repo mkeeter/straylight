@@ -30,7 +30,7 @@ Column {
                 anchors.margins: 5
 
                 onEraseMe: {
-                    Bridge.eraseCell(itemIndex)
+                    Bridge.eraseCell(uniqueIndex)
                 }
 
                 Component.onCompleted: {
@@ -61,8 +61,8 @@ Column {
             spacing: 5
 
             // Store the item index under a different name so that we can
-            // refer to it in IO cells (which have their own itemIndex)
-            property int instanceIndex: itemIndex
+            // refer to it in IO cells (which have their own uniqueIndex)
+            property int instanceIndex: uniqueIndex
 
             // Here, we have a single canonical padding value
             // (which is updated when io labels change)
@@ -84,12 +84,12 @@ Column {
                 anchors.margins: 5
 
                 onEraseMe: {
-                    Bridge.eraseInstance(itemIndex)
+                    Bridge.eraseInstance(uniqueIndex)
                 }
 
                 onOpenSheet: {
                     var env = sheetEnv.slice()
-                    env.push(itemIndex)
+                    env.push(uniqueIndex)
                     sheetStack.openTo(env)
                 }
                 onCloseSheet: {
@@ -143,7 +143,7 @@ Column {
             sourceComponent: bestDelegate(type)
         }
     }
-    property bool isInstanceOpen: sheetStack.env.indexOf(itemIndex) != -1
+    property bool isInstanceOpen: sheetStack.env.indexOf(uniqueIndex) != -1
 
     Rectangle {
         width: parent.width

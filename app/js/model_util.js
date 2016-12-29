@@ -5,7 +5,7 @@
  *
  *  If the item is found later in the list, move it to the starting index
  */
-function findItem(item_type, item_index, startIndex, model, params) {
+function findItem(item_type, unique_index, startIndex, model, params) {
     if (typeof(params) === 'undefined') {
         params = {}
     }
@@ -15,7 +15,7 @@ function findItem(item_type, item_index, startIndex, model, params) {
     {
         var item = model.get(searchIndex)
         if (item.type == item_type &&
-            item.itemIndex == item_index)
+            item.uniqueIndex == unique_index)
         {
             if (searchIndex != startIndex) {
                 model.move(searchIndex, startIndex, 1)
@@ -26,7 +26,7 @@ function findItem(item_type, item_index, startIndex, model, params) {
     }
 
     params['type'] = item_type
-    params['itemIndex'] = item_index
+    params['uniqueIndex'] = unique_index
     model.insert(startIndex, params)
 }
 

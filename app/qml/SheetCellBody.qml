@@ -47,7 +47,7 @@ GridLayout {
         onTextChanged: {
             if (activeFocus)
             {
-                Bridge.setExpr(itemIndex, text)
+                Bridge.setExpr(uniqueIndex, text)
             }
         }
 

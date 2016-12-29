@@ -81,10 +81,10 @@ GridLayout {
         id: renamer
         label: "Rename to"
         getError: function(name) {
-            return Bridge.checkItemRename(itemIndex, name)
+            return Bridge.checkItemRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
-            Bridge.renameItem(itemIndex, t)
+            Bridge.renameItem(uniqueIndex, t)
         }
     }
 }

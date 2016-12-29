@@ -39,7 +39,7 @@ GridLayout {
 
         onTextChanged: {
             if (activeFocus) {
-                Bridge.setInput(instanceIndex, itemIndex, text)
+                Bridge.setInput(instanceIndex, uniqueIndex, text)
             }
         }
 

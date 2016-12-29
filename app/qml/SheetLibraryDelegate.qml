@@ -40,7 +40,7 @@ GridLayout {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
             enabled: insertable
-            onClicked: { addInstance(itemIndex) }
+            onClicked: { addInstance(uniqueIndex) }
         }
         IconButton {
             text: Awesome.fa_pencil
@@ -55,7 +55,7 @@ GridLayout {
             text: Awesome.fa_trash
             toolTip: "Delete"
             visible: editable
-            onClicked: { eraseSheet(itemIndex) }
+            onClicked: { eraseSheet(uniqueIndex) }
         }
     }
 
@@ -75,10 +75,10 @@ GridLayout {
         width: parent.width
         label: "Rename to"
         getError: function(name) {
-            return Bridge.checkSheetRename(itemIndex, name)
+            return Bridge.checkSheetRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
-            Bridge.renameSheet(itemIndex, t)
+            Bridge.renameSheet(uniqueIndex, t)
         }
     }
 
