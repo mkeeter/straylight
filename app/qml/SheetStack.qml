@@ -14,6 +14,7 @@ SplitView {
     // a way to look up the item at a particular index.
     property var items: []
     property var toErase: []
+    property var toOpen: []
 
     function closeTo(e) {
         var new_width = width
@@ -33,6 +34,20 @@ SplitView {
     }
 
     function openTo(e) {
+        var prefix = []
+        for (var i in env) {
+            if (i < e.length && env[i] == e[i]) {
+                prefix.push(env[i])
+            } else {
+                break
+            }
+        }
+        if (prefix.length < env.length) {
+            toOpen = e // widthAnim will re-open when it's done
+            closeTo(prefix)
+            return
+        }
+
         var new_width = width
         while (env.length < e.length)
         {
@@ -59,6 +74,12 @@ SplitView {
                 removeItem(toErase[i])
             }
             toErase = []
+
+            if (toOpen.length) {
+                var t = toOpen.slice()
+                toOpen = []
+                openTo(t)
+            }
         }
     }
 
