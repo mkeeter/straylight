@@ -79,7 +79,7 @@ ColumnLayout {
             spacing: 5
 
             IconButton {
-                text: Awesome.fa_plus
+                text: Awesome.fa_plus_square
                 mode: "light"
                 toolTip: "Add sheet"
                 onClicked: { addSheet() }

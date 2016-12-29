@@ -45,7 +45,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 5
                 IconButton {
-                    text: Awesome.fa_plus_square
+                    text: Awesome.fa_plus
                     mode: "light"
                     toolTip: "Add cell"
                     onClicked: { insertCell() }
