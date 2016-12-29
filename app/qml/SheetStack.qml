@@ -68,7 +68,7 @@ SplitView {
     property var widthAnim: NumberAnimation {
         target: sstack
         property: 'width'
-        duration: 50
+        duration: 100
         onStopped: {
             for (var i in toErase) {
                 removeItem(toErase[i])
