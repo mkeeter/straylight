@@ -182,7 +182,7 @@ SplitView {
                 lib.visible = (to > 0)
             }
         }
-        visible: false
+        visible: true
 
         onAddInstance: {
             var instance = sheetEnv[sheetEnv.length - 1]

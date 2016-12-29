@@ -252,3 +252,32 @@ TEST_CASE("Tree::nextName")
     REQUIRE(t.nextName(SheetIndex(0), "c") == "c1");
     REQUIRE(t.nextName(SheetIndex(0), "prefix") == "prefix0");
 }
+
+TEST_CASE("Tree::canInsertInstance")
+{
+    Tree t;
+
+    // Dummy sheet indices
+    SheetIndex root(0);
+    SheetIndex a(1);
+    SheetIndex b(2);
+
+    SECTION("Self")
+    {
+        auto ia = t.insertInstance(root, "ia", a);
+        REQUIRE(!t.canInsertInstance(a, a));
+    }
+
+    SECTION("Nested")
+    {
+        auto ia = t.insertInstance(root, "ia", a);
+        auto ib = t.insertInstance(a, "ib", b);
+        REQUIRE(!t.canInsertInstance(b, a));
+    }
+
+    SECTION("Multiple insertions")
+    {
+        auto ia = t.insertInstance(root, "ia", a);
+        REQUIRE(t.canInsertInstance(root, a));
+    }
+}
