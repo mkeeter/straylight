@@ -83,6 +83,13 @@ ColumnLayout {
         }
     }
 
+    Text {
+        visible: libraryModel.count == 0
+        text: "No sheets in library"
+        color: Style.textDarkHint
+        padding: 10
+    }
+
     ScrollView {
         Layout.fillWidth: true
         Layout.fillHeight: true

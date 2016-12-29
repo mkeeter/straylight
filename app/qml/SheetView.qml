@@ -26,6 +26,7 @@ SplitView {
     Component.onCompleted: {
         Bridge.push.connect(push)
         Bridge.pop.connect(pop)
+        lib.slideOpen()
     }
 
     function connectBridge() {
@@ -146,6 +147,12 @@ SplitView {
                 }
             }
         }
+        Text {
+            visible: items.itemsModel.count == 0
+            text: "Nothing here yet..."
+            color: Style.textDarkHint
+            padding: 10
+        }
         SheetItemsPane {
             id: items
             width: parent.width
@@ -182,7 +189,7 @@ SplitView {
                 lib.visible = (to > 0)
             }
         }
-        visible: true
+        visible: false
 
         onAddInstance: {
             var instance = sheetEnv[sheetEnv.length - 1]
