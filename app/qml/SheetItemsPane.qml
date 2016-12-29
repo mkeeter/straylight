@@ -41,7 +41,8 @@ ScrollView {
 
     function instance(instance_index, name, sheet) {
         ModelUtil.findItem('instance', instance_index, itemIndex, itemsModel,
-            {'ioCells': new Array()})
+            {'ioCells': new Array(),
+             'valid': false, 'expr': '', 'value': '', 'ioType': 'unknown'})
 
         itemsModel.setProperty(itemIndex, "name", name)
         itemsModel.setProperty(itemIndex, "sheet", sheet)
@@ -72,7 +73,7 @@ ScrollView {
 
     function output(cell_index, name, valid, value) {
         var model = itemsModel.get(itemIndex - 1).ioCells
-        ModelUtil.findItem('output', cell_index, ioIndex, model)
+        ModelUtil.findItem('output', cell_index, ioIndex, model, {'expr': ''})
 
         model.setProperty(ioIndex, "name", name)
         model.setProperty(ioIndex, "valid", valid)
@@ -82,9 +83,9 @@ ScrollView {
     }
 
     function cell(cell_index, name, expr, type, valid, value) {
-        ModelUtil.findItem('cell', cell_index, itemIndex, itemsModel)
+        ModelUtil.findItem('cell', cell_index, itemIndex, itemsModel,
+            {'sheet':'', 'ioCells': new Array()})
 
-        // Then update all of the relevant properties
         itemsModel.setProperty(itemIndex, "name", name)
         itemsModel.setProperty(itemIndex, "valid", valid)
         itemsModel.setProperty(itemIndex, "expr", expr)
