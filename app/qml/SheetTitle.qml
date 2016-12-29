@@ -23,7 +23,7 @@ Item {
         Text {
             id: sheetTitleText
 
-            text: sheetName ? (instanceName + " [" + sheetName + "]") : "Root"
+            text: sheetName ? instanceName : "Root"
             color: Style.textLightPrimary
             font.family: fixedWidth.name
             font.pointSize: 18
@@ -34,21 +34,31 @@ Item {
 
         Row {
             anchors.right: header.right
-            anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: 10
-            spacing: 5
+            anchors.verticalCenter: parent.verticalCenter
 
-            IconButton {
-                text: Awesome.fa_plus_square
-                mode: "light"
-                toolTip: "Add cell"
-                onClicked: { insertCell() }
+            Text {
+                text: sheetName
+                font.pointSize: 14
+                color: Style.textLightSecondary
+                rightPadding: 14
             }
-            IconButton {
-                text: libOpen ? Awesome.fa_arrow_circle_down : Awesome.fa_arrow_circle_up
-                mode: "light"
-                toolTip: libOpen ? "Hide library" : "Show library"
-                onClicked: { toggleLibrary() }
+
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 5
+                IconButton {
+                    text: Awesome.fa_plus_square
+                    mode: "light"
+                    toolTip: "Add cell"
+                    onClicked: { insertCell() }
+                }
+                IconButton {
+                    text: libOpen ? Awesome.fa_arrow_circle_down : Awesome.fa_arrow_circle_up
+                    mode: "light"
+                    toolTip: libOpen ? "Hide library" : "Show library"
+                    onClicked: { toggleLibrary() }
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ GridLayout {
         id: sheetName
         text: name
 
-        color: Style.textDarkPrimary
+        color: insertable ? Style.textDarkPrimary : Style.textDarkSecondary
         topPadding: 3
         leftPadding: 5
         bottomPadding: topPadding
@@ -39,8 +39,8 @@ GridLayout {
         IconButton {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
-            enabled: insertable
             onClicked: { addInstance(uniqueIndex) }
+            visible: insertable
         }
         IconButton {
             text: Awesome.fa_pencil
