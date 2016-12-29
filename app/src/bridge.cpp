@@ -130,6 +130,12 @@ QString Bridge::nextItemName(int sheet_index) const
             r.nextItemName(SheetIndex(sheet_index), "i"));
 }
 
+QString Bridge::nextSheetName(int sheet_index) const
+{
+    return QString::fromStdString(
+            r.nextSheetName(SheetIndex(sheet_index), "s"));
+}
+
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)

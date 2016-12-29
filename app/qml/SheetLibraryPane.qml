@@ -12,6 +12,25 @@ ColumnLayout {
     property ListModel libraryModel: ListModel { }
 
     signal addInstance(int targetSheetIndex)
+    signal addSheet()
+
+    function renameLast() {
+        // XXX This is slightly evil, as we're poking members of the ListView
+        // directly, but should be safe enough...
+        var children = sheetList.contentItem.children
+        var y = 0
+        var lastIndex = 0
+        for(var i in children) {
+            if (children[i].objectName === "SheetLibraryDelegate") {
+                y += children[i].height
+                lastIndex = i
+            }
+        }
+        y -= libraryView.height
+        scrollTo.to = Math.max(y, 0)
+        scrollTo.start()
+        children[lastIndex].renameMe()
+    }
 
     // Used when deserializing from bridge
     property int itemIndex: 0
@@ -59,7 +78,7 @@ ColumnLayout {
             text: Awesome.fa_plus
             mode: "light"
             toolTip: "Add sheet"
-            onClicked: { console.log("Adding sheet") }
+            onClicked: { addSheet() }
         }
     }
 
@@ -89,6 +108,12 @@ ColumnLayout {
                 }
             }
 
+            NumberAnimation {
+                id: scrollTo
+                target: libraryView.flickableItem
+                property: 'contentY'
+                duration: 100
+            }
         }
     }
 }

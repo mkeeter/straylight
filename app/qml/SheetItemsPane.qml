@@ -124,6 +124,7 @@ ScrollView {
             id: scrollTo
             target: items.flickableItem
             property: 'contentY'
+            duration: 100
         }
     }
     style: ScrollViewStyle {

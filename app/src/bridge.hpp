@@ -36,6 +36,7 @@ public:
 
     Q_INVOKABLE int sheetOf(int instance_index) const;
     Q_INVOKABLE QString nextItemName(int sheet_index) const;
+    Q_INVOKABLE QString nextSheetName(int sheet_index) const;
 
     /*
      *  Constructor for the QML singleton

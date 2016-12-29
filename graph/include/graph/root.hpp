@@ -136,7 +136,7 @@ public:
         { return getItem(item).instance()->sheet; }
 
     std::string nextItemName(const SheetIndex& sheet,
-                             const std::string& prefix="s") const
+                             const std::string& prefix="i") const
         { return tree.nextName(sheet, prefix); }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -173,6 +173,13 @@ public:
      */
     void renameSheet(const SheetIndex& i, const std::string& name)
         { lib.rename(i, name); }
+
+    /*
+     *  Returns the next valid sheet name
+     */
+    std::string nextSheetName(const SheetIndex& sheet,
+                              const std::string& prefix="s") const
+        { return lib.nextName(sheet, prefix); }
 
     ////////////////////////////////////////////////////////////////////////////
 

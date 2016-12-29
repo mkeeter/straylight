@@ -6,7 +6,8 @@ import Awesome 4.7
 import Bridge 1.0
 
 GridLayout {
-    signal addInstance(int sheet_index)
+    objectName: "SheetLibraryDelegate"
+    signal addInstance(int targetSheetIndex)
 
     Text {
         Layout.row: 0
@@ -57,6 +58,8 @@ GridLayout {
     }
 
     ValidatedInput {
+        id: renamer
+
         Layout.row: 1
         Layout.column: 0
         Layout.columnSpan: 2
@@ -67,7 +70,6 @@ GridLayout {
         }
         clip: true
 
-        id: renamer
         width: parent.width
         label: "Rename to"
         getError: function(name) {
@@ -88,4 +90,6 @@ GridLayout {
         height: 2
         color: last ? 'transparent' : Style.dividerDark
     }
+
+    function renameMe() { renamer.enable(name) }
 }

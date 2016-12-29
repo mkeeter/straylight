@@ -122,6 +122,11 @@ SplitView {
         interval: 10
         onTriggered: { items.renameLast() }
     }
+    Timer {
+        id: renameLastSheetTimer
+        interval: 10
+        onTriggered: { lib.renameLast() }
+    }
 
     ColumnLayout {
         SheetTitle {
@@ -186,6 +191,14 @@ SplitView {
             var name = Bridge.nextItemName(sheet)
             Bridge.insertInstance(sheet, name, targetSheetIndex)
             renameLastItemTimer.restart()
+        }
+
+        onAddSheet: {
+            var instance = sheetEnv[sheetEnv.length - 1]
+            var sheet = Bridge.sheetOf(instance)
+            var name = Bridge.nextSheetName(sheet)
+            Bridge.insertSheet(sheet, name)
+            renameLastSheetTimer.restart()
         }
     }
 
