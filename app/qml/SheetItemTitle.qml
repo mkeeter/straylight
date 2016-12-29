@@ -22,7 +22,7 @@ GridLayout {
         Layout.column: 0
         Layout.fillWidth: true
 
-        text: type == 'cell' ? name : name + " [" + sheet + "]"
+        text: name
         font.family: fixedWidth.name
         font.pointSize: 18
         color: Style.textDarkPrimary
@@ -31,30 +31,39 @@ GridLayout {
     Row {
         Layout.row: 0
         Layout.column: 1
-        spacing: 4
 
-        IconButton {
-            text: Awesome.fa_pencil
-            enabled: !renamer.active
-            onClicked: {
-                renamer.enable(name)
+        Text {
+            text: type == 'cell' ? '' : sheet
+            font.pointSize: 14
+            color: Style.textDarkSecondary
+            rightPadding: 8
+        }
+
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            IconButton {
+                text: isInstanceOpen ? Awesome.fa_outdent
+                                     : Awesome.fa_indent
+                visible: type == 'instance'
+                toolTip: isInstanceOpen ? "Close" : "Edit"
+                onClicked: { if (isInstanceOpen) base.closeSheet()
+                             else                base.openSheet() }
             }
-            toolTip: "Rename"
-        }
-
-        IconButton {
-            text: Awesome.fa_trash
-            onClicked: { base.eraseMe() }
-            toolTip: "Delete"
-        }
-
-        IconButton {
-            text: isInstanceOpen ? Awesome.fa_outdent
-                                 : Awesome.fa_indent
-            visible: type == 'instance'
-            toolTip: isInstanceOpen ? "Close" : "Edit"
-            onClicked: { if (isInstanceOpen) base.closeSheet()
-                         else                base.openSheet() }
+            IconButton {
+                text: Awesome.fa_pencil
+                enabled: !renamer.active
+                onClicked: {
+                    renamer.enable(name)
+                }
+                toolTip: "Rename"
+            }
+            IconButton {
+                text: Awesome.fa_trash
+                onClicked: { base.eraseMe() }
+                toolTip: "Delete"
+            }
         }
     }
 
