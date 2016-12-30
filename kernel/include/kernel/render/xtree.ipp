@@ -245,9 +245,7 @@ std::vector<Intersection> XTree<T, dims>::findIntersections(
     auto ds = eval->derivs(intersections.size());
     for (unsigned i=0; i < intersections.size(); ++i)
     {
-        const glm::vec3 g(std::get<1>(ds)[i],
-                          std::get<2>(ds)[i],
-                          std::get<3>(ds)[i]);
+        const glm::vec3 g(ds.dx[i], ds.dy[i], ds.dz[i]);
         intersections[i].norm = glm::normalize(g);
     }
 

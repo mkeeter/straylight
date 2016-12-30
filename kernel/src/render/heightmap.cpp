@@ -52,19 +52,18 @@ struct NormalRenderer
     {
         // Get derivative array pointers
         auto ds = e->derivs(count);
-        auto dx = std::get<1>(ds);
-        auto dy = std::get<2>(ds);
-        auto dz = std::get<3>(ds);
 
         for (size_t i=0; i < count; ++i)
         {
             // Find the vector's length
-            float length = sqrt(pow(dx[i], 2) + pow(dy[i], 2) + pow(dz[i], 2));
+            float length = sqrt(pow(ds.dx[i], 2) +
+                                pow(ds.dy[i], 2) +
+                                pow(ds.dz[i], 2));
 
             // Scale each normal into the 0-255 range
-            uint32_t ix = 255 * (dx[i] / (2 * length) + 0.5);
-            uint32_t iy = 255 * (dy[i] / (2 * length) + 0.5);
-            uint32_t iz = 255 * (dz[i] / (2 * length) + 0.5);
+            uint32_t ix = 255 * (ds.dx[i] / (2 * length) + 0.5);
+            uint32_t iy = 255 * (ds.dy[i] / (2 * length) + 0.5);
+            uint32_t iz = 255 * (ds.dz[i] / (2 * length) + 0.5);
 
             // Pack the normals and a dummy alpha byte into the image
             norm(xs[i], ys[i]) = (0xff << 24) | (iz << 16) | (iy << 8) | ix;

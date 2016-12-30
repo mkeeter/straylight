@@ -16,8 +16,7 @@ public:
      */
     void applyTransform(Result::Index count);
     const float* values(Result::Index count);
-    std::tuple<const float*, const float*,
-               const float*, const float*> derivs(Result::Index count);
+    Derivs derivs(Result::Index count);
 
 protected:
     static void eval_clause_values(Opcode::Opcode op,

@@ -923,8 +923,7 @@ const float* EvaluatorBase::values(Result::Index count)
     return &result.f[0][0];
 }
 
-std::tuple<const float*, const float*,
-           const float*, const float*> EvaluatorBase::derivs(Result::Index count)
+EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
 {
     for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
     {
@@ -952,10 +951,8 @@ std::tuple<const float*, const float*,
         result.dz[0][i] = n.z;
     }
 
-    return std::tuple<const float*, const float*,
-                      const float*, const float*> {
-        &result.f[0][0], &result.dx[0][0], &result.dy[0][0], &result.dz[0][0]
-    };
+    return { &result.f[0][0], &result.dx[0][0],
+             &result.dy[0][0], &result.dz[0][0] };
 }
 
 std::map<Cache::Id, float> EvaluatorBase::gradient(float x, float y, float z)

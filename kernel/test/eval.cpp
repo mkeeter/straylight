@@ -218,13 +218,10 @@ TEST_CASE("Matrix normals")
                                {0.0, 0.0, 1.0}));
         e.set(1, 2, 3, 0);
         auto out = e.derivs(1);
-        glm::vec3 d(std::get<1>(out)[0],
-                    std::get<2>(out)[0],
-                    std::get<3>(out)[0]);
 
-        REQUIRE(d.x == Approx(0));
-        REQUIRE(d.y == Approx(1));
-        REQUIRE(d.z == Approx(0));
+        REQUIRE(out.dx[0] == Approx(0));
+        REQUIRE(out.dy[0] == Approx(1));
+        REQUIRE(out.dz[0] == Approx(0));
     }
 
     SECTION("Swapping")
@@ -233,13 +230,10 @@ TEST_CASE("Matrix normals")
                                {0.0, 0.0, 1.0}));
         e.set(1, 2, 3, 0);
         auto out = e.derivs(1);
-        glm::vec3 d(std::get<1>(out)[0],
-                    std::get<2>(out)[0],
-                    std::get<3>(out)[0]);
 
-        REQUIRE(d.x == Approx(0));
-        REQUIRE(d.y == Approx(1));
-        REQUIRE(d.z == Approx(0));
+        REQUIRE(out.dx[0] == Approx(0));
+        REQUIRE(out.dy[0] == Approx(1));
+        REQUIRE(out.dz[0] == Approx(0));
     }
 }
 
@@ -253,20 +247,20 @@ TEST_CASE("Evaluator::derivs")
         auto d = e.derivs(2);
 
         // Values = x
-        REQUIRE(std::get<0>(d)[0] == 0.0);
-        REQUIRE(std::get<0>(d)[1] == 1.0);
+        REQUIRE(d.v[0] == 0.0);
+        REQUIRE(d.v[1] == 1.0);
 
         // d/dx = 1
-        REQUIRE(std::get<1>(d)[0] == 1.0);
-        REQUIRE(std::get<1>(d)[1] == 1.0);
+        REQUIRE(d.dx[0] == 1.0);
+        REQUIRE(d.dx[1] == 1.0);
 
         // d/dy = 0
-        REQUIRE(std::get<2>(d)[0] == 0.0);
-        REQUIRE(std::get<2>(d)[1] == 0.0);
+        REQUIRE(d.dy[0] == 0.0);
+        REQUIRE(d.dy[1] == 0.0);
 
         // d/dz = 0
-        REQUIRE(std::get<3>(d)[0] == 0.0);
-        REQUIRE(std::get<3>(d)[1] == 0.0);
+        REQUIRE(d.dz[0] == 0.0);
+        REQUIRE(d.dz[1] == 0.0);
     }
 
     SECTION("X + Z")
@@ -278,19 +272,19 @@ TEST_CASE("Evaluator::derivs")
         auto d = e.derivs(2);
 
         // Values = x
-        REQUIRE(std::get<0>(d)[0] == 2.0);
-        REQUIRE(std::get<0>(d)[1] == 4.0);
+        REQUIRE(d.v[0] == 2.0);
+        REQUIRE(d.v[1] == 4.0);
 
         // d/dx = 1
-        REQUIRE(std::get<1>(d)[0] == 1.0);
-        REQUIRE(std::get<1>(d)[1] == 1.0);
+        REQUIRE(d.dx[0] == 1.0);
+        REQUIRE(d.dx[1] == 1.0);
 
         // d/dy = 0
-        REQUIRE(std::get<2>(d)[0] == 0.0);
-        REQUIRE(std::get<2>(d)[1] == 0.0);
+        REQUIRE(d.dy[0] == 0.0);
+        REQUIRE(d.dy[1] == 0.0);
 
         // d/dz = 1
-        REQUIRE(std::get<3>(d)[0] == 1.0);
-        REQUIRE(std::get<3>(d)[1] == 1.0);
+        REQUIRE(d.dz[0] == 1.0);
+        REQUIRE(d.dz[1] == 1.0);
     }
 }

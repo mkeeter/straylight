@@ -52,13 +52,22 @@ public:
     const float* values(Result::Index count);
 
     /*
+     *  Helper struct when returning derivatives
+     */
+    struct Derivs {
+        const float* v;
+        const float* dx;
+        const float* dy;
+        const float* dz;
+    };
+
+    /*
      *  Evaluate a set of gradients, returning a tuple
      *      value, dx, dy, dz
      *
      *  Values must have been previously loaded by set
      */
-    std::tuple<const float*, const float*,
-               const float*, const float*> derivs(Result::Index count);
+    Derivs derivs(Result::Index count);
 
     /*
      *  Returns the gradient with respect to all VARs

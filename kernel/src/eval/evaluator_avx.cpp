@@ -294,8 +294,7 @@ const float* EvaluatorAVX::values(Result::Index count)
     return &result.f[0][0];
 }
 
-std::tuple<const float*, const float*,
-           const float*, const float*> EvaluatorAVX::derivs(Result::Index count)
+EvaluatorBase::Derivs EvaluatorAVX::derivs(Result::Index count)
 {
     Result::Index vc = (count - 1)/8 + 1;
 
@@ -326,10 +325,8 @@ std::tuple<const float*, const float*,
         result.dz[0][i] = n.z;
     }
 
-    return std::tuple<const float*, const float*,
-                      const float*, const float*> {
-        &result.f[0][0], &result.dx[0][0], &result.dy[0][0], &result.dz[0][0]
-    };
+    return { &result.f[0][0], &result.dx[0][0],
+             &result.dy[0][0], &result.dz[0][0] };
 }
 
 void EvaluatorAVX::applyTransform(Result::Index count)
