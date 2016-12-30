@@ -122,3 +122,19 @@ TEST_CASE("Interpreter::eval")
         REQUIRE(value.valid == false);
     }
 }
+
+TEST_CASE("Interpreter::isKeyword")
+{
+    Root r;
+    Dependencies d(r);
+    auto interp = Interpreter(r, &d);
+
+    REQUIRE(interp.isKeyword("input"));
+    REQUIRE(interp.isKeyword("output"));
+    REQUIRE(interp.isKeyword("define"));
+    REQUIRE(interp.isKeyword("#f"));
+    REQUIRE(interp.isKeyword("+"));
+    REQUIRE(interp.isKeyword("#t"));
+    REQUIRE(!interp.isKeyword("hi"));
+    REQUIRE(!interp.isKeyword("omg"));
+}

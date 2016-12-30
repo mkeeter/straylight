@@ -8,6 +8,7 @@
 
 // Forward declarations
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args);
+static bool map_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -397,7 +398,25 @@ NameKey Interpreter::decodeNameKey(s7_scheme* interpreter, s7_pointer v)
     return out;
 }
 
+bool Interpreter::isKeyword(const std::string& k)
+{
+    // Just-in-time population of keywords array
+    if (keywords.size() == 0)
+    {
+        keywords.insert("input");
+        keywords.insert("output");
+        s7_for_each_symbol_name(interpreter, map_insert_, &keywords);
+    }
+    return keywords.find(k) != keywords.end();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+
+static bool map_insert_(const char* symbol_name, void* data)
+{
+    reinterpret_cast<std::set<std::string>*>(data)->insert(symbol_name);
+    return false;
+}
 
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
 {

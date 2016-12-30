@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "graph/cell.hpp"
 #include "graph/keys.hpp"
 
@@ -44,6 +46,11 @@ public:
     static CellKey decodeCellKey(s7_scheme* interpreter, s7_cell* v);
     static NameKey decodeNameKey(s7_scheme* interpreter, s7_cell* v);
 
+    /*
+     *  Checks to see if the given string is a keyword
+     */
+    bool isKeyword(const std::string& k);
+
 private:
     /*
      *  Helper functions used in cellType
@@ -82,4 +89,6 @@ private:
     s7_cell* const value_thunk_factory;
     s7_cell* const instance_thunk_factory;
     s7_cell* const eval_func;
+
+    std::set<std::string> keywords;
 };
