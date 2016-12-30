@@ -314,6 +314,7 @@ std::tuple<const float*, const float*,
     }
 
     // Apply the inverse matrix transform to our normals
+    // TODO: we could SIMD this as well!
     auto o = Mi * glm::vec4(0,0,0,1);
     for (size_t i=0; i < count; ++i)
     {
