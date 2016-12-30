@@ -47,9 +47,9 @@ public:
     static NameKey decodeNameKey(s7_scheme* interpreter, s7_cell* v);
 
     /*
-     *  Checks to see if the given string is a keyword
+     *  Checks to see if the given string is reserved
      */
-    bool isKeyword(const std::string& k);
+    bool isReserved(const std::string& k) const;
 
 private:
     /*
@@ -89,6 +89,4 @@ private:
     s7_cell* const value_thunk_factory;
     s7_cell* const instance_thunk_factory;
     s7_cell* const eval_func;
-
-    std::set<std::string> keywords;
 };

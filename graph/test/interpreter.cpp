@@ -123,18 +123,21 @@ TEST_CASE("Interpreter::eval")
     }
 }
 
-TEST_CASE("Interpreter::isKeyword")
+TEST_CASE("Interpreter::isReserved")
 {
     Root r;
     Dependencies d(r);
     auto interp = Interpreter(r, &d);
 
-    REQUIRE(interp.isKeyword("input"));
-    REQUIRE(interp.isKeyword("output"));
-    REQUIRE(interp.isKeyword("define"));
-    REQUIRE(interp.isKeyword("#f"));
-    REQUIRE(interp.isKeyword("+"));
-    REQUIRE(interp.isKeyword("#t"));
-    REQUIRE(!interp.isKeyword("hi"));
-    REQUIRE(!interp.isKeyword("omg"));
+    REQUIRE(interp.isReserved("input"));
+    REQUIRE(interp.isReserved("output"));
+    REQUIRE(interp.isReserved("define"));
+    REQUIRE(interp.isReserved("#f"));
+    REQUIRE(interp.isReserved("+"));
+    REQUIRE(interp.isReserved("#t"));
+    REQUIRE(!interp.isReserved("hi"));
+    REQUIRE(!interp.isReserved("omg"));
+    REQUIRE(!interp.isReserved("d"));
+    REQUIRE(!interp.isReserved("e"));
+    REQUIRE(!interp.isReserved("i"));
 }

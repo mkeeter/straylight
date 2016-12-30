@@ -283,6 +283,14 @@ bool Root::checkItemName(const SheetIndex& parent,
         }
         return false;
     }
+    else if (interpreter.isReserved(name))
+    {
+        if (err)
+        {
+            *err = "Name is reserved by interpreter";
+        }
+        return false;
+    }
 
     return true;
 }
