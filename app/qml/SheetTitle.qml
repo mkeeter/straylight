@@ -50,6 +50,17 @@ Item {
                     toolTip: "Add cell"
                     onClicked: { insertCell() }
                 }
+                IconButton {
+                    mode: "light"
+                    visible: sheetEnv.length > 1
+                    text: Awesome.fa_window_close
+                    onClicked: {
+                        var env = sheetEnv.slice()
+                        env.pop()
+                        sheetStack.closeTo(env)
+                    }
+                    toolTip: "Collapse"
+                }
             }
         }
     }
