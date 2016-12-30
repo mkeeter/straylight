@@ -72,6 +72,7 @@ SplitView {
         onStopped: {
             for (var i in toErase) {
                 removeItem(toErase[i])
+                toErase[i].destroy()
             }
             toErase = []
 
