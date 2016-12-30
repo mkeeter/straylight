@@ -21,7 +21,8 @@
 #include <catch/catch.hpp>
 
 #include "kernel/tree/tree.hpp"
-#include "kernel/eval/evaluator.hpp"
+#include "kernel/eval/evaluator_base.hpp"
+#include "kernel/eval/evaluator_avx.hpp"
 #include "kernel/eval/result.hpp"
 
 #include "util/shapes.hpp"
@@ -34,11 +35,13 @@ TEST_CASE("Vectorized performance")
     const float N = 100;
 
     Tree t = menger(3);
-    Evaluator e(t);
+    EvaluatorBase e(t);
+    EvaluatorAVX ea(t);
 
     for (unsigned i=0; i < Result::N; ++i)
     {
         e.set(i, 2*i, 0, i);
+        ea.set(i, 2*i, 0, i);
     }
 
     SECTION("Speed")
@@ -47,7 +50,7 @@ TEST_CASE("Vectorized performance")
         start = std::chrono::system_clock::now();
         for (int i=0; i < N; ++i)
         {
-            e.values(Result::N, false);
+            e.values(Result::N);
         }
         end = std::chrono::system_clock::now();
         std::chrono::duration<double> ft = end - start;
@@ -55,7 +58,7 @@ TEST_CASE("Vectorized performance")
         start = std::chrono::system_clock::now();
         for (int i=0; i < N; ++i)
         {
-            e.values(Result::N, true);
+            ea.values(Result::N);
         }
         end = std::chrono::system_clock::now();
         std::chrono::duration<double> mt = end - start;
@@ -70,8 +73,8 @@ TEST_CASE("Vectorized performance")
         float vec[Result::N];
         float nonvec[Result::N];
 
-        memcpy(   vec, e.values(Result::N,  true), Result::N * sizeof(float));
-        memcpy(nonvec, e.values(Result::N, false), Result::N * sizeof(float));
+        memcpy(   vec, e.values(Result::N),  Result::N * sizeof(float));
+        memcpy(nonvec, ea.values(Result::N), Result::N * sizeof(float));
 
         bool matched = true;
         for (unsigned i=0; i < Result::N; ++i)
@@ -81,6 +84,7 @@ TEST_CASE("Vectorized performance")
                 CAPTURE(i);
                 CAPTURE(vec[i]);
                 CAPTURE(nonvec[i]);
+                REQUIRE(false);
                 matched = false;
             }
         }

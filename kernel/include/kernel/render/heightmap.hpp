@@ -26,7 +26,7 @@
 #include "kernel/format/image.hpp"
 #include "kernel/tree/tree.hpp"
 
-class Evaluator;
+#include "kernel/eval/evaluator.hpp"
 
 namespace Heightmap
 {

@@ -117,7 +117,8 @@ protected:
     const bool collapsed;
 
     /*  An Evaluator needs to be able to pull out the parent Cache */
-    friend class Evaluator;
+    friend class EvaluatorBase;
+    friend class EvaluatorAVX;
 };
 
 // Mass-produce declarations for overloaded operations

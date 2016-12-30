@@ -185,5 +185,6 @@ protected:
     static std::map<std::thread::id, std::shared_ptr<Cache>> instances;
     static std::mutex instance_lock;
 
-    friend class Evaluator;
+    friend class EvaluatorBase;
+    friend class EvaluatorAVX;
 };
