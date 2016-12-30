@@ -30,6 +30,11 @@ SplitView {
         lib.slideOpen()
     }
 
+    Component.onDestruction: {
+        Bridge.push.disconnect(push)
+        Bridge.pop.disconnect(pop)
+    }
+
     function connectBridge() {
         Bridge.instance.connect(instance)
         Bridge.input.connect(input)
