@@ -146,17 +146,22 @@ SplitView {
                     renameLastItemTimer.restart()
                 }
             }
-            Text {
-                visible: items.itemsModel.count == 0
-                text: "Nothing here yet..."
-                color: Style.textDarkHint
-                padding: 10
-            }
-            SheetItemsPane {
-                id: items
-                width: parent.width
+            Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+
+                Text {
+                    opacity: items.itemsModel.count == 0
+                    Behavior on opacity { OpacityAnimator { duration: 100 }}
+                    text: "Nothing here yet..."
+                    color: Style.textDarkHint
+                    padding: 10
+                }
+                SheetItemsPane {
+                    anchors.fill: parent
+                    id: items
+                    width: parent.width
+                }
             }
         }
 
