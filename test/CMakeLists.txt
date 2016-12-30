@@ -1,7 +1,22 @@
-file(GLOB_RECURSE SRC_FILES
-     ../kernel/test/*.cpp
-     ../graph/test/*.cpp
-     )
+add_executable(straylight-test main.cpp
+    ../kernel/test/avx.cpp
+    ../kernel/test/cache.cpp
+    ../kernel/test/dc.cpp
+    ../kernel/test/eval.cpp
+    ../kernel/test/heightmap.cpp
+    ../kernel/test/mesh.cpp
+    ../kernel/test/octree.cpp
+    ../kernel/test/region.cpp
+    ../kernel/test/solver.cpp
+    ../kernel/test/subregion.cpp
+    ../kernel/test/tree.cpp
+    ../kernel/test/util/shapes.cpp
 
-add_executable(straylight-test ${SRC_FILES} main.cpp)
+    ../graph/test/dependencies.cpp
+    ../graph/test/interpreter.cpp
+    ../graph/test/item.cpp
+    ../graph/test/library.cpp
+    ../graph/test/root.cpp
+    ../graph/test/tree.cpp
+)
 target_link_libraries(straylight-test straylight-kernel straylight-graph)

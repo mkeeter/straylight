@@ -3,9 +3,25 @@ find_package(PNG REQUIRED)
 
 ################################################################################
 
-file(GLOB SRC_FILES src/tree/*.cpp src/format/*.cpp
-                    src/render/*.cpp src/eval/*.cpp src/solve/*.cpp)
-add_library(straylight-kernel STATIC ${SRC_FILES})
+add_library(straylight-kernel STATIC
+    src/eval/evaluator_avx.cpp
+    src/eval/evaluator_base.cpp
+    src/eval/result.cpp
+    src/format/contours.cpp
+    src/format/image.cpp
+    src/format/mesh.cpp
+    src/render/dc.cpp
+    src/render/dc2d.cpp
+    src/render/heightmap.cpp
+    src/render/octree.cpp
+    src/render/quadtree.cpp
+    src/render/region.cpp
+    src/render/subregion.cpp
+    src/solve/solver.cpp
+    src/tree/cache.cpp
+    src/tree/opcode.cpp
+    src/tree/tree.cpp
+)
 
 target_include_directories(straylight-kernel SYSTEM PRIVATE
     ${BOOST_INCLUDE_DIR}
