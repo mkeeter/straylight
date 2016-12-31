@@ -72,3 +72,15 @@ TEST_CASE("shape_sub")
     REQUIRE(eval(sc, "(- 1 2)") == "-1.0");
     REQUIRE(eval(sc, "(- 1 2 3 4)") == "-8.0");
 }
+
+TEST_CASE("shape_div")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(/)") == "wrong-number-of-args");
+    REQUIRE(eval(sc, "(/ 1)") == "1.0");
+    REQUIRE(eval(sc, "(/ 2)") == "0.5");
+    REQUIRE(eval(sc, "(/ 1 4)") == "0.25");
+    REQUIRE(eval(sc, "(/ 1 2 4)") == "0.125");
+}

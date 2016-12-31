@@ -91,7 +91,7 @@ static s7_pointer is_shape_(s7_scheme *sc, s7_pointer args)
 ////////////////////////////////////////////////////////////////////////////////
 
 static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
-                         Kernel::Opcode::Opcode op, float* d)
+                         Kernel::Opcode::Opcode op, const float* d)
 {
     switch (s7_list_length(sc, list))
     {
@@ -178,10 +178,40 @@ static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
         {
             auto lhs = ensure_shape(sc, s7_car(args), "-");
             CHECK_SHAPE(lhs);
-            auto rhs = reduce(sc, s7_cdr(args), "-", Kernel::Opcode::ADD, 0);
+            const float d = 0;
+            auto rhs = reduce(sc, s7_cdr(args), "-", Kernel::Opcode::ADD, &d);
             CHECK_SHAPE(rhs);
             return result_to_const(sc, to_shape(sc,
                         Kernel::Tree(Kernel::Opcode::SUB,
+                            to_tree(lhs), to_tree(rhs))));
+        }
+    }
+}
+
+static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
+{
+    switch (s7_list_length(sc, args))
+    {
+        case 0:
+        {
+            return s7_wrong_number_of_args_error(sc, "/", args);
+        }
+        case 1:
+        {
+            auto s = ensure_shape(sc, s7_car(args), "/");
+            CHECK_SHAPE(s);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::DIV, 1.0f, to_tree(s))));
+        }
+        default:
+        {
+            auto lhs = ensure_shape(sc, s7_car(args), "/");
+            CHECK_SHAPE(lhs);
+            const float d = 1;
+            auto rhs = reduce(sc, s7_cdr(args), "/", Kernel::Opcode::MUL, &d);
+            CHECK_SHAPE(rhs);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::DIV,
                             to_tree(lhs), to_tree(rhs))));
         }
     }
@@ -222,4 +252,5 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "min", shape_min);
     install_overload(sc, "max", shape_max);
     install_overload(sc, "-", shape_sub);
+    install_overload(sc, "/", shape_div);
 }
