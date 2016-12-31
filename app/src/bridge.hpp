@@ -43,7 +43,7 @@ public:
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
-    static Root* root();
+    static Graph::Root* root();
 
     /*
      *  Requests that the UI be synchronized to the graph
@@ -72,34 +72,34 @@ signals:
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
 protected:
-    Root r;
+    Graph::Root r;
 
     /*
      *  Lightweight TreeSerializer class
      *  (passes everything back to its parent signals)
      */
-    class BridgeTreeSerializer : public TreeSerializer
+    class BridgeTreeSerializer : public Graph::TreeSerializer
     {
     public:
         BridgeTreeSerializer(Bridge* b) : parent(b) {}
 
-        void cell(CellIndex c, const std::string& name,
-                  const std::string& expr, Cell::Type type,
+        void cell(Graph::CellIndex c, const std::string& name,
+                  const std::string& expr, Graph::Cell::Type type,
                   bool valid, const std::string& val) override;
 
-        void instance(InstanceIndex i, const std::string& name,
+        void instance(Graph::InstanceIndex i, const std::string& name,
                       const std::string& sheet) override;
-        void input(CellIndex c, const std::string& name,
+        void input(Graph::CellIndex c, const std::string& name,
                    const std::string& expr, bool valid,
                    const std::string& val) override;
-        void output(CellIndex c, const std::string& name,
+        void output(Graph::CellIndex c, const std::string& name,
                     bool valid, const std::string& val) override;
 
-        bool push(InstanceIndex i, const std::string& instance_name,
+        bool push(Graph::InstanceIndex i, const std::string& instance_name,
                   const std::string& sheet_name) override;
         void pop() override;
 
-        void sheet(SheetIndex s, const std::string& sheet_name,
+        void sheet(Graph::SheetIndex s, const std::string& sheet_name,
                    bool editable, bool insertable) override;
     private:
         Bridge* parent;

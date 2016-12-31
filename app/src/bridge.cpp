@@ -68,7 +68,7 @@ void Bridge::insertSheet(int sheet_index, QString name)
 
 void Bridge::eraseSheet(int sheet_index)
 {
-    r.eraseSheet(SheetIndex(sheet_index));
+    r.eraseSheet(Graph::SheetIndex(sheet_index));
     sync();
 }
 
@@ -91,7 +91,8 @@ void Bridge::setExpr(int cell_index, const QString& expr)
 void Bridge::setInput(int instance_index, int cell_index,
                       const QString& expr)
 {
-    if (r.setInput(InstanceIndex(instance_index), CellIndex(cell_index),
+    if (r.setInput(Graph::InstanceIndex(instance_index),
+                   Graph::CellIndex(cell_index),
                    expr.toStdString()))
     {
         sync();
@@ -107,32 +108,32 @@ void Bridge::eraseCell(int cell_index)
 void Bridge::insertInstance(int parent_sheet_index, QString name,
                             int target_sheet_index)
 {
-    r.insertInstance(parent_sheet_index, name.toStdString(),
-                     target_sheet_index);
+    r.insertInstance(Graph::SheetIndex(parent_sheet_index), name.toStdString(),
+                     Graph::SheetIndex(target_sheet_index));
     sync();
 }
 
 void Bridge::eraseInstance(int instance_index)
 {
-    r.eraseInstance(instance_index);
+    r.eraseInstance(Graph::InstanceIndex(instance_index));
     sync();
 }
 
 int Bridge::sheetOf(int instance_index) const
 {
-    return r.instanceSheet(InstanceIndex(instance_index)).i;
+    return r.instanceSheet(Graph::InstanceIndex(instance_index)).i;
 }
 
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextItemName(SheetIndex(sheet_index), "i"));
+            r.nextItemName(Graph::SheetIndex(sheet_index), "i"));
 }
 
 QString Bridge::nextSheetName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextSheetName(SheetIndex(sheet_index), "s"));
+            r.nextSheetName(Graph::SheetIndex(sheet_index), "s"));
 }
 
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
@@ -147,7 +148,7 @@ QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
     return _instance;
 }
 
-Root* Bridge::root()
+Graph::Root* Bridge::root()
 {
     if (_instance == nullptr)
     {
@@ -163,7 +164,7 @@ void Bridge::sync()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool Bridge::BridgeTreeSerializer::push(InstanceIndex i,
+bool Bridge::BridgeTreeSerializer::push(Graph::InstanceIndex i,
                                         const std::string& instance_name,
                                         const std::string& sheet_name)
 {
@@ -178,39 +179,44 @@ void Bridge::BridgeTreeSerializer::pop()
 }
 
 void Bridge::BridgeTreeSerializer::instance(
-        InstanceIndex i, const std::string& name, const std::string& sheet)
+        Graph::InstanceIndex i, const std::string& name,
+        const std::string& sheet)
 {
     parent->instance(i.i, QString::fromStdString(name),
             QString::fromStdString(sheet));
 }
 
-void Bridge::BridgeTreeSerializer::input(CellIndex c, const std::string& name,
-           const std::string& expr, bool valid,
-           const std::string& val)
+void Bridge::BridgeTreeSerializer::input(
+        Graph::CellIndex c, const std::string& name,
+        const std::string& expr, bool valid,
+        const std::string& val)
 {
     parent->input(c.i, QString::fromStdString(name),
                   QString::fromStdString(expr), valid,
                   QString::fromStdString(val));
 }
 
-void Bridge::BridgeTreeSerializer::output(CellIndex c, const std::string& name,
-            bool valid, const std::string& val)
+void Bridge::BridgeTreeSerializer::output(
+        Graph::CellIndex c, const std::string& name,
+        bool valid, const std::string& val)
 {
     parent->output(c.i, QString::fromStdString(name),
                    valid, QString::fromStdString(val));
 }
 
-void Bridge::BridgeTreeSerializer::cell(CellIndex c, const std::string& name,
-                  const std::string& expr, Cell::Type type,
-                  bool valid, const std::string& val)
+void Bridge::BridgeTreeSerializer::cell(
+        Graph::CellIndex c, const std::string& name,
+        const std::string& expr, Graph::Cell::Type type,
+        bool valid, const std::string& val)
 {
     parent->cell(c.i, QString::fromStdString(name),
                  QString::fromStdString(expr), type,
                  valid, QString::fromStdString(val));
 }
 
-void Bridge::BridgeTreeSerializer::sheet(SheetIndex s, const std::string& name,
-                bool editable, bool insertable)
+void Bridge::BridgeTreeSerializer::sheet(
+        Graph::SheetIndex s, const std::string& name,
+        bool editable, bool insertable)
 {
     parent->sheet(s.i, QString::fromStdString(name), editable, insertable);
 }

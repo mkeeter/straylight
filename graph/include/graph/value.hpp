@@ -4,6 +4,8 @@
 
 #include "graph/ptr.hpp"
 
+namespace Graph {
+
 struct Value
 {
     Value(ValuePtr value, std::string str, bool valid)
@@ -13,3 +15,5 @@ struct Value
     std::string str="";
     bool valid=false;
 };
+
+}   // namespace Graph

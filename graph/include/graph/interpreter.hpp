@@ -8,6 +8,8 @@
 struct s7_cell;
 struct s7_scheme;
 
+namespace Graph {
+
 class Root;
 class Dependencies;
 
@@ -90,3 +92,5 @@ private:
     s7_cell* const instance_thunk_factory;
     s7_cell* const eval_func;
 };
+
+}   // namespace Graph

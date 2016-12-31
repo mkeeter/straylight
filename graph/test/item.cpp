@@ -2,6 +2,8 @@
 
 #include "graph/item.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Item::instance")
 {
     auto i = Item((SheetIndex){0});

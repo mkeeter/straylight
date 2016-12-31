@@ -2,6 +2,8 @@
 
 #include "graph/library.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Library::canInsert")
 {
     Library lib;

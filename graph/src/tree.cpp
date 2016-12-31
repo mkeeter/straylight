@@ -1,6 +1,8 @@
 #include "graph/tree.hpp"
 #include "graph/instance.hpp"
 
+namespace Graph {
+
 Tree::Tree()
 {
     SheetIndex default_sheet(0);
@@ -135,3 +137,5 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
     }
     return out;
 }
+
+}   // namespace Graph

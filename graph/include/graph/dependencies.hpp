@@ -5,6 +5,8 @@
 
 #include "keys.hpp"
 
+namespace Graph {
+
 class Root;
 
 class Dependencies
@@ -57,3 +59,5 @@ protected:
      *  detect circular dependencies. */
     std::map<CellKey, std::set<CellKey>> upstream;
 };
+
+}   // namespace Graph

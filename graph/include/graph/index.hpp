@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Graph {
+
 /* Use phantom types to make separate item and sheet indices, each containing
  * a single unsigned i */
 template <class T>
@@ -44,3 +46,5 @@ struct ItemIndex : public Index<ItemIndex_>
         return i == other.i;
     }
 };
+
+}   // namespace Graph

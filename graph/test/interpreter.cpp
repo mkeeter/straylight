@@ -3,6 +3,8 @@
 #include "graph/interpreter.hpp"
 #include "graph/root.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Interpreter::cellType")
 {
     Root r;

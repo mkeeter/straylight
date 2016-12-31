@@ -10,6 +10,8 @@
 #include "graph/keys.hpp"
 #include "graph/tree.hpp"
 
+namespace Graph {
+
 class Root
 {
 public:
@@ -266,3 +268,5 @@ protected:
     /*  List of keys that need re-evaluation  */
     std::list<CellKey> dirty;
 };
+
+}   // namespace Graph

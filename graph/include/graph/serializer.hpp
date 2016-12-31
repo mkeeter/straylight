@@ -5,6 +5,8 @@
 #include "graph/index.hpp"
 #include "graph/cell.hpp"
 
+namespace Graph {
+
 class TreeSerializer
 {
 public:
@@ -56,3 +58,5 @@ public:
 
     virtual void pop()=0;
 };
+
+}   // namespace Graph

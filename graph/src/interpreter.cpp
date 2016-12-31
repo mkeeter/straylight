@@ -6,6 +6,8 @@
 #include "graph/dependencies.hpp"
 #include "graph/root.hpp"
 
+namespace Graph {
+
 // Forward declarations
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args);
 
@@ -414,3 +416,5 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
 
     return s7_make_integer(interpreter, deps.insert(looker, lookee));
 }
+
+}   // namespace Graph

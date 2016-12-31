@@ -3,6 +3,8 @@
 #include <string>
 #include "graph/index.hpp"
 
+namespace Graph {
+
 struct Instance;
 struct Cell;
 
@@ -27,3 +29,5 @@ private:
         Instance* instance;
     } item;
 };
+
+}   // namespace Graph

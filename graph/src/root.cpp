@@ -1,5 +1,7 @@
 #include "graph/root.hpp"
 
+namespace Graph {
+
 CellKey Root::toCellKey(const NameKey& k) const
 {
     auto sheet = getItem(k.first.back()).instance()->sheet;
@@ -505,3 +507,5 @@ void Root::pushDirty(const CellKey& c)
         dirty.insert(itr, c);
     }
 }
+
+}   // namespace Graph

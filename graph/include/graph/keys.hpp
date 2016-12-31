@@ -6,6 +6,8 @@
 #include "graph/index.hpp"
 #include "graph/env.hpp"
 
+namespace Graph {
+
 /*
  *  Refers to a particular cell in the graph
  *
@@ -15,3 +17,5 @@
  */
 typedef std::pair<Env, std::string> NameKey;
 typedef std::pair<Env, CellIndex> CellKey;
+
+}   // namespace Graph

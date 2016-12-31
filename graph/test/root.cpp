@@ -2,6 +2,8 @@
 
 #include "graph/root.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Root::toCellKey")
 {
     Root r;

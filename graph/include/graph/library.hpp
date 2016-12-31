@@ -7,6 +7,8 @@
 
 #include "keynamestore.hpp"
 
+namespace Graph {
+
 struct Sheet {
     /*
      *  Dummy struct for Library
@@ -28,3 +30,5 @@ public:
      */
     SheetIndex insert(SheetIndex parent, const std::string& name);
 };
+
+}   // namespace Graph

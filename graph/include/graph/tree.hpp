@@ -6,6 +6,8 @@
 #include "graph/env.hpp"
 #include "graph/keys.hpp"
 
+namespace Graph {
+
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
 public:
@@ -71,3 +73,5 @@ protected:
      */
     std::map<SheetIndex, std::list<ItemIndex>> order;
 };
+
+}   // namespace Graph

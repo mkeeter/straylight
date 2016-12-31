@@ -2,6 +2,8 @@
 
 #include "graph/tree.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Tree::canInsert")
 {
     Tree s;

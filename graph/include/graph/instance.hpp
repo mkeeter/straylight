@@ -4,6 +4,8 @@
 
 #include "index.hpp"
 
+namespace Graph {
+
 struct Instance
 {
     Instance(SheetIndex s) : sheet(s) {}
@@ -14,3 +16,5 @@ struct Instance
     /*  Represents an index into the Sheet library */
     SheetIndex sheet;
 };
+
+}   // namespace Graph

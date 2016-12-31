@@ -6,6 +6,8 @@
 #include "graph/env.hpp"
 #include "graph/value.hpp"
 
+namespace Graph {
+
 struct Cell
 {
     Cell(const std::string& e) : expr(e) {}
@@ -19,3 +21,5 @@ struct Cell
     /*  Per-environment value list  */
     std::map<Env, Value> values;
 };
+
+}   // namespace Graph

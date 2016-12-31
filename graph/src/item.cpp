@@ -3,6 +3,8 @@
 #include "graph/cell.hpp"
 #include "graph/instance.hpp"
 
+namespace Graph {
+
 Item::Item(const std::string& e)
     : type(ITEM_CELL)
 {
@@ -59,3 +61,5 @@ void Item::dealloc()
         case ITEM_INSTANCE: delete item.instance; break;
     }
 }
+
+}   // namespace Graph

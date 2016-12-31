@@ -3,6 +3,8 @@
 #include <map>
 #include <boost/bimap.hpp>
 
+namespace Graph {
+
 template <class Stored, class StoredIndex, class ParentIndex>
 class KeyNameStore
 {
@@ -155,3 +157,5 @@ protected:
      *  stored together in order */
     boost::bimap<std::pair<ParentIndex, std::string>, StoredIndex> names;
 };
+
+}   // namespace Graph

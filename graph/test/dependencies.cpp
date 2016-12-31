@@ -3,6 +3,8 @@
 #include "graph/dependencies.hpp"
 #include "graph/root.hpp"
 
+using namespace Graph;
+
 TEST_CASE("Dependencies::insert")
 {
     Root r;

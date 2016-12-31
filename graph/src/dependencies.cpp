@@ -1,6 +1,8 @@
 #include "graph/dependencies.hpp"
 #include "graph/root.hpp"
 
+namespace Graph {
+
 int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
 {
     forward[looker].insert(lookee);
@@ -36,3 +38,5 @@ const std::set<CellKey>& Dependencies::inverseDeps(const NameKey& k) const
     const static std::set<CellKey> empty;
     return inverse.count(k) ? inverse.at(k) : empty;
 }
+
+}   // namespace Graph
