@@ -2,6 +2,8 @@
 
 #include "kernel/eval/evaluator_base.hpp"
 
+namespace Kernel {
+
 class EvaluatorAVX : public EvaluatorBase
 {
 public:
@@ -34,3 +36,5 @@ protected:
         __m256* __restrict ody, __m256* __restrict odz,
         Result::Index count);
 };
+
+}   // namespace Kernel

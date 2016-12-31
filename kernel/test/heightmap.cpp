@@ -26,6 +26,8 @@
 
 #include "util/shapes.hpp"
 
+using namespace Kernel;
+
 #define EPSILON 1e-6
 
 // Helper function to make rendering a single call

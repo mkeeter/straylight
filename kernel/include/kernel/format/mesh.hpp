@@ -25,6 +25,8 @@
 #include "kernel/render/octree.hpp"
 #include "kernel/tree/tree.hpp"
 
+namespace Kernel {
+
 class Region;
 
 struct Mesh
@@ -56,3 +58,5 @@ struct Mesh
     /*  Triangles in the mesh (as indices in verts list)  */
     std::vector<glm::uvec3> tris;
 };
+
+}   // namespace Kernel

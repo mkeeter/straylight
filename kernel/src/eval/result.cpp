@@ -18,6 +18,8 @@
  */
 #include "kernel/eval/result.hpp"
 
+namespace Kernel {
+
 void Result::resize(Index clauses, Index vars)
 {
 #ifdef __AVX__
@@ -83,3 +85,5 @@ void Result::setDeriv(float x, float y, float z, Index clause)
         dz[clause][i] = z;
     }
 }
+
+}   // namespace Kernel

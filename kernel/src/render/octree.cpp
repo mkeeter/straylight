@@ -22,6 +22,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace Kernel {
+
 Octree::Octree(const Subregion& r) : XTree(r)
 {
     // Nothing to do here
@@ -191,3 +193,5 @@ bool Octree::leafTopology() const
 
     return edges_safe && faces_safe && center_safe;
 }
+
+}   // namespace Kernel

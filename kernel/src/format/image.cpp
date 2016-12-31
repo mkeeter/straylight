@@ -22,6 +22,8 @@
 
 #include "kernel/format/image.hpp"
 
+namespace Kernel {
+
 namespace Image
 {
 
@@ -105,3 +107,5 @@ bool SavePng(std::string filename, const DepthImage& img)
 }
 
 } // namespace Image
+
+}   // namespace Kernel

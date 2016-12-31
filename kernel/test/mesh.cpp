@@ -26,6 +26,8 @@
 
 #include "util/shapes.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Saving a mesh")
 {
     Mesh m;

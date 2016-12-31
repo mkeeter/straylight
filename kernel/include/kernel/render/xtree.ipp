@@ -26,6 +26,8 @@
 
 #include "kernel/render/xtree.hpp"
 
+namespace Kernel {
+
 template <class T, int dims>
 T* XTree<T, dims>::Render(const Tree t, const Region& r, bool multithread)
 {
@@ -458,3 +460,5 @@ glm::vec3 XTree<T, dims>::searchEdge(glm::vec3 a, glm::vec3 b,
 
     return a;
 }
+
+}   // namespace Kernel

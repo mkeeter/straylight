@@ -20,6 +20,8 @@
 
 #include "kernel/render/xtree.hpp"
 
+namespace Kernel {
+
 class Quadtree : public XTree<Quadtree, 2>
 {
     Quadtree(const Subregion& r);
@@ -38,3 +40,5 @@ class Quadtree : public XTree<Quadtree, 2>
 
     friend class XTree;
 };
+
+}   // namespace Kernel

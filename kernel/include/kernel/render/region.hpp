@@ -23,6 +23,8 @@
 #include "kernel/eval/interval.hpp"
 #include "kernel/render/subregion.hpp"
 
+namespace Kernel {
+
 /*
  *  A region constains X, Y, Z bounds and voxel count / positions
  */
@@ -100,3 +102,5 @@ protected:
     Region(Axis x, Axis y, Axis z);
 
 };
+
+}   // namespace Kernel

@@ -20,6 +20,8 @@
 
 #include "kernel/tree/opcode.hpp"
 
+namespace Kernel {
+
 size_t Opcode::args(Opcode op)
 {
     switch (op)
@@ -123,3 +125,5 @@ Opcode::Opcode Opcode::from_str(std::string s)
     auto itr = inverse.find(s);
     return itr != inverse.end() ? itr->second : INVALID;
 }
+
+}   // namespace Kernel

@@ -21,6 +21,8 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/solve/solver.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Solver::findRoot")
 {
     SECTION("Single variable")

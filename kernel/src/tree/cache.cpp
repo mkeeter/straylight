@@ -22,6 +22,8 @@
 #include "kernel/tree/cache.hpp"
 #include "kernel/tree/tree.hpp"
 
+namespace Kernel {
+
 /******************************************************************************
  * Per-thread cache lookup
  ******************************************************************************/
@@ -373,3 +375,5 @@ Cache::Id Cache::collapse(Id root)
 
     return rebuild(root, changed);
 }
+
+}   // namespace Kernel

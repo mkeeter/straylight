@@ -20,6 +20,8 @@
 
 #include "kernel/render/region.hpp"
 
+namespace Kernel {
+
 Region::Region(Interval x, Interval y, Interval z, float res)
     : Region(x, y, z, res, res, res)
 {
@@ -118,3 +120,5 @@ Interval Region::Axis::expand(Interval i, float res)
         return {i.lower() - extra/2, i.upper() + extra/2};
     }
 }
+
+}   // namespace Kernel

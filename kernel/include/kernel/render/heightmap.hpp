@@ -28,6 +28,8 @@
 
 #include "kernel/eval/evaluator.hpp"
 
+namespace Kernel {
+
 namespace Heightmap
 {
 
@@ -45,3 +47,5 @@ std::pair<DepthImage, NormalImage> Render(
         const std::atomic_bool& abort,
         glm::mat4 m=glm::mat4());
 }
+
+}   // namespace Kernel

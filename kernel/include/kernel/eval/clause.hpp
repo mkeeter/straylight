@@ -20,6 +20,8 @@
 
 #include "kernel/tree/opcode.hpp"
 
+namespace Kernel {
+
 /*
  *  A clause is used in an Evaluator to evaluate a tree
  */
@@ -41,3 +43,5 @@ struct Clause
     Id const a;
     Id const b;
 };
+
+}   // namespace Kernel

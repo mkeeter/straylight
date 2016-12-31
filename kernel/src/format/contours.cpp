@@ -21,6 +21,8 @@
 
 #include "kernel/format/contours.hpp"
 
+namespace Kernel {
+
 void Contours::writeSVG(std::string filename, const Region& r)
 {
     std::ofstream file;
@@ -66,3 +68,5 @@ void Contours::writeSVG(std::string filename, const Region& r)
     }
     file << "\n</svg>";
 }
+
+}   // namespace Kernel

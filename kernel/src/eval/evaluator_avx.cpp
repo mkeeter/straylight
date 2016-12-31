@@ -2,6 +2,8 @@
 
 #include "kernel/eval/evaluator_avx.hpp"
 
+namespace Kernel {
+
 #define EVAL_LOOP for (Result::Index i=0; i < count; ++i)
 void EvaluatorAVX::eval_clause_values(Opcode::Opcode op,
         const __m256* __restrict a, const __m256* __restrict b,
@@ -368,3 +370,5 @@ void EvaluatorAVX::applyTransform(Result::Index count)
 }
 
 #endif
+
+}   // namespace Kernel

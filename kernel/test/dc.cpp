@@ -28,6 +28,8 @@
 #include "util/glm.hpp"
 #include "util/shapes.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Small sphere mesh")
 {
     Tree t = sphere(0.5);

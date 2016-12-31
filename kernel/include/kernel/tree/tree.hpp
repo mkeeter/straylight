@@ -26,6 +26,8 @@
 #include "kernel/tree/opcode.hpp"
 #include "kernel/tree/cache.hpp"
 
+namespace Kernel {
+
 /*
  *  A Tree represents a tree of math expressions.
  *
@@ -121,8 +123,10 @@ protected:
     friend class EvaluatorAVX;
 };
 
+}   // namespace Kernel
+
 // Mass-produce declarations for overloaded operations
-#define OP_UNARY(name)      Tree name(const Tree& a)
+#define OP_UNARY(name)      Kernel::Tree name(const Kernel::Tree& a)
 OP_UNARY(square);
 OP_UNARY(sqrt);
 OP_UNARY(abs);
@@ -135,7 +139,7 @@ OP_UNARY(atan);
 OP_UNARY(exp);
 #undef OP_UNARY
 
-#define OP_BINARY(name)     Tree name(const Tree& a, const Tree& b)
+#define OP_BINARY(name)     Kernel::Tree name(const Kernel::Tree& a, const Kernel::Tree& b)
 OP_BINARY(operator+);
 OP_BINARY(operator*);
 OP_BINARY(min);

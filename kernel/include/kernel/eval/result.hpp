@@ -27,6 +27,8 @@
 #ifdef __AVX__
 #include <immintrin.h>
 
+namespace Kernel {
+
 // AVX data needs to be aligned on 32-byte boundaries.
 // This isn't the default on certain OSs, so we make a custom allocator
 // here that uses _mm_malloc and _mm_free.
@@ -118,3 +120,5 @@ struct Result {
 
     std::vector<Interval> i;
 };
+
+}   // namespace Kernel

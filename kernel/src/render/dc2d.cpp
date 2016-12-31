@@ -25,6 +25,8 @@
 #include "kernel/format/contours.hpp"
 #include "kernel/render/region.hpp"
 
+namespace Kernel {
+
 struct Comparator
 {
     bool operator()(const glm::vec2& a, const glm::vec2& b) const
@@ -178,3 +180,5 @@ Contours Contours::Render(const Tree t, const Region& r)
     }
     return c;
 }
+
+}   // namespace Kernel

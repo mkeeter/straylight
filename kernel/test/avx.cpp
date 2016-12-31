@@ -27,6 +27,8 @@
 
 #include "util/shapes.hpp"
 
+using namespace Kernel;
+
 #ifdef __AVX__
 
 TEST_CASE("Vectorized performance")

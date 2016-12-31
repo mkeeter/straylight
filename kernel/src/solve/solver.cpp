@@ -22,6 +22,8 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/eval/evaluator.hpp"
 
+namespace Kernel {
+
 namespace Solver
 {
 
@@ -86,3 +88,5 @@ std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v)
 }
 
 } // namespace Solver
+
+}   // namespace Kernel

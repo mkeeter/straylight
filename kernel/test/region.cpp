@@ -20,6 +20,8 @@
 
 #include "kernel/render/region.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Region::Axis construction")
 {
     SECTION("Exact values")

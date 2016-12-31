@@ -20,6 +20,8 @@
 
 #include "kernel/render/xtree.hpp"
 
+namespace Kernel {
+
 class Octree : public XTree<Octree, 3>
 {
 protected:
@@ -38,3 +40,5 @@ protected:
 
     friend class XTree;
 };
+
+}   // namespace Kernel

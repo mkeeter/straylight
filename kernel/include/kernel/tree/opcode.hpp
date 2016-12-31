@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <string>
 
+namespace Kernel {
+
 namespace Opcode
 {
 enum Opcode
@@ -85,3 +87,5 @@ std::string to_str(Opcode op);
 Opcode from_str(std::string s);
 }
 
+
+}   // namespace Kernel

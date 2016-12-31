@@ -21,6 +21,8 @@
 
 #include "kernel/tree/tree.hpp"
 
+using namespace Kernel;
+
 Tree rectangle(float xmin, float xmax, float ymin, float ymax, glm::mat4 M)
 {
     auto x = Tree::affine(M[0][0], M[0][1], M[0][2], M[0][3]);

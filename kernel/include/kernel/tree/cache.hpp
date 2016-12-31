@@ -30,6 +30,8 @@
 
 #include "kernel/tree/opcode.hpp"
 
+namespace Kernel {
+
 /*
  *  A Cache stores values in a deduplicated math expression
  */
@@ -188,3 +190,5 @@ protected:
     friend class EvaluatorBase;
     friend class EvaluatorAVX;
 };
+
+}   // namespace Kernel

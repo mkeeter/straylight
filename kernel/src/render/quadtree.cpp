@@ -21,6 +21,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace Kernel {
+
 Quadtree::Quadtree(const Subregion& r) : XTree(r)
 {
     // Nothing to do here
@@ -68,3 +70,5 @@ bool Quadtree::leafTopology() const
 
     return edges_safe && faces_safe;
 }
+
+}   // namespace Kernel

@@ -22,6 +22,8 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/eval/evaluator.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Principle variable evaluation")
 {
     Evaluator e(Tree::X());

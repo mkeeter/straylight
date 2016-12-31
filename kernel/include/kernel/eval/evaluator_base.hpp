@@ -31,6 +31,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace Kernel {
+
 class EvaluatorBase
 {
 public:
@@ -200,3 +202,5 @@ protected:
 
     Result result;
 };
+
+}   // namespace Kernel

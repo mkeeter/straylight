@@ -20,6 +20,8 @@
 
 #include "kernel/tree/cache.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Constructing a simple shape")
 {
     Cache::reset();

@@ -20,6 +20,6 @@
 
 #include "kernel/tree/tree.hpp"
 
-Tree menger(int i);
-Tree circle(float r);
-Tree sphere(float r);
+Kernel::Tree menger(int i);
+Kernel::Tree circle(float r);
+Kernel::Tree sphere(float r);

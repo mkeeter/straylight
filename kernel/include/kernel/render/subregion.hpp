@@ -25,6 +25,8 @@
 
 #include "kernel/eval/interval.hpp"
 
+namespace Kernel {
+
 class Region;
 
 /*
@@ -131,3 +133,5 @@ protected:
      */
     Subregion(const Axis& x, const Axis& y, const Axis& z);
 };
+
+}   // namespace Kernel

@@ -24,6 +24,8 @@
 #include "kernel/render/quadtree.hpp"
 #include "kernel/tree/tree.hpp"
 
+namespace Kernel {
+
 class Region;
 
 struct Contours
@@ -38,3 +40,5 @@ struct Contours
     /*  Contours in 2D space  */
     std::vector<std::vector<glm::vec2>> contours;
 };
+
+}   // namespace Kernel

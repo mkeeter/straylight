@@ -21,6 +21,8 @@
 #include "kernel/tree/tree.hpp"
 #include "util/glm.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Joining two trees")
 {
     auto t = Tree::X() + 1;

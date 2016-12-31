@@ -22,6 +22,8 @@
 
 #include "kernel/tree/cache.hpp"
 
+namespace Kernel {
+
 class Tree;
 
 namespace Solver
@@ -29,3 +31,5 @@ namespace Solver
     typedef std::map<Cache::Id, float> Solution;
     std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v={0,0,0});
 }   // namespace Solver
+
+}   // namespace Kernel

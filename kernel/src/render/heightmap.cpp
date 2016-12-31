@@ -27,6 +27,8 @@
 #include "kernel/eval/result.hpp"
 #include "kernel/eval/evaluator.hpp"
 
+namespace Kernel {
+
 namespace Heightmap
 {
 
@@ -324,3 +326,5 @@ std::pair<DepthImage, NormalImage> Render(
 }
 
 } // namespace Heightmap
+
+}   // namespace Kernel

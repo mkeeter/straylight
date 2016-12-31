@@ -27,6 +27,8 @@
 #include "kernel/eval/evaluator.hpp"
 #include "kernel/eval/clause.hpp"
 
+namespace Kernel {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
@@ -1037,3 +1039,5 @@ std::map<Cache::Id, float> EvaluatorBase::varValues() const
     }
     return out;
 }
+
+}   // namespace Kernel

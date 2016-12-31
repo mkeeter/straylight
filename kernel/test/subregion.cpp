@@ -22,6 +22,8 @@
 #include "kernel/render/subregion.hpp"
 #include "kernel/render/octree.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Subregion::Axis split")
 {
     auto d = Region::Axis(Interval(0, 1), 10.0f);

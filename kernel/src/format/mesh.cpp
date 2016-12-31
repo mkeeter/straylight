@@ -25,6 +25,7 @@
 
 #include "kernel/format/mesh.hpp"
 
+namespace Kernel {
 
 void Mesh::writeMeshToFile(std::string filename)
 {
@@ -113,3 +114,5 @@ glm::vec3 Mesh::norm(unsigned i) const
     const auto n = glm::cross(a, b);
     return glm::normalize(n);
 }
+
+}   // namespace Kernel

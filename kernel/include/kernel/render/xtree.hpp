@@ -31,6 +31,8 @@
 #include "kernel/render/region.hpp"
 #include "kernel/tree/tree.hpp"
 
+namespace Kernel {
+
 /*  Helper struct to store Hermite intersection data  */
 struct Intersection {
     glm::vec3 pos;
@@ -247,5 +249,7 @@ protected:
     /*  Eigenvalue threshold for determining feature rank  */
     constexpr static float EIGENVALUE_CUTOFF = 0.1f;
 };
+
+}   // namespace Kernel
 
 #include "kernel/render/xtree.ipp"

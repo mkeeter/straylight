@@ -27,6 +27,8 @@
 #include "util/glm.hpp"
 #include "util/shapes.hpp"
 
+using namespace Kernel;
+
 TEST_CASE("Octree coordinates")
 {
     Tree t = sphere(1);

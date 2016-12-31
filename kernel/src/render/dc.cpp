@@ -24,6 +24,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace Kernel {
+
 /*
  *  Helper struct that can be passed around when meshing
  */
@@ -276,3 +278,5 @@ Mesh Mesh::Render(const Tree t, const Region& r)
 
     return w.mesh;
 }
+
+}   // namespace Kernel

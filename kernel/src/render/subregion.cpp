@@ -22,6 +22,8 @@
 #include "kernel/render/region.hpp"
 #include "kernel/render/octree.hpp"
 
+namespace Kernel {
+
 Subregion::Subregion(const Region& r)
     : X(r.X.bounds, r.X.values),
       Y(r.Y.bounds, r.Y.values),
@@ -178,3 +180,5 @@ std::pair<Subregion::Axis, Subregion::Axis> Subregion::Axis::split() const
             Axis(Interval(middle, upper()), ptr + half,
                  size - half, min + half)};
 }
+
+}   // namespace Kernel
