@@ -89,7 +89,7 @@ TEST_CASE("Found flag propagation")
     REQUIRE(!f.count(t->Y()));
 }
 
-TEST_CASE("Automatic expression pruning")
+TEST_CASE("Collapsing of identites")
 {
     Cache::reset();
     auto t = Cache::instance();
@@ -129,6 +129,16 @@ TEST_CASE("Automatic expression pruning")
         REQUIRE(t->opcode(od) == Opcode::CONST);
         REQUIRE(t->value(od) == 0);
     }
+}
+
+TEST_CASE("Collapsing constants")
+{
+    Cache::reset();
+    auto t = Cache::instance();
+
+    Cache::Id a = t->operation(Opcode::ADD, t->constant(4), t->constant(3));
+    REQUIRE(t->opcode(a) == Opcode::CONST);
+    REQUIRE(t->value(a) == 7);
 }
 
 TEST_CASE("Collapsing affine trees")
