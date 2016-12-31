@@ -13,6 +13,15 @@ std::string eval(s7_scheme* sc, std::string expr)
     return s;
 }
 
+double num(s7_scheme* sc, std::string expr)
+{
+    auto out = s7_eval_c_string(sc, expr.c_str());
+    assert(s7_is_number(out));
+    return s7_real(out);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 TEST_CASE("shape_add")
 {
     s7_scheme* sc = s7_init();
@@ -83,4 +92,20 @@ TEST_CASE("shape_div")
     REQUIRE(eval(sc, "(/ 2)") == "0.5");
     REQUIRE(eval(sc, "(/ 1 4)") == "0.25");
     REQUIRE(eval(sc, "(/ 1 2 4)") == "0.125");
+}
+
+TEST_CASE("shape_atan")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(atan)") == "wrong-number-of-args");
+    REQUIRE(num(sc, "(atan 1)") == Approx(M_PI/4));
+    REQUIRE(num(sc, "(atan 2)") == Approx(1.10715));
+
+    // Check all four quadrants of atan2
+    REQUIRE(num(sc, "(atan 1 4)") == Approx(0.244978));
+    REQUIRE(num(sc, "(atan -1 4)") == Approx(-0.244978));
+    REQUIRE(num(sc, "(atan 1 -4)") == Approx(2.89661));
+    REQUIRE(num(sc, "(atan -1 -4)") == Approx(-2.89661));
 }

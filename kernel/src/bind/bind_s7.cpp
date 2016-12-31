@@ -217,6 +217,30 @@ static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
     }
 }
 
+static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
+{
+    switch (s7_list_length(sc, args))
+    {
+        case 1:
+        {
+            auto s = ensure_shape(sc, s7_car(args), "atan");
+            CHECK_SHAPE(s);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::ATAN, to_tree(s))));
+        }
+        case 2:
+        {
+            auto a = ensure_shape(sc, s7_car(args), "atan");
+            CHECK_SHAPE(a);
+            auto b = ensure_shape(sc, s7_cadr(args), "atan");
+            CHECK_SHAPE(b);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::ATAN2, to_tree(a), to_tree(b))));
+        }
+        default:    return s7_wrong_number_of_args_error(sc, "atan", args);
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static void install_overload(s7_scheme* sc, const char* op,
@@ -253,4 +277,5 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "max", shape_max);
     install_overload(sc, "-", shape_sub);
     install_overload(sc, "/", shape_div);
+    install_overload(sc, "atan", shape_atan);
 }
