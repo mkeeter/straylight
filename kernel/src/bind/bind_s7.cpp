@@ -57,7 +57,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
 {
     switch (s7_list_length(sc, list))
     {
-        case 0: return to_shape(sc, Kernel::Tree::affine(0, 0, 0, d));
+        case 0: return to_shape(sc, Kernel::Tree(d));
         case 1:
         {
             auto front = s7_car(list);
@@ -67,7 +67,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
             }
             else if (s7_is_number(front))
             {
-                return to_shape(sc, Kernel::Tree::affine(0, 0, 0, s7_number_to_real(sc, front)));
+                return to_shape(sc, Kernel::Tree(s7_number_to_real(sc, front)));
             }
             else
             {
@@ -118,13 +118,9 @@ static s7_pointer shape_add(s7_scheme* sc, s7_pointer args)
     // If the result is a constant (indicating that there was no Shape
     // involved in the reduction), then convert back to an ordinary
     // Scheme real to keep addition working as usual.
-    if (tree.opcode() == Kernel::Opcode::AFFINE_VEC)
+    if (tree.opcode() == Kernel::Opcode::CONST)
     {
-        auto v = tree.getAffine();
-        if (v.x == 0 && v.y == 0 && v.z == 0)
-        {
-            return s7_make_real(sc, v.w);
-        }
+        return s7_make_real(sc, tree.value());
     }
     return out;
 }

@@ -1,5 +1,6 @@
 add_executable(straylight-test main.cpp
     ../kernel/test/avx.cpp
+    ../kernel/test/bind_s7.cpp
     ../kernel/test/cache.cpp
     ../kernel/test/dc.cpp
     ../kernel/test/eval.cpp
