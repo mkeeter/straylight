@@ -6,12 +6,43 @@
 // if we ever try to use it at the wrong time.
 static int shape_type_tag;
 
+// Forward declaration
+static bool is_shape(s7_pointer s);
+
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
+ *  Converts a Tree into an allocated Scheme shape
+ */
 static s7_pointer to_shape(s7_scheme* sc, Kernel::Tree t)
 {
     return s7_make_object(sc, shape_type_tag, new Shape { t });
 }
+
+/*
+ *  Tries to convert a Scheme object into a shape
+ *
+ *  On failure, returns an error message with the given function name
+ */
+s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
+                        const char* func_name="ensure_shape")
+{
+    if (is_shape(obj))
+    {
+        return obj;
+    }
+    else if (s7_is_number(obj))
+    {
+        return to_shape(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
+    }
+    else
+    {
+        return s7_wrong_type_arg_error(sc, func_name, 0, obj,
+                "shape or real");
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 static void shape_free(void* s)
 {
@@ -40,19 +71,19 @@ static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
     return to_shape(sc, Kernel::Tree::X());
 }
 
-static bool shape_is(s7_pointer s)
+static bool is_shape(s7_pointer s)
 {
     return s7_is_object(s) && s7_object_type(s) == shape_type_tag;
 }
 
-static s7_pointer shape_is_(s7_scheme *sc, s7_pointer args)
+static s7_pointer is_shape_(s7_scheme *sc, s7_pointer args)
 {
-    return s7_make_boolean(sc, shape_is(s7_car(args)));
+    return s7_make_boolean(sc, is_shape(s7_car(args)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* name,
+static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
                          Kernel::Opcode::Opcode op, float* d)
 {
     switch (s7_list_length(sc, list))
@@ -65,51 +96,30 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* name,
             }
             else
             {
-                return s7_wrong_number_of_args_error(sc, name, list);
+                return s7_wrong_number_of_args_error(sc, func_name, list);
             }
         }
         case 1:
         {
-            auto front = s7_car(list);
-            if (shape_is(front))
-            {
-                return front;
-            }
-            else if (s7_is_number(front))
-            {
-                return to_shape(sc, Kernel::Tree(s7_number_to_real(sc, front)));
-            }
-            else
-            {
-                return s7_wrong_type_arg_error(sc, name, 0, front,
-                        "shape or real");
-            }
+            return ensure_shape(sc, s7_car(list), func_name);
         }
         default:
         {
-            auto front = s7_car(list);
-            auto rest = reduce(sc, s7_cdr(list), name, op, d);
-            if (!shape_is(rest))
+            auto front = ensure_shape(sc, s7_car(list), func_name);
+            if (!is_shape(front))
+            {
+                return front;
+            }
+
+            auto rest = reduce(sc, s7_cdr(list), func_name, op, d);
+            if (!is_shape(rest))
             {
                 return rest;
             }
 
+            const auto& lhs = static_cast<Shape*>(s7_object_value(front))->tree;
             const auto& rhs = static_cast<Shape*>(s7_object_value(rest))->tree;
-            if (s7_is_number(front))
-            {
-                return to_shape(sc, Kernel::Tree(op,
-                        Kernel::Tree(s7_number_to_real(sc, front)), rhs));
-            }
-            else if (shape_is(front))
-            {
-                return to_shape(sc, Kernel::Tree(op,
-                        static_cast<Shape*>(s7_object_value(front))->tree, rhs));
-            }
-            else
-            {
-                return s7_wrong_type_arg_error(sc, name, 0, s7_car(list),
-                        "shape or real");
-            }
+            return to_shape(sc, Kernel::Tree(op, lhs, rhs));
         }
     }
 }
@@ -118,7 +128,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* name,
 
 static s7_pointer check_result(s7_scheme* sc, s7_pointer out)
 {
-    if (!shape_is(out))
+    if (!is_shape(out))
     {
         return out;
     }
@@ -152,7 +162,9 @@ OVERLOAD_COMMUTATIVE_DEFAULT(shape_mul, "*", Kernel::Opcode::MUL, 1);
 OVERLOAD_COMMUTATIVE(shape_min, "min", Kernel::Opcode::MIN);
 OVERLOAD_COMMUTATIVE(shape_max, "max", Kernel::Opcode::MAX);
 
-void install_overload(s7_scheme* sc, const char* op,
+////////////////////////////////////////////////////////////////////////////////
+
+static void install_overload(s7_scheme* sc, const char* op,
                       s7_pointer (*f)(s7_scheme*, s7_pointer))
 {
     s7_define_function(sc, op, f, 0, 0, true,
@@ -177,7 +189,7 @@ void kernel_bind_s7(s7_scheme* sc)
 
     s7_define_function(sc, "make-shape", shape_new, 1, 0, false,
             "(make-shape func) makes a new shape");
-    s7_define_function(sc, "shape?", shape_is_, 1, 0, false,
+    s7_define_function(sc, "shape?", is_shape_, 1, 0, false,
             "(shape? s) checks if something is a shape");
 
     install_overload(sc, "+", shape_add);
