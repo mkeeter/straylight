@@ -22,6 +22,8 @@
 #include "kernel/tree/cache.hpp"
 #include "kernel/tree/tree.hpp"
 
+#include "kernel/eval/evaluator.hpp"
+
 namespace Kernel {
 
 /******************************************************************************
@@ -103,6 +105,16 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
     if (data.left.find(k) == data.left.end())
     {
         data.insert({k, next++});
+    }
+
+    // If both sides of the operation are constant, then return a constant
+    if ((a || b) && (!a || opcode(a) == Opcode::CONST) &&
+                    (!b || opcode(b) == Opcode::CONST))
+    {
+        // Here, we construct a Tree manually to avoid a recursive loop,
+        // then pass it immediately into a dummy Evaluator
+        Evaluator e(Tree(instance(), data.left.at(k)));
+        return constant(e.values(1)[0]);
     }
 
     return data.left.at(k);

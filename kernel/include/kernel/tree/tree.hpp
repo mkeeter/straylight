@@ -121,6 +121,9 @@ protected:
     /*  An Evaluator needs to be able to pull out the parent Cache */
     friend class EvaluatorBase;
     friend class EvaluatorAVX;
+
+    /*  A Cache needs to construct a raw tree in some cases  */
+    friend class Cache;
 };
 
 }   // namespace Kernel
