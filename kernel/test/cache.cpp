@@ -139,6 +139,10 @@ TEST_CASE("Collapsing constants")
     Cache::Id a = t->operation(Opcode::ADD, t->constant(4), t->constant(3));
     REQUIRE(t->opcode(a) == Opcode::CONST);
     REQUIRE(t->value(a) == 7);
+
+    Cache::Id b = t->operation(Opcode::NEG, t->constant(4));
+    REQUIRE(t->opcode(b) == Opcode::CONST);
+    REQUIRE(t->value(b) == -4);
 }
 
 TEST_CASE("Collapsing affine trees")

@@ -42,7 +42,7 @@ TEST_CASE("shape_min")
     s7_scheme* sc = s7_init();
     kernel_bind_s7(sc);
 
-    REQUIRE(eval(sc, "(min)") == "1.0");
+    REQUIRE(eval(sc, "(min)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(min 1)") == "1.0");
     REQUIRE(eval(sc, "(min 2)") == "2.0");
     REQUIRE(eval(sc, "(min 1 2)") == "1.0");
@@ -54,9 +54,21 @@ TEST_CASE("shape_max")
     s7_scheme* sc = s7_init();
     kernel_bind_s7(sc);
 
-    REQUIRE(eval(sc, "(max)") == "1.0");
+    REQUIRE(eval(sc, "(max)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(max 1)") == "1.0");
     REQUIRE(eval(sc, "(max 2)") == "2.0");
     REQUIRE(eval(sc, "(max 1 2)") == "2.0");
     REQUIRE(eval(sc, "(max 1 2 3 4)") == "4.0");
+}
+
+TEST_CASE("shape_sub")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(-)") == "wrong-number-of-args");
+    REQUIRE(eval(sc, "(- 1)") == "-1.0");
+    REQUIRE(eval(sc, "(- 2)") == "-2.0");
+    REQUIRE(eval(sc, "(- 1 2)") == "-1.0");
+    REQUIRE(eval(sc, "(- 1 2 3 4)") == "-8.0");
 }

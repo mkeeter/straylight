@@ -19,6 +19,12 @@ static s7_pointer to_shape(s7_scheme* sc, Kernel::Tree t)
     return s7_make_object(sc, shape_type_tag, new Shape { t });
 }
 
+static Kernel::Tree to_tree(s7_pointer obj)
+{
+    assert(is_shape(obj));
+    return static_cast<Shape*>(s7_object_value(obj))->tree;
+}
+
 /*
  *  Tries to convert a Scheme object into a shape
  *
@@ -41,6 +47,7 @@ s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
                 "shape or real");
     }
 }
+#define CHECK_SHAPE(OBJ) {   if (!is_shape(OBJ)) return OBJ; }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,32 +113,22 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
         default:
         {
             auto front = ensure_shape(sc, s7_car(list), func_name);
-            if (!is_shape(front))
-            {
-                return front;
-            }
+            CHECK_SHAPE(front);
 
             auto rest = reduce(sc, s7_cdr(list), func_name, op, d);
-            if (!is_shape(rest))
-            {
-                return rest;
-            }
+            CHECK_SHAPE(rest);
 
-            const auto& lhs = static_cast<Shape*>(s7_object_value(front))->tree;
-            const auto& rhs = static_cast<Shape*>(s7_object_value(rest))->tree;
-            return to_shape(sc, Kernel::Tree(op, lhs, rhs));
+            return to_shape(sc, Kernel::Tree(op, to_tree(front), to_tree(rest)));
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static s7_pointer check_result(s7_scheme* sc, s7_pointer out)
+static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
 {
-    if (!is_shape(out))
-    {
-        return out;
-    }
+    CHECK_SHAPE(out);
+
     const auto& tree = static_cast<Shape*>(s7_object_value(out))->tree;
 
     // If the result is a constant (indicating that there was no Shape
@@ -144,23 +141,51 @@ static s7_pointer check_result(s7_scheme* sc, s7_pointer out)
     return out;
 }
 
-#define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)  \
-static s7_pointer NAME(s7_scheme* sc, s7_pointer args)          \
-{                                                               \
-    float d = DEFAULT;                                          \
-    return check_result(sc, reduce(sc, args, FUNC, OPCODE, &d));   \
+#define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)           \
+static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
+{                                                                           \
+    float d = DEFAULT;                                                      \
+    return result_to_const(sc, reduce(sc, args, FUNC, OPCODE, &d));         \
 }
 
-#define OVERLOAD_COMMUTATIVE(NAME, FUNC, OPCODE)  \
-static s7_pointer NAME(s7_scheme* sc, s7_pointer args)          \
-{                                                               \
-    return check_result(sc, reduce(sc, args, FUNC, OPCODE, nullptr));   \
+#define OVERLOAD_COMMUTATIVE(NAME, FUNC, OPCODE)                            \
+static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
+{                                                                           \
+    return result_to_const(sc, reduce(sc, args, FUNC, OPCODE, nullptr));    \
 }
 
 OVERLOAD_COMMUTATIVE_DEFAULT(shape_add, "+", Kernel::Opcode::ADD, 0);
 OVERLOAD_COMMUTATIVE_DEFAULT(shape_mul, "*", Kernel::Opcode::MUL, 1);
 OVERLOAD_COMMUTATIVE(shape_min, "min", Kernel::Opcode::MIN);
 OVERLOAD_COMMUTATIVE(shape_max, "max", Kernel::Opcode::MAX);
+
+static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
+{
+    switch (s7_list_length(sc, args))
+    {
+        case 0:
+        {
+            return s7_wrong_number_of_args_error(sc, "-", args);
+        }
+        case 1:
+        {
+            auto s = ensure_shape(sc, s7_car(args), "-");
+            CHECK_SHAPE(s);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::NEG, to_tree(s))));
+        }
+        default:
+        {
+            auto lhs = ensure_shape(sc, s7_car(args), "-");
+            CHECK_SHAPE(lhs);
+            auto rhs = reduce(sc, s7_cdr(args), "-", Kernel::Opcode::ADD, 0);
+            CHECK_SHAPE(rhs);
+            return result_to_const(sc, to_shape(sc,
+                        Kernel::Tree(Kernel::Opcode::SUB,
+                            to_tree(lhs), to_tree(rhs))));
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -196,4 +221,5 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "*", shape_mul);
     install_overload(sc, "min", shape_min);
     install_overload(sc, "max", shape_max);
+    install_overload(sc, "-", shape_sub);
 }
