@@ -106,9 +106,8 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static s7_pointer shape_add(s7_scheme* sc, s7_pointer args)
+static s7_pointer check_result(s7_scheme* sc, s7_pointer out)
 {
-    auto out = reduce(sc, args, Kernel::Opcode::ADD, 0);
     if (!shape_is(out))
     {
         return out;
@@ -123,6 +122,22 @@ static s7_pointer shape_add(s7_scheme* sc, s7_pointer args)
         return s7_make_real(sc, tree.value());
     }
     return out;
+}
+
+#define OVERLOAD_COMMUTATIVE(NAME, OPCODE, DEFAULT)             \
+static s7_pointer NAME(s7_scheme* sc, s7_pointer args)          \
+{                                                               \
+    return check_result(sc, reduce(sc, args, OPCODE, DEFAULT)); \
+}
+
+OVERLOAD_COMMUTATIVE(shape_add, Kernel::Opcode::ADD, 0);
+OVERLOAD_COMMUTATIVE(shape_mul, Kernel::Opcode::MUL, 1);
+
+void install_overload(s7_scheme* sc, const char* op,
+                      s7_pointer (*f)(s7_scheme*, s7_pointer))
+{
+    s7_define_function(sc, op, f, 0, 0, true,
+                       s7_help(sc, s7_name_to_value(sc, op)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,5 +161,5 @@ void kernel_bind_s7(s7_scheme* sc)
     s7_define_function(sc, "shape?", shape_is_, 1, 0, false,
             "(shape? s) checks if something is a shape");
 
-    s7_define_function(sc, "+", shape_add, 0, 0, true, s7_help(sc, s7_name_to_value(sc, "+")));
+    install_overload(sc, "+", shape_add);
 }
