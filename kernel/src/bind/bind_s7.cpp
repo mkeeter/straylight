@@ -2,11 +2,17 @@
 
 #include "kernel/bind/bind_s7.h"
 
-////////////////////////////////////////////////////////////////////////////////
-
+// Populated in kernel_bind_s7; left uninitialized to make Valgrind warn
+// if we ever try to use it at the wrong time.
 static int shape_type_tag;
 
-// Define custom types, etc here
+////////////////////////////////////////////////////////////////////////////////
+
+static s7_pointer to_shape(s7_scheme* sc, Kernel::Tree t)
+{
+    return s7_make_object(sc, shape_type_tag, new Shape { t });
+}
+
 static void shape_free(void* s)
 {
     if (s)
@@ -30,17 +36,99 @@ static char* shape_print(s7_scheme* sc, void* s)
 
 static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
 {
-    (void)args; // TODO: use args
-    auto out = new Shape { Kernel::Tree::X() };
-    return s7_make_object(sc, shape_type_tag, (void*)out);
+    (void)args; // TODO: trace args[0] to get Tree
+    return to_shape(sc, Kernel::Tree::X());
 }
 
-static s7_pointer shape_is(s7_scheme *sc, s7_pointer args)
+static bool shape_is(s7_pointer s)
 {
-    return(s7_make_boolean(sc,
-        s7_is_object(s7_car(args)) &&
-        s7_object_type(s7_car(args)) == shape_type_tag));
+    return s7_is_object(s) && s7_object_type(s) == shape_type_tag;
 }
+
+static s7_pointer shape_is_(s7_scheme *sc, s7_pointer args)
+{
+    return s7_make_boolean(sc, shape_is(s7_car(args)));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
+                         Kernel::Opcode::Opcode op, float d)
+{
+    switch (s7_list_length(sc, list))
+    {
+        case 0: return to_shape(sc, Kernel::Tree::affine(0, 0, 0, d));
+        case 1:
+        {
+            auto front = s7_car(list);
+            if (shape_is(front))
+            {
+                return front;
+            }
+            else if (s7_is_number(front))
+            {
+                return to_shape(sc, Kernel::Tree::affine(0, 0, 0, s7_number_to_real(sc, front)));
+            }
+            else
+            {
+                return s7_wrong_type_arg_error(sc, "reduce", 0, front,
+                        "shape or real");
+            }
+        }
+        default:
+        {
+            auto front = s7_car(list);
+            auto rest = reduce(sc, s7_cdr(list), op, d);
+            if (!shape_is(rest))
+            {
+                return rest;
+            }
+
+            const auto& rhs = static_cast<Shape*>(s7_object_value(rest))->tree;
+            if (s7_is_number(front))
+            {
+                return to_shape(sc, Kernel::Tree(op,
+                        Kernel::Tree(s7_number_to_real(sc, front)), rhs));
+            }
+            else if (shape_is(front))
+            {
+                return to_shape(sc, Kernel::Tree(op,
+                        static_cast<Shape*>(s7_object_value(front))->tree, rhs));
+            }
+            else
+            {
+                return s7_wrong_type_arg_error(sc, "reduce", 0, s7_car(list),
+                        "shape or real");
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static s7_pointer shape_add(s7_scheme* sc, s7_pointer args)
+{
+    auto out = reduce(sc, args, Kernel::Opcode::ADD, 0);
+    if (!shape_is(out))
+    {
+        return out;
+    }
+    const auto& tree = static_cast<Shape*>(s7_object_value(out))->tree;
+
+    // If the result is a constant (indicating that there was no Shape
+    // involved in the reduction), then convert back to an ordinary
+    // Scheme real to keep addition working as usual.
+    if (tree.opcode() == Kernel::Opcode::AFFINE_VEC)
+    {
+        auto v = tree.getAffine();
+        if (v.x == 0 && v.y == 0 && v.z == 0)
+        {
+            return s7_make_real(sc, v.w);
+        }
+    }
+    return out;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void kernel_bind_s7(s7_scheme* sc)
@@ -59,6 +147,8 @@ void kernel_bind_s7(s7_scheme* sc)
 
     s7_define_function(sc, "make-shape", shape_new, 1, 0, false,
             "(make-shape func) makes a new shape");
-    s7_define_function(sc, "shape?", shape_is, 1, 0, false,
+    s7_define_function(sc, "shape?", shape_is_, 1, 0, false,
             "(shape? s) checks if something is a shape");
+
+    s7_define_function(sc, "+", shape_add, 0, 0, true, s7_help(sc, s7_name_to_value(sc, "+")));
 }

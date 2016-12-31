@@ -81,7 +81,7 @@ public:
      *  Attempts to get affine terms from a AFFINE_VEC token
      *  If success is provided, it is populated with true or false
      */
-    glm::vec4 getAffine(bool* success=nullptr)
+    glm::vec4 getAffine(bool* success=nullptr) const
         { return parent->getAffine(id, success); }
 
     /*
