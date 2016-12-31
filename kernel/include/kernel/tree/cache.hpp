@@ -85,7 +85,7 @@ public:
     /*
      *  Finds every token descending from root
      */
-    std::set<Id> findConnected(Id root);
+    std::set<Id> findConnected(Id root) const;
 
     /*
      *  If the given Id is an AFFINE_VEC, return the affine terms

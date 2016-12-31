@@ -306,7 +306,7 @@ Cache::Key Cache::key(Opcode::Opcode op, Id a, Id b) const
 /******************************************************************************
  * Tree walking and modification
  ******************************************************************************/
-std::set<Cache::Id> Cache::findConnected(Id root)
+std::set<Cache::Id> Cache::findConnected(Id root) const
 {
     std::set<Id> found = {root};
 
