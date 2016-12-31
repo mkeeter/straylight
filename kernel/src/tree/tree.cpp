@@ -35,6 +35,9 @@ Tree::Tree(Opcode::Opcode op, Tree a, Tree b)
 {
     assert(!a.id || a.parent == Cache::instance());
     assert(!b.id || b.parent == Cache::instance());
+    assert((Opcode::args(op) == 0 && !a.id && !b.id) ||
+           (Opcode::args(op) == 1 &&  a.id && !b.id) ||
+           (Opcode::args(op) == 2 &&  a.id &&  b.id));
 
     // POW only accepts integral values as its second argument
     if (op == Opcode::POW)
