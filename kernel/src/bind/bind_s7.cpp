@@ -52,12 +52,22 @@ static s7_pointer shape_is_(s7_scheme *sc, s7_pointer args)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
-                         Kernel::Opcode::Opcode op, float d)
+static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* name,
+                         Kernel::Opcode::Opcode op, float* d)
 {
     switch (s7_list_length(sc, list))
     {
-        case 0: return to_shape(sc, Kernel::Tree(d));
+        case 0:
+        {
+            if (d != nullptr)
+            {
+                return to_shape(sc, Kernel::Tree(*d));
+            }
+            else
+            {
+                return s7_wrong_number_of_args_error(sc, name, list);
+            }
+        }
         case 1:
         {
             auto front = s7_car(list);
@@ -71,14 +81,14 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
             }
             else
             {
-                return s7_wrong_type_arg_error(sc, "reduce", 0, front,
+                return s7_wrong_type_arg_error(sc, name, 0, front,
                         "shape or real");
             }
         }
         default:
         {
             auto front = s7_car(list);
-            auto rest = reduce(sc, s7_cdr(list), op, d);
+            auto rest = reduce(sc, s7_cdr(list), name, op, d);
             if (!shape_is(rest))
             {
                 return rest;
@@ -97,7 +107,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list,
             }
             else
             {
-                return s7_wrong_type_arg_error(sc, "reduce", 0, s7_car(list),
+                return s7_wrong_type_arg_error(sc, name, 0, s7_car(list),
                         "shape or real");
             }
         }
@@ -124,14 +134,23 @@ static s7_pointer check_result(s7_scheme* sc, s7_pointer out)
     return out;
 }
 
-#define OVERLOAD_COMMUTATIVE(NAME, OPCODE, DEFAULT)             \
+#define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)  \
 static s7_pointer NAME(s7_scheme* sc, s7_pointer args)          \
 {                                                               \
-    return check_result(sc, reduce(sc, args, OPCODE, DEFAULT)); \
+    float d = DEFAULT;                                          \
+    return check_result(sc, reduce(sc, args, FUNC, OPCODE, &d));   \
 }
 
-OVERLOAD_COMMUTATIVE(shape_add, Kernel::Opcode::ADD, 0);
-OVERLOAD_COMMUTATIVE(shape_mul, Kernel::Opcode::MUL, 1);
+#define OVERLOAD_COMMUTATIVE(NAME, FUNC, OPCODE)  \
+static s7_pointer NAME(s7_scheme* sc, s7_pointer args)          \
+{                                                               \
+    return check_result(sc, reduce(sc, args, FUNC, OPCODE, nullptr));   \
+}
+
+OVERLOAD_COMMUTATIVE_DEFAULT(shape_add, "+", Kernel::Opcode::ADD, 0);
+OVERLOAD_COMMUTATIVE_DEFAULT(shape_mul, "*", Kernel::Opcode::MUL, 1);
+OVERLOAD_COMMUTATIVE(shape_min, "min", Kernel::Opcode::MIN);
+OVERLOAD_COMMUTATIVE(shape_max, "max", Kernel::Opcode::MAX);
 
 void install_overload(s7_scheme* sc, const char* op,
                       s7_pointer (*f)(s7_scheme*, s7_pointer))
@@ -162,4 +181,7 @@ void kernel_bind_s7(s7_scheme* sc)
             "(shape? s) checks if something is a shape");
 
     install_overload(sc, "+", shape_add);
+    install_overload(sc, "*", shape_mul);
+    install_overload(sc, "min", shape_min);
+    install_overload(sc, "max", shape_max);
 }

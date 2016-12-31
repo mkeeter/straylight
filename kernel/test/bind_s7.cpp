@@ -13,7 +13,7 @@ std::string eval(s7_scheme* sc, std::string expr)
     return s;
 }
 
-TEST_CASE("Overloaded addition")
+TEST_CASE("shape_add")
 {
     s7_scheme* sc = s7_init();
     kernel_bind_s7(sc);
@@ -23,4 +23,40 @@ TEST_CASE("Overloaded addition")
     REQUIRE(eval(sc, "(+ 2)") == "2.0");
     REQUIRE(eval(sc, "(+ 1 2)") == "3.0");
     REQUIRE(eval(sc, "(+ 1 2 3 4)") == "10.0");
+}
+
+TEST_CASE("shape_mul")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(*)") == "1.0");
+    REQUIRE(eval(sc, "(* 1)") == "1.0");
+    REQUIRE(eval(sc, "(* 2)") == "2.0");
+    REQUIRE(eval(sc, "(* 1 2)") == "2.0");
+    REQUIRE(eval(sc, "(* 1 2 3 4)") == "24.0");
+}
+
+TEST_CASE("shape_min")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(min)") == "1.0");
+    REQUIRE(eval(sc, "(min 1)") == "1.0");
+    REQUIRE(eval(sc, "(min 2)") == "2.0");
+    REQUIRE(eval(sc, "(min 1 2)") == "1.0");
+    REQUIRE(eval(sc, "(min 1 2 3 4)") == "1.0");
+}
+
+TEST_CASE("shape_max")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(max)") == "1.0");
+    REQUIRE(eval(sc, "(max 1)") == "1.0");
+    REQUIRE(eval(sc, "(max 2)") == "2.0");
+    REQUIRE(eval(sc, "(max 1 2)") == "2.0");
+    REQUIRE(eval(sc, "(max 1 2 3 4)") == "4.0");
 }
