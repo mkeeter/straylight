@@ -4,6 +4,7 @@ find_package(PNG REQUIRED)
 ################################################################################
 
 add_library(straylight-kernel STATIC
+    src/bind/bind_s7.cpp
     src/eval/evaluator_avx.cpp
     src/eval/evaluator_base.cpp
     src/eval/result.cpp

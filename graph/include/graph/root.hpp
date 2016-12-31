@@ -191,6 +191,13 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     /*
+     *  Calls a function with the interpreter pointer
+     */
+    void call(void (*f)(s7_scheme*)) { interpreter.call(f); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    /*
      *  RAII-style system for locking the tree
      *  (to prevent intermediate evaluation)
      */

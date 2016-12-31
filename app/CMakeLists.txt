@@ -24,6 +24,7 @@ target_link_libraries(Straylight
     Qt5::Gui
     Qt5::OpenGL
     straylight-graph
+    straylight-kernel
     ${OPENGL_LIBRARIES})
 target_include_directories(Straylight PRIVATE inc)
 

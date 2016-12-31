@@ -1,11 +1,13 @@
 #include "bridge.hpp"
+#include "kernel/bind/bind_s7.h"
 
 Bridge* Bridge::_instance = nullptr;
 
 Bridge::Bridge()
     : bts(this)
 {
-    // Nothing to do here
+    // Inject the kernel bindings into the interpreter
+    r.call(kernel_bind_s7);
 }
 
 QString Bridge::checkItemName(int sheet_index, QString name) const

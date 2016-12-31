@@ -53,6 +53,12 @@ public:
      */
     bool isReserved(const std::string& k) const;
 
+    /*
+     *  Calls a function with the interpreter
+     *  Used to install custom bindings
+     */
+    void call(void (*f)(s7_scheme*)) { f(interpreter); }
+
 private:
     /*
      *  Helper functions used in cellType
