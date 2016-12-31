@@ -356,11 +356,14 @@ Cache::Id Cache::collapse(Id root)
     // Details on which nodes have changed
     std::map<Id, Id> changed;
 
+    auto connected = findConnected(root);
+
     // Turn every AFFINE into a normal OP_ADD
     // (with identity operations automatically cancelled out)
     for (auto c : tokens.left)
     {
-        if (c.first.opcode() == Opcode::AFFINE_VEC)
+        if (connected.find(c.second) != connected.end() &&
+            c.first.opcode() == Opcode::AFFINE_VEC)
         {
             auto v = getAffine(c.second);
             changed[c.second] = operation(Opcode::ADD,
