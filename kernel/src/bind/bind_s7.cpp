@@ -183,7 +183,7 @@ static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
     {
         case 0:
         {
-            return s7_wrong_number_of_args_error(sc, "-", args);
+            return s7_wrong_number_of_args_error(sc, "-: too few arguments: ~A", args);
         }
         case 1:
         {
@@ -212,7 +212,7 @@ static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
     {
         case 0:
         {
-            return s7_wrong_number_of_args_error(sc, "/", args);
+            return s7_wrong_number_of_args_error(sc, "/: too few arguments: ~A", args);
         }
         case 1:
         {
@@ -255,7 +255,7 @@ static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
             return result_to_const(sc, to_shape(sc,
                         Kernel::Tree(Kernel::Opcode::ATAN2, to_tree(a), to_tree(b))));
         }
-        default:    return s7_wrong_number_of_args_error(sc, "atan", args);
+        default:    return s7_wrong_number_of_args_error(sc, "atan: wrong number of args: ~A", args);
     }
 }
 
@@ -293,7 +293,8 @@ static s7_pointer shape_expt(s7_scheme* sc, s7_pointer args)
     }
     else
     {
-        return s7_wrong_number_of_args_error(sc, "expt", args);
+        return s7_wrong_number_of_args_error(sc,
+                "expt: wrong number of args: ~A", args);
     }
 }
 
