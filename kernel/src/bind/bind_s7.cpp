@@ -74,8 +74,11 @@ static char* shape_print(s7_scheme* sc, void* s)
 
 static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
 {
-    (void)args; // TODO: trace args[0] to get Tree
-    return to_shape(sc, Kernel::Tree::X());
+    return ensure_shape(sc, s7_call(sc, s7_car(args), s7_list(sc, 3,
+            to_shape(sc, Kernel::Tree::affine(1, 0, 0, 0)),
+            to_shape(sc, Kernel::Tree::affine(0, 1, 0, 0)),
+            to_shape(sc, Kernel::Tree::affine(0, 0, 1, 0)))),
+        "make-shape");
 }
 
 static bool is_shape(s7_pointer s)
