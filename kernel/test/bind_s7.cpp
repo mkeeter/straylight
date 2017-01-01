@@ -120,5 +120,10 @@ TEST_CASE("shape_expt")
     REQUIRE(num(sc, "(expt 2 4)") == 16);
     REQUIRE(num(sc, "(expt 4 1/2)") == 2);
 
+    REQUIRE(num(sc,
+        "(let* ((f (lambda (x y z) x))"
+        "       (d (expt (make-shape f) 1/3)))"
+        "(d 27 0 0))") == 3);
+
     // TODO: more tests of tree here
 }
