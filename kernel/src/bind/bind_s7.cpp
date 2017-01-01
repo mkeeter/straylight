@@ -1,6 +1,7 @@
 #include "s7/s7.h"
 
 #include "kernel/bind/bind_s7.h"
+#include "kernel/eval/evaluator.hpp"
 
 // Populated in kernel_bind_s7; left uninitialized to make Valgrind warn
 // if we ever try to use it at the wrong time.
@@ -79,6 +80,20 @@ static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
             to_shape(sc, Kernel::Tree::affine(0, 1, 0, 0)),
             to_shape(sc, Kernel::Tree::affine(0, 0, 1, 0)))),
         "make-shape");
+}
+static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+{
+    if (s7_list_length(sc, args) != 3)
+    {
+        return s7_wrong_number_of_args_error(sc, "apply-shape: wrong number of args: ~A", args);
+    }
+    assert(is_shape(obj));
+
+    auto e = Kernel::Evaluator(to_tree(obj));
+    return s7_make_real(sc,
+            e.eval(s7_number_to_real(sc, s7_car(args)),
+                   s7_number_to_real(sc, s7_cadr(args)),
+                   s7_number_to_real(sc, s7_caddr(args))));
 }
 
 static bool is_shape(s7_pointer s)
@@ -300,7 +315,7 @@ void kernel_bind_s7(s7_scheme* sc)
         shape_free,
         nullptr,  /* equal */
         nullptr,  /* gc_mark */
-        nullptr,  /* apply */
+        shape_apply,  /* apply */
         nullptr,  /* set */
         nullptr,  /* length */
         nullptr,  /* copy */
