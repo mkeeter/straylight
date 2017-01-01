@@ -244,6 +244,44 @@ static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
     }
 }
 
+static s7_pointer shape_expt(s7_scheme* sc, s7_pointer args)
+{
+    if (s7_list_length(sc, args) == 2)
+    {
+        auto a = s7_car(args);
+        auto b = s7_cadr(args);
+
+        if (s7_is_number(a) && s7_is_number(b))
+        {
+            return s7_make_real(sc, pow(s7_number_to_real(sc, a),
+                                        s7_number_to_real(sc, b)));
+        }
+
+        auto lhs = ensure_shape(sc, s7_car(args), "expt");
+        CHECK_SHAPE(a);
+
+        if (s7_is_integer(b))
+        {
+            return to_shape(sc, Kernel::Tree(Kernel::Opcode::POW,
+                to_tree(lhs), Kernel::Tree(s7_integer(b))));
+        }
+        else if (s7_is_ratio(b) && s7_numerator(b) == 1)
+        {
+            return to_shape(sc, Kernel::Tree(Kernel::Opcode::NTH_ROOT,
+                to_tree(lhs), Kernel::Tree(s7_denominator(b))));
+        }
+        else
+        {
+            return s7_wrong_type_arg_error(sc, "expt", 2, b,
+                    "integer or 1/integer");
+        }
+    }
+    else
+    {
+        return s7_wrong_number_of_args_error(sc, "expt", args);
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static void install_overload(s7_scheme* sc, const char* op,
@@ -281,4 +319,5 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "-", shape_sub);
     install_overload(sc, "/", shape_div);
     install_overload(sc, "atan", shape_atan);
+    install_overload(sc, "expt", shape_expt);
 }

@@ -109,3 +109,16 @@ TEST_CASE("shape_atan")
     REQUIRE(num(sc, "(atan 1 -4)") == Approx(2.89661));
     REQUIRE(num(sc, "(atan -1 -4)") == Approx(-2.89661));
 }
+
+TEST_CASE("shape_expt")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(expt)") == "wrong-number-of-args");
+    REQUIRE(num(sc, "(expt 1 4)") == 1);
+    REQUIRE(num(sc, "(expt 2 4)") == 16);
+    REQUIRE(num(sc, "(expt 4 1/2)") == 2);
+
+    // TODO: more tests of tree here
+}
