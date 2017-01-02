@@ -127,3 +127,14 @@ TEST_CASE("shape_expt")
 
     // TODO: more tests of tree here
 }
+
+TEST_CASE("shape_mod")
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+
+    REQUIRE(eval(sc, "(modulo)") == "wrong-number-of-args");
+    REQUIRE(eval(sc, "(modulo 1)") == "wrong-number-of-args");
+    REQUIRE(eval(sc, "(modulo 3 2)") == "1.0");
+    REQUIRE(eval(sc, "(modulo -5 4)") == "3.0");
+}

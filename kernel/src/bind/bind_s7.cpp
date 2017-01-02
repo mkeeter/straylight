@@ -298,6 +298,23 @@ static s7_pointer shape_expt(s7_scheme* sc, s7_pointer args)
     }
 }
 
+static s7_pointer shape_modulo(s7_scheme* sc, s7_pointer args)
+{
+    if (s7_list_length(sc, args) != 2)
+    {
+        return s7_wrong_number_of_args_error(sc,
+                "modulo: wrong number of args: ~A", args);
+    }
+
+    auto lhs = ensure_shape(sc, s7_car(args), "modulo");
+    CHECK_SHAPE(lhs);
+    auto rhs = ensure_shape(sc, s7_cadr(args), "modulo");
+    CHECK_SHAPE(rhs);
+
+    return result_to_const(sc, to_shape(sc, Kernel::Tree(Kernel::Opcode::MOD,
+        to_tree(lhs), to_tree(rhs))));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static void install_overload(s7_scheme* sc, const char* op,
@@ -336,4 +353,5 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "/", shape_div);
     install_overload(sc, "atan", shape_atan);
     install_overload(sc, "expt", shape_expt);
+    install_overload(sc, "modulo", shape_modulo);
 }
