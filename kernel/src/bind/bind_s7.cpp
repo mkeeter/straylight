@@ -315,6 +315,29 @@ static s7_pointer shape_modulo(s7_scheme* sc, s7_pointer args)
         to_tree(lhs), to_tree(rhs))));
 }
 
+#define OVERLOAD_UNARY(NAME, FUNC, OPCODE) \
+static s7_pointer NAME(s7_scheme* sc, s7_pointer args) \
+{                                                       \
+    if (s7_list_length(sc, args) != 1)                  \
+    {                                                   \
+        return s7_wrong_number_of_args_error(sc,        \
+                FUNC ": wrong number of args: ~A", args);   \
+    }   \
+    auto lhs = ensure_shape(sc, s7_car(args), FUNC);    \
+    CHECK_SHAPE(lhs);   \
+    return result_to_const(sc,  \
+            to_shape(sc, Kernel::Tree(OPCODE, to_tree(lhs)))); \
+}
+OVERLOAD_UNARY(shape_square, "square", Kernel::Opcode::SQUARE);
+OVERLOAD_UNARY(shape_sqrt, "sqrt", Kernel::Opcode::SQRT);
+OVERLOAD_UNARY(shape_abs, "abs", Kernel::Opcode::ABS);
+OVERLOAD_UNARY(shape_sin, "sin", Kernel::Opcode::SIN);
+OVERLOAD_UNARY(shape_cos, "cos", Kernel::Opcode::COS);
+OVERLOAD_UNARY(shape_tan, "tan", Kernel::Opcode::TAN);
+OVERLOAD_UNARY(shape_asin, "asin", Kernel::Opcode::ASIN);
+OVERLOAD_UNARY(shape_acos, "acos", Kernel::Opcode::ACOS);
+OVERLOAD_UNARY(shape_exp, "exp", Kernel::Opcode::EXP);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static void install_overload(s7_scheme* sc, const char* op,
@@ -354,4 +377,14 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "atan", shape_atan);
     install_overload(sc, "expt", shape_expt);
     install_overload(sc, "modulo", shape_modulo);
+
+    install_overload(sc, "square", shape_square);
+    install_overload(sc, "sqrt", shape_sqrt);
+    install_overload(sc, "abs", shape_abs);
+    install_overload(sc, "sin", shape_sin);
+    install_overload(sc, "cos", shape_cos);
+    install_overload(sc, "tan", shape_tan);
+    install_overload(sc, "asin", shape_asin);
+    install_overload(sc, "acos", shape_acos);
+    install_overload(sc, "exp", shape_exp);
 }
