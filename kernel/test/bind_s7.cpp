@@ -20,12 +20,19 @@ double num(s7_scheme* sc, std::string expr)
     return s7_real(out);
 }
 
+s7_scheme* get_scm()
+{
+    s7_scheme* sc = s7_init();
+    kernel_bind_s7(sc);
+    s7_set_current_error_port(sc, s7_open_output_string(sc));
+    return sc;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_CASE("shape_add")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(+)") == "0.0");
     REQUIRE(eval(sc, "(+ 1)") == "1.0");
@@ -36,8 +43,7 @@ TEST_CASE("shape_add")
 
 TEST_CASE("shape_mul")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(*)") == "1.0");
     REQUIRE(eval(sc, "(* 1)") == "1.0");
@@ -48,8 +54,7 @@ TEST_CASE("shape_mul")
 
 TEST_CASE("shape_min")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(min)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(min 1)") == "1.0");
@@ -60,8 +65,7 @@ TEST_CASE("shape_min")
 
 TEST_CASE("shape_max")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(max)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(max 1)") == "1.0");
@@ -72,8 +76,7 @@ TEST_CASE("shape_max")
 
 TEST_CASE("shape_sub")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(-)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(- 1)") == "-1.0");
@@ -84,8 +87,7 @@ TEST_CASE("shape_sub")
 
 TEST_CASE("shape_div")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(/)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(/ 1)") == "1.0");
@@ -96,8 +98,7 @@ TEST_CASE("shape_div")
 
 TEST_CASE("shape_atan")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(atan)") == "wrong-number-of-args");
     REQUIRE(num(sc, "(atan 1)") == Approx(M_PI/4));
@@ -112,8 +113,7 @@ TEST_CASE("shape_atan")
 
 TEST_CASE("shape_expt")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(expt)") == "wrong-number-of-args");
     REQUIRE(num(sc, "(expt 1 4)") == 1);
@@ -130,8 +130,7 @@ TEST_CASE("shape_expt")
 
 TEST_CASE("shape_mod")
 {
-    s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    auto sc = get_scm();
 
     REQUIRE(eval(sc, "(modulo)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(modulo 1)") == "wrong-number-of-args");
