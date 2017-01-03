@@ -187,7 +187,7 @@ SplitView {
 
         function slideOpen() {
             anim.from = 0
-            anim.to = items.height / 3
+            anim.to = Math.max(200, items.height / 3)
             anim.start()
             visible = true
         }
