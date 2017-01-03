@@ -17,16 +17,32 @@ Item {
         color: Style.sheetTitle
         id: header
 
-        Text {
-            id: sheetTitleText
+        Row {
+            spacing: 10
+            Text {
+                id: sheetTitleText
 
-            text: sheetName ? instanceName : "Root"
-            color: Style.textLightPrimary
-            font.family: fixedWidth.name
-            font.pointSize: 18
-            leftPadding: 5
-            topPadding: 3
-            bottomPadding: 3
+                text: sheetName ? instanceName : "Root"
+                color: Style.textLightPrimary
+                font.family: fixedWidth.name
+                font.pointSize: 18
+                leftPadding: 5
+                topPadding: 3
+                bottomPadding: 3
+            }
+
+            IconButton {
+                anchors.verticalCenter: parent.verticalCenter
+                mode: "light"
+                visible: sheetEnv.length > 1
+                text: Awesome.fa_outdent
+                onClicked: {
+                    var env = sheetEnv.slice()
+                    env.pop()
+                    sheetStack.closeTo(env)
+                }
+                toolTip: "Collapse"
+            }
         }
 
         Row {
@@ -41,26 +57,12 @@ Item {
                 rightPadding: 14
             }
 
-            Row {
+            IconButton {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 5
-                IconButton {
-                    text: Awesome.fa_plus
-                    mode: "light"
-                    toolTip: "Add cell"
-                    onClicked: { insertCell() }
-                }
-                IconButton {
-                    mode: "light"
-                    visible: sheetEnv.length > 1
-                    text: Awesome.fa_window_close
-                    onClicked: {
-                        var env = sheetEnv.slice()
-                        env.pop()
-                        sheetStack.closeTo(env)
-                    }
-                    toolTip: "Collapse"
-                }
+                text: Awesome.fa_plus
+                mode: "light"
+                toolTip: "Add cell"
+                onClicked: { insertCell() }
             }
         }
     }
