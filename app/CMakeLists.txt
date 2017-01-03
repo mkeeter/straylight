@@ -17,6 +17,7 @@ find_package(Qt5OpenGL REQUIRED)
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
     src/bridge.cpp
+    src/canvas.cpp
     qml.qrc)
 
 target_link_libraries(Straylight

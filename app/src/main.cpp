@@ -2,48 +2,23 @@
 #include <QQmlApplicationEngine>
 
 #include <QQuickItem>
-#include <QQuickFramebufferObject>
-#include <QOpenGLFramebufferObject>
 
 #include "bridge.hpp"
+#include "canvas.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class FbItemRenderer : public QQuickFramebufferObject::Renderer
-{
-    QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
-    {
-        QOpenGLFramebufferObjectFormat format;
-        format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-        // optionally enable multisampling by doing format.setSamples(4);
-        return new QOpenGLFramebufferObject(size, format);
-    }
-
-    void render()
-    {
-        glClearColor(1, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-        // Do rendering here
-    }
-};
-
-class FbItem : public QQuickFramebufferObject
-{
-    QQuickFramebufferObject::Renderer *createRenderer() const override
-    {
-        return new FbItemRenderer;
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char**argv)
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
+    // Register canvas class for drawing
     QQmlApplicationEngine engine;
-    qmlRegisterType<FbItem>("FbItem", 1, 0, "FbItem");
+    qmlRegisterType<CanvasObject>("FbItem", 1, 0, "FbItem");
+
+    // Install Bridge singleton
     qmlRegisterSingletonType<Bridge>("Bridge", 1, 0, "Bridge", Bridge::singleton);
 
     // Register pure-QML singletons
