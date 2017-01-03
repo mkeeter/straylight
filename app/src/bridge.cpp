@@ -170,9 +170,10 @@ bool Bridge::BridgeTreeSerializer::push(Graph::InstanceIndex i,
                                         const std::string& instance_name,
                                         const std::string& sheet_name)
 {
+    parent->pinged = false;
     parent->push(i.i, QString::fromStdString(instance_name),
                  QString::fromStdString(sheet_name));
-    return true;
+    return parent->pinged;
 }
 
 void Bridge::BridgeTreeSerializer::pop()

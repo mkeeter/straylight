@@ -65,6 +65,7 @@ SplitView {
 
             items.push()
             lib.push()
+            Bridge.ping()
 
             connectBridge()
         } else {

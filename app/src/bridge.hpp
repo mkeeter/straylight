@@ -40,6 +40,11 @@ public:
     Q_INVOKABLE int sheetOf(int instance_index) const;
 
     /*
+     *  Sets the pinged variable to true
+     */
+    Q_INVOKABLE void ping() { pinged = true; }
+
+    /*
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
@@ -106,6 +111,7 @@ protected:
     };
 
     BridgeTreeSerializer bts;
+    bool pinged=false;
 
     static Bridge* _instance;
 };
