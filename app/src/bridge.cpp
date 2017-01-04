@@ -143,11 +143,23 @@ QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
     Q_UNUSED(engine)
     Q_UNUSED(scriptEngine)
 
+    return singleton();
+}
+
+Bridge* Bridge::singleton()
+{
     if (_instance == nullptr)
     {
         _instance = new Bridge();
     }
     return _instance;
+}
+
+void Bridge::setCanvas(Canvas* c)
+{
+    assert(canvas == nullptr);
+    canvas = c;
+    sync();
 }
 
 Graph::Root* Bridge::root()

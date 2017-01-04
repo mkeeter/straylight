@@ -5,6 +5,11 @@
 #include "graph/root.hpp"
 #include "graph/serializer.hpp"
 
+// Forward declaration of Canvas
+class Canvas;
+
+////////////////////////////////////////////////////////////////////////////////
+
 class Bridge : public QObject
 {
     Q_OBJECT
@@ -48,12 +53,18 @@ public:
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static Bridge* singleton();
     static Graph::Root* root();
 
     /*
      *  Requests that the UI be synchronized to the graph
      */
     Q_INVOKABLE void sync();
+
+    /*
+     *  Installs the Canvas object
+     */
+    void setCanvas(Canvas* c);
 
 signals:
     /*
@@ -78,6 +89,7 @@ signals:
 
 protected:
     Graph::Root r;
+    Canvas* canvas=nullptr;
 
     /*
      *  Lightweight TreeSerializer class

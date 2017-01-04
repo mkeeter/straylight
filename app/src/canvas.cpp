@@ -1,6 +1,7 @@
 #include <QOpenGLFramebufferObject>
 
 #include "canvas.hpp"
+#include "bridge.hpp"
 
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 {
@@ -21,5 +22,7 @@ void Canvas::render()
 
 QQuickFramebufferObject::Renderer* CanvasObject::createRenderer() const
 {
-    return new Canvas;
+    auto c = new Canvas();
+    Bridge::singleton()->setCanvas(c);
+    return c;
 }
