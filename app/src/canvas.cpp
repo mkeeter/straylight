@@ -3,6 +3,8 @@
 #include "canvas.hpp"
 #include "bridge.hpp"
 
+#include "kernel/bind/bind_s7.h"
+
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 {
     QOpenGLFramebufferObjectFormat format;
@@ -26,6 +28,18 @@ void Canvas::push(Graph::InstanceIndex i)
 void Canvas::pop()
 {
     env.pop_back();
+}
+
+void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
+{
+    assert(r);
+    auto v = r->getValue({env, c}).value;
+    printf("Got value %p\n", v);
+    if (is_shape(v))
+    {
+        auto s = get_shape(v);
+        printf("Got shape %p\n", s);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

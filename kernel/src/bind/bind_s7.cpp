@@ -7,9 +7,6 @@
 // if we ever try to use it at the wrong time.
 static int shape_type_tag;
 
-// Forward declaration
-static bool is_shape(s7_pointer s);
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -22,8 +19,7 @@ static s7_pointer to_shape(s7_scheme* sc, Kernel::Tree t)
 
 static Kernel::Tree to_tree(s7_pointer obj)
 {
-    assert(is_shape(obj));
-    return static_cast<Shape*>(s7_object_value(obj))->tree;
+    return get_shape(obj)->tree;
 }
 
 /*
@@ -96,9 +92,14 @@ static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
                    s7_number_to_real(sc, s7_caddr(args))));
 }
 
-static bool is_shape(s7_pointer s)
+bool is_shape(s7_pointer s)
 {
     return s7_is_object(s) && s7_object_type(s) == shape_type_tag;
+}
+
+const Shape* get_shape(s7_cell* obj)
+{
+    return static_cast<Shape*>(s7_object_value_checked(obj, shape_type_tag));
 }
 
 static s7_pointer is_shape_(s7_scheme *sc, s7_pointer args)
@@ -147,7 +148,7 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
 {
     CHECK_SHAPE(out);
 
-    const auto& tree = static_cast<Shape*>(s7_object_value(out))->tree;
+    const auto& tree = get_shape(out)->tree;
 
     // If the result is a constant (indicating that there was no Shape
     // involved in the reduction), then convert back to an ordinary

@@ -239,6 +239,10 @@ void Bridge::BridgeTreeSerializer::cell(
     parent->cell(c.i, QString::fromStdString(name),
                  QString::fromStdString(expr), type,
                  valid, QString::fromStdString(val));
+    if (parent->canvas)
+    {
+        parent->canvas->cell(c, &parent->r);
+    }
 }
 
 void Bridge::BridgeTreeSerializer::sheet(
