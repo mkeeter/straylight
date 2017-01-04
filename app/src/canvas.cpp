@@ -18,6 +18,16 @@ void Canvas::render()
     // Do rendering here
 }
 
+void Canvas::push(Graph::InstanceIndex i)
+{
+    env.push_back(i);
+}
+
+void Canvas::pop()
+{
+    env.pop_back();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 QQuickFramebufferObject::Renderer* CanvasObject::createRenderer() const

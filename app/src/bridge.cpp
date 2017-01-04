@@ -1,4 +1,6 @@
 #include "bridge.hpp"
+#include "canvas.hpp"
+
 #include "kernel/bind/bind_s7.h"
 
 Bridge* Bridge::_instance = nullptr;
@@ -185,12 +187,22 @@ bool Bridge::BridgeTreeSerializer::push(Graph::InstanceIndex i,
     parent->pinged = false;
     parent->push(i.i, QString::fromStdString(instance_name),
                  QString::fromStdString(sheet_name));
+
+    if (parent->canvas)
+    {
+        parent->canvas->push(i);
+    }
+
     return parent->pinged;
 }
 
 void Bridge::BridgeTreeSerializer::pop()
 {
     parent->pop();
+    if (parent->canvas)
+    {
+        parent->canvas->pop();
+    }
 }
 
 void Bridge::BridgeTreeSerializer::instance(
