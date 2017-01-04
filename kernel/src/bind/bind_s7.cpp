@@ -77,6 +77,7 @@ static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
             to_shape(sc, Kernel::Tree::affine(0, 0, 1, 0)))),
         "make-shape");
 }
+
 static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
 {
     if (s7_list_length(sc, args) != 3)

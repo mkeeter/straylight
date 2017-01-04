@@ -283,6 +283,11 @@ void Interpreter::release(ValuePtr v)
     s7_gc_unprotect(interpreter, v);
 }
 
+ValuePtr Interpreter::untag(ValuePtr v) const
+{
+    return s7_cdr(v);
+}
+
 s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
                                const CellKey& looker)
 {

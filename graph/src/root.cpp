@@ -257,6 +257,16 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
+ValuePtr Root::getRawValuePtr(const CellKey& cell) const
+{
+    return interpreter.untag(getValue(cell).value);
+}
+
+bool Root::isValid(const CellKey& cell) const
+{
+    return getValue(cell).valid;
+}
+
 bool Root::checkItemName(const SheetIndex& parent,
                          const std::string& name,
                          std::string* err) const

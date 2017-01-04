@@ -33,12 +33,19 @@ void Canvas::pop()
 void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
 {
     assert(r);
-    auto v = r->getValue({env, c}).value;
-    printf("Got value %p\n", v);
-    if (is_shape(v))
+
+    Graph::CellKey key = {env, c};
+    if (r->isValid(key))
     {
-        auto s = get_shape(v);
-        printf("Got shape %p\n", s);
+        auto v = r->getRawValuePtr(key);
+
+        // Low-level functions to strip the Shape from the data allocated by
+        // the interpreter
+        if (is_shape(v))
+        {
+            auto s = get_shape(v);
+            printf("Got shape %p\n", s);
+        }
     }
 }
 

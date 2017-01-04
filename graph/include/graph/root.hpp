@@ -76,6 +76,16 @@ public:
     const Value& getValue(const CellKey& cell) const;
 
     /*
+     *  Checks to see if the given cell is valid
+     */
+    bool isValid(const CellKey& cell) const;
+
+    /*
+     *  Returns the raw value pointer from a cell
+     */
+    ValuePtr getRawValuePtr(const CellKey& cell) const;
+
+    /*
      *  Checks to see whether the given sheet name is valid
      *  (both as an identifier and in having no collisions)
      */
