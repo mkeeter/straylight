@@ -67,13 +67,15 @@ Item {
         }
     }
 
-    DropShadow {
-        anchors.fill: header
-        horizontalOffset: 0
-        verticalOffset: 3
-        radius: 8.0
-        color: "#80000000"
-        source: header
-        cached: true
+    Rectangle {
+        anchors.top: header.bottom
+        anchors.left: header.left
+        anchors.right: header.right
+        height: 10
+
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: '#40000000'}
+            GradientStop { position: 1.0; color: '#00000000'}
+        }
     }
 }

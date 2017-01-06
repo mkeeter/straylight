@@ -1,3 +1,5 @@
+#include <QDebug>
+#include <QQuickWindow>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
@@ -8,15 +10,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
 int main(int argc, char**argv)
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication app(argc, argv);
+    {   // Configure default OpenGL as 3.3 Core
+        QSurfaceFormat format;
+        format.setVersion(3, 3);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+        QSurfaceFormat::setDefaultFormat(format);
+    }
 
     // Register canvas class for drawing
-    QQmlApplicationEngine engine;
-    qmlRegisterType<CanvasObject>("FbItem", 1, 0, "FbItem");
+    qmlRegisterType<CanvasObject>("Canvas", 1, 0, "Canvas");
 
     // Install Bridge singleton
     qmlRegisterSingletonType<Bridge>("Bridge", 1, 0, "Bridge", Bridge::singleton);
@@ -26,9 +30,9 @@ int main(int argc, char**argv)
     qmlRegisterSingletonType(QUrl("qrc:/qml/Style.qml"), "Style", 1, 0, "Style");
     qmlRegisterSingletonType(QUrl("qrc:/qml/Awesome.qml"), "Awesome", 4, 7, "Awesome");
 
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
 
     return app.exec();
-
-    return 1;
 }

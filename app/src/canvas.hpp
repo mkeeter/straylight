@@ -8,6 +8,8 @@
 
 #include "kernel/tree/tree.hpp"
 
+#include "axes.hpp"
+
 class Canvas : public QQuickFramebufferObject::Renderer
 {
 public:
@@ -21,6 +23,8 @@ public:
 protected:
     std::list<Graph::InstanceIndex> env;
     std::map<Graph::CellKey, Kernel::Tree*> shapes;
+
+    Axes axes;
 };
 
 class CanvasObject : public QQuickFramebufferObject

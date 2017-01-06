@@ -25,5 +25,8 @@
 
         <file>fonts/fontawesome-webfont.ttf</file>
         <file>fonts/Inconsolata-Regular.ttf</file>
+
+        <file>gl/axes.vert</file>
+        <file>gl/axes.frag</file>
     </qresource>
 </RCC>

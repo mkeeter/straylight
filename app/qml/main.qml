@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
-import FbItem 1.0
+import Canvas 1.0
 import Style 1.0
 import Material 1.0
 import Bridge 1.0
@@ -66,7 +66,8 @@ ApplicationWindow {
             anchors.top: parent.top
         }
 
-        FbItem {
+        // Rendering window (handled in C++)
+        Canvas {
             id: viewport
             Layout.minimumWidth: 100
             Layout.fillWidth: true

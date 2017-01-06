@@ -9,14 +9,18 @@ QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 {
     QOpenGLFramebufferObjectFormat format;
     format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+
     // optionally enable multisampling by doing format.setSamples(4);
     return new QOpenGLFramebufferObject(size, format);
 }
 
 void Canvas::render()
 {
-    glClearColor(1, 1, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    axes.draw(QMatrix4x4());
+
     // Do rendering here
 }
 
