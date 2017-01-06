@@ -13,58 +13,61 @@ Axes::Axes()
     {   // In-line data for axes model
         const float o = 0.05;
 
+#define MATERIAL_RED    0.957, 0.263, 0.212
+#define MATERIAL_GREEN  0.298, 0.686, 0.314
+#define MATERIAL_BLUE   0.129, 0.588, 0.953
         // Data is arranged  x   y   z   r   g   b
         GLfloat data[] = {   /********************/
                              /*    X axis        */
-                             o,  o,  o,  1,  0,  0,
-                             o, -o,  o,  1,  0,  0,
-                             1,  0,  0,  1,  0,  0,
+                             o,  o,  o,  MATERIAL_RED,
+                             o, -o,  o,  MATERIAL_RED,
+                             1,  0,  0,  MATERIAL_RED,
 
-                             o,  o, -o,  1,  0,  0,
-                             o, -o, -o,  1,  0,  0,
-                             1,  0,  0,  1,  0,  0,
+                             o,  o, -o,  MATERIAL_RED,
+                             o, -o, -o,  MATERIAL_RED,
+                             1,  0,  0,  MATERIAL_RED,
 
-                             o,  o,  o,  1,  0,  0,
-                             o,  o, -o,  1,  0,  0,
-                             1,  0,  0,  1,  0,  0,
+                             o,  o,  o,  MATERIAL_RED,
+                             o,  o, -o,  MATERIAL_RED,
+                             1,  0,  0,  MATERIAL_RED,
 
-                             o, -o,  o,  1,  0,  0,
-                             o, -o, -o,  1,  0,  0,
-                             1,  0,  0,  1,  0,  0,
+                             o, -o,  o,  MATERIAL_RED,
+                             o, -o, -o,  MATERIAL_RED,
+                             1,  0,  0,  MATERIAL_RED,
                              /********************/
                              /*    Y axis        */
-                             o,  o,  o,  0,  1,  0,
-                            -o,  o,  o,  0,  1,  0,
-                             0,  1,  0,  0,  1,  0,
+                             o,  o,  o,  MATERIAL_GREEN,
+                            -o,  o,  o,  MATERIAL_GREEN,
+                             0,  1,  0,  MATERIAL_GREEN,
 
-                             o,  o, -o,  0,  1,  0,
-                            -o,  o, -o,  0,  1,  0,
-                             0,  1,  0,  0,  1,  0,
+                             o,  o, -o,  MATERIAL_GREEN,
+                            -o,  o, -o,  MATERIAL_GREEN,
+                             0,  1,  0,  MATERIAL_GREEN,
 
-                             o,  o,  o,  0,  1,  0,
-                             o,  o, -o,  0,  1,  0,
-                             0,  1,  0,  0,  1,  0,
+                             o,  o,  o,  MATERIAL_GREEN,
+                             o,  o, -o,  MATERIAL_GREEN,
+                             0,  1,  0,  MATERIAL_GREEN,
 
-                            -o,  o,  o,  0,  1,  0,
-                            -o,  o, -o,  0,  1,  0,
-                             0,  1,  0,  0,  1,  0,
+                            -o,  o,  o,  MATERIAL_GREEN,
+                            -o,  o, -o,  MATERIAL_GREEN,
+                             0,  1,  0,  MATERIAL_GREEN,
                              /********************/
                              /*    Z axis        */
-                             o,  o,  o,  0,  0,  1,
-                            -o,  o,  o,  0,  0,  1,
-                             0,  0,  1,  0,  0,  1,
+                             o,  o,  o,  MATERIAL_BLUE,
+                            -o,  o,  o,  MATERIAL_BLUE,
+                             0,  0,  1,  MATERIAL_BLUE,
 
-                             o, -o,  o,  0,  0,  1,
-                            -o, -o,  o,  0,  0,  1,
-                             0,  0,  1,  0,  0,  1,
+                             o, -o,  o,  MATERIAL_BLUE,
+                            -o, -o,  o,  MATERIAL_BLUE,
+                             0,  0,  1,  MATERIAL_BLUE,
 
-                             o,  o,  o,  0,  0,  1,
-                             o, -o,  o,  0,  0,  1,
-                             0,  0,  1,  0,  0,  1,
+                             o,  o,  o,  MATERIAL_BLUE,
+                             o, -o,  o,  MATERIAL_BLUE,
+                             0,  0,  1,  MATERIAL_BLUE,
 
-                            -o,  o,  o,  0,  0,  1,
-                            -o, -o,  o,  0,  0,  1,
-                             0,  0,  1,  0,  0,  1,
+                            -o,  o,  o,  MATERIAL_BLUE,
+                            -o, -o,  o,  MATERIAL_BLUE,
+                             0,  0,  1,  MATERIAL_BLUE,
                              /********************/
                              /*    Base cube     */
                              o,  o, -o,  1,  1,  1,
