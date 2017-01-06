@@ -9,8 +9,8 @@ QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 {
     QOpenGLFramebufferObjectFormat format;
     format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    format.setSamples(4);
 
-    // optionally enable multisampling by doing format.setSamples(4);
     return new QOpenGLFramebufferObject(size, format);
 }
 
