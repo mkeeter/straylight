@@ -71,6 +71,14 @@ ApplicationWindow {
             id: viewport
             Layout.minimumWidth: 100
             Layout.fillWidth: true
+
+            function emitSize() {
+                Bridge.canvasResized(width, height)
+            }
+            Component.onCompleted: {
+                widthChanged.connect(emitSize)
+                heightChanged.connect(emitSize)
+            }
         }
 
         Component.onCompleted: {

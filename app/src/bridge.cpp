@@ -161,6 +161,8 @@ void Bridge::setCanvas(Canvas* c)
 {
     assert(canvas == nullptr);
     canvas = c;
+    connect(this, &Bridge::canvasResized,
+            c, &Canvas::setSize);
     sync();
 }
 

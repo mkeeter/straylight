@@ -87,6 +87,11 @@ signals:
 
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
+    /*
+     *  Signals to handle updating 3D viewport size
+     */
+    void canvasResized(float w, float h);
+
 protected:
     Graph::Root r;
     Canvas* canvas=nullptr;
