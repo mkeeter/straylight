@@ -79,6 +79,10 @@ ApplicationWindow {
                 widthChanged.connect(emitSize)
                 heightChanged.connect(emitSize)
             }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+            }
         }
 
         Component.onCompleted: {
