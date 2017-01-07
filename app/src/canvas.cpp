@@ -57,12 +57,29 @@ void Canvas::render()
 
 void Canvas::push(Graph::InstanceIndex i)
 {
+    if (env.size() == 0)
+    {
+        assert(visited.size() == 0);
+    }
     env.push_back(i);
 }
 
 void Canvas::pop()
 {
     env.pop_back();
+
+    if (env.size() == 0)
+    {
+        for (auto s : shapes)
+        {
+            if (visited.find(s.first) == visited.end())
+            {
+                delete s.second;
+                shapes.erase(s.first);
+            }
+        }
+        visited.clear();
+    }
 }
 
 void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
@@ -79,6 +96,11 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
         if (is_shape(v))
         {
             auto s = get_shape(v);
+            if (shapes.count({key, s}) == 0)
+            {
+                shapes[{key, s}] = new ::Renderer(s->tree);
+            }
+            visited.insert({key, s});
         }
     }
 }
@@ -104,7 +126,7 @@ void Canvas::panIncremental(float dx, float dy)
 {
     // Find the starting position in world coordinates
     auto inv = M().inverted();
-    auto diff = inv.map({dx/window_size.x(), dy/window_size.y(), 0}) - 
+    auto diff = inv.map({dx/window_size.x(), dy/window_size.y(), 0}) -
                 inv.map({0, 0, 0});
 
     center += diff*2;

@@ -9,6 +9,9 @@
 #include "kernel/tree/tree.hpp"
 
 #include "axes.hpp"
+#include "renderer.hpp"
+
+struct Shape;
 
 class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {
@@ -58,7 +61,9 @@ protected:
 
     // Render tracking
     std::list<Graph::InstanceIndex> env;
-    std::map<Graph::CellKey, Kernel::Tree*> shapes;
+
+    std::set<std::pair<Graph::CellKey, const Shape*>> visited;
+    std::map<std::pair<Graph::CellKey, const Shape*>, ::Renderer*> shapes;
 };
 
 class CanvasObject : public QQuickFramebufferObject

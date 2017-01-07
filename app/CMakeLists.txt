@@ -19,6 +19,7 @@ add_executable(Straylight MACOSX_BUNDLE
     src/bridge.cpp
     src/canvas.cpp
     src/axes.cpp
+    src/renderer.cpp
     resources.qrc)
 
 target_link_libraries(Straylight
