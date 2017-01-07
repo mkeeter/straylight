@@ -80,8 +80,19 @@ ApplicationWindow {
                 heightChanged.connect(emitSize)
             }
             MouseArea {
+                property real prevX: 0
+                property real prevY: 0
+
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+                hoverEnabled: true
+                onPositionChanged: function(event) {
+                    if (event.buttons & Qt.LeftButton) {
+                        Bridge.canvasRotated(event.x - prevX, event.y - prevY)
+                    }
+                    prevX = event.x
+                    prevY = event.y
+                }
             }
         }
 

@@ -87,10 +87,16 @@ signals:
 
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
+public slots:
     /*
      *  Signals to handle updating 3D viewport size
      */
     void canvasResized(float w, float h);
+
+    /*
+     *  Rotate the canvas incrementally
+     */
+    void canvasRotated(float dx, float dy);
 
 protected:
     Graph::Root r;

@@ -161,9 +161,23 @@ void Bridge::setCanvas(Canvas* c)
 {
     assert(canvas == nullptr);
     canvas = c;
-    connect(this, &Bridge::canvasResized,
-            c, &Canvas::setSize);
     sync();
+}
+
+void Bridge::canvasResized(float w, float h)
+{
+    if (canvas != nullptr)
+    {
+        canvas->setSize(w, h);
+    }
+}
+
+void Bridge::canvasRotated(float dx, float dy)
+{
+    if (canvas != nullptr)
+    {
+        canvas->rotateIncremental(dx, dy);
+    }
 }
 
 Graph::Root* Bridge::root()

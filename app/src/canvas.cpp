@@ -36,15 +36,13 @@ QMatrix4x4 Canvas::proj() const
 
 QMatrix4x4 Canvas::view() const
 {
-    /*
-    glm::mat4 m = glm::scale(glm::vec3(scale, scale, scale));;
-    m = glm::rotate(m, pitch,  {1.0, 0.0, 0.0});
-    m = glm::rotate(m, roll, {0.0, 0.0, 1.0});
-    m = glm::translate(m, center);
+    QMatrix4x4 m;
+    m.scale(scale, scale, scale);
+    m.rotate(pitch, {1, 0, 0});
+    m.rotate(yaw,   {0, 0, 1});
+    m.translate(center);
 
     return m;
-    */
-    return QMatrix4x4();
 }
 
 void Canvas::render()
@@ -81,7 +79,6 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
         if (is_shape(v))
         {
             auto s = get_shape(v);
-            printf("Got shape %p\n", s);
         }
     }
 }
@@ -89,6 +86,13 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
 void Canvas::setSize(float w, float h)
 {
     window_size = {w, h};
+    update();
+}
+
+void Canvas::rotateIncremental(float x, float y)
+{
+    pitch += x;
+    yaw += y;
     update();
 }
 
