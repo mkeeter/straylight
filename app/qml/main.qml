@@ -96,6 +96,10 @@ ApplicationWindow {
                     prevX = event.x
                     prevY = event.y
                 }
+                onPressed: function(event) {
+                    prevX = event.x
+                    prevY = event.y
+                }
             }
         }
 
