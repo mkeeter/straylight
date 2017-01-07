@@ -111,6 +111,17 @@ void Canvas::panIncremental(float dx, float dy)
     update();
 }
 
+void Canvas::zoomIncremental(float ds, float x, float y)
+{
+    QVector3D pt(x / window_size.x() - 0.5, y / window_size.y() - 0.5, 0);
+    auto a = M().inverted().map(pt);
+
+    scale *= pow(1.1, ds / 120.);
+    center += 2 * (M().inverted().map(pt) - a);
+
+    update();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 QQuickFramebufferObject::Renderer* CanvasObject::createRenderer() const

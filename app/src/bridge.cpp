@@ -188,6 +188,14 @@ void Bridge::canvasPanned(float dx, float dy)
     }
 }
 
+void Bridge::canvasZoomed(float ds, float x, float y)
+{
+    if (canvas != nullptr)
+    {
+        canvas->zoomIncremental(ds, x, y);
+    }
+}
+
 Graph::Root* Bridge::root()
 {
     if (_instance == nullptr)

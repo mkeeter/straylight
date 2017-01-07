@@ -98,6 +98,7 @@ public slots:
      */
     void canvasRotated(float dx, float dy);
     void canvasPanned(float dx, float dy);
+    void canvasZoomed(float ds, float x, float y);
 
 protected:
     Graph::Root r;

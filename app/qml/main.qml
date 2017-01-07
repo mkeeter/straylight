@@ -100,6 +100,9 @@ ApplicationWindow {
                     prevX = event.x
                     prevY = event.y
                 }
+                onWheel: function(event) {
+                    Bridge.canvasZoomed(event.angleDelta.y, event.x, event.y)
+                }
             }
         }
 
