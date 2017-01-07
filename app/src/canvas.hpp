@@ -62,8 +62,9 @@ protected:
     // Render tracking
     std::list<Graph::InstanceIndex> env;
 
-    std::set<std::pair<Graph::CellKey, const Shape*>> visited;
-    std::map<std::pair<Graph::CellKey, const Shape*>, ::Renderer*> shapes;
+    typedef std::pair<Graph::CellKey, const Shape*> ShapeKey;
+    std::set<ShapeKey> visited;
+    std::map<ShapeKey, ::Renderer*> shapes;
 };
 
 class CanvasObject : public QQuickFramebufferObject

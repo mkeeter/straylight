@@ -70,13 +70,18 @@ void Canvas::pop()
 
     if (env.size() == 0)
     {
+        std::set<ShapeKey> to_erase;
         for (auto s : shapes)
         {
             if (visited.find(s.first) == visited.end())
             {
                 delete s.second;
-                shapes.erase(s.first);
+                to_erase.insert(s.first);
             }
+        }
+        for (auto e : to_erase)
+        {
+            shapes.erase(e);
         }
         visited.clear();
     }
