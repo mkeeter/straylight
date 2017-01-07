@@ -180,6 +180,14 @@ void Bridge::canvasRotated(float dx, float dy)
     }
 }
 
+void Bridge::canvasPanned(float dx, float dy)
+{
+    if (canvas != nullptr)
+    {
+        canvas->panIncremental(dx, dy);
+    }
+}
+
 Graph::Root* Bridge::root()
 {
     if (_instance == nullptr)

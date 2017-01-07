@@ -89,10 +89,25 @@ void Canvas::setSize(float w, float h)
     update();
 }
 
-void Canvas::rotateIncremental(float x, float y)
+void Canvas::rotateIncremental(float dx, float dy)
 {
-    pitch += x;
-    yaw += y;
+    pitch -= dy;
+    yaw -= dx;
+
+    pitch = fmin(fmax(pitch, 0), 180);
+    yaw = fmod(yaw, 360);
+
+    update();
+}
+
+void Canvas::panIncremental(float dx, float dy)
+{
+    // Find the starting position in world coordinates
+    auto inv = M().inverted();
+    auto diff = inv.map({dx/window_size.x(), dy/window_size.y(), 0}) - 
+                inv.map({0, 0, 0});
+
+    center += diff*2;
     update();
 }
 

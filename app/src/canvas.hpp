@@ -24,6 +24,7 @@ public:
 public slots:
     void setSize(float w, float h);
     void rotateIncremental(float dx, float dy);
+    void panIncremental(float dx, float dy);
 
 protected:
     /*

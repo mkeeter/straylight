@@ -97,6 +97,7 @@ public slots:
      *  Rotate the canvas incrementally
      */
     void canvasRotated(float dx, float dy);
+    void canvasPanned(float dx, float dy);
 
 protected:
     Graph::Root r;

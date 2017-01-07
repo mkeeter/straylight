@@ -90,6 +90,9 @@ ApplicationWindow {
                     if (event.buttons & Qt.LeftButton) {
                         Bridge.canvasRotated(event.x - prevX, event.y - prevY)
                     }
+                    else if (event.buttons & Qt.RightButton) {
+                        Bridge.canvasPanned(event.x - prevX, event.y - prevY)
+                    }
                     prevX = event.x
                     prevY = event.y
                 }
