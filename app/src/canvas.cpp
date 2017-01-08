@@ -75,7 +75,7 @@ void Canvas::pop()
         {
             if (visited.find(s.first) == visited.end())
             {
-                delete s.second;
+                s.second->deleteWhenNotRunning();
                 to_erase.insert(s.first);
             }
         }
@@ -96,8 +96,8 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
     {
         auto v = r->getRawValuePtr(key);
 
-        // Low-level functions to strip the Shape from the data allocated by
-        // the interpreter
+        // If this is a (Scheme) shape, then extract it and make a Renderer
+        // for it (if one doesn't already exist)
         if (is_shape(v))
         {
             auto s = get_shape(v);
@@ -105,10 +105,24 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
             {
                 auto r = new ::Renderer(s->tree);
                 shapes[{key, s}] = r;
+
+                // Connect the renderer to our viewChanged signal so it will
+                // automatically redraw when necessary
                 connect(this, &Canvas::viewChanged,
                         r, &::Renderer::onViewChanged);
-                emit viewChanged(M(), window_size);
+
+                // Connect the renderer and the blitter, so bitmaps will
+                // magically appear in the 3D viewport
+                connect(r, &::Renderer::gotResult,
+                        &blitter, &Blitter::addQuad);
+                connect(r, &::Renderer::goodbye,
+                        &blitter, &Blitter::forget);
+
+                // Kick off an initial render
+                r->onViewChanged(M(), window_size);
             }
+
+            // Make sure we don't delete this renderer
             visited.insert({key, s});
         }
     }

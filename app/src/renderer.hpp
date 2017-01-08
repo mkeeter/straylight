@@ -17,45 +17,64 @@ public:
     Renderer(Kernel::Tree t);
     ~Renderer();
 
-public slots:
-    void onViewChanged(QMatrix4x4 mat, QSize size);
+    /*
+     *  Asks this renderer to delete itself when it's done
+     *  with the current task.
+     */
+    void deleteWhenNotRunning();
 
-protected:
     struct Result {
         Kernel::DepthImage depth;
         Kernel::NormalImage norm;
     };
 
     struct Task {
-        Task() : valid(false) {}
+        Task() {}
         Task(QMatrix4x4 mat, QSize size)
-            : mat(mat), size(size), valid(true) {}
+            : mat(mat), size(size) {}
 
         QMatrix4x4 mat;
         QSize size;
-        bool valid=false;
     };
 
+signals:
     /*
-     *  Kicks off a new render operation, drawing from next_task
+     *  Passes off a result to the blitter
      */
-    void startRender();
+    void gotResult(Renderer* self, Result r, Task t);
 
     /*
-     *  Run the rendering task on the current task
+     *  Emitted before (self-)destruction
+     *  Used to inform the blitter that these results should be forgotten
      */
-    Result run();
+    void goodbye(Renderer* self);
+
+public slots:
+    void onViewChanged(QMatrix4x4 mat, QSize size);
 
 protected slots:
     void onRenderFinished();
 
 protected:
+    /*
+     *  Kicks off a new render operation if we're not rendering
+     *  and next task is available
+     */
+    void checkNext();
+
+    /*
+     *  Run the rendering task on the given task
+     */
+    void run(Task t);
+
     std::vector<Kernel::Evaluator*> evaluators;
     std::atomic_bool abort;
 
-    Task current_task;
-    Task next_task;
+    /*  What should we do when the current task completes?
+     *  (this would be nicer as a variant type) */
+    Task next;
+    enum { NOTHING, NEXT, DELETE } todo;
 
-    QFuture<Result> future;
-    QFutureWatcher<Result> watcher;
+    QFuture<void> future;
+    QFutureWatcher<void> watcher;
 };

@@ -10,6 +10,7 @@
 
 #include "axes.hpp"
 #include "renderer.hpp"
+#include "blitter.hpp"
 
 struct Shape;
 
@@ -65,9 +66,15 @@ protected:
     // Render tracking
     std::list<Graph::InstanceIndex> env;
 
+    /*  Here, we store the set of shapes to be drawn */
     typedef std::pair<Graph::CellKey, const Shape*> ShapeKey;
-    std::set<ShapeKey> visited;
     std::map<ShapeKey, ::Renderer*> shapes;
+
+    /*  Used in graph serialization to keep track of which keys are active */
+    std::set<ShapeKey> visited;
+
+    /*  Responsible for actually blitting rendered shapes to the screen */
+    Blitter blitter;
 };
 
 class CanvasObject : public QQuickFramebufferObject
