@@ -16,8 +16,8 @@ QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 
 QMatrix4x4 Canvas::proj() const
 {
-    float width = window_size.x();
-    float height = window_size.y();
+    float width = window_size.width();
+    float height = window_size.height();
 
     QMatrix4x4 m;
 
@@ -116,7 +116,7 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
 
 void Canvas::setSize(float w, float h)
 {
-    window_size = {w, h};
+    window_size = QSize(w, h);
     emit viewChanged(M(), window_size);
     update();
 }
@@ -137,7 +137,7 @@ void Canvas::panIncremental(float dx, float dy)
 {
     // Find the starting position in world coordinates
     auto inv = M().inverted();
-    auto diff = inv.map({dx/window_size.x(), dy/window_size.y(), 0}) -
+    auto diff = inv.map({dx/window_size.width(), dy/window_size.height(), 0}) -
                 inv.map({0, 0, 0});
 
     center += diff*2;
@@ -147,7 +147,8 @@ void Canvas::panIncremental(float dx, float dy)
 
 void Canvas::zoomIncremental(float ds, float x, float y)
 {
-    QVector3D pt(x / window_size.x() - 0.5, y / window_size.y() - 0.5, 0);
+    QVector3D pt(x / window_size.width() - 0.5,
+                 y / window_size.height() - 0.5, 0);
     auto a = M().inverted().map(pt);
 
     scale *= pow(1.1, ds / 120.);

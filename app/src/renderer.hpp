@@ -18,7 +18,7 @@ public:
     ~Renderer();
 
 public slots:
-    void onViewChanged(QMatrix4x4 mat, QVector2D size);
+    void onViewChanged(QMatrix4x4 mat, QSize size);
 
 protected:
     struct Result {
@@ -28,10 +28,11 @@ protected:
 
     struct Task {
         Task() : valid(false) {}
-        Task(QMatrix4x4 mat, QVector2D size)
+        Task(QMatrix4x4 mat, QSize size)
             : mat(mat), size(size), valid(true) {}
+
         QMatrix4x4 mat;
-        QVector2D size;
+        QSize size;
         bool valid=false;
     };
 

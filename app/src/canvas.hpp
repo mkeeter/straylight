@@ -31,7 +31,7 @@ public slots:
     void zoomIncremental(float ds, float x, float y);
 
 signals:
-    void viewChanged(QMatrix4x4 mat, QVector2D size);
+    void viewChanged(QMatrix4x4 mat, QSize size);
 
 protected:
     /*
@@ -57,7 +57,7 @@ protected:
     float pitch=0;
     float yaw=0;
 
-    QVector2D window_size;
+    QSize window_size;
 
     // Background axes
     Axes axes;

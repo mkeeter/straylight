@@ -1,6 +1,8 @@
 #include <QtConcurrent>
 #include <QThread>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "renderer.hpp"
 
 Renderer::Renderer(Kernel::Tree t)
@@ -21,7 +23,7 @@ Renderer::~Renderer()
     }
 }
 
-void Renderer::onViewChanged(QMatrix4x4 mat, QVector2D size)
+void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
 {
     next_task = Task(mat, size);
     if (!watcher.isRunning())
@@ -62,6 +64,10 @@ void Renderer::startRender()
 
 Renderer::Result Renderer::run()
 {
-    QThread::sleep(5);
-    return {Kernel::DepthImage(), Kernel::NormalImage()};
+    Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1},
+             current_task.size.width()/2,
+             current_task.size.height()/2, 255);
+    auto m = glm::make_mat4(current_task.mat.data());
+    auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
+    return {out.first, out.second};
 }
