@@ -28,5 +28,7 @@
 
         <file>gl/axes.vert</file>
         <file>gl/axes.frag</file>
+        <file>gl/depthquad.vert</file>
+        <file>gl/depthquad.frag</file>
     </qresource>
 </RCC>

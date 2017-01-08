@@ -48,9 +48,11 @@ QMatrix4x4 Canvas::view() const
 void Canvas::render()
 {
     glClearColor(0, 0, 0, 1);
+    glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     axes.draw(M());
+    blitter.draw(M());
 
     // Do rendering here
 }

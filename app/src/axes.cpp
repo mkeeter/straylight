@@ -123,6 +123,7 @@ void Axes::draw(QMatrix4x4 M)
 
     solid_vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, 54);
+    solid_vao.release();
 
     shader.release();
 }

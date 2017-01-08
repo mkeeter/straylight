@@ -1,14 +1,20 @@
 #pragma once
+
 #include <QObject>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions>
 #include <QOpenGLTexture>
 
 #include "renderer.hpp"
 
-class Blitter : public QObject
+class Blitter : public QObject, public QOpenGLFunctions
 {
     Q_OBJECT
 public:
-    Blitter() {}
+    Blitter();
+    void draw(QMatrix4x4 M);
 
 public slots:
     void addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t);
@@ -22,4 +28,8 @@ protected:
         //QOpenGLTexture norm;
     };
     std::map<Renderer*, Quad> quads;
+
+    QOpenGLBuffer quad_vbo;
+    QOpenGLVertexArrayObject quad_vao;
+    QOpenGLShaderProgram shader;
 };
