@@ -10,31 +10,33 @@ Blitter::Blitter()
             QOpenGLShader::Fragment, ":/gl/depthquad.frag");
     shader.link();
 
-    {
-        GLfloat data[] ={   -1.0f, -1.0f, 0.0f,
-                             1.0f, -1.0f, 0.0f,
-                             1.0f,  1.0f, 0.0f,
-                            -1.0f,  1.0f, 0.0f  };
+    GLfloat data[] ={   -1.0f, -1.0f,
+                         1.0f, -1.0f,
+                         1.0f,  1.0f,
+                        -1.0f,  1.0f };
 
-        quad_vbo.create();
-        quad_vbo.bind();
-        quad_vbo.allocate(data, sizeof(data));
+    quad_vbo.create();
+    quad_vbo.bind();
+    quad_vbo.allocate(data, sizeof(data));
 
-        quad_vao.create();
-        quad_vao.bind();
+    quad_vao.create();
+    quad_vao.bind();
 
-        glVertexAttribPointer(
-                0, 3, GL_FLOAT, GL_FALSE,
-                3 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+            0, 2, GL_FLOAT, GL_FALSE,
+            2 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
 
-        quad_vbo.release();
-        quad_vao.release();
-    }
+    quad_vbo.release();
+    quad_vao.release();
 }
 
 void Blitter::addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t)
 {
+    (void)R;
+    (void)imgs;
+    (void)t;
+
     quads[R] = Quad();
 }
 
