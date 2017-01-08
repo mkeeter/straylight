@@ -29,6 +29,10 @@ void Renderer::onViewChanged(QMatrix4x4 mat, QVector2D size)
         printf("Starting new render from onViewChanged!\n");
         startRender();
     }
+    else
+    {
+        abort.store(true);
+    }
 }
 
 void Renderer::onRenderFinished()

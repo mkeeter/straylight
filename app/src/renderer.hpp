@@ -49,7 +49,7 @@ protected slots:
     void onRenderFinished();
 
 protected:
-    std::list<Kernel::Evaluator*> evaluators;
+    std::vector<Kernel::Evaluator*> evaluators;
     std::atomic_bool abort;
 
     Task current_task;
