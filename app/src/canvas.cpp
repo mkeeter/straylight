@@ -103,7 +103,11 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
             auto s = get_shape(v);
             if (shapes.count({key, s}) == 0)
             {
-                shapes[{key, s}] = new ::Renderer(s->tree);
+                auto r = new ::Renderer(s->tree);
+                shapes[{key, s}] = r;
+                connect(this, &Canvas::viewChanged,
+                        r, &::Renderer::onViewChanged);
+                emit viewChanged(M(), window_size);
             }
             visited.insert({key, s});
         }
@@ -113,6 +117,7 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
 void Canvas::setSize(float w, float h)
 {
     window_size = {w, h};
+    emit viewChanged(M(), window_size);
     update();
 }
 
@@ -124,6 +129,7 @@ void Canvas::rotateIncremental(float dx, float dy)
     pitch = fmin(fmax(pitch, 0), 180);
     yaw = fmod(yaw, 360);
 
+    emit viewChanged(M(), window_size);
     update();
 }
 
@@ -135,6 +141,7 @@ void Canvas::panIncremental(float dx, float dy)
                 inv.map({0, 0, 0});
 
     center += diff*2;
+    emit viewChanged(M(), window_size);
     update();
 }
 
@@ -146,6 +153,7 @@ void Canvas::zoomIncremental(float ds, float x, float y)
     scale *= pow(1.1, ds / 120.);
     center += 2 * (M().inverted().map(pt) - a);
 
+    viewChanged(M(), window_size);
     update();
 }
 

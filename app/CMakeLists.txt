@@ -13,6 +13,7 @@ find_package(OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
 
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
@@ -26,6 +27,7 @@ target_link_libraries(Straylight
     Qt5::Quick
     Qt5::Gui
     Qt5::OpenGL
+    Qt5::Concurrent
     straylight-graph
     straylight-kernel
     ${OPENGL_LIBRARIES})

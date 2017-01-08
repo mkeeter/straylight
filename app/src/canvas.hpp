@@ -30,6 +30,9 @@ public slots:
     void panIncremental(float dx, float dy);
     void zoomIncremental(float ds, float x, float y);
 
+signals:
+    void viewChanged(QMatrix4x4 mat, QVector2D size);
+
 protected:
     /*
      *  Returns the projection matrix
