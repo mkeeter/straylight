@@ -24,12 +24,12 @@ QMatrix4x4 Canvas::proj() const
     if (width > height)
     {
         const float frac = height/float(width);
-        m.scale(frac, 1.0, -frac);
+        m.scale(frac, -1.0, -frac);
     }
     else
     {
         const float frac = width/float(height);
-        m.scale(1.0, frac, -frac);
+        m.scale(1.0, -frac, -frac);
     }
     return m;
 }
