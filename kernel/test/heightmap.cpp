@@ -18,9 +18,7 @@ static std::pair<DepthImage, NormalImage> Render(
 {
     std::atomic_bool abort(false);
 
-    auto out = Heightmap::Render(t, r, abort, M);
-    return std::make_pair(out.first.transpose(),
-                          out.second.transpose());
+    return Heightmap::Render(t, r, abort, M);
 }
 
 TEST_CASE("2D interval Z values")

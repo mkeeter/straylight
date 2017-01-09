@@ -50,7 +50,7 @@ struct NormalRenderer
             uint32_t iz = 255 * (ds.dz[i] / (2 * length) + 0.5);
 
             // Pack the normals and a dummy alpha byte into the image
-            norm(xs[i], ys[i]) = (0xff << 24) | (iz << 16) | (iy << 8) | ix;
+            norm(ys[i], xs[i]) = (0xff << 24) | (iz << 16) | (iy << 8) | ix;
         }
         count = 0;
     }
@@ -94,7 +94,7 @@ struct NormalRenderer
 #define SUBREGION_ITERATE_XYZ(r) \
 for (unsigned i=0; i < r.X.size; ++i)           \
     for (unsigned j=0; j < r.Y.size; ++j)       \
-        if (depth(r.X.min + i, r.Y.min + j) < r.Z.pos(r.Z.size - 1)) \
+        if (depth(r.Y.min + j, r.X.min + i) < r.Z.pos(r.Z.size - 1)) \
         for (unsigned k=0; k < r.Z.size; ++k)
 
 /*
@@ -129,9 +129,9 @@ static void pixels(Evaluator* e, const Subregion& r,
         {
             // Check to see whether the voxel is in front of the image's depth
             const float z = r.Z.pos(r.Z.size - k - 1);
-            if (depth(r.X.min + i, r.Y.min + j) < z)
+            if (depth(r.Y.min + j, r.X.min + i) < z)
             {
-                depth(r.X.min + i, r.Y.min + j) = z;
+                depth(r.Y.min + j, r.X.min + i) = z;
 
                 // Store normals to render in a bulk pass
                 nr.push(i, j, z);
@@ -170,9 +170,9 @@ static void fill(Evaluator* e, const Subregion& r, DepthImage& depth,
         for (unsigned j=0; j < r.Y.size; ++j)
         {
             // Check to see whether the voxel is in front of the image's depth
-            if (depth(r.X.min + i, r.Y.min + j) < z)
+            if (depth(r.Y.min + j, r.X.min + i) < z)
             {
-                depth(r.X.min + i, r.Y.min + j) = z;
+                depth(r.Y.min + j, r.X.min + i) = z;
                 nr.push(i, j, z);
             }
         }
@@ -195,7 +195,7 @@ static void recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
     }
 
     // Extract the block of the image that's being inspected
-    auto block = depth.block(r.X.min, r.Y.min, r.X.size, r.Y.size);
+    auto block = depth.block(r.Y.min, r.X.min, r.Y.size, r.X.size);
 
     // If all points in the region are below the heightmap, skip it
     if ((block >= r.Z.pos(r.Z.size - 1)).all())
@@ -262,8 +262,8 @@ std::pair<DepthImage, NormalImage> Render(
         const std::vector<Evaluator*>& es, Region r,
         const std::atomic_bool& abort, glm::mat4 m)
 {
-    auto depth = DepthImage(r.X.values.size(), r.Y.values.size());
-    auto norm = NormalImage(r.X.values.size(), r.Y.values.size());
+    auto depth = DepthImage(r.Y.values.size(), r.X.values.size());
+    auto norm = NormalImage(r.Y.values.size(), r.X.values.size());
 
     depth.fill(-std::numeric_limits<float>::infinity());
     norm.fill(0);
