@@ -25,6 +25,8 @@ vec4 shade(vec3 norm)
 
 void main()
 {
+    fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    /*
     float d = texture(depth, tex_coord).r;
     if (d == 1.0f)
     {
@@ -36,4 +38,5 @@ void main()
         gl_FragDepth = d;
         fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
     }
+    */
 }

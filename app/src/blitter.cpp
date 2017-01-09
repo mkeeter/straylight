@@ -10,11 +10,11 @@ Blitter::Blitter()
             QOpenGLShader::Fragment, ":/gl/depthquad.frag");
     shader.link();
 
-    GLfloat data[] ={   -1.0f, -1.0f,
-                         1.0f, -1.0f,
-                         1.0f,  1.0f,
-                        -1.0f,  1.0f };
-
+    // Data is arranged  x   y
+    GLfloat data[] = {  -1, -1,
+                         1, -1,
+                         1,  1,
+                        -1,  1, };
     quad_vbo.create();
     quad_vbo.bind();
     quad_vbo.allocate(data, sizeof(data));
