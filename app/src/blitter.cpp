@@ -2,6 +2,9 @@
 
 Blitter::Blitter()
 {
+    qRegisterMetaType<Renderer::Result>("Result");
+    qRegisterMetaType<Renderer::Task>("Task");
+
     initializeOpenGLFunctions();
 
     shader.addShaderFromSourceFile(
