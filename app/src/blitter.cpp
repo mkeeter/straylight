@@ -37,15 +37,37 @@ Blitter::Blitter()
 void Blitter::addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t)
 {
     (void)R;
-    (void)imgs;
     (void)t;
 
-    quads[R] = Quad();
+    delete quads[R];
+    quads[R] = new Quad(imgs.depth, imgs.norm);
 }
 
 void Blitter::forget(Renderer* R)
 {
+    delete quads[R];
     quads.erase(R);
+}
+
+Blitter::Quad::Quad(const Kernel::DepthImage& d,
+                    const Kernel::NormalImage& n)
+    : depth(QOpenGLTexture::Target2D),
+      norm(QOpenGLTexture::Target2D)
+{
+    depth.setFormat(QOpenGLTexture::D32F);
+    norm.setFormat(QOpenGLTexture::RGBAFormat);
+    for (auto tex : {&depth, &norm})
+    {
+        tex->setSize(d.rows(), d.cols());
+        tex->setAutoMipMapGenerationEnabled(false);
+        tex->allocateStorage();
+    }
+
+    depth.setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, d.data());
+    norm.setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, n.data());
+
+    assert(depth.isCreated());
+    assert(norm.isCreated());
 }
 
 void Blitter::draw(QMatrix4x4 M)
@@ -53,9 +75,23 @@ void Blitter::draw(QMatrix4x4 M)
     shader.bind();
     glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, M.data());
 
-    quad_vao.bind();
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    quad_vao.release();
+    glUniform1i(shader.uniformLocation("depth"), 0);
+    glUniform1i(shader.uniformLocation("norm"), 1);
 
+    quad_vao.bind();
+    for (auto& q : quads)
+    {
+        q.second->depth.bind(0);
+        q.second->norm.bind(1);
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    quad_vao.release();
     shader.release();
 }

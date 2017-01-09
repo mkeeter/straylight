@@ -22,12 +22,13 @@ public slots:
 
 protected:
     struct Quad {
+        Quad(const Kernel::DepthImage& d, const Kernel::NormalImage& n);
         QVector3D center;
         QVector3D corner;
-        //QOpenGLTexture depth;
-        //QOpenGLTexture norm;
+        QOpenGLTexture depth;
+        QOpenGLTexture norm;
     };
-    std::map<Renderer*, Quad> quads;
+    std::map<Renderer*, Quad*> quads;
 
     QOpenGLBuffer quad_vbo;
     QOpenGLVertexArrayObject quad_vao;
