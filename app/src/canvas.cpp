@@ -139,10 +139,10 @@ void Canvas::setSize(float w, float h)
 
 void Canvas::rotateIncremental(float dx, float dy)
 {
-    pitch -= dy;
-    yaw -= dx;
+    pitch += dy;
+    yaw += dx;
 
-    pitch = fmin(fmax(pitch, 0), 180);
+    pitch = fmin(fmax(pitch, -180), 0);
     yaw = fmod(yaw, 360);
 
     emit viewChanged(M(), window_size);
