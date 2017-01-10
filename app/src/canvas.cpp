@@ -51,10 +51,9 @@ void Canvas::render()
     glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    axes.draw(M());
-    blitter.draw(M());
-
-    // Do rendering here
+    const auto mat = M();
+    axes.draw(mat);
+    blitter.draw(mat);
 }
 
 void Canvas::push(Graph::InstanceIndex i)
