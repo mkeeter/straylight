@@ -17,7 +17,7 @@ public:
     void draw(QMatrix4x4 M);
 
 public slots:
-    void addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t);
+    void addQuad(Renderer* R, Renderer::Result imgs, QMatrix4x4 t);
     void forget(Renderer*);
 
 protected:

@@ -3,7 +3,6 @@
 Blitter::Blitter()
 {
     qRegisterMetaType<Renderer::Result>("Result");
-    qRegisterMetaType<Renderer::Task>("Task");
 
     initializeOpenGLFunctions();
 
@@ -34,10 +33,10 @@ Blitter::Blitter()
     quad_vao.release();
 }
 
-void Blitter::addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t)
+void Blitter::addQuad(Renderer* R, Renderer::Result imgs, QMatrix4x4 mat)
 {
     delete quads[R];
-    quads[R] = new Quad(t.mat.inverted(), imgs.depth, imgs.norm);
+    quads[R] = new Quad(mat.inverted(), imgs.depth, imgs.norm);
 }
 
 void Blitter::forget(Renderer* R)
