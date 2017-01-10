@@ -36,11 +36,8 @@ Blitter::Blitter()
 
 void Blitter::addQuad(Renderer* R, Renderer::Result imgs, Renderer::Task t)
 {
-    (void)R;
-    (void)t;
-
     delete quads[R];
-    quads[R] = new Quad(imgs.depth, imgs.norm);
+    quads[R] = new Quad(t.mat.inverted(), imgs.depth, imgs.norm);
 }
 
 void Blitter::forget(Renderer* R)
@@ -49,9 +46,10 @@ void Blitter::forget(Renderer* R)
     quads.erase(R);
 }
 
-Blitter::Quad::Quad(const Kernel::DepthImage& d,
+Blitter::Quad::Quad(const QMatrix4x4& mat,
+                    const Kernel::DepthImage& d,
                     const Kernel::NormalImage& n)
-    : depth(QOpenGLTexture::Target2D),
+    : mat(mat), depth(QOpenGLTexture::Target2D),
       norm(QOpenGLTexture::Target2D)
 {
     depth.setFormat(QOpenGLTexture::D32F);
@@ -74,6 +72,7 @@ void Blitter::draw(QMatrix4x4 M)
 {
     shader.bind();
     glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, M.data());
+    auto mquad = shader.uniformLocation("m_quad");
 
     glUniform1i(shader.uniformLocation("depth"), 0);
     glUniform1i(shader.uniformLocation("norm"), 1);
@@ -83,6 +82,7 @@ void Blitter::draw(QMatrix4x4 M)
     {
         q.second->depth.bind(0);
         q.second->norm.bind(1);
+        glUniformMatrix4fv(mquad, 1, GL_FALSE, q.second->mat.data());
 
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }

@@ -22,9 +22,9 @@ public slots:
 
 protected:
     struct Quad {
-        Quad(const Kernel::DepthImage& d, const Kernel::NormalImage& n);
-        QVector3D center;
-        QVector3D corner;
+        Quad(const QMatrix4x4& mat, const Kernel::DepthImage& d,
+             const Kernel::NormalImage& n);
+        QMatrix4x4 mat;
         QOpenGLTexture depth;
         QOpenGLTexture norm;
     };
