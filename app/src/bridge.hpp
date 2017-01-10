@@ -87,6 +87,11 @@ signals:
 
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
+    /*
+     *  Used to queue a sync from a non-main thread
+     */
+    void syncLater();
+
 public slots:
     /*
      *  Signals to handle updating 3D viewport size

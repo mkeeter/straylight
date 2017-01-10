@@ -1,3 +1,5 @@
+#include <QThread>
+
 #include "bridge.hpp"
 #include "canvas.hpp"
 
@@ -10,6 +12,8 @@ Bridge::Bridge()
 {
     // Inject the kernel bindings into the interpreter
     r.call(kernel_bind_s7);
+    connect(this, &Bridge::syncLater,
+            this, &Bridge::sync, Qt::QueuedConnection);
 }
 
 QString Bridge::checkItemName(int sheet_index, QString name) const
@@ -161,7 +165,7 @@ void Bridge::setCanvas(Canvas* c)
 {
     assert(canvas == nullptr);
     canvas = c;
-    sync();
+    emit(syncLater());
 }
 
 void Bridge::canvasResized(float w, float h)
@@ -207,6 +211,7 @@ Graph::Root* Bridge::root()
 
 void Bridge::sync()
 {
+    assert(QObject::thread() == QThread::currentThread());
     r.serialize(&bts);
 }
 
