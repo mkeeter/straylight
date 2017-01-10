@@ -133,7 +133,7 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
 void Canvas::setSize(float w, float h)
 {
     window_size = QSize(w, h);
-    emit viewChanged(M(), window_size);
+    emit(viewChanged(M(), window_size));
     update();
 }
 
@@ -145,7 +145,7 @@ void Canvas::rotateIncremental(float dx, float dy)
     pitch = fmin(fmax(pitch, -180), 0);
     yaw = fmod(yaw, 360);
 
-    emit viewChanged(M(), window_size);
+    emit(viewChanged(M(), window_size));
     update();
 }
 
@@ -157,7 +157,7 @@ void Canvas::panIncremental(float dx, float dy)
                 inv.map({0, 0, 0});
 
     center += diff*2;
-    emit viewChanged(M(), window_size);
+    emit(viewChanged(M(), window_size));
     update();
 }
 
@@ -170,7 +170,7 @@ void Canvas::zoomIncremental(float ds, float x, float y)
     scale *= pow(1.1, ds / 120.);
     center += 2 * (M().inverted().map(pt) - a);
 
-    viewChanged(M(), window_size);
+    emit(viewChanged(M(), window_size));
     update();
 }
 

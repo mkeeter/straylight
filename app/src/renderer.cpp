@@ -25,7 +25,7 @@ Renderer::~Renderer()
         delete e;
     }
 
-    emit goodbye(this);
+    emit(goodbye(this));
 }
 
 void Renderer::deleteWhenNotRunning()
