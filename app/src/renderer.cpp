@@ -82,7 +82,7 @@ void Renderer::run(Task t)
     Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1},
              t.size.width()/2,
              t.size.height()/2, 255);
-    auto m = glm::make_mat4(t.mat.data());
+    auto m = glm::make_mat4(t.mat.inverted().data());
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
     emit(gotResult(this, {out.first, out.second}, t));
