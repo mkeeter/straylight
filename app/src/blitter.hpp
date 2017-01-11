@@ -20,7 +20,7 @@ public:
 public slots:
     /*  Both addQuad and forget are async, scheduling work to take place
      *  in the render thread. */
-    void addQuad(Renderer* R, const Renderer::Result& imgs,
+    void addQuad(Renderer* R, const Renderer::Result imgs,
                  const QMatrix4x4& t);
     void forget(Renderer*);
 

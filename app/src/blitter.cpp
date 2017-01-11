@@ -5,6 +5,8 @@
 
 Blitter::Blitter()
 {
+    qRegisterMetaType<Renderer::Result>("Result");
+
     initializeOpenGLFunctions();
 
     shader.addShaderFromSourceFile(
@@ -34,7 +36,8 @@ Blitter::Blitter()
     quad_vao.release();
 }
 
-void Blitter::addQuad(Renderer* R, const Renderer::Result& imgs, const QMatrix4x4& mat)
+void Blitter::addQuad(Renderer* R, const Renderer::Result imgs,
+                      const QMatrix4x4& mat)
 {
     getWindow()->scheduleRenderJob(
             new QuadAdd(this, R, mat, imgs.depth, imgs.norm),
