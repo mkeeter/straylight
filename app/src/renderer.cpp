@@ -85,10 +85,9 @@ void Renderer::run(Task t)
 
     auto inv = t.mat.inverted();
 
-    // Flip and compress Z axis (to avoid clipping)
-    // The value 4 isn't anything magical here, just seems to work well
+    // Flip Z axis for correct rendering
     auto scaled = inv;
-    scaled.scale(1, 1, -4);
+    scaled.scale(1, 1, -1);
     auto m = glm::make_mat4(scaled.data());
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 

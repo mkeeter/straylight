@@ -26,15 +26,18 @@ QMatrix4x4 Canvas::proj() const
 
     QMatrix4x4 m;
 
+    //  Compress the Z axis to avoid clipping
+    //  The value 4 isn't anything magical here, just seems to work well
+    const float Z_COMPRESS = 4;
     if (width > height)
     {
         const float frac = height/float(width);
-        m.scale(frac, 1, 1);
+        m.scale(frac, 1, 1/Z_COMPRESS);
     }
     else
     {
         const float frac = width/float(height);
-        m.scale(1, frac, 1);
+        m.scale(1, frac, 1/Z_COMPRESS);
     }
     return m;
 }
