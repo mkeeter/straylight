@@ -67,13 +67,23 @@ void Renderer::onRenderFinished()
 
 void Renderer::checkNext()
 {
-    if (todo == NEXT && !watcher.isRunning())
+    if (!watcher.isRunning())
     {
-        todo = NOTHING;
+        // Load refinement render task
+        if (todo == NOTHING && next.level > 0)
+        {
+            next.level--;
+            todo = NEXT;
+        }
 
-        abort.store(false);
-        future = QtConcurrent::run(this, &Renderer::run, next);
-        watcher.setFuture(future);
+        if (todo == NEXT)
+        {
+            todo = NOTHING;
+
+            abort.store(false);
+            future = QtConcurrent::run(this, &Renderer::run, next);
+            watcher.setFuture(future);
+        }
     }
 }
 
