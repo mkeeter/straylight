@@ -72,13 +72,11 @@ void Blitter::draw(QMatrix4x4 M)
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     quad_vao.release();
     shader.release();
+
+    // Reset active texture to avoid corrupting QML state
+    glActiveTexture(GL_TEXTURE0);
 }
 
 QQuickWindow* Blitter::getWindow() const
