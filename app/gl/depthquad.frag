@@ -8,16 +8,16 @@ uniform sampler2D norm;
 
 out vec4 fragColor;
 
-vec4 shade(vec3 norm)
+vec4 shade(vec3 n)
 {
     vec3 light = vec3(0.99f, 0.96f, 0.89f);
     vec3 dark  = vec3(0.20f, 0.25f, 0.30f);
 
     // a is a light pointed directly down
-    float a = dot(norm, vec3(0.0f,   0.0f, 1.0f));
+    float a = dot(n, vec3(0.0f,   0.0f, 1.0f));
 
     // b is a light coming in from an angle
-    float b = dot(norm, vec3(0.57f, 0.57f, 0.57f));
+    float b = dot(n, vec3(0.57f, 0.57f, 0.57f));
 
     return vec4((a*light + (1.0f - a)*dark)*0.35f +
                 (b*light + (1.0f - b)*dark)*0.65f, 1.0f);
@@ -40,7 +40,7 @@ void main()
         }
         else
         {
-            fragColor = vec4(d + 0.5f, d, d, 1.0f);
+            fragColor = vec4(texture(norm, tex_coord).rgb, 1.0f); //vec4(d + 0.5f, d, d, 1.0f);
         }
         /*
         // Map a depth in the range [1, -1] to the depth buffer's [0, 1] range
