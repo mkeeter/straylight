@@ -121,8 +121,6 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
                 // magically appear in the 3D viewport
                 connect(r, &::Renderer::gotResult,
                         &blitter, &Blitter::addQuad, Qt::DirectConnection);
-                connect(r, &::Renderer::gotResult,
-                        [](){ qDebug() << "  gotResult!"; });
                 connect(r, &::Renderer::goodbye,
                         &blitter, &Blitter::forget);
 

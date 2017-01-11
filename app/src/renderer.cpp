@@ -43,42 +43,35 @@ void Renderer::deleteWhenNotRunning()
 
 void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
 {
-    qDebug() << "Renderer::onViewChanged" << QThread::currentThread();
     if (todo != DELETE)
     {
         next = Task(mat, size);
         todo = NEXT;
 
         abort.store(true);
-        qDebug() << "   checking";
         checkNext();
     }
 }
 
 void Renderer::onRenderFinished()
 {
-    qDebug() << "Renderer::onRenderFinished" << QThread::currentThread();
     if (todo == DELETE)
     {
-        qDebug() << "   deleting";
         delete this;
     }
     else
     {
-        qDebug() << "   checking";
         checkNext();
     }
 }
 
 void Renderer::checkNext()
 {
-    qDebug() << "   Renderer::checkNext" << QThread::currentThread();
     if (todo == NEXT && !watcher.isRunning())
     {
         todo = NOTHING;
 
         abort.store(false);
-        qDebug() << "     running!";
         future = QtConcurrent::run(this, &Renderer::run, next);
         watcher.setFuture(future);
     }
@@ -86,10 +79,9 @@ void Renderer::checkNext()
 
 void Renderer::run(Task t)
 {
-    qDebug() << "Renderer::run" << QThread::currentThread();
     Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1},
-             t.size.width()/2,
-             t.size.height()/2, 255);
+             t.size.width()/2, t.size.height()/2,
+             fmax(t.size.width()/2, t.size.height()/2));
 
     auto inv = t.mat.inverted();
 
@@ -99,7 +91,10 @@ void Renderer::run(Task t)
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
     Kernel::Image::SavePng("/Users/mkeeter/Desktop/out.png", out.first.colwise().reverse());
-    qDebug() << "  emitting gotResult";
-    emit(gotResult(this, {out.first, out.second}, inv));
-    qDebug() << "  done";
+
+    // Map the depth buffer into the 0 - 1 range, with -inf = 1
+    Kernel::DepthImage d =
+        (out.first == -std::numeric_limits<float>::infinity())
+        .select(1, (1 - out.first) / 2);
+    emit(gotResult(this, {d, out.second}, inv));
 }

@@ -26,17 +26,17 @@ vec4 shade(vec3 norm)
 void main()
 {
     float d = texture(depth, tex_coord).r;
-    fragColor = vec4(d + 0.5f, d, d, 1.0f);
-    /*
     if (d == 1.0f)
     {
         discard;
     }
     else
     {
-        // Map a depth in the range [1, -1] to the depth buffer's [0, 1] range
         gl_FragDepth = d;
+        fragColor = vec4(d + 0.5f, d, d, 1.0f);
+        /*
+        // Map a depth in the range [1, -1] to the depth buffer's [0, 1] range
         fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
+        */
     }
-    */
 }
