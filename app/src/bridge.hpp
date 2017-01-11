@@ -1,5 +1,6 @@
 #include <QObject>
 #include <QQmlEngine>
+#include <QQuickTextDocument>
 #include <QJSEngine>
 
 #include "graph/root.hpp"
@@ -43,6 +44,8 @@ public:
     Q_INVOKABLE void eraseInstance(int instance_index);
 
     Q_INVOKABLE int sheetOf(int instance_index) const;
+
+    Q_INVOKABLE void installHighlighter(QQuickTextDocument* doc);
 
     /*
      *  Sets the pinged variable to true

@@ -2,6 +2,7 @@
 
 #include "bridge.hpp"
 #include "canvas.hpp"
+#include "syntax.hpp"
 
 #include "kernel/bind/bind_s7.h"
 
@@ -131,6 +132,11 @@ void Bridge::eraseInstance(int instance_index)
 int Bridge::sheetOf(int instance_index) const
 {
     return r.instanceSheet(Graph::InstanceIndex(instance_index)).i;
+}
+
+void Bridge::installHighlighter(QQuickTextDocument* doc)
+{
+    new SyntaxHighlighter(doc->textDocument());
 }
 
 QString Bridge::nextItemName(int sheet_index) const

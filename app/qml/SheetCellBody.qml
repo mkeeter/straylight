@@ -20,39 +20,55 @@ GridLayout {
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
-    TextEdit {
+    Flickable {
+        id: flick
+
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        Layout.preferredHeight: exprText.height
+        clip: true
 
-        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
-        font.family: fixedWidth.name
-        selectionColor: Style.textSelect
-        selectByMouse: true
-        wrapMode: TextEdit.Wrap
-
-        id: exprText
-        property string expr
-
-        function syncText() {
-            var c = cursorPosition
-            text = activeFocus ? expr :
-                (ioType == 'input' ? '(input ...)' :
-                    (expr.length ? expr : 'Expression'))
-            cursorPosition = Math.min(text.length, c)
-        }
-        onActiveFocusChanged: { syncText() }
-        onExprChanged: { syncText() }
-
-        onTextChanged: {
-            if (activeFocus)
-            {
-                Bridge.setExpr(uniqueIndex, text)
+        function scrollTo(r) {
+            if (contentX >= r.x) {
+                contentX = r.x;
+            } else if (contentX + width <= r.x + r.width) {
+                contentX = r.x + r.width - width;
             }
         }
 
-        Component.onCompleted: { syncText() }
+        TextEdit {
+            color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
+            font.family: fixedWidth.name
+            selectionColor: Style.textSelect
+            selectByMouse: true
+
+            id: exprText
+            property string expr
+
+            function syncText() {
+                var c = cursorPosition
+                text = activeFocus ? expr :
+                    (ioType == 'input' ? '(input ...)' :
+                        (expr.length ? expr : 'Expression'))
+                cursorPosition = Math.min(text.length, c)
+            }
+
+            Component.onCompleted: {
+                syncText()
+                Bridge.installHighlighter(textDocument)
+            }
+            onActiveFocusChanged: syncText()
+            onExprChanged: syncText()
+
+            onTextChanged: {
+                if (activeFocus) {
+                    Bridge.setExpr(uniqueIndex, text)
+                }
+            }
+
+            onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
+        }
     }
 
     Rectangle {
@@ -100,5 +116,4 @@ GridLayout {
             exprText.expr = e
         }
     }
-
 }
