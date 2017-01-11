@@ -40,7 +40,7 @@ void main()
         }
         else
         {
-            fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
+            fragColor = vec4(texture(norm, tex_coord).rgb, 1.0f); //shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
         }
     }
 }
