@@ -92,7 +92,10 @@ void Renderer::run(Task t)
              t.size.height()/2, 255);
 
     auto inv = t.mat.inverted();
-    auto m = glm::make_mat4(inv.data());
+
+    auto scaled = inv;
+    scaled.scale(1, 1, -1);
+    auto m = glm::make_mat4(scaled.data());
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
     Kernel::Image::SavePng("/Users/mkeeter/Desktop/out.png", out.first.colwise().reverse());
