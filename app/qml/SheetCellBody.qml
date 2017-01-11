@@ -30,6 +30,7 @@ GridLayout {
         font.family: fixedWidth.name
         selectionColor: Style.textSelect
         selectByMouse: true
+        wrapMode: TextEdit.Wrap
 
         id: exprText
         property string expr
