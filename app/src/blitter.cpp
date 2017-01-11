@@ -104,7 +104,7 @@ Blitter::Quad::Quad(const QMatrix4x4& mat,
       norm(QOpenGLTexture::Target2D)
 {
     depth.setFormat(QOpenGLTexture::D32F);
-    norm.setFormat(QOpenGLTexture::RGBAFormat);
+    norm.setFormat(QOpenGLTexture::RGBA8_UNorm);
     for (auto tex : {&depth, &norm})
     {
         tex->setSize(d.rows(), d.cols());

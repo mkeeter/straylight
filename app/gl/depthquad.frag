@@ -40,11 +40,7 @@ void main()
         }
         else
         {
-            fragColor = vec4(texture(norm, tex_coord).rgb, 1.0f); //vec4(d + 0.5f, d, d, 1.0f);
+            fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
         }
-        /*
-        // Map a depth in the range [1, -1] to the depth buffer's [0, 1] range
-        fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
-        */
     }
 }
