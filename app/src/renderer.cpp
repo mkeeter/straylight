@@ -79,9 +79,9 @@ void Renderer::checkNext()
 
 void Renderer::run(Task t)
 {
-    Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1},
-             t.size.width()/2, t.size.height()/2,
-             fmax(t.size.width()/2, t.size.height()/2));
+    const float rx = t.size.width() * 2;
+    const float ry = t.size.height() * 2;
+    Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1}, rx, ry, fmax(rx, ry));
 
     auto inv = t.mat.inverted();
 
