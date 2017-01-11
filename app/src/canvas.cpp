@@ -5,6 +5,11 @@
 
 #include "kernel/bind/bind_s7.h"
 
+Canvas::Canvas()
+{
+    connect(&blitter, &Blitter::changed, [=](){ this->update(); });
+}
+
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
 {
     QOpenGLFramebufferObjectFormat format;
@@ -24,12 +29,12 @@ QMatrix4x4 Canvas::proj() const
     if (width > height)
     {
         const float frac = height/float(width);
-        m.scale(frac, -1.0, -frac);
+        m.scale(frac, 1, 1);
     }
     else
     {
         const float frac = width/float(height);
-        m.scale(1.0, -frac, -frac);
+        m.scale(1, frac, 1);
     }
     return m;
 }
@@ -115,7 +120,9 @@ void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
                 // Connect the renderer and the blitter, so bitmaps will
                 // magically appear in the 3D viewport
                 connect(r, &::Renderer::gotResult,
-                        &blitter, &Blitter::addQuad);
+                        &blitter, &Blitter::addQuad, Qt::DirectConnection);
+                connect(r, &::Renderer::gotResult,
+                        [](){ qDebug() << "  gotResult!"; });
                 connect(r, &::Renderer::goodbye,
                         &blitter, &Blitter::forget);
 
@@ -141,7 +148,7 @@ void Canvas::rotateIncremental(float dx, float dy)
     pitch += dy;
     yaw += dx;
 
-    pitch = fmin(fmax(pitch, -180), 0);
+    pitch = fmax(fmin(pitch, 180), 0);
     yaw = fmod(yaw, 360);
 
     emit(viewChanged(M(), window_size));

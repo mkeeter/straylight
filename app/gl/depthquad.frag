@@ -25,9 +25,9 @@ vec4 shade(vec3 norm)
 
 void main()
 {
-    fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    /*
     float d = texture(depth, tex_coord).r;
+    fragColor = vec4(d + 0.5f, d, d, 1.0f);
+    /*
     if (d == 1.0f)
     {
         discard;

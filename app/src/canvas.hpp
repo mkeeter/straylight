@@ -18,6 +18,8 @@ class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT
 public:
+    Canvas();
+
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
     void render() override;
 
@@ -77,9 +79,10 @@ protected:
     Blitter blitter;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
 class CanvasObject : public QQuickFramebufferObject
 {
 public:
     QQuickFramebufferObject::Renderer* createRenderer() const override;
-    void onWidthChanged(float w);
 };

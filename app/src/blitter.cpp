@@ -1,9 +1,10 @@
+#include <QGuiApplication>
+#include <QThread>
+
 #include "blitter.hpp"
 
 Blitter::Blitter()
 {
-    qRegisterMetaType<Renderer::Result>("Result");
-
     initializeOpenGLFunctions();
 
     shader.addShaderFromSourceFile(
@@ -33,39 +34,21 @@ Blitter::Blitter()
     quad_vao.release();
 }
 
-void Blitter::addQuad(Renderer* R, Renderer::Result imgs, QMatrix4x4 mat)
+void Blitter::addQuad(Renderer* R, const Renderer::Result& imgs, const QMatrix4x4& mat)
 {
-    delete quads[R];
-    quads[R] = new Quad(mat.inverted(), imgs.depth, imgs.norm);
+    getWindow()->scheduleRenderJob(
+            new QuadAdd(this, R, mat, imgs.depth, imgs.norm),
+            QQuickWindow::NoStage);
 }
 
 void Blitter::forget(Renderer* R)
 {
-    delete quads[R];
-    quads.erase(R);
+    getWindow()->scheduleRenderJob(
+            new QuadForget(this, R),
+            QQuickWindow::NoStage);
 }
 
-Blitter::Quad::Quad(const QMatrix4x4& mat,
-                    const Kernel::DepthImage& d,
-                    const Kernel::NormalImage& n)
-    : mat(mat), depth(QOpenGLTexture::Target2D),
-      norm(QOpenGLTexture::Target2D)
-{
-    depth.setFormat(QOpenGLTexture::D32F);
-    norm.setFormat(QOpenGLTexture::RGBAFormat);
-    for (auto tex : {&depth, &norm})
-    {
-        tex->setSize(d.rows(), d.cols());
-        tex->setAutoMipMapGenerationEnabled(false);
-        tex->allocateStorage();
-    }
-
-    depth.setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, d.data());
-    norm.setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, n.data());
-
-    assert(depth.isCreated());
-    assert(norm.isCreated());
-}
+////////////////////////////////////////////////////////////////////////////////
 
 void Blitter::draw(QMatrix4x4 M)
 {
@@ -94,3 +77,74 @@ void Blitter::draw(QMatrix4x4 M)
     quad_vao.release();
     shader.release();
 }
+
+QQuickWindow* Blitter::getWindow() const
+{
+    auto app = dynamic_cast<QGuiApplication*>(QCoreApplication::instance());
+    assert(app);
+    for (auto w : app->allWindows())
+    {
+        if (auto q = dynamic_cast<QQuickWindow*>(w))
+        {
+            return q;
+        }
+    }
+
+    assert(false);
+    return nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Blitter::Quad::Quad(const QMatrix4x4& mat,
+                    const Kernel::DepthImage& d,
+                    const Kernel::NormalImage& n)
+    : mat(mat), depth(QOpenGLTexture::Target2D),
+      norm(QOpenGLTexture::Target2D)
+{
+    depth.setFormat(QOpenGLTexture::D32F);
+    norm.setFormat(QOpenGLTexture::RGBAFormat);
+    for (auto tex : {&depth, &norm})
+    {
+        tex->setSize(d.rows(), d.cols());
+        tex->setAutoMipMapGenerationEnabled(false);
+        tex->allocateStorage();
+    }
+
+    depth.setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, d.data());
+    norm.setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, n.data());
+
+    assert(depth.isCreated());
+    assert(norm.isCreated());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Blitter::QuadAdd::QuadAdd(
+        Blitter* parent, Renderer* R, const QMatrix4x4& mat,
+        const Kernel::DepthImage& d, const Kernel::NormalImage& n)
+    : parent(parent), R(R), mat(mat), depth(d), norm(n)
+{
+    // Nothing to do here
+}
+
+void Blitter::QuadAdd::run()
+{
+    delete parent->quads[R];
+    parent->quads[R] = new Quad(mat, depth, norm);
+    emit(parent->changed());
+}
+
+Blitter::QuadForget::QuadForget(Blitter* parent, Renderer* R)
+    : parent(parent), R(R)
+{
+    // Nothing to do here
+}
+
+void Blitter::QuadForget::run()
+{
+    delete parent->quads[R];
+    parent->quads.erase(R);
+    emit(parent->changed());
+}
+

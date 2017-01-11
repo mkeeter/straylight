@@ -12,6 +12,7 @@ Bridge::Bridge()
 {
     // Inject the kernel bindings into the interpreter
     r.call(kernel_bind_s7);
+    r.insertCell(0, "s", "(make-shape (lambda (x y z) (max (- z 1) (- -1 z) (+ (* x x) (* y y) -1) (- (max x y)))))");
     connect(this, &Bridge::syncLater,
             this, &Bridge::sync, Qt::QueuedConnection);
 }

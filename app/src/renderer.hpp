@@ -41,7 +41,7 @@ signals:
     /*
      *  Passes off a result to the blitter
      */
-    void gotResult(Renderer* self, Result r, QMatrix4x4 mat);
+    void gotResult(Renderer* self, const Result& r, const QMatrix4x4& mat);
 
     /*
      *  Emitted before (self-)destruction
