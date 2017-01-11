@@ -92,9 +92,15 @@ void Renderer::run(Task t)
     auto scaled = inv;
     scaled.scale(1, 1, -1);
     auto m = glm::make_mat4(scaled.data());
-    auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
-    if (!abort.load())
+    // Make rendering at the base level un-abortable
+    // (otherwise we'd have a bunch of black images when rotating)
+    std::atomic_bool dummy(false);
+    std::atomic_bool& abort_ = (t.level == base_level) ? dummy : abort;
+
+    auto out = Kernel::Heightmap::Render(evaluators, r, abort_, m);
+
+    if (!abort_.load())
     {
         // Map the depth buffer into the 0 - 1 range, with -inf = 1
         Kernel::DepthImage d =
