@@ -85,8 +85,10 @@ void Renderer::run(Task t)
 
     auto inv = t.mat.inverted();
 
+    // Flip and compress Z axis (to avoid clipping)
+    // The value 4 isn't anything magical here, just seems to work well
     auto scaled = inv;
-    scaled.scale(1, 1, -1);
+    scaled.scale(1, 1, -4);
     auto m = glm::make_mat4(scaled.data());
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
@@ -96,6 +98,7 @@ void Renderer::run(Task t)
         Kernel::DepthImage d =
             (out.first == -std::numeric_limits<float>::infinity())
             .select(1, (1 - out.first) / 2);
+        d = (out.first == r.Z.values.back()).select(0, d);
         emit(gotResult(this, {d, out.second}, inv));
     }
 }

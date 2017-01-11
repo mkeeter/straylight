@@ -33,7 +33,15 @@ void main()
     else
     {
         gl_FragDepth = d;
-        fragColor = vec4(d + 0.5f, d, d, 1.0f);
+        if (d == 0.0f)
+        {
+            // Special color to indicate clipped pixels
+            fragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+            fragColor = vec4(d + 0.5f, d, d, 1.0f);
+        }
         /*
         // Map a depth in the range [1, -1] to the depth buffer's [0, 1] range
         fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
