@@ -45,7 +45,7 @@ void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
 {
     if (todo != DELETE)
     {
-        next = Task(mat, size);
+        next = Task(mat, size, base_level);
         todo = NEXT;
 
         abort.store(true);
@@ -79,8 +79,11 @@ void Renderer::checkNext()
 
 void Renderer::run(Task t)
 {
-    const float rx = t.size.width() * 2;
-    const float ry = t.size.height() * 2;
+    auto start_time = QTime();
+    start_time.start();
+
+    const float rx = t.size.width() * 2 / (1 << t.level);
+    const float ry = t.size.height() * 2 / (1 << t.level);
     Kernel::Region r({-1, 1}, {-1, 1}, {-1, 1}, rx, ry, fmax(rx, ry));
 
     auto inv = t.mat.inverted();
@@ -99,5 +102,15 @@ void Renderer::run(Task t)
             .select(1, (1 - out.first) / 2);
         d = (out.first == r.Z.values.back()).select(0, d);
         emit(gotResult(this, {d, out.second}, inv));
+
+        auto dt = start_time.elapsed();
+        if (dt < 10 & base_level > 0)
+        {
+            base_level--;
+        }
+        else if (dt > 20)
+        {
+            base_level++;
+        }
     }
 }

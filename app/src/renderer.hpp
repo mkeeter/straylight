@@ -30,11 +30,12 @@ public:
 
     struct Task {
         Task() {}
-        Task(QMatrix4x4 mat, QSize size)
-            : mat(mat), size(size) {}
+        Task(QMatrix4x4 mat, QSize size, int level)
+            : mat(mat), size(size), level(level) {}
 
         QMatrix4x4 mat;
         QSize size;
+        int level;
     };
 
 signals:
@@ -69,6 +70,7 @@ protected:
 
     std::vector<Kernel::Evaluator*> evaluators;
     std::atomic_bool abort;
+    int base_level=4;
 
     /*  What should we do when the current task completes?
      *  (this would be nicer as a variant type) */
