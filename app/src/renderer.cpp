@@ -90,11 +90,12 @@ void Renderer::run(Task t)
     auto m = glm::make_mat4(scaled.data());
     auto out = Kernel::Heightmap::Render(evaluators, r, abort, m);
 
-    Kernel::Image::SavePng("/Users/mkeeter/Desktop/out.png", out.first.colwise().reverse());
-
-    // Map the depth buffer into the 0 - 1 range, with -inf = 1
-    Kernel::DepthImage d =
-        (out.first == -std::numeric_limits<float>::infinity())
-        .select(1, (1 - out.first) / 2);
-    emit(gotResult(this, {d, out.second}, inv));
+    if (!abort.load())
+    {
+        // Map the depth buffer into the 0 - 1 range, with -inf = 1
+        Kernel::DepthImage d =
+            (out.first == -std::numeric_limits<float>::infinity())
+            .select(1, (1 - out.first) / 2);
+        emit(gotResult(this, {d, out.second}, inv));
+    }
 }
