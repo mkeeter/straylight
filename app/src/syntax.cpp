@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "syntax.hpp"
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
@@ -7,12 +9,13 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
     quote_format.setForeground(Qt::red);
 
     // Strings on a single line
-    rules << Rule(R"("(\\"|[^"])*")", quote_format, BASE, BASE);
+    // (with clever regex for escaped chars)
+    rules << Rule(R"("(\\.|[^"\\])*")", quote_format, BASE, BASE);
 
     // Multi-line strings
-    rules << Rule(R"(".*$)", quote_format, BASE, STRING);
-    rules << Rule(R"(^.*")", quote_format, STRING, BASE);
-    rules << Rule(R"(^.*")" quote_format, STRING, STRING);
+    rules << Rule(R"("(\\.|[^"\\])*$)", quote_format, BASE, STRING);
+    rules << Rule(R"(^(\\.|[^"\\])*")", quote_format, STRING, BASE);
+    rules << Rule(R"(.+)", quote_format, STRING, STRING);
 }
 
 void SyntaxHighlighter::highlightBlock(const QString& text)
@@ -51,6 +54,9 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
         {
             break;
         }
+
+        // Otherwise we end up in an infinite loop
+        assert(match_length > 0);
 
         setFormat(match_start, match_length, rule.format);
         offset = match_start + match_length;
