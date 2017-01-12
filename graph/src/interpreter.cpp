@@ -10,6 +10,7 @@ namespace Graph {
 
 // Forward declarations
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args);
+static bool set_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -411,6 +412,13 @@ bool Interpreter::isReserved(const std::string& k) const
            s7_name_to_value(interpreter, k.c_str()) != s7_undefined(interpreter);
 }
 
+std::set<std::string> Interpreter::keywords() const
+{
+    std::set<std::string> keywords;
+    s7_for_each_symbol_name(interpreter, set_insert_, &keywords);
+    return keywords;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
@@ -420,6 +428,12 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
     auto looker = Interpreter::decodeCellKey(interpreter, s7_caddr(args));
 
     return s7_make_integer(interpreter, deps.insert(looker, lookee));
+}
+
+static bool set_insert_(const char* symbol_name, void* data)
+{
+    reinterpret_cast<std::set<std::string>*>(data)->insert(symbol_name);
+    return false;
 }
 
 }   // namespace Graph

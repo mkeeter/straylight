@@ -143,3 +143,16 @@ TEST_CASE("Interpreter::isReserved")
     REQUIRE(!interp.isReserved("e"));
     REQUIRE(!interp.isReserved("i"));
 }
+
+TEST_CASE("Interpreter::keywords")
+{
+    Root r;
+    Dependencies d(r);
+    auto interp = Interpreter(r, &d);
+
+    auto k = interp.keywords();
+
+    REQUIRE(k.count("#t"));
+    REQUIRE(k.count("define"));
+    REQUIRE(k.count("lambda"));
+}

@@ -108,6 +108,12 @@ public slots:
     void canvasPanned(float dx, float dy);
     void canvasZoomed(float ds, float x, float y);
 
+    /*
+     *  Returns interpreter keywords
+     *  (for syntax highlighting)
+     */
+    std::set<std::string> keywords() const { return r.keywords(); }
+
 protected:
     Graph::Root r;
     Canvas* canvas=nullptr;

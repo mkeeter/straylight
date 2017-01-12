@@ -1,9 +1,22 @@
 #include <cassert>
 
+#include "bridge.hpp"
 #include "syntax.hpp"
+
+QList<SyntaxHighlighter::Rule> SyntaxHighlighter::rules;
+
+////////////////////////////////////////////////////////////////////////////////
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
     : QSyntaxHighlighter(doc)
+{
+    if (rules.empty())
+    {
+        buildRules();
+    }
+}
+
+void SyntaxHighlighter::buildRules()
 {
     {   // Strings (single and multi-line)
         QTextCharFormat string_format;
@@ -47,6 +60,16 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
         comment_format.setForeground(Qt::gray);
 
         rules << Rule(R"(\;.*)", comment_format);
+    }
+
+    {
+        QTextCharFormat keyword_format;
+        keyword_format.setForeground(Qt::cyan);
+        for (const auto& k : Bridge::singleton()->keywords())
+        {
+            rules << Rule(QRegularExpression::escape(QString::fromStdString(k)),
+                          keyword_format);
+        }
     }
 }
 

@@ -204,6 +204,7 @@ public:
      *  Calls a function with the interpreter pointer
      */
     void call(void (*f)(s7_scheme*)) { interpreter.call(f); }
+    std::set<std::string> keywords() const { return interpreter.keywords(); }
 
     ////////////////////////////////////////////////////////////////////////////
 

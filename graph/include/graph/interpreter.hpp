@@ -65,6 +65,11 @@ public:
      */
     void call(void (*f)(s7_scheme*)) { f(interpreter); }
 
+    /*
+     *  Returns a set of keywords
+     */
+    std::set<std::string> keywords() const;
+
 private:
     /*
      *  Helper functions used in cellType

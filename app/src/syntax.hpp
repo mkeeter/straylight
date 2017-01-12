@@ -25,7 +25,8 @@ protected:
         State state_in, state_out;
     };
 
-    QList<Rule> rules;
+    void buildRules();
+    static QList<Rule> rules;
 
     void highlightBlock(const QString& text) override;
 };
