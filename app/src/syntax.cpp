@@ -21,7 +21,7 @@ void SyntaxHighlighter::buildRules()
 {
     {   // Strings (single and multi-line)
         QTextCharFormat string_format;
-        string_format.setForeground(Qt::red);
+        string_format.setForeground(Material::red_500);
 
         // Strings on a single line
         // (with clever regex for escaped chars)
@@ -41,7 +41,7 @@ void SyntaxHighlighter::buildRules()
 
         {   // All the possible float formats
             QTextCharFormat float_format;
-            float_format.setForeground(Qt::green);
+            float_format.setForeground(Material::green_500);
 
             rules << Rule(neg + R"(\b\d+\.\d*e\d+))", float_format);
             rules << Rule(neg + R"(\b\d+\.\d*))", float_format);
@@ -50,7 +50,7 @@ void SyntaxHighlighter::buildRules()
 
         {   // Integers
             QTextCharFormat int_format;
-            int_format.setForeground(Qt::blue);
+            int_format.setForeground(Material::light_green_500);
 
             rules << Rule(neg + R"(\b\d+\b))", int_format);
         }
@@ -58,14 +58,14 @@ void SyntaxHighlighter::buildRules()
 
     {   // Comments!
         QTextCharFormat comment_format;
-        comment_format.setForeground(Qt::gray);
+        comment_format.setForeground(Material::grey_500);
 
         rules << Rule(R"(\;.*)", comment_format);
     }
 
     {
         QTextCharFormat keyword_format;
-        keyword_format.setForeground(Qt::cyan);
+        keyword_format.setForeground(Material::blue_500);
         for (const auto& k : Bridge::singleton()->keywords())
         {
             rules << Rule(QRegularExpression::escape(QString::fromStdString(k)),
