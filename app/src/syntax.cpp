@@ -21,15 +21,15 @@ void SyntaxHighlighter::buildRules()
 {
     {   // Strings (single and multi-line)
         QTextCharFormat string_format;
-        string_format.setForeground(Material::red_500);
+        string_format.setForeground(Material::orange_500);
 
         // Strings on a single line
         // (with clever regex for escaped chars)
-        rules << Rule(R"("(\\.|[^"\\])*")", string_format, BASE, BASE);
+        rules << Rule(R"("(?:\\.|[^"\\])*")", string_format, BASE, BASE);
 
         // Multi-line strings
-        rules << Rule(R"("(\\.|[^"\\])*$)", string_format, BASE, STRING);
-        rules << Rule(R"(^(\\.|[^"\\])*")", string_format, STRING, BASE);
+        rules << Rule(R"("(?:\\.|[^"\\])*$)", string_format, BASE, STRING);
+        rules << Rule(R"(^(?:\\.|[^"\\])*")", string_format, STRING, BASE);
         rules << Rule(R"(.+)", string_format, STRING, STRING);
     }
 
@@ -98,10 +98,12 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
                 continue;
             }
 
-            if (match_start == -1 || match.capturedStart(0) < match_start)
+            auto index = match.lastCapturedIndex();
+
+            if (match_start == -1 || match.capturedStart(index) < match_start)
             {
-                match_start = match.capturedStart(0);
-                match_length = match.capturedLength(0);
+                match_start = match.capturedStart(index);
+                match_length = match.capturedLength(index);
                 rule = r;
             }
         }
