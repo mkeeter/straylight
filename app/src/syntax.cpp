@@ -5,17 +5,49 @@
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
     : QSyntaxHighlighter(doc)
 {
-    QTextCharFormat quote_format;
-    quote_format.setForeground(Qt::red);
+    {   // Strings (single and multi-line)
+        QTextCharFormat string_format;
+        string_format.setForeground(Qt::red);
 
-    // Strings on a single line
-    // (with clever regex for escaped chars)
-    rules << Rule(R"("(\\.|[^"\\])*")", quote_format, BASE, BASE);
+        // Strings on a single line
+        // (with clever regex for escaped chars)
+        rules << Rule(R"("(\\.|[^"\\])*")", string_format, BASE, BASE);
 
-    // Multi-line strings
-    rules << Rule(R"("(\\.|[^"\\])*$)", quote_format, BASE, STRING);
-    rules << Rule(R"(^(\\.|[^"\\])*")", quote_format, STRING, BASE);
-    rules << Rule(R"(.+)", quote_format, STRING, STRING);
+        // Multi-line strings
+        rules << Rule(R"("(\\.|[^"\\])*$)", string_format, BASE, STRING);
+        rules << Rule(R"(^(\\.|[^"\\])*")", string_format, STRING, BASE);
+        rules << Rule(R"(.+)", string_format, STRING, STRING);
+    }
+
+    {   // Numbers (float and integer), with the help of a magical
+        // string that can be prepended to a regex to make it detect negative
+        // numbers (but not subtraction).  Note that a closing parenthesis is
+        // needed and the desired number is the last match group.
+        QString neg = R"((^|\*\*|[(+\-=*\/,\[])([+\-\s]*)";
+
+        {   // All the possible float formats
+            QTextCharFormat float_format;
+            float_format.setForeground(Qt::green);
+
+            rules << Rule(neg + R"(\b\d+\.\d*e\d+))", float_format);
+            rules << Rule(neg + R"(\b\d+\.\d*))", float_format);
+            rules << Rule(neg + R"(\b\d+e\d+))", float_format);
+        }
+
+        {   // Integers
+            QTextCharFormat int_format;
+            int_format.setForeground(Qt::blue);
+
+            rules << Rule(neg + R"(\b\d+\b))", int_format);
+        }
+    }
+
+    {   // Comments!
+        QTextCharFormat comment_format;
+        comment_format.setForeground(Qt::gray);
+
+        rules << Rule(R"(\;.*)", comment_format);
+    }
 }
 
 void SyntaxHighlighter::highlightBlock(const QString& text)
