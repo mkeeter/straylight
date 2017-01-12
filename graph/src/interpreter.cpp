@@ -414,8 +414,12 @@ bool Interpreter::isReserved(const std::string& k) const
 
 std::set<std::string> Interpreter::keywords() const
 {
-    std::set<std::string> keywords;
-    s7_for_each_symbol_name(interpreter, set_insert_, &keywords);
+    // Hard-code special keywords, then look up the rest
+    std::set<std::string> keywords = {
+        "#t", "#f", "#<unspecified>", "#<undefined>",
+        "#<eof>", "#true", "#false"};
+    std::pair<s7_scheme*, decltype(keywords)*> data = {interpreter, &keywords};
+    s7_for_each_symbol_name(interpreter, set_insert_, &data);
     return keywords;
 }
 
@@ -432,7 +436,12 @@ static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
 
 static bool set_insert_(const char* symbol_name, void* data)
 {
-    reinterpret_cast<std::set<std::string>*>(data)->insert(symbol_name);
+    auto& d = *reinterpret_cast<std::pair<s7_scheme*,
+                                std::set<std::string>*>*>(data);
+    if (s7_name_to_value(d.first, symbol_name) != s7_undefined(d.first))
+    {
+        d.second->insert(symbol_name);
+    }
     return false;
 }
 

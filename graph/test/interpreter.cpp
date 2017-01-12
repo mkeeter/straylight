@@ -155,4 +155,7 @@ TEST_CASE("Interpreter::keywords")
     REQUIRE(k.count("#t"));
     REQUIRE(k.count("define"));
     REQUIRE(k.count("lambda"));
+    REQUIRE(!k.count("x"));
+    REQUIRE(!k.count("y"));
+    REQUIRE(!k.count("d"));
 }
