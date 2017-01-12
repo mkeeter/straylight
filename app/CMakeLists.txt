@@ -18,6 +18,7 @@ find_package(Qt5Concurrent REQUIRED)
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
     src/bridge.cpp
+    src/material.cpp
     src/syntax.cpp
     src/canvas.cpp
     src/axes.cpp

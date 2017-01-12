@@ -6,6 +6,7 @@
 #include <QQuickItem>
 
 #include "bridge.hpp"
+#include "material.hpp"
 #include "canvas.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,8 @@ int main(int argc, char**argv)
 
     // Install Bridge singleton
     qmlRegisterSingletonType<Bridge>("Bridge", 1, 0, "Bridge", Bridge::singleton);
+    qmlRegisterSingletonType<MaterialSingleton>(
+            "Material", 1, 0, "Material", MaterialSingleton::singleton);
 
     // Register pure-QML singletons
     qmlRegisterSingletonType(QUrl("qrc:/qml/Material.qml"), "Material", 1, 0, "Material");

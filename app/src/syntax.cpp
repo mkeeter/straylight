@@ -2,6 +2,7 @@
 
 #include "bridge.hpp"
 #include "syntax.hpp"
+#include "material.hpp"
 
 QList<SyntaxHighlighter::Rule> SyntaxHighlighter::rules;
 

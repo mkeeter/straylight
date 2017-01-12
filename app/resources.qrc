@@ -17,7 +17,6 @@
         <file>qml/TextRect.qml</file>
 
         <file>qml/Awesome.qml</file>
-        <file>qml/Material.qml</file>
         <file>qml/Style.qml</file>
 
         <file>js/vendor/underscore.js</file>
