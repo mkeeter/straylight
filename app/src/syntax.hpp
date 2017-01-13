@@ -7,8 +7,12 @@ class SyntaxHighlighter : public QSyntaxHighlighter
 {
 public:
     SyntaxHighlighter(QTextDocument* doc);
+    static int matchedParen(QTextDocument* doc, int pos);
 
 protected:
+    static int searchLeft(QTextDocument* doc, int pos);
+    static int searchRight(QTextDocument* doc, int pos);
+
     /*  Define states to keep track of multiline strings. */
     enum State { BASE = -1, STRING = 1 };
 

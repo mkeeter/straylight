@@ -8,6 +8,106 @@ QList<SyntaxHighlighter::Rule> SyntaxHighlighter::rules;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef std::pair<int, char> ParenthesisInfo;
+
+class BlockData : public QTextBlockUserData
+{
+public:
+    std::list<ParenthesisInfo> parens;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+int SyntaxHighlighter::searchLeft(QTextDocument* doc, int pos)
+{
+    int depth = 1;
+    for(QTextBlock b = doc->findBlock(pos); b.isValid(); b=b.previous())
+    {
+        auto data = static_cast<BlockData*>(doc->findBlock(pos).userData());
+        if (!data)
+        {
+            continue;
+        }
+        const auto& parens = data->parens;
+
+        // Search left to find a right-parens match
+        auto start = std::find_if(parens.rbegin(), parens.rend(),
+                [=](const ParenthesisInfo& val) { return val.first < pos; });
+
+        for (auto itr=start; itr != parens.rend(); ++itr)
+        {
+            depth += (itr->second == ')') - (itr->second == '(');
+            if (depth == 0)
+            {
+                return itr->first;
+            }
+        }
+    }
+    return -1;
+}
+
+int SyntaxHighlighter::searchRight(QTextDocument* doc, int pos)
+{
+    int depth = 1;
+    for(QTextBlock b = doc->findBlock(pos); b.isValid(); b=b.next())
+    {
+        auto data = static_cast<BlockData*>(doc->findBlock(pos).userData());
+        if (!data)
+        {
+            continue;
+        }
+        const auto& parens = data->parens;
+
+        // Search right to find a left-parens match
+        auto start = std::find_if(parens.begin(), parens.end(),
+                [=](const ParenthesisInfo& val) { return val.first > pos; });
+
+        for (auto itr=start; itr != parens.end(); ++itr)
+        {
+            depth += (itr->second == '(') - (itr->second == ')');
+            if (depth == 0)
+            {
+                return itr->first;
+            }
+        }
+    }
+    return -1;
+}
+
+int SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
+{
+    auto block = doc->findBlock(pos);
+    assert(block.isValid());
+
+    auto data = static_cast<BlockData*>(block.userData());
+    if (!data)
+    {
+        return -1;
+    }
+
+    const auto& parens = data->parens;
+    auto found = std::find_if(parens.begin(), parens.end(),
+            [=](const ParenthesisInfo& val) { return val.first == pos; });
+
+    if (found == parens.end())
+    {
+        return -1;
+    }
+    else if (found->second == ')')
+    {
+        return searchLeft(doc, pos);
+    }
+    else if (found->second == '(')
+    {
+        return searchRight(doc, pos);
+    }
+
+    assert(false);
+    return -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
     : QSyntaxHighlighter(doc)
 {
@@ -74,47 +174,59 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
     int offset = 0;
     int state = previousBlockState();
 
+    auto parens = new BlockData;
+
     while (offset <= text.length())
     {
-        int match_start = -1;
-        int match_length;
-        Rule rule;
-
-        for (auto r : rules)
+        if (state == BASE && text[offset] == '(')
         {
-            if (r.state_in != state)
-            {
-                continue;
-            }
-
-            auto match = r.regex.match(text, offset);
-            if (!match.hasMatch())
-            {
-                continue;
-            }
-
-            auto index = match.lastCapturedIndex();
-
-            if (match_start == -1 || match.capturedStart(index) < match_start)
-            {
-                match_start = match.capturedStart(index);
-                match_length = match.capturedLength(index);
-                rule = r;
-            }
+            parens->parens.push_back({offset++, '('});
         }
-
-        if (match_start == -1)
+        else if (state == BASE && text[offset] == ')')
         {
-            break;
+            parens->parens.push_back({offset++, ')'});
         }
+        else
+        {
+            int match_start = -1;
+            int match_length;
+            Rule rule;
 
-        // Otherwise we end up in an infinite loop
-        assert(match_length > 0);
+            for (auto r : rules)
+            {
+                if (r.state_in != state)
+                {
+                    continue;
+                }
 
-        setFormat(match_start, match_length, rule.format);
-        offset = match_start + match_length;
-        state = rule.state_out;
+                auto match = r.regex.match(text, offset);
+                if (!match.hasMatch())
+                {
+                    continue;
+                }
+
+                if (match_start == -1 || match.capturedStart(0) < match_start)
+                {
+                    match_start = match.capturedStart(0);
+                    match_length = match.capturedLength(0);
+                    rule = r;
+                }
+            }
+
+            if (match_start == -1)
+            {
+                break;
+            }
+
+            // Otherwise we end up in an infinite loop
+            assert(match_length > 0);
+
+            setFormat(match_start, match_length, rule.format);
+            offset = match_start + match_length;
+            state = rule.state_out;
+        }
     }
 
     setCurrentBlockState(state);
+    setCurrentBlockUserData(parens);
 }

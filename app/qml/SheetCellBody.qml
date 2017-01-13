@@ -68,6 +68,11 @@ GridLayout {
             }
 
             onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
+            onCursorPositionChanged: {
+                var pos = Bridge.matchedParen(textDocument, cursorPosition)
+                //var rect = positionToRectangle(pos)
+                console.log(pos)
+            }
         }
     }
 

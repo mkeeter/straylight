@@ -139,6 +139,11 @@ void Bridge::installHighlighter(QQuickTextDocument* doc)
     new SyntaxHighlighter(doc->textDocument());
 }
 
+int Bridge::matchedParen(QQuickTextDocument* doc, int pos)
+{
+    return SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
+}
+
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(

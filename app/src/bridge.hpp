@@ -45,7 +45,16 @@ public:
 
     Q_INVOKABLE int sheetOf(int instance_index) const;
 
+    /*
+     *  Install a syntax highlighter to the given doc
+     */
     Q_INVOKABLE void installHighlighter(QQuickTextDocument* doc);
+
+    /*
+     *  Returns the cursor position that matches the given position's paren
+     *  (or -1 if no such match exists)
+     */
+    Q_INVOKABLE int matchedParen(QQuickTextDocument* doc, int pos);
 
     /*
      *  Sets the pinged variable to true
@@ -68,6 +77,7 @@ public:
      *  Installs the Canvas object
      */
     void setCanvas(Canvas* c);
+
 
 signals:
     /*
