@@ -144,16 +144,16 @@ void SyntaxHighlighter::buildRules()
             QTextCharFormat float_format;
             float_format.setForeground(Material::green_500);
 
-            rules << Rule(R"((?:-|)\d+\.\d*e\d+)", float_format);
-            rules << Rule(R"((?:-|)\d+\.\d*)", float_format);
-            rules << Rule(R"((?:-|)\d+e\d+)", float_format);
+            rules << Rule(R"(\b(?:-|)\d+\.\d*e\d+)", float_format);
+            rules << Rule(R"(\b(?:-|)\d+\.\d*)", float_format);
+            rules << Rule(R"(\b(?:-|)\d+e\d+)", float_format);
         }
 
         {   // Integers
             QTextCharFormat int_format;
             int_format.setForeground(Material::light_green_500);
 
-            rules << Rule(R"((?:-|)\d+\b)", int_format);
+            rules << Rule(R"(\b(?:-|)\d+\b)", int_format);
         }
     }
 
