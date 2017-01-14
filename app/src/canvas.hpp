@@ -39,7 +39,7 @@ signals:
 protected:
     /*
      *  Returns the projection matrix
-     *  (which compensates for window size)
+     *  (which compensates for window aspect ratio)
      */
     QMatrix4x4 proj() const;
 
