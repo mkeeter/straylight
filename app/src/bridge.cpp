@@ -139,7 +139,7 @@ void Bridge::installHighlighter(QQuickTextDocument* doc)
     new SyntaxHighlighter(doc->textDocument());
 }
 
-int Bridge::matchedParen(QQuickTextDocument* doc, int pos)
+QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
 {
     return SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
 }

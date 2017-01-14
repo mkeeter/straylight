@@ -7,7 +7,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter
 {
 public:
     SyntaxHighlighter(QTextDocument* doc);
-    static int matchedParen(QTextDocument* doc, int pos);
+    static QPoint matchedParen(QTextDocument* doc, int pos);
 
 protected:
     static int searchLeft(QTextDocument* doc, int pos);

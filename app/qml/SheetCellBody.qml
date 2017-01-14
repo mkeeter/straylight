@@ -56,7 +56,13 @@ GridLayout {
             }
 
             Rectangle {
-                id: parenMatch
+                id: matchA
+                visible: false
+                color: Material.lime
+                opacity: 0.5
+            }
+            Rectangle {
+                id: matchB
                 visible: false
                 color: Material.lime
                 opacity: 0.5
@@ -79,19 +85,27 @@ GridLayout {
             onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
             onCursorPositionChanged: {
                 var pos = Bridge.matchedParen(textDocument, cursorPosition)
-                if (pos != -1) {
-                    var rect = positionToRectangle(pos)
-                    console.log(pos)
-                    console.log(rect)
-
-                    parenMatch.x = rect.x
-                    parenMatch.y = rect.y
-                    parenMatch.visible = true;
-                    parenMatch.height = rect.height
-                    parenMatch.width = positionToRectangle(pos + 1).x - rect.x
+                if (pos.x != -1 && pos.y != -1) {
+                    highlightPos(pos.x, matchA)
+                    highlightPos(pos.y, matchB)
                 } else {
-                    parenMatch.visible = false;
+                    matchA.visible = false;
+                    matchB.visible = false;
                 }
+            }
+
+            /*
+             *  Helper function that moves the given object to a particular
+             *  position.  The object should be a semi-transparent Rectangle
+             */
+            function highlightPos(pos, obj) {
+                var r = positionToRectangle(pos)
+
+                obj.x = r.x
+                obj.y = r.y
+                obj.visible = true;
+                obj.height = r.height
+                obj.width = positionToRectangle(pos + 1).x - r.x
             }
         }
     }

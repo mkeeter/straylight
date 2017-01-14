@@ -74,7 +74,7 @@ int SyntaxHighlighter::searchRight(QTextDocument* doc, int pos)
     return -1;
 }
 
-int SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
+QPoint SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
 {
     auto block = doc->findBlock(pos);
     assert(block.isValid());
@@ -82,7 +82,7 @@ int SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
     auto data = static_cast<BlockData*>(block.userData());
     if (!data)
     {
-        return -1;
+        return {-1, -1};
     }
 
     const auto& parens = data->data;
@@ -92,19 +92,19 @@ int SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
 
     if (found == parens.end())
     {
-        return -1;
+        return {-1, -1};
     }
     else if (found->second == ")")
     {
-        return searchLeft(doc, found->first);
+        return {found->first, searchLeft(doc, found->first)};
     }
     else if (found->second == "(")
     {
-        return searchRight(doc, found->first);
+        return {found->first, searchRight(doc, found->first)};
     }
 
     assert(false);
-    return -1;
+    return {-1, -1};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

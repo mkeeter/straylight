@@ -51,10 +51,10 @@ public:
     Q_INVOKABLE void installHighlighter(QQuickTextDocument* doc);
 
     /*
-     *  Returns the cursor position that matches the given position's paren
-     *  (or -1 if no such match exists)
+     *  Returns a cursor position pair that matches the given position's paren
+     *  (or -1, -1 if no such match exists)
      */
-    Q_INVOKABLE int matchedParen(QQuickTextDocument* doc, int pos);
+    Q_INVOKABLE QPoint matchedParen(QQuickTextDocument* doc, int pos);
 
     /*
      *  Sets the pinged variable to true
