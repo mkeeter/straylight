@@ -32,14 +32,15 @@ int SyntaxHighlighter::searchLeft(QTextDocument* doc, int pos)
 
         // Search left to find a right-parens match
         auto start = std::find_if(parens.rbegin(), parens.rend(),
-                [=](const MatchInfo& val) { return val.first < pos; });
+                [=](const MatchInfo& val)
+                { return val.first + b.position() < pos; });
 
         for (auto itr=start; itr != parens.rend(); ++itr)
         {
             depth += (itr->second == ")") - (itr->second == "(");
             if (depth == 0)
             {
-                return itr->first;
+                return itr->first + b.position();
             }
         }
     }
@@ -60,14 +61,15 @@ int SyntaxHighlighter::searchRight(QTextDocument* doc, int pos)
 
         // Search right to find a left-parens match
         auto start = std::find_if(parens.begin(), parens.end(),
-                [=](const MatchInfo& val) { return val.first > pos; });
+                [=](const MatchInfo& val)
+                { return val.first + b.position() > pos; });
 
         for (auto itr=start; itr != parens.end(); ++itr)
         {
             depth += (itr->second == "(") - (itr->second == ")");
             if (depth == 0)
             {
-                return itr->first;
+                return itr->first + b.position();
             }
         }
     }
@@ -88,19 +90,22 @@ QPoint SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
     const auto& parens = data->data;
     auto found = std::find_if(parens.begin(), parens.end(),
             [=](const MatchInfo& val)
-            { return val.first == pos || pos - 1 == val.first; });
+            { return val.first + block.position() == pos ||
+                     val.first + block.position() == pos - 1; });
 
     if (found == parens.end())
     {
         return {-1, -1};
     }
-    else if (found->second == ")")
+
+    auto p = found->first + block.position();
+    if (found->second == ")")
     {
-        return {found->first, searchLeft(doc, found->first)};
+        return {p, searchLeft(doc, p)};
     }
     else if (found->second == "(")
     {
-        return {found->first, searchRight(doc, found->first)};
+        return {p, searchRight(doc, p)};
     }
 
     assert(false);
@@ -209,7 +214,8 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
 
         if (!match.isValid() || !match.hasMatch())
         {
-            break;
+            offset++;
+            continue;
         }
 
         const auto start = match.capturedStart(rule.capture);
