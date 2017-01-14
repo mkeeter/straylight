@@ -113,7 +113,7 @@ SplitView {
         items.output(cell_index, name, valid, value)
     }
 
-    function cell(cell_index, name, expr, type, valid, value) {
+    function cell(cell_index, name, expr, type, valid, value, ptr) {
         items.cell(cell_index, name, expr, type, valid, value)
     }
 

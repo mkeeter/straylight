@@ -72,18 +72,9 @@ public:
 
     /*
      *  Looks up the value of a particular env + cell
+     *  TODO: this is only used in test harnesses?
      */
     const Value& getValue(const CellKey& cell) const;
-
-    /*
-     *  Checks to see if the given cell is valid
-     */
-    bool isValid(const CellKey& cell) const;
-
-    /*
-     *  Returns the raw value pointer from a cell
-     */
-    ValuePtr getRawValuePtr(const CellKey& cell) const;
 
     /*
      *  Checks to see whether the given sheet name is valid

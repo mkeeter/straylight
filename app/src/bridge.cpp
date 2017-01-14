@@ -188,6 +188,11 @@ void Bridge::setCanvas(Canvas* c)
 {
     assert(canvas == nullptr);
     canvas = c;
+
+    connect(this, &Bridge::push, c, &Canvas::push);
+    connect(this, &Bridge::pop, c, &Canvas::pop);
+    connect(this, &Bridge::cell, c, &Canvas::cell);
+
     emit(syncLater());
 }
 
@@ -247,22 +252,12 @@ bool Bridge::BridgeTreeSerializer::push(Graph::InstanceIndex i,
     parent->pinged = false;
     parent->push(i.i, QString::fromStdString(instance_name),
                  QString::fromStdString(sheet_name));
-
-    if (parent->canvas)
-    {
-        parent->canvas->push(i);
-    }
-
     return parent->pinged;
 }
 
 void Bridge::BridgeTreeSerializer::pop()
 {
     parent->pop();
-    if (parent->canvas)
-    {
-        parent->canvas->pop();
-    }
 }
 
 void Bridge::BridgeTreeSerializer::instance(
@@ -294,15 +289,11 @@ void Bridge::BridgeTreeSerializer::output(
 void Bridge::BridgeTreeSerializer::cell(
         Graph::CellIndex c, const std::string& name,
         const std::string& expr, Graph::Cell::Type type,
-        bool valid, const std::string& val)
+        bool valid, const std::string& val, Graph::ValuePtr ptr)
 {
     parent->cell(c.i, QString::fromStdString(name),
                  QString::fromStdString(expr), type,
-                 valid, QString::fromStdString(val));
-    if (parent->canvas)
-    {
-        parent->canvas->cell(c, &parent->r);
-    }
+                 valid, QString::fromStdString(val), ptr);
 }
 
 void Bridge::BridgeTreeSerializer::sheet(

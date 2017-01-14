@@ -49,7 +49,7 @@ public:
      *  Returns an untagged value pointer
      *  e.g. taking '(value 12) and returning 12
      */
-    ValuePtr untag(ValuePtr v) const;
+    static ValuePtr untag(ValuePtr v);
 
     static CellKey decodeCellKey(s7_scheme* interpreter, s7_cell* v);
     static NameKey decodeNameKey(s7_scheme* interpreter, s7_cell* v);

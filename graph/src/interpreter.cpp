@@ -284,7 +284,7 @@ void Interpreter::release(ValuePtr v)
     s7_gc_unprotect(interpreter, v);
 }
 
-ValuePtr Interpreter::untag(ValuePtr v) const
+ValuePtr Interpreter::untag(ValuePtr v)
 {
     return s7_cdr(v);
 }

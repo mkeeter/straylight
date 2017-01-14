@@ -64,13 +64,17 @@ void Canvas::render()
     blitter.draw(mat);
 }
 
-void Canvas::push(Graph::InstanceIndex i)
+void Canvas::push(int instance_index, const QString& instance_name,
+                  const QString& sheet_name)
 {
+    (void)instance_name;
+    (void)sheet_name;
+
     if (env.size() == 0)
     {
         assert(visited.size() == 0);
     }
-    env.push_back(i);
+    env.push_back(instance_index);
 }
 
 void Canvas::pop()
@@ -96,14 +100,18 @@ void Canvas::pop()
     }
 }
 
-void Canvas::cell(Graph::CellIndex c, const Graph::Root* r)
+void Canvas::cell(int c, const QString& name, const QString& expr, int type,
+                  bool valid, const QString& val, void* ptr)
 {
-    assert(r);
+    (void)name;
+    (void)expr;
+    (void)type;
+    (void)val;
 
     Graph::CellKey key = {env, c};
-    if (r->isValid(key))
+    if (valid)
     {
-        auto v = r->getRawValuePtr(key);
+        auto v = Graph::Interpreter::untag(static_cast<Graph::ValuePtr>(ptr));
 
         // If this is a (Scheme) shape, then extract it and make a Renderer
         // for it (if one doesn't already exist)

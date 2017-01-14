@@ -15,7 +15,8 @@ public:
      */
     virtual void cell(CellIndex c, const std::string& name,
                       const std::string& expr, Cell::Type type,
-                      bool valid, const std::string& val)=0;
+                      bool valid, const std::string& val,
+                      const ValuePtr ptr)=0;
 
     /*
      *  Begin drawing an instance with the given name and index

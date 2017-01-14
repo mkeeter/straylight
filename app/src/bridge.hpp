@@ -105,14 +105,14 @@ signals:
     void pop();
 
     void instance(int i, const QString& name, const QString& sheet);
-    void input(int c, const QString& name,
-               const QString& expr, bool valid,
+    void input(int c, const QString& name, const QString& expr, bool valid,
                const QString& val);
-    void output(int c, const QString& name,
-                bool valid, const QString& val);
-    void cell(int c, const QString& name,
-              const QString& expr, int type,
-              bool valid, const QString& val);
+    void output(int c, const QString& name, bool valid, const QString& val);
+
+    // ptr is actually of type Graph::ValuePtr, but we use void* here due to
+    // Qt limitations (since it doesn't let you pass ValuePtrs through slots)
+    void cell(int c, const QString& name, const QString& expr, int type,
+              bool valid, const QString& val, void* ptr);
 
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
@@ -155,7 +155,8 @@ protected:
 
         void cell(Graph::CellIndex c, const std::string& name,
                   const std::string& expr, Graph::Cell::Type type,
-                  bool valid, const std::string& val) override;
+                  bool valid, const std::string& val,
+                  Graph::ValuePtr ptr) override;
 
         void instance(Graph::InstanceIndex i, const std::string& name,
                       const std::string& sheet) override;

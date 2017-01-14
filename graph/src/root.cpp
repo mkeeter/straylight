@@ -257,16 +257,6 @@ const Value& Root::getValue(const CellKey& cell) const
     return getItem(cell.second).cell()->values.at(cell.first);
 }
 
-ValuePtr Root::getRawValuePtr(const CellKey& cell) const
-{
-    return interpreter.untag(getValue(cell).value);
-}
-
-bool Root::isValid(const CellKey& cell) const
-{
-    return getValue(cell).valid;
-}
-
 bool Root::checkItemName(const SheetIndex& parent,
                          const std::string& name,
                          std::string* err) const
@@ -357,7 +347,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             {
                 const auto& value = c->values.at(env);
                 s->cell(CellIndex(i), name, c->expr, c->type,
-                        value.valid, value.str);
+                        value.valid, value.str, value.value);
             }
             else if (auto n = item.instance())
             {

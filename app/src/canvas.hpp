@@ -23,11 +23,18 @@ public:
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
     void render() override;
 
-    void push(Graph::InstanceIndex i);
-    void pop();
-    void cell(Graph::CellIndex c, const Graph::Root* r);
-
 public slots:
+    ////////////////////////////////////////////////////////////////////////////
+    //  Graph serialization
+    //  (which we only track closely enough to get shapes
+    void push(const int instance_index, const QString& instance_name,
+              const QString& sheet_name);
+    void pop();
+    void cell(int c, const QString& name, const QString& expr, int type,
+              bool valid, const QString& val, void* ptr);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //  Changes to window properties
     void setSize(float w, float h);
     void rotateIncremental(float dx, float dy);
     void panIncremental(float dx, float dy);
