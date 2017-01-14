@@ -78,39 +78,29 @@ int SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
 {
     auto block = doc->findBlock(pos);
     assert(block.isValid());
-    qDebug() << "Block text: " << block.text();
 
     auto data = static_cast<BlockData*>(block.userData());
     if (!data)
     {
-        printf("No data!\n");
         return -1;
     }
 
     const auto& parens = data->data;
     auto found = std::find_if(parens.begin(), parens.end(),
-            [=](const MatchInfo& val) { return val.first == pos; });
-
-    printf("Target pso: %i\n", pos);
-    for (auto p : parens)
-    {
-        qDebug() << p.first << p.second;
-    }
+            [=](const MatchInfo& val)
+            { return val.first == pos || pos - 1 == val.first; });
 
     if (found == parens.end())
     {
-        printf("Did not find parens\n");
         return -1;
     }
     else if (found->second == ")")
     {
-        printf("Searching left\n");
-        return searchLeft(doc, pos);
+        return searchLeft(doc, found->first);
     }
     else if (found->second == "(")
     {
-        printf("Searching right\n");
-        return searchRight(doc, pos);
+        return searchRight(doc, found->first);
     }
 
     assert(false);
@@ -231,10 +221,8 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
         offset = start + length;
         state = rule.state_out;
 
-        qDebug() << match.lastCapturedIndex();
         for (int i=1; i <= match.lastCapturedIndex(); ++i)
         {
-            qDebug() << "   " << i;
             data->data.push_back({match.capturedStart(i), match.captured(i)});
         }
     }
