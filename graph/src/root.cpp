@@ -368,7 +368,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                 auto env_ = env;
                 env_.push_back(index);
 
-                for (auto item: iterItems(n->sheet))
+                for (auto item : iterItems(n->sheet))
                 {
                     if (auto c = getItem(item).cell())
                     {
