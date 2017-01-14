@@ -21,6 +21,8 @@ GridLayout {
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
+    function setFocus() {  exprText.forceActiveFocus() }
+
     Flickable {
         id: flick
 

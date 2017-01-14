@@ -36,6 +36,7 @@ Column {
 
                 Component.onCompleted: {
                     renameMe.connect(openRename)
+                    focusCell.connect(cellBody.setFocus)
                 }
             }
 

@@ -12,6 +12,7 @@ GridLayout {
     signal eraseMe
     signal openSheet
     signal closeSheet
+    signal focusCell
 
     function openRename() {
         renamer.enable(name)
@@ -86,5 +87,6 @@ GridLayout {
         onAccepted: function(t) {
             Bridge.renameItem(uniqueIndex, t)
         }
+        onActiveChanged: { focusCell() }
     }
 }
