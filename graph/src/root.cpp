@@ -59,7 +59,7 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
         {
             if (c->type == Cell::INPUT)
             {
-                getMutableItem(i).instance()->inputs[t] =
+                getMutableItem(i).instance()->inputs[CellIndex(t.i)] =
                     interpreter.defaultExpr(c->expr);
             }
         }
@@ -376,7 +376,8 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                         if (c->type == Cell::INPUT)
                         {
                             s->input(CellIndex(item.i), itemName(item),
-                                     n->inputs.at(item), v.valid, v.str);
+                                     n->inputs.at(CellIndex(item.i)),
+                                     v.valid, v.str);
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
