@@ -75,18 +75,18 @@ public:
      *  (until reset by another call to instance)
      */
     virtual void instance(InstanceIndex i, const std::string& name,
-                          SheetIndex s);
+                          SheetIndex s)=0;
 
     /*
      *  Stores an input expression
      */
-    virtual void input(CellIndex c, const std::string& expr);
+    virtual void input(CellIndex c, const std::string& expr)=0;
 
     /*
      *  Pushes and pops into a sheet from the library
      */
-    virtual bool push(SheetIndex i, const std::string& sheet_name);
-    virtual bool pop();
+    virtual void push(SheetIndex i, const std::string& sheet_name)=0;
+    virtual void pop()=0;
 };
 
 }   // namespace Graph

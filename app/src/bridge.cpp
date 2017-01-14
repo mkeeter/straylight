@@ -144,6 +144,17 @@ QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
     return SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
 }
 
+QString Bridge::saveToFile(QString filename)
+{
+    BridgeFlatSerializer ser(filename);
+    if (!ser.opened)
+    {
+        return "Could not open file " + filename;
+    }
+    r.serialize(&ser);
+    return "";
+}
+
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(
@@ -299,4 +310,45 @@ void Bridge::BridgeTreeSerializer::sheet(
         bool editable, bool insertable)
 {
     parent->sheet(s.i, QString::fromStdString(name), editable, insertable);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Bridge::BridgeFlatSerializer::BridgeFlatSerializer(QString filename)
+    : file(filename), out(&file), opened(file.open(QIODevice::WriteOnly))
+{
+    // Nothing to do here
+    //
+    // Caller must check opened and is not allowed to call functions
+    // if it is false.
+}
+
+void Bridge::BridgeFlatSerializer::cell(
+        Graph::CellIndex c, const std::string& name, const std::string& expr)
+{
+    out << (quint8)'c' << (quint32)c.i << QString::fromStdString(name)
+        << QString::fromStdString(expr);
+}
+
+void Bridge::BridgeFlatSerializer::instance(
+        Graph::InstanceIndex i, const std::string& name, Graph::SheetIndex s)
+{
+    out << (quint8)'i' << (quint32)i.i << QString::fromStdString(name)
+        << (quint32)s.i;
+}
+void Bridge::BridgeFlatSerializer::input(
+        Graph::CellIndex c, const std::string& expr)
+{
+    out << (quint8)'n' << (quint32)c.i << QString::fromStdString(expr);
+}
+
+void Bridge::BridgeFlatSerializer::push(
+        Graph::SheetIndex i, const std::string& sheet_name)
+{
+    out << (quint8)'s' << (quint32)i.i << QString::fromStdString(sheet_name);
+}
+
+void Bridge::BridgeFlatSerializer::pop()
+{
+    out << (quint8)'p';
 }

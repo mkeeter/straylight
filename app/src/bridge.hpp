@@ -58,18 +58,32 @@ public:
 
     /*
      *  Sets the pinged variable to true
+     *
+     *  This is used when the Bridge tells the UI about an instance, and the
+     *  UI tells the Bridge whether that instance is being drawn.
      */
     Q_INVOKABLE void ping() { pinged = true; }
+
+    /*
+     *  Saves to the given file, returning an error string on failure
+     */
+    Q_INVOKABLE QString saveToFile(QString filename);
 
     /*
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
     static Bridge* singleton();
+
+    /*
+     *  Extract the graph root from the singleton
+     */
     static Graph::Root* root();
 
     /*
      *  Requests that the UI be synchronized to the graph
+     *
+     *  This should be called from the UI thread when things change
      */
     Q_INVOKABLE void sync();
 
@@ -78,11 +92,13 @@ public:
      */
     void setCanvas(Canvas* c);
 
-
 signals:
     /*
      *  Set of signals for deserialization of the graph
      *  (interpreted as a tree)
+     *
+     *  These signals are connected directly to the UI, which is responsible
+     *  for maintaining serializer state and updating its models
      */
     void push(const int instance_index, const QString& instance_name,
               const QString& sheet_name);
@@ -101,7 +117,7 @@ signals:
     void sheet(int s, const QString& name, bool editable, bool insertable);
 
     /*
-     *  Used to queue a sync from a non-main thread
+     *  Used to queue a sync from a non-UI thread
      */
     void syncLater();
 
@@ -159,6 +175,51 @@ protected:
         Bridge* parent;
     };
 
+    /*
+     *  This is a serializer that writes a graph to a file
+     *  It is transient, constructed to save a file then discarded
+     *  After construction, the caller should check opened and is only
+     *  allowed to call other functions if true
+     */
+    class BridgeFlatSerializer : public Graph::FlatSerializer
+    {
+    public:
+        BridgeFlatSerializer(QString filename);
+
+        /*
+         *  Describes a cell within the current sheet
+         */
+        void cell(Graph::CellIndex c, const std::string& name,
+                  const std::string& expr) override;
+
+        /*
+         *  Begins an instance within the current sheet
+         *
+         *  input calls after this point refer to this instance
+         *  (until reset by another call to instance)
+         */
+        void instance(Graph::InstanceIndex i, const std::string& name,
+                      Graph::SheetIndex s) override;
+
+        /*
+         *  Stores an input expression
+         */
+        void input(Graph::CellIndex c, const std::string& expr) override;
+
+        /*
+         *  Pushes and pops into a sheet from the library
+         */
+        void push(Graph::SheetIndex i, const std::string& sheet_name) override;
+        void pop() override;
+
+    protected:
+        QFile file;
+        QDataStream out;
+    public:
+        const bool opened;
+    };
+
+    /*  Permanent serializer that's connected to the right places  */
     BridgeTreeSerializer bts;
     bool pinged=false;
 
