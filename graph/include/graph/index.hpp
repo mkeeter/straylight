@@ -9,6 +9,10 @@ struct Index
 {
     Index() : i(-1) { /* Default constructor */ }
     Index(unsigned i) : i(i) { /* Nothing to do here */ }
+
+    template <class M>
+    explicit Index(const Index<M>& other) : i(other.i) { /* Nothing to do here */ }
+
     bool operator<(const Index<T>& other) const {
         return i < other.i;
     }

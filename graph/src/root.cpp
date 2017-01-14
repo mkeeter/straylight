@@ -9,7 +9,7 @@ CellKey Root::toCellKey(const NameKey& k) const
 
     assert(getItem(i).cell());
 
-    return {k.first, CellIndex(i.i)};
+    return {k.first, CellIndex(i)};
 }
 
 NameKey Root::toNameKey(const CellKey& k) const
@@ -356,7 +356,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             if (auto c = item.cell())
             {
                 const auto& value = c->values.at(env);
-                s->cell(CellIndex(i.i), name, c->expr, c->type,
+                s->cell(CellIndex(i), name, c->expr, c->type,
                         value.valid, value.str);
             }
             else if (auto n = item.instance())
@@ -375,13 +375,13 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                         const auto& v = c->values.at(env_);
                         if (c->type == Cell::INPUT)
                         {
-                            s->input(CellIndex(item.i), itemName(item),
-                                     n->inputs.at(CellIndex(item.i)),
+                            s->input(CellIndex(item), itemName(item),
+                                     n->inputs.at(CellIndex(item)),
                                      v.valid, v.str);
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
-                            s->output(CellIndex(item.i), itemName(item),
+                            s->output(CellIndex(item), itemName(item),
                                       v.valid, v.str);
                         }
                     }
@@ -410,7 +410,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             }
             for (const auto& e : sheets_above)
             {
-                s->sheet(e.i, lib.nameOf(e), sheets_direct.count(e),
+                s->sheet(e, lib.nameOf(e), sheets_direct.count(e),
                          tree.canInsertInstance(sheet, e));
             }
         }
@@ -429,7 +429,7 @@ void Root::serialize(FlatSerializer* s, SheetIndex sheet) const
     {
         if (auto n = getItem(i).instance())
         {
-            s->instance(InstanceIndex(i.i), tree.nameOf(i), n->sheet);
+            s->instance(InstanceIndex(i), tree.nameOf(i), n->sheet);
             for (const auto& p : n->inputs)
             {
                 s->input(p.first, p.second);
@@ -437,7 +437,7 @@ void Root::serialize(FlatSerializer* s, SheetIndex sheet) const
         }
         else if (auto c = getItem(i).cell())
         {
-            s->cell(CellIndex(i.i), tree.nameOf(i), c->expr);
+            s->cell(CellIndex(i), tree.nameOf(i), c->expr);
         }
         else
         {
@@ -458,11 +458,11 @@ void Root::clear()
     {
         if (getItem(i).instance())
         {
-            eraseInstance(InstanceIndex(i.i));
+            eraseInstance(InstanceIndex(i));
         }
         else if (getItem(i).cell())
         {
-            eraseCell(CellIndex(i.i));
+            eraseCell(CellIndex(i));
         }
         else
         {

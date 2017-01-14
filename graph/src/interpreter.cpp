@@ -295,7 +295,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
     const auto& item = root.getItem(index);
     if (auto cell = item.cell())
     {
-        CellKey lookee = {env, CellIndex(index.i)};
+        CellKey lookee = {env, CellIndex(index)};
 
         // Construct a lookup thunk using value_thunk_factory
         auto args = s7_list(interpreter, 5,
@@ -314,7 +314,7 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
         {   // Create a temporary environment inside the instance, and
             // build up a list of OUTPUT cells within this instance
             auto env_ = env;
-            env_.push_back(InstanceIndex(index.i));
+            env_.push_back(InstanceIndex(index));
             for (const auto& c : root.iterItems(instance->sheet))
             {
                 if (auto cell = root.getItem(c).cell())

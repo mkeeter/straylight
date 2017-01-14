@@ -25,7 +25,7 @@ CellIndex Tree::insertCell(const SheetIndex& parent, const std::string& name,
 {
     auto c = insert(parent, name, Item(expr));
     order[parent].push_back(c);
-    return CellIndex(c.i); // manual conversion!
+    return CellIndex(c);
 }
 
 /*
@@ -37,7 +37,7 @@ InstanceIndex Tree::insertInstance(const SheetIndex& parent,
 {
     auto i = insert(parent, name, Item(target));
     order[parent].push_back(i);
-    return InstanceIndex(i.i);
+    return InstanceIndex(i);
 }
 
 bool Tree::canInsertInstance(const SheetIndex& parent,
@@ -85,7 +85,7 @@ std::list<Env> Tree::envsOf(const SheetIndex& s) const
                 auto env_ = env;
                 if (auto instance = at(i).instance())
                 {
-                    env_.push_back(InstanceIndex(i.i));
+                    env_.push_back(InstanceIndex(i));
                     todo.push_back({env_, instance->sheet});
                 }
             }
@@ -104,7 +104,7 @@ std::list<InstanceIndex> Tree::instancesOf(const SheetIndex& s) const
     {
         if (i.second.instance() && i.second.instance()->sheet == s)
         {
-            out.push_back(InstanceIndex(i.first.i));
+            out.push_back(InstanceIndex(i.first));
         }
     }
     return out;
@@ -124,13 +124,13 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
     {
         if (at(i).cell())
         {
-            out.push_back({{}, CellIndex(i.i)});
+            out.push_back({{}, CellIndex(i)});
         }
         else if (auto n = at(i).instance())
         {
             for (auto k : cellsOf(n->sheet))
             {
-                k.first.push_front(InstanceIndex(i.i));
+                k.first.push_front(InstanceIndex(i));
                 out.push_back(k);
             }
         }
