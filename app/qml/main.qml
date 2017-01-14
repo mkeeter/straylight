@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.2
 
 import Canvas 1.0
 import Style 1.0
@@ -43,11 +44,28 @@ ApplicationWindow {
                 shortcut: StandardKey.Open
             }
             MenuItem {
+                text: qsTr("&Save As")
+                onTriggered: saveDialog.visible = true
+                shortcut: StandardKey.SaveAs
+            }
+            MenuItem {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
                 shortcut: StandardKey.Quit
             }
         }
+    }
+
+    FileDialog {
+        id: saveDialog
+        title: "Please choose a file"
+        folder: shortcuts.home
+        onAccepted: {
+            Bridge.saveToFile(saveDialog.fileUrl)
+            // TODO: error handling here
+        }
+        selectExisting: false
+        visible: false
     }
 
     Component {
