@@ -8,6 +8,12 @@ SplitView {
     id: sstack
     width: 0
 
+    // This is the component that's initialized in our stack of sheets
+    Component {
+        id: sheetViewComponent
+        SheetView { }
+    }
+
     property var env: []
 
     // We have to manually track items because SplitView doesn't have
@@ -84,6 +90,7 @@ SplitView {
         }
     }
 
+    // The handle between items is a fake drop-shadow
     handleDelegate: Component {
         Item {
             width: 0

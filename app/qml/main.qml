@@ -23,6 +23,9 @@ ApplicationWindow {
             color: Material.white
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //  Global properties for fonts and underscore
     FontLoader {
         id: fontAwesome
         source: "qrc:/fonts/fontawesome-webfont.ttf"
@@ -31,10 +34,10 @@ ApplicationWindow {
         id: fixedWidth
         source: "qrc:/fonts/Inconsolata-Regular.ttf"
     }
-
     property var _: Underscore.init()
 
-    //menu containing two menu items
+    ////////////////////////////////////////////////////////////////////////////
+    //  Menu bar, with all the functions you'd expect
     menuBar: MenuBar {
         Menu {
             title: qsTr("File")
@@ -56,6 +59,8 @@ ApplicationWindow {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //  All of the dialogs, with visible = false until shown
     FileDialog {
         id: saveDialog
         title: "Please choose a file"
@@ -68,11 +73,11 @@ ApplicationWindow {
         visible: false
     }
 
-    Component {
-        id: sheetViewComponent
-        SheetView { }
-    }
-
+    ////////////////////////////////////////////////////////////////////////////
+    //  This splitview contains our sheets on the left and the OpenGL canvas
+    //  on the right.  The OpenGL canvas is a minimal object that forwards
+    //  everything through the Bridge
+    //  TODO: make the Canvas call its own functions (instead of fowarding)
     SplitView {
         anchors.fill: parent
         orientation: Qt.Horizontal
