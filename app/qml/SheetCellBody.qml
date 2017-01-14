@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.0
 import Style 1.0
 import Bridge 1.0
 import Awesome 4.7
+import Material 1.0
 
 GridLayout {
 
@@ -54,6 +55,13 @@ GridLayout {
                 cursorPosition = Math.min(text.length, c)
             }
 
+            Rectangle {
+                id: parenMatch
+                visible: false
+                color: Material.lime
+                opacity: 0.5
+            }
+
             Component.onCompleted: {
                 syncText()
                 Bridge.installHighlighter(textDocument)
@@ -65,13 +73,25 @@ GridLayout {
                 if (activeFocus) {
                     Bridge.setExpr(uniqueIndex, text)
                 }
+                onCursorPositionChanged()
             }
 
             onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
             onCursorPositionChanged: {
                 var pos = Bridge.matchedParen(textDocument, cursorPosition)
-                //var rect = positionToRectangle(pos)
-                console.log(pos)
+                if (pos != -1) {
+                    var rect = positionToRectangle(pos)
+                    console.log(pos)
+                    console.log(rect)
+
+                    parenMatch.x = rect.x
+                    parenMatch.y = rect.y
+                    parenMatch.visible = true;
+                    parenMatch.height = rect.height
+                    parenMatch.width = positionToRectangle(pos + 1).x - rect.x
+                } else {
+                    parenMatch.visible = false;
+                }
             }
         }
     }

@@ -20,13 +20,16 @@ protected:
     struct Rule
     {
         Rule() {}
-        Rule(QString r, QTextCharFormat f, State si=BASE, State so=BASE)
-            : regex(QRegularExpression(r)), format(f), state_in(si), state_out(so)
+        Rule(QString r, QTextCharFormat f, State si=BASE, State so=BASE,
+             int capture=0)
+            : regex(QRegularExpression(r)), format(f), state_in(si), state_out(so),
+              capture(capture)
         { /* Nothing to do here */ }
 
         QRegularExpression regex;
         QTextCharFormat format;
         State state_in, state_out;
+        int capture;
     };
 
     void buildRules();
