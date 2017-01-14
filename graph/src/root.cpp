@@ -445,7 +445,10 @@ void Root::serialize(FlatSerializer* s, SheetIndex sheet) const
         }
     }
 
-    // Serialize library here!
+    for (const auto& h : lib.childrenOf(sheet))
+    {
+        serialize(s, h);
+    }
 }
 
 void Root::clear()
