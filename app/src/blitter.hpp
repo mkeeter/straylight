@@ -52,6 +52,7 @@ protected:
     std::map<Renderer*, Quad*> quads;
 
     QOpenGLBuffer quad_vbo;
+    GLsizei quad_vbo_size;
     QOpenGLVertexArrayObject quad_vao;
     QOpenGLShaderProgram shader;
 

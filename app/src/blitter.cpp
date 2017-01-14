@@ -15,14 +15,26 @@ Blitter::Blitter()
             QOpenGLShader::Fragment, ":/gl/depthquad.frag");
     shader.link();
 
-    // Data is arranged  x   y
-    GLfloat data[] = {  -1, -1,
-                         1, -1,
-                         1,  1,
-                        -1,  1, };
-    quad_vbo.create();
-    quad_vbo.bind();
-    quad_vbo.allocate(data, sizeof(data));
+    {   // Push a bunch of triangles to the quad VBO
+        const int SUBDIV = 32;
+        std::vector<GLfloat> data;
+        for (int i=0; i < SUBDIV; ++i)
+        {
+            for (int j=0; j < SUBDIV; ++j)
+            {
+                float x0 = -1.0 + 2.0*i/SUBDIV;
+                float y0 = -1.0 + 2.0*j/SUBDIV;
+                float x1 = -1.0 + 2.0*(i + 1)/SUBDIV;
+                float y1 = -1.0 + 2.0*(j + 1)/SUBDIV;
+                data.insert(data.end(), {x0, y0, x0, y1, x1, y1});
+                data.insert(data.end(), {x0, y0, x1, y1, x1, y0});
+            }
+        }
+        quad_vbo.create();
+        quad_vbo.bind();
+        quad_vbo.allocate(data.data(), data.size()*sizeof(GLfloat));
+        quad_vbo_size = data.size() / 2;
+    }
 
     quad_vao.create();
     quad_vao.bind();
@@ -69,7 +81,7 @@ void Blitter::draw(QMatrix4x4 M)
         q.second->norm.bind(1);
         glUniformMatrix4fv(mquad, 1, GL_FALSE, q.second->mat.data());
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLES, 0, quad_vbo_size);
     }
 
     quad_vao.release();

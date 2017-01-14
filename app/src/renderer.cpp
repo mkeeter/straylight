@@ -122,11 +122,11 @@ void Renderer::run(Task t)
         auto dt = start_time.elapsed();
         if (dt < 10 & base_level > 0)
         {
-            base_level--;
+            //base_level--;
         }
         else if (dt > 20)
         {
-            base_level++;
+            //base_level++;
         }
     }
 }

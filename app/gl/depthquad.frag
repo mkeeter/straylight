@@ -32,7 +32,7 @@ void main()
     }
     else
     {
-        gl_FragDepth = d;
+        //gl_FragDepth = d;
         if (d == 0.0f)
         {
             // Special color to indicate clipped pixels
