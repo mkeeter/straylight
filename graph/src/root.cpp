@@ -418,6 +418,36 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
     s->pop();
 }
 
+void Root::serialize(FlatSerializer* s) const
+{
+    serialize(s, 0);
+}
+
+void Root::serialize(FlatSerializer* s, SheetIndex sheet) const
+{
+    for (auto i : iterItems(sheet))
+    {
+        if (auto n = getItem(i).instance())
+        {
+            s->instance(InstanceIndex(i.i), tree.nameOf(i), n->sheet);
+            for (const auto& p : n->inputs)
+            {
+                s->input(p.first, p.second);
+            }
+        }
+        else if (auto c = getItem(i).cell())
+        {
+            s->cell(CellIndex(i.i), tree.nameOf(i), c->expr);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+
+    // Serialize library here!
+}
+
 void Root::clear()
 {
     auto lock = Lock();

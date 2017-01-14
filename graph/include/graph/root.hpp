@@ -105,7 +105,7 @@ public:
 
     /*
      *  Exports the graph to any object implementing the FlatSerializer API
-     *  This is used to save files to disk
+     *  This is used to save files to disk with an appropriate encoder
      */
     void serialize(FlatSerializer* s) const;
 
@@ -280,6 +280,7 @@ protected:
      *  Exports the graph to any object implementing the TreeSerializer API
      */
     void serialize(TreeSerializer* s, const Env& env) const;
+    void serialize(FlatSerializer* s, SheetIndex sheet) const;
 
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
     Tree tree;

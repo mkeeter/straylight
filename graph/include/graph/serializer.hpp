@@ -75,7 +75,7 @@ public:
      *  (until reset by another call to instance)
      */
     virtual void instance(InstanceIndex i, const std::string& name,
-                          const std::string& sheet)=0;
+                          SheetIndex s);
 
     /*
      *  Stores an input expression
