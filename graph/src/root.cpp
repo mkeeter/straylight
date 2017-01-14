@@ -422,7 +422,8 @@ void Root::clear()
     auto lock = Lock();
 
     // Erase every item in the root sheet
-    for (auto i : iterItems({0}))
+    const auto items = iterItems({0});
+    for (auto i : items)
     {
         if (getItem(i).instance())
         {
@@ -438,7 +439,8 @@ void Root::clear()
         }
     }
 
-    for (const auto& s : lib.childrenOf(0))
+    const auto sheets = lib.childrenOf(0);
+    for (const auto& s : sheets)
     {
         eraseSheet(s);
     }
