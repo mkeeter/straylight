@@ -102,6 +102,22 @@ public:
      */
     void serialize(TreeSerializer* s) const;
 
+    /*
+     *  Serialize to a string
+     */
+    std::string toString() const;
+
+    /*
+     *  Deserializes from a string, clearing the existing graph
+     */
+    void load(const std::string& data);
+
+    /*
+     *  Removes all items from the graph
+     */
+    void clear();
+
+
     ////////////////////////////////////////////////////////////////////////////
     // Forwarding functions from stored Tree
 

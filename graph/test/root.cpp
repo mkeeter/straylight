@@ -376,3 +376,26 @@ TEST_CASE("Root::eraseInstance")
         /*  If this crashes, then the test fails!  */
     }
 }
+
+TEST_CASE("Root::clear")
+{
+    Root r;
+
+    SECTION("Basic")
+    {
+        auto a = r.insertCell(0, "a", "(+ 1 2)");
+        r.clear();
+        REQUIRE(true /* didn't crash */);
+    }
+
+    SECTION("With inputs")
+    {
+        auto sum = r.insertSheet(0, "sum");
+        auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
+        auto i = r.insertInstance(0, "instance", sum);
+
+        auto a = r.insertCell(0, "a", "12"); // used in input
+        r.clear();
+        REQUIRE(true /* didn't crash */);
+    }
+}

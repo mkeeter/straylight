@@ -417,6 +417,35 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
     s->pop();
 }
 
+void Root::clear()
+{
+    auto lock = Lock();
+
+    // Erase every item in the root sheet
+    for (auto i : iterItems({0}))
+    {
+        if (getItem(i).instance())
+        {
+            eraseInstance(InstanceIndex(i.i));
+        }
+        else if (getItem(i).cell())
+        {
+            eraseCell(CellIndex(i.i));
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+
+    for (const auto& s : lib.childrenOf(0))
+    {
+        eraseSheet(s);
+    }
+
+    assert(dirty.size() == 0);
+}
+
 bool Root::checkSheetName(const SheetIndex& parent,
                           const std::string& name,
                           std::string* err) const
