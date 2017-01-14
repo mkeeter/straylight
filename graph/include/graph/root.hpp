@@ -99,18 +99,21 @@ public:
 
     /*
      *  Exports the graph to any object implementing the TreeSerializer API
+     *  This is commonly used to render into a UI in a immediate style
      */
     void serialize(TreeSerializer* s) const;
 
     /*
-     *  Serialize to a string
+     *  Exports the graph to any object implementing the FlatSerializer API
+     *  This is used to save files to disk
      */
-    std::string toString() const;
+    void serialize(FlatSerializer* s) const;
 
     /*
-     *  Deserializes from a string, clearing the existing graph
+     *  Look up the target sheet for an instance
      */
-    void load(const std::string& data);
+    SheetIndex instanceSheet(const InstanceIndex& item) const
+        { return getItem(item).instance()->sheet; }
 
     /*
      *  Removes all items from the graph
@@ -156,12 +159,6 @@ public:
      */
     SheetIndex itemParent(const ItemIndex& item) const
         { return tree.parentOf(item); }
-
-    /*
-     *  Look up the target sheet for an instance
-     */
-    SheetIndex instanceSheet(const InstanceIndex& item) const
-        { return getItem(item).instance()->sheet; }
 
     std::string nextItemName(const SheetIndex& sheet,
                              const std::string& prefix="i") const
