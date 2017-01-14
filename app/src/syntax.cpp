@@ -23,7 +23,7 @@ int SyntaxHighlighter::searchLeft(QTextDocument* doc, int pos)
     int depth = 1;
     for(QTextBlock b = doc->findBlock(pos); b.isValid(); b=b.previous())
     {
-        auto data = static_cast<BlockData*>(doc->findBlock(pos).userData());
+        auto data = static_cast<BlockData*>(b.userData());
         if (!data)
         {
             continue;
@@ -51,7 +51,7 @@ int SyntaxHighlighter::searchRight(QTextDocument* doc, int pos)
     int depth = 1;
     for(QTextBlock b = doc->findBlock(pos); b.isValid(); b=b.next())
     {
-        auto data = static_cast<BlockData*>(doc->findBlock(pos).userData());
+        auto data = static_cast<BlockData*>(b.userData());
         if (!data)
         {
             continue;
