@@ -146,7 +146,7 @@ QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
 
 QString Bridge::saveToFile(QString filename)
 {
-    BridgeFlatSerializer ser(filename);
+    BridgeFlatSerializer ser(filename.replace("file://", ""));
     if (!ser.opened)
     {
         return "Could not open file " + filename;
