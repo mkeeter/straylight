@@ -26,8 +26,8 @@ int main(int argc, char**argv)
 
     // Install Bridge singleton
     qmlRegisterSingletonType<Bridge>("Bridge", 1, 0, "Bridge", Bridge::singleton);
-    qmlRegisterSingletonType<MaterialSingleton>(
-            "Material", 1, 0, "Material", MaterialSingleton::singleton);
+    qmlRegisterSingletonType<Material>(
+            "Material", 1, 0, "Material", Material::singleton);
 
     // Register pure-QML singletons
     qmlRegisterSingletonType(QUrl("qrc:/qml/Material.qml"), "Material", 1, 0, "Material");

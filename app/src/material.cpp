@@ -1,12 +1,11 @@
 #include "material.hpp"
 
-
-QObject* MaterialSingleton::singleton(QQmlEngine *engine,
-                                      QJSEngine *scriptEngine)
+QObject* Material::singleton(QQmlEngine *engine,
+                             QJSEngine *scriptEngine)
 {
     (void)engine;
     (void)scriptEngine;
-    return new MaterialSingleton();
+    return new Material();
 }
 
 /* Red */
