@@ -95,13 +95,6 @@ ApplicationWindow {
             Layout.minimumWidth: 100
             Layout.fillWidth: true
 
-            function emitSize() {
-                Bridge.canvasResized(width, height)
-            }
-            Component.onCompleted: {
-                widthChanged.connect(emitSize)
-                heightChanged.connect(emitSize)
-            }
             MouseArea {
                 property real prevX: 0
                 property real prevY: 0
@@ -111,10 +104,10 @@ ApplicationWindow {
                 hoverEnabled: true
                 onPositionChanged: function(event) {
                     if (event.buttons & Qt.LeftButton) {
-                        Bridge.canvasRotated(event.x - prevX, event.y - prevY)
+                        viewport.rotateIncremental(event.x - prevX, event.y - prevY)
                     }
                     else if (event.buttons & Qt.RightButton) {
-                        Bridge.canvasPanned(event.x - prevX, event.y - prevY)
+                        viewport.panIncremental(event.x - prevX, event.y - prevY)
                     }
                     prevX = event.x
                     prevY = event.y
@@ -124,7 +117,7 @@ ApplicationWindow {
                     prevY = event.y
                 }
                 onWheel: function(event) {
-                    Bridge.canvasZoomed(event.angleDelta.y, event.x, event.y)
+                    viewport.zoomIncremental(event.angleDelta.y, event.x, event.y)
                 }
             }
         }

@@ -184,48 +184,13 @@ Bridge* Bridge::singleton()
     return _instance;
 }
 
-void Bridge::setCanvas(Canvas* c)
+void Bridge::attachCanvas(Canvas* c)
 {
-    assert(canvas == nullptr);
-    canvas = c;
-
     connect(this, &Bridge::push, c, &Canvas::push);
     connect(this, &Bridge::pop, c, &Canvas::pop);
     connect(this, &Bridge::cell, c, &Canvas::cell);
 
     emit(syncLater());
-}
-
-void Bridge::canvasResized(float w, float h)
-{
-    if (canvas != nullptr)
-    {
-        canvas->setSize(w, h);
-    }
-}
-
-void Bridge::canvasRotated(float dx, float dy)
-{
-    if (canvas != nullptr)
-    {
-        canvas->rotateIncremental(dx, dy);
-    }
-}
-
-void Bridge::canvasPanned(float dx, float dy)
-{
-    if (canvas != nullptr)
-    {
-        canvas->panIncremental(dx, dy);
-    }
-}
-
-void Bridge::canvasZoomed(float ds, float x, float y)
-{
-    if (canvas != nullptr)
-    {
-        canvas->zoomIncremental(ds, x, y);
-    }
 }
 
 Graph::Root* Bridge::root()

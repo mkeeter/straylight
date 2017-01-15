@@ -90,7 +90,7 @@ public:
     /*
      *  Installs the Canvas object
      */
-    void setCanvas(Canvas* c);
+    void attachCanvas(Canvas* c);
 
 signals:
     /*
@@ -123,18 +123,6 @@ signals:
 
 public slots:
     /*
-     *  Signals to handle updating 3D viewport size
-     */
-    void canvasResized(float w, float h);
-
-    /*
-     *  Rotate the canvas incrementally
-     */
-    void canvasRotated(float dx, float dy);
-    void canvasPanned(float dx, float dy);
-    void canvasZoomed(float ds, float x, float y);
-
-    /*
      *  Returns interpreter keywords
      *  (for syntax highlighting)
      */
@@ -142,7 +130,6 @@ public slots:
 
 protected:
     Graph::Root r;
-    Canvas* canvas=nullptr;
 
     /*
      *  Lightweight TreeSerializer class
