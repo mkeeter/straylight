@@ -205,6 +205,8 @@ protected:
         QDataStream out;
     public:
         const bool opened;
+        const static QString fileId;
+        const static quint32 version;
     };
 
     /*  Permanent serializer that's connected to the right places  */

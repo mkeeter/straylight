@@ -270,13 +270,19 @@ void Bridge::BridgeTreeSerializer::sheet(
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const QString Bridge::BridgeFlatSerializer::fileId = "Straylight";
+const quint32 Bridge::BridgeFlatSerializer::version = 1;
+
 Bridge::BridgeFlatSerializer::BridgeFlatSerializer(QString filename)
     : file(filename), out(&file), opened(file.open(QIODevice::WriteOnly))
 {
-    // Nothing to do here
-    //
     // Caller must check opened and is not allowed to call functions
     // if it is false.
+    if (opened)
+    {
+        out << fileId;  // Magic identifier
+        out << version; // Format version
+    }
 }
 
 void Bridge::BridgeFlatSerializer::cell(
