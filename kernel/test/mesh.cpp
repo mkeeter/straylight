@@ -51,7 +51,7 @@ TEST_CASE("Mesh performance")
 
     // Begin timekeeping
     start = std::chrono::system_clock::now();
-    auto mesh = Mesh::Render(sponge, r);
+    auto mesh = Mesh::render(sponge, r);
     end = std::chrono::system_clock::now();
 
     elapsed = end - start;

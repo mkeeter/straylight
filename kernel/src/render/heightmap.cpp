@@ -239,32 +239,14 @@ static void recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
     }
 }
 
-std::pair<DepthImage, NormalImage> Render(
-    const Tree t, Region r, const std::atomic_bool& abort,
-    glm::mat4 m, size_t workers)
-{
-    std::vector<Evaluator*> es;
-    for (size_t i=0; i < workers; ++i)
-    {
-        es.push_back(new Evaluator(t));
-    }
+////////////////////////////////////////////////////////////////////////////////
 
-    auto out = Render(es, r, abort, m);
 
-    for (auto e : es)
-    {
-        delete e;
-    }
-    return out;
-}
-
-std::pair<DepthImage, NormalImage> Render(
+void render(
         const std::vector<Evaluator*>& es, Region r,
-        const std::atomic_bool& abort, glm::mat4 m)
+        const std::atomic_bool& abort, glm::mat4 m,
+        DepthImage& depth, NormalImage& norm)
 {
-    auto depth = DepthImage(r.Y.values.size(), r.X.values.size());
-    auto norm = NormalImage(r.Y.values.size(), r.X.values.size());
-
     depth.fill(-std::numeric_limits<float>::infinity());
     norm.fill(0);
 
@@ -302,6 +284,48 @@ std::pair<DepthImage, NormalImage> Render(
     // If a voxel is touching the top Z boundary, set the normal to be
     // pointing in the Z direction.
     norm = (depth == r.Z.values.back()).select(0xffff7f7f, norm);
+}
+
+std::pair<DepthImage, NormalImage> render(
+    const Tree t, Region r, const std::atomic_bool& abort,
+    glm::mat4 m, size_t workers)
+{
+    std::vector<Evaluator*> es;
+    for (size_t i=0; i < workers; ++i)
+    {
+        es.push_back(new Evaluator(t));
+    }
+
+    auto out = render(es, r, abort, m);
+
+    for (auto e : es)
+    {
+        delete e;
+    }
+    return out;
+}
+
+std::pair<DepthImage, NormalImage> render(
+        const std::vector<Evaluator*>& es, Region r,
+        const std::atomic_bool& abort, glm::mat4 m)
+{
+    auto depth = DepthImage(r.Y.values.size(), r.X.values.size());
+    auto norm = NormalImage(r.Y.values.size(), r.X.values.size());
+
+    render(es, r, abort, m, depth, norm);
+
+    return std::make_pair(depth, norm);
+
+}
+
+std::pair<DepthImage*, NormalImage*> render_(
+        const std::vector<Evaluator*>& es, Region r,
+        const std::atomic_bool& abort, glm::mat4 m)
+{
+    auto depth = new DepthImage(r.Y.values.size(), r.X.values.size());
+    auto norm = new NormalImage(r.Y.values.size(), r.X.values.size());
+
+    render(es, r, abort, m, *depth, *norm);
 
     return std::make_pair(depth, norm);
 

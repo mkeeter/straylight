@@ -16,7 +16,7 @@ TEST_CASE("Octree coordinates")
     Tree t = sphere(1);
 
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 1);
-    std::unique_ptr<Octree> out(Octree::Render(t, r));
+    std::unique_ptr<Octree> out(Octree::render(t, r));
     REQUIRE(out->getType() == Octree::BRANCH);
 
     // Check that all child pointers are populated
@@ -41,7 +41,7 @@ TEST_CASE("Octree values")
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 1);
     REQUIRE(r.X.values.size() == 2);
 
-    std::unique_ptr<Octree> out(Octree::Render(t, r));
+    std::unique_ptr<Octree> out(Octree::render(t, r));
 
     // Check that values and gradients are correct
     for (int i=0; i < 8; ++i)
@@ -57,7 +57,7 @@ TEST_CASE("Vertex positioning")
 
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 4);
 
-    std::unique_ptr<Octree> out(Octree::Render(t, r));
+    std::unique_ptr<Octree> out(Octree::render(t, r));
 
     // Walk every leaf node in the octree, keeping track of the
     // minimum and maximum vertex radius

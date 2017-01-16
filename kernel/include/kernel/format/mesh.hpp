@@ -20,7 +20,7 @@ struct Mesh
      *  simplification to collapse leaf cells), then using DC to generate
      *  a triangle mesh.
      */
-    static Mesh Render(const Tree t, const Region& r);
+    static Mesh render(const Tree t, const Region& r);
 
     /*
      *  Saves the given mesh as a .stl file

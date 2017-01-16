@@ -13,12 +13,12 @@ using namespace Kernel;
 #define EPSILON 1e-6
 
 // Helper function to make rendering a single call
-static std::pair<DepthImage, NormalImage> Render(
+static std::pair<DepthImage, NormalImage> render(
         Tree t, const Region& r, glm::mat4 M=glm::mat4())
 {
     std::atomic_bool abort(false);
 
-    return Heightmap::Render(t, r, abort, M);
+    return Heightmap::render(t, r, abort, M);
 }
 
 TEST_CASE("2D interval Z values")
@@ -26,7 +26,7 @@ TEST_CASE("2D interval Z values")
     Tree t = circle(1);
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 25, 25, 0);
 
-    auto out = Render(t, r).first;
+    auto out = render(t, r).first;
     CAPTURE(out);
     REQUIRE((out == 0 ||
              out == -std::numeric_limits<float>::infinity()).all());
@@ -37,7 +37,7 @@ TEST_CASE("3D interval Z values")
     Tree t = circle(1);
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 25, 25, 25);
 
-    auto out = Render(t, r).first;
+    auto out = render(t, r).first;
     CAPTURE(out);
     REQUIRE((out == r.Z.values.back() ||
              out == -std::numeric_limits<float>::infinity()).all());
@@ -64,7 +64,7 @@ TEST_CASE("2D rendering of a circle ")
     SECTION("Empty Z")
     {
         Region r({-1, 1}, {-1, 1}, {0, 0}, 5);
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
         CAPTURE(out);
         REQUIRE((comp == out).all());
     }
@@ -72,7 +72,7 @@ TEST_CASE("2D rendering of a circle ")
     SECTION("Zero-resolution Z")
     {
         Region r({-1, 1}, {-1, 1}, {-1, 1}, 5, 5, 0);
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
         CAPTURE(out);
         REQUIRE((comp == out).all());
     }
@@ -83,7 +83,7 @@ TEST_CASE("2D circle rendering at non-zero Z ")
     Tree t = circle(1);
 
     Region r({-1, 1}, {-1, 1}, {1, 1}, 5);
-    auto out = Render(t, r).first;
+    auto out = render(t, r).first;
     CAPTURE(out);
 
     DepthImage comp(10, 10);
@@ -109,7 +109,7 @@ TEST_CASE("Render orientation ")
     SECTION("Y")
     {
         Tree t = max(circle(1), Tree::Y());
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
 
         DepthImage comp(10, 10);
         float inf = std::numeric_limits<float>::infinity();
@@ -132,7 +132,7 @@ TEST_CASE("Render orientation ")
     SECTION("X")
     {
         Tree t = max(circle(1), Tree::X());
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
 
         DepthImage comp(10, 10);
         float inf = std::numeric_limits<float>::infinity();
@@ -160,14 +160,14 @@ TEST_CASE("Render shape ")
     SECTION("X")
     {
         Region r({0, 1}, {-1, 1}, {0, 0}, 5);
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
         REQUIRE(out.rows() == 10);
         REQUIRE(out.cols() == 5);
     }
     SECTION("Y")
     {
         Region r({-1, 1}, {0, 1}, {0, 0}, 5);
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
         REQUIRE(out.rows() == 5);
         REQUIRE(out.cols() == 10);
     }
@@ -180,7 +180,7 @@ TEST_CASE("3D rendering of a sphere ")
     SECTION("Values")
     {
         Region r({-1, 1}, {-1, 1}, {-1, 1}, 5);
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
 
         DepthImage comp(10, 10);
         float inf = std::numeric_limits<float>::infinity();
@@ -211,7 +211,7 @@ TEST_CASE("2D rendering with normals ")
     SECTION("X")
     {
         Tree t = Tree::X() + Tree::Z();
-        auto norm = Render(t, r).second;
+        auto norm = render(t, r).second;
 
         CAPTURE(norm);
         REQUIRE((norm == 0xffd97fd9).all());
@@ -220,7 +220,7 @@ TEST_CASE("2D rendering with normals ")
     SECTION("-X")
     {
         Tree t = Tree::Z() + (-Tree::X());
-        auto norm = Render(t, r).second;
+        auto norm = render(t, r).second;
 
         CAPTURE(norm);
         REQUIRE((norm == 0xffd97f25 ||
@@ -230,7 +230,7 @@ TEST_CASE("2D rendering with normals ")
     SECTION("Y")
     {
         Tree t = Tree::Y() + Tree::Z();
-        auto norm = Render(t, r).second;
+        auto norm = render(t, r).second;
 
         CAPTURE(norm);
         REQUIRE((norm == 0xffd9d97f ||
@@ -243,7 +243,7 @@ TEST_CASE("Normal clipping ")
     Tree t = circle(1);
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 5);
 
-    auto norm = Render(t, r).second;
+    auto norm = render(t, r).second;
 
     CAPTURE(norm);
     REQUIRE((norm == 0xffff7f7f || norm == 0).all());
@@ -262,7 +262,7 @@ TEST_CASE("Performance")
         Region r({-1, 1}, {-1, 1}, {-1, 1}, 500);
 
         start = std::chrono::system_clock::now();
-        auto out = Render(t, r).first;
+        auto out = render(t, r).first;
         end = std::chrono::system_clock::now();
 
         elapsed = end - start;
@@ -279,7 +279,7 @@ TEST_CASE("Performance")
 
         // Begin timekeeping
         start = std::chrono::system_clock::now();
-        auto heightmap = Render(sponge, r, rot).first;
+        auto heightmap = render(sponge, r, rot).first;
         end = std::chrono::system_clock::now();
 
         elapsed = end - start;

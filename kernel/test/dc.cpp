@@ -18,7 +18,7 @@ TEST_CASE("Small sphere mesh")
 
     Region r({-1, 1}, {-1, 1}, {-1, 1}, 1);
 
-    auto m = Mesh::Render(t, r);
+    auto m = Mesh::render(t, r);
 
     REQUIRE(m.tris.size() == 12);
 }
@@ -33,7 +33,7 @@ TEST_CASE("Face normals")
     {
         for (int i=0; i < 3; ++i)
         {
-            auto m = Mesh::Render(axis[i], r);
+            auto m = Mesh::render(axis[i], r);
             for (unsigned j=0; j < m.tris.size(); ++j)
             {
                 REQUIRE(m.norm(j) == norm[i]);
@@ -49,7 +49,7 @@ TEST_CASE("Face normals")
                         Opcode::NEG,
                         Tree(Opcode::ADD, axis[i],
                             Tree(0.75))));
-            auto m = Mesh::Render(t, r);
+            auto m = Mesh::render(t, r);
             for (unsigned j=0; j < m.tris.size(); ++j)
             {
                 REQUIRE(m.norm(j) == -norm[i]);
@@ -64,7 +64,7 @@ TEST_CASE("Simple 2D contouring")
 
     Region r({-1, 1}, {-1, 1}, {0, 0}, 1);
 
-    auto m = Contours::Render(t, r);
+    auto m = Contours::render(t, r);
     REQUIRE(m.contours.size() == 1);
 }
 
@@ -74,7 +74,7 @@ TEST_CASE("2D contour tracking")
 
     Region r({-1, 1}, {-1, 1}, {0, 0}, 10);
 
-    auto m = Contours::Render(t, r);
+    auto m = Contours::render(t, r);
     REQUIRE(m.contours.size() == 1);
 
     float min = 1;

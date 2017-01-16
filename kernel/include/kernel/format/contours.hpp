@@ -12,7 +12,7 @@ class Region;
 
 struct Contours
 {
-    static Contours Render(const Tree t, const Region& r);
+    static Contours render(const Tree t, const Region& r);
 
     /*
      *  Saves the given contours as an SVG file

@@ -108,16 +108,19 @@ void Renderer::run(Task t)
     std::atomic_bool dummy(false);
     std::atomic_bool& abort_ = (t.level == base_level) ? dummy : abort;
 
-    auto out = Kernel::Heightmap::Render(evaluators, r, abort_, m);
+    auto out = Kernel::Heightmap::render_(evaluators, r, abort_, m);
 
     if (!abort_.load())
     {
         // Map the depth buffer into the 0 - 1 range, with -inf = 1
-        Kernel::DepthImage d =
-            (out.first == -std::numeric_limits<float>::infinity())
-            .select(1, (1 - out.first) / 2);
-        d = (out.first == r.Z.values.back()).select(0, d);
-        emit(gotResult(this, {d, out.second}, inv));
+        *out.first =
+            (*out.first == -std::numeric_limits<float>::infinity())
+            .select(1, (1 - *out.first) / 2);
+
+        // Then map the back Z value to 0
+        *out.first = (*out.first == r.Z.values.back()).select(0, *out.first);
+
+        emit(gotResult(this, {out.first, out.second}, inv));
 
         auto dt = start_time.elapsed();
         if (dt < 10 & base_level > 0)

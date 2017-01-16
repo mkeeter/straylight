@@ -98,8 +98,8 @@ QQuickWindow* Blitter::getWindow() const
 ////////////////////////////////////////////////////////////////////////////////
 
 Blitter::Quad::Quad(const QMatrix4x4& mat,
-                    const Kernel::DepthImage& d,
-                    const Kernel::NormalImage& n)
+                    const Kernel::DepthImage* d,
+                    const Kernel::NormalImage* n)
     : mat(mat), depth(QOpenGLTexture::Target2D),
       norm(QOpenGLTexture::Target2D)
 {
@@ -107,13 +107,13 @@ Blitter::Quad::Quad(const QMatrix4x4& mat,
     norm.setFormat(QOpenGLTexture::RGBA8_UNorm);
     for (auto tex : {&depth, &norm})
     {
-        tex->setSize(d.rows(), d.cols());
+        tex->setSize(d->rows(), d->cols());
         tex->setAutoMipMapGenerationEnabled(false);
         tex->allocateStorage();
     }
 
-    depth.setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, d.data());
-    norm.setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, n.data());
+    depth.setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, d->data());
+    norm.setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, n->data());
 
     assert(depth.isCreated());
     assert(norm.isCreated());
@@ -123,7 +123,7 @@ Blitter::Quad::Quad(const QMatrix4x4& mat,
 
 Blitter::QuadAdd::QuadAdd(
         Blitter* parent, Renderer* R, const QMatrix4x4& mat,
-        const Kernel::DepthImage& d, const Kernel::NormalImage& n)
+        const Kernel::DepthImage* d, const Kernel::NormalImage* n)
     : parent(parent), R(R), mat(mat), depth(d), norm(n)
 {
     // Nothing to do here
@@ -133,6 +133,10 @@ void Blitter::QuadAdd::run()
 {
     delete parent->quads[R];
     parent->quads[R] = new Quad(mat, depth, norm);
+
+    delete depth;
+    delete norm;
+
     emit(parent->changed());
 }
 

@@ -11,7 +11,7 @@
 namespace Kernel {
 
 template <class T, int dims>
-T* XTree<T, dims>::Render(const Tree t, const Region& r, bool multithread)
+T* XTree<T, dims>::render(const Tree t, const Region& r, bool multithread)
 {
     auto rp = r.powerOfTwo(dims).view();
 

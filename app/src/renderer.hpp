@@ -24,8 +24,8 @@ public:
     void deleteWhenNotRunning();
 
     struct Result {
-        Kernel::DepthImage depth;
-        Kernel::NormalImage norm;
+        Kernel::DepthImage* depth;
+        Kernel::NormalImage* norm;
     };
 
     struct Task {

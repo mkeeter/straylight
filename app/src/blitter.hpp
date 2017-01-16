@@ -36,8 +36,8 @@ protected:
      *  Struct that represents a textured quad in 3D space
      */
     struct Quad {
-        Quad(const QMatrix4x4& mat, const Kernel::DepthImage& d,
-             const Kernel::NormalImage& n);
+        Quad(const QMatrix4x4& mat, const Kernel::DepthImage* d,
+             const Kernel::NormalImage* n);
         QMatrix4x4 mat;
         QOpenGLTexture depth;
         QOpenGLTexture norm;
@@ -62,7 +62,7 @@ protected:
     {
     public:
         QuadAdd(Blitter* parent, Renderer* R, const QMatrix4x4& mat,
-                const Kernel::DepthImage& d, const Kernel::NormalImage& n);
+                const Kernel::DepthImage* d, const Kernel::NormalImage* n);
         void run() override;
 
     protected:
@@ -70,8 +70,8 @@ protected:
         Renderer* const R;
 
         const QMatrix4x4 mat;
-        const Kernel::DepthImage depth;
-        const Kernel::NormalImage norm;
+        const Kernel::DepthImage* depth;
+        const Kernel::NormalImage* norm;
     };
 
     class QuadForget : public QRunnable

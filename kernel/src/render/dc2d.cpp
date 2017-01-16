@@ -118,9 +118,9 @@ void Worker2D::segment(const Quadtree* a, const Quadtree* b)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Contours Contours::Render(const Tree t, const Region& r)
+Contours Contours::render(const Tree t, const Region& r)
 {
-    std::unique_ptr<Quadtree> q(Quadtree::Render(t, r));
+    std::unique_ptr<Quadtree> q(Quadtree::render(t, r));
 
     DC::Worker2D w;
     w.cell(q.get());
