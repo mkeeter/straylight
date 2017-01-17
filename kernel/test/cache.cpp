@@ -173,11 +173,25 @@ TEST_CASE("Cache::checkCommutative")
     Cache::reset();
     auto t = Cache::instance();
 
-    auto a = t->operation(Opcode::MIN, t->X(), t->Y());
-    REQUIRE(t->rank(a) == 1);
+    SECTION("No balancing")
+    {
+        auto a = t->operation(Opcode::MIN, t->X(), t->Y());
+        REQUIRE(t->rank(a) == 1);
+    }
 
-    auto b = t->operation(Opcode::MIN, t->X(),
-             t->operation(Opcode::MIN, t->Y(),
-             t->operation(Opcode::MIN, t->Z(), t->constant(1.0f))));
-    REQUIRE(t->rank(b) == 2);
+    SECTION("LHS")
+    {
+        auto b = t->operation(Opcode::MIN, t->X(),
+                 t->operation(Opcode::MIN, t->Y(),
+                 t->operation(Opcode::MIN, t->Z(), t->constant(1.0f))));
+        REQUIRE(t->rank(b) == 2);
+    }
+
+    SECTION("RHS")
+    {
+        auto b = t->operation(Opcode::MIN, t->operation(Opcode::MIN,
+                 t->operation(Opcode::MIN, t->Z(), t->constant(1.0f)),
+                     t->X()), t->Y());
+        REQUIRE(t->rank(b) == 2);
+    }
 }
