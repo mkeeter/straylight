@@ -189,7 +189,7 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Cell becoming an output")
     {
-        auto sum = r.insertSheet(0, "sum");
+        auto sum = r.insertSheet(0, "Sum");
 
         auto a = r.insertCell(sum, "a", "10");
         auto i = r.insertInstance(0, "i", sum);
@@ -202,7 +202,7 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Cell becoming an output (same value)")
     {
-        auto sum = r.insertSheet(0, "sum");
+        auto sum = r.insertSheet(0, "Sum");
 
         auto a = r.insertCell(sum, "a", "10");
         auto i = r.insertInstance(0, "i", sum);
@@ -217,27 +217,39 @@ TEST_CASE("Root::setExpr")
 TEST_CASE("Root::canInsertSheet")
 {
     Root r;
-    REQUIRE(r.canInsertSheet(0, "sum"));
+    REQUIRE(r.canInsertSheet(0, "Sum"));
+    REQUIRE(!r.canInsertSheet(0, "sum"));
     REQUIRE(!r.canInsertSheet(0, ""));
 
-    r.insertSheet(0, "sum");
-    REQUIRE(!r.canInsertSheet(0, "sum"));
+    REQUIRE(r.canInsertSheet(0, "A"));
+    REQUIRE(r.canInsertSheet(0, "B"));
+    REQUIRE(r.canInsertSheet(0, "C"));
+
+    REQUIRE(!r.canInsertSheet(0, ""));
+    REQUIRE(!r.canInsertSheet(0, "a"));
+    REQUIRE(!r.canInsertSheet(0, "b"));
+    REQUIRE(!r.canInsertSheet(0, "c"));
+    REQUIRE(!r.canInsertSheet(0, "12c"));
+    REQUIRE(!r.canInsertSheet(0, "with a space"));
+
+    r.insertSheet(0, "Sum");
+    REQUIRE(!r.canInsertSheet(0, "Sum"));
 }
 
 TEST_CASE("Root::insertSheet")
 {
     Root r;
-    auto sum = r.insertSheet(0, "sum");
+    auto sum = r.insertSheet(0, "Sum");
     REQUIRE(sum.i == 1);
 
-    auto mul = r.insertSheet(0, "mul");
+    auto mul = r.insertSheet(0, "Mul");
     REQUIRE(mul.i == 2);
 }
 
 TEST_CASE("Root::eraseSheet")
 {
     Root r;
-    auto sum = r.insertSheet(0, "sum");
+    auto sum = r.insertSheet(0, "Sum");
 
     auto i = r.insertInstance(0, "i", sum);
     REQUIRE(!r.checkItemName(0, "i"));
@@ -250,7 +262,7 @@ TEST_CASE("Root::insertInstance")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "sum");
+    auto sum = r.insertSheet(0, "Sum");
 
     SECTION("Cells within sheet")
     {
@@ -320,7 +332,7 @@ TEST_CASE("Root::setInput")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "sum");
+    auto sum = r.insertSheet(0, "Sum");
 
     auto a = r.insertCell(sum, "a", "(input 10)");
     auto b = r.insertCell(sum, "b", "2");
@@ -336,7 +348,7 @@ TEST_CASE("Root::eraseInstance")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "sum");
+    auto sum = r.insertSheet(0, "Sum");
 
     SECTION("Re-evaluating outputs")
     {
@@ -390,7 +402,7 @@ TEST_CASE("Root::clear")
 
     SECTION("With inputs")
     {
-        auto sum = r.insertSheet(0, "sum");
+        auto sum = r.insertSheet(0, "Sum");
         auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
         auto i = r.insertInstance(0, "instance", sum);
 

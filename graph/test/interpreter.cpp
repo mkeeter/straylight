@@ -159,3 +159,18 @@ TEST_CASE("Interpreter::keywords")
     REQUIRE(!k.count("y"));
     REQUIRE(!k.count("d"));
 }
+
+TEST_CASE("Interpreter::nameValid")
+{
+    Root r;
+    Dependencies d(r);
+    auto interp = Interpreter(r, &d);
+
+    REQUIRE(interp.nameValid("x"));
+    REQUIRE(interp.nameValid("y"));
+    REQUIRE(interp.nameValid("x-y"));
+
+    REQUIRE(!interp.nameValid("15"));
+    REQUIRE(!interp.nameValid("(aaaa)"));
+    REQUIRE(!interp.nameValid("with spaces"));
+}

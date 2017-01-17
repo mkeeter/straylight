@@ -167,10 +167,11 @@ public:
 
     bool canInsertSheet(const SheetIndex& parent,
                         const std::string& name) const
-        { return lib.canInsert(parent, name); }
+        { return checkSheetName(parent, name); }
 
     SheetIndex insertSheet(const SheetIndex& parent, const std::string& name)
-        { return lib.insert(parent, name); }
+        { assert(canInsertSheet(parent, name));
+          return lib.insert(parent, name); }
 
     /*
      *  Looks up the parent sheet for a sheet

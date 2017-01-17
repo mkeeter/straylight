@@ -269,6 +269,14 @@ bool Root::checkItemName(const SheetIndex& parent,
         }
         return false;
     }
+    else if (!islower(name[0]))
+    {
+        if (err)
+        {
+            *err = "Name must begin with a lowercase letter";
+        }
+        return false;
+    }
     else if (!tree.canInsert(parent, name))
     {
         if (err)
@@ -481,6 +489,14 @@ bool Root::checkSheetName(const SheetIndex& parent,
         if (err)
         {
             *err = "Name cannot be empty";
+        }
+        return false;
+    }
+    else if (!isupper(name[0]))
+    {
+        if (err)
+        {
+            *err = "Name must begin with a uppercase letter";
         }
         return false;
     }
