@@ -151,16 +151,3 @@ TEST_CASE("Tree::var")
     REQUIRE(b.var() == 2);
     REQUIRE(c.var() == 3);
 }
-
-TEST_CASE("Commutative balancing")
-{
-    Cache::reset();
-
-    auto a = Tree(Opcode::MIN, Tree::X(), Tree::Y());
-    REQUIRE(a.rank() == 1);
-
-    auto b = Tree(Opcode::MIN, Tree::X(),
-             Tree(Opcode::MIN, Tree::Y(),
-             Tree(Opcode::MIN, Tree::Z(), Tree(1.0f))));
-    REQUIRE(b.rank() == 2);
-}
