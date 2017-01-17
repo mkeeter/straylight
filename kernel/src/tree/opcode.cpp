@@ -108,4 +108,47 @@ Opcode::Opcode Opcode::from_str(std::string s)
     return itr != inverse.end() ? itr->second : INVALID;
 }
 
+bool Opcode::isCommutative(Opcode op)
+{
+    switch (op)
+    {
+        case CONST: // fallthrough
+        case VAR_X:
+        case VAR_Y:
+        case VAR_Z:
+        case VAR:
+        case SQUARE:
+        case SQRT:
+        case NEG:
+        case ABS:
+        case SIN:
+        case COS:
+        case TAN:
+        case ASIN:
+        case ACOS:
+        case ATAN:
+        case EXP:
+        case SUB:
+        case DIV:
+        case ATAN2:
+        case POW:
+        case NTH_ROOT:
+        case MOD:
+        case NANFILL:
+        case AFFINE_VEC:
+        case INVALID:
+        case DUMMY_A:
+        case DUMMY_B:
+        case LAST_OP:
+            return false;
+
+        case ADD: // fallthrough
+        case MUL:
+        case MIN:
+        case MAX:
+            return true;
+    }
+
+}
+
 }   // namespace Kernel

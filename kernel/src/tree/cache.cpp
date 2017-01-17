@@ -80,6 +80,10 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
         {
             return t;
         }
+        else if (auto t = checkCommutative(op, a, b))
+        {
+           return t;
+        }
     }
 
     // Otherwise, construct a new Id and add it to the ops set
@@ -254,6 +258,36 @@ Cache::Id Cache::checkIdentity(Opcode::Opcode op, Id a, Id b)
             else if (value(b) == 1)
             {
                 return a;
+            }
+        }
+    }
+    return 0;
+}
+
+Cache::Id Cache::checkCommutative(Opcode::Opcode op, Id a, Id b)
+{
+    if (Opcode::isCommutative(op))
+    {
+        if (opcode(a) == op)
+        {
+            if (rank(lhs(a)) > rank(b))
+            {
+                return operation(op, lhs(a), operation(op, rhs(a), b));
+            }
+            else if (rank(rhs(a)) > rank(b))
+            {
+                return operation(op, rhs(a), operation(op, lhs(a), b));
+            }
+        }
+        else if (opcode(b) == op)
+        {
+            if (rank(lhs(b)) > rank(a))
+            {
+                return operation(op, lhs(b), operation(op, rhs(b), a));
+            }
+            else if (rank(rhs(b)) > rank(a))
+            {
+                return operation(op, rhs(b), operation(op, lhs(b), a));
             }
         }
     }

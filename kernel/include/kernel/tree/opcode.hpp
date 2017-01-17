@@ -67,6 +67,8 @@ enum Opcode
 size_t args(Opcode op);
 std::string to_str(Opcode op);
 Opcode from_str(std::string s);
+bool isCommutative(Opcode op);
+
 }
 
 

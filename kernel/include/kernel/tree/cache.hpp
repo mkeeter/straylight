@@ -115,6 +115,12 @@ protected:
     Id checkAffine(Opcode::Opcode op, Id a, Id b);
 
     /*
+     *  If the opcode is commutative, consider tweaking tree structure
+     *  to keep it as balanced as possible.
+     */
+    Id checkCommutative(Opcode::Opcode op, Id a, Id b);
+
+    /*
      *  Rebuilds a tree from the base up, returning the new root
      *
      *  All old Cache::Ids remain valid, though they may be orphaned in
