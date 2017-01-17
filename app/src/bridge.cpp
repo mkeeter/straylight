@@ -164,7 +164,7 @@ QString Bridge::nextItemName(int sheet_index) const
 QString Bridge::nextSheetName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextSheetName(Graph::SheetIndex(sheet_index), "s"));
+            r.nextSheetName(Graph::SheetIndex(sheet_index), "S"));
 }
 
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)

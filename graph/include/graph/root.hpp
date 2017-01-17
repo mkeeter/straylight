@@ -151,6 +151,12 @@ public:
     SheetIndex itemParent(const ItemIndex& item) const
         { return tree.parentOf(item); }
 
+    /*
+     *  Returns the next available item name
+     *
+     *  Prefix must be initially lowercase and must produce valid
+     *  names when followed by numbers
+     */
     std::string nextItemName(const SheetIndex& sheet,
                              const std::string& prefix="i") const
         { return tree.nextName(sheet, prefix); }
@@ -193,9 +199,12 @@ public:
 
     /*
      *  Returns the next valid sheet name
+     *
+     *  Prefix must be initially uppercase and must produce valid
+     *  names when followed by numbers
      */
     std::string nextSheetName(const SheetIndex& sheet,
-                              const std::string& prefix="s") const
+                              const std::string& prefix="S") const
         { return lib.nextName(sheet, prefix); }
 
     /*
