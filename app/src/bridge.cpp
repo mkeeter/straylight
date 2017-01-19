@@ -314,3 +314,87 @@ void Bridge::BridgeFlatSerializer::pop()
 {
     out << (quint8)'p';
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+QString Bridge::loadFile(QString filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return "Couldn't open file";
+    }
+    QDataStream in(&file);
+
+    QString fileId;
+    quint32 version;
+    in >> fileId;
+    if (in.status() == QDataStream::ReadCorruptData)
+    {
+        return "Corrupt file";
+    }
+
+    if (fileId != BridgeFlatSerializer::fileId)
+    {
+        return "Invalid magic string";
+    }
+
+    in >> version;
+    if (version != BridgeFlatSerializer::version)
+    {
+        return "Invalid version";
+    }
+
+    r.clear();
+    quint32 index;
+    QList<quint32> sheets;
+    while (true)
+    {
+        quint8 op;
+        in >> op;
+        if (in.status() == QDataStream::ReadPastEnd)
+        {
+            if (sheets.size())
+            {
+                return "Ran out of data early!";
+            }
+            return "";
+        }
+        else if (in.status() == QDataStream::ReadCorruptData)
+        {
+            return "Corrupt file";
+        }
+
+        if (op == 'c')
+        {
+            QString cell_name;
+            QString cell_expr;
+            in >> index >> cell_name >> cell_expr;
+            // Do stuff here
+        }
+        else if (op == 'i')
+        {
+            QString instance_name;
+            quint32 sheet_index;
+            in >> index >> instance_name >> sheet_index;
+            // Do stuff here
+        }
+        else if (op == 'n')
+        {
+            quint32 cell_index;
+            QString input_expr;
+            in >> cell_index >> input_expr;
+            // Do stuff here
+        }
+        else if (op == 's')
+        {
+            QString sheet_name;
+            in >> index >> sheet_name;
+            sheets.push_back(index);
+        }
+        else if (op == 'p')
+        {
+            sheets.pop_back();
+        }
+    }
+}
