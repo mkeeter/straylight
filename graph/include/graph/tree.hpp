@@ -27,6 +27,8 @@ public:
      */
     CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr);
+    void insertCell(const SheetIndex& parent, const CellIndex& cell,
+                    const std::string& name, const std::string& expr);
 
     /*
      *  Insert a new instance of the given sheet
@@ -34,6 +36,10 @@ public:
     InstanceIndex insertInstance(const SheetIndex& parent,
                                  const std::string& name,
                                  const SheetIndex& target);
+    void insertInstance(const SheetIndex& parent,
+                        const InstanceIndex& instance,
+                        const std::string& name,
+                        const SheetIndex& target);
 
     /*
      *  Checks to see whether we can insert the given instance

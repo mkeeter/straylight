@@ -28,6 +28,13 @@ CellIndex Tree::insertCell(const SheetIndex& parent, const std::string& name,
     return CellIndex(c);
 }
 
+void Tree::insertCell(const SheetIndex& parent, const CellIndex& cell,
+                      const std::string& name, const std::string& expr)
+{
+    insert(parent, cell, name, Item(expr));
+    order[parent].push_back(cell);
+}
+
 /*
  *  Insert a new instance of the given sheet
  */
@@ -38,6 +45,13 @@ InstanceIndex Tree::insertInstance(const SheetIndex& parent,
     auto i = insert(parent, name, Item(target));
     order[parent].push_back(i);
     return InstanceIndex(i);
+}
+
+void Tree::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
+                          const std::string& name, const SheetIndex& target)
+{
+    insert(parent, i, name, Item(target));
+    order[parent].push_back(i);
 }
 
 bool Tree::canInsertInstance(const SheetIndex& parent,

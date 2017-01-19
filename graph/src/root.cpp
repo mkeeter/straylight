@@ -32,6 +32,19 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
     return cell;
 }
 
+void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
+                      const std::string& name, const std::string& expr)
+{
+    tree.insertCell(sheet, cell, name, expr);
+    getMutableItem(cell).cell()->type = interpreter.cellType(expr);
+
+    for (const auto& e : tree.envsOf(sheet))
+    {
+        markDirty({e, name});
+    }
+    sync();
+}
+
 InstanceIndex Root::insertInstance(const SheetIndex& parent,
                                    const std::string& name,
                                    const SheetIndex& target)
@@ -67,6 +80,41 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
 
     sync();
     return i;
+}
+
+void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
+                          const std::string& name, const SheetIndex& target)
+{
+    tree.insertInstance(parent, i, name, target);
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+
+        // Then, mark all cells as dirty
+        for (const auto& c : tree.cellsOf(target))
+        {
+            auto env = e; // copy
+            env.push_back(i);
+            env.insert(e.end(), c.first.begin(), c.first.end());
+            markDirty({env, itemName(c.second)});
+        }
+    }
+
+    // Assign default expressions for inputs
+    for (const auto& t : iterItems(target))
+    {
+        if (auto c = getItem(t).cell())
+        {
+            if (c->type == Cell::INPUT)
+            {
+                getMutableItem(i).instance()->inputs[CellIndex(t.i)] =
+                    interpreter.defaultExpr(c->expr);
+            }
+        }
+    }
+
+    sync();
 }
 
 void Root::eraseCell(const CellIndex& cell)
@@ -516,6 +564,13 @@ SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
     assert(canInsertSheet(parent, name));
     return lib.insert(parent, name);
+}
+
+void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
+                       const std::string& name)
+{
+    assert(canInsertSheet(parent, name));
+    return lib.insert(parent, sheet, name);
 }
 
 void Root::eraseSheet(const SheetIndex& s)

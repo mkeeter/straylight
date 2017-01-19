@@ -36,6 +36,14 @@ public:
         return next;
     }
 
+    void insert(const ParentIndex& parent, const StoredIndex& i,
+                const std::string& name, Stored s)
+    {
+        assert(!storage.count(i));
+        storage.insert({i, s});
+        names.left.insert({std::make_pair(parent, name), i});
+    }
+
     /*
      *  Rename a stored item
      */

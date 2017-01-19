@@ -29,6 +29,7 @@ public:
      *  Inserts the given sheet, returning its index
      */
     SheetIndex insert(SheetIndex parent, const std::string& name);
+    void insert(SheetIndex parent, SheetIndex sheet, const std::string& name);
 };
 
 }   // namespace Graph
