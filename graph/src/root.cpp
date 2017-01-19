@@ -512,6 +512,12 @@ bool Root::checkSheetName(const SheetIndex& parent,
     return true;
 }
 
+SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
+{
+    assert(canInsertSheet(parent, name));
+    return lib.insert(parent, name);
+}
+
 void Root::eraseSheet(const SheetIndex& s)
 {
     auto lock = Lock();

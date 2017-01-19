@@ -346,8 +346,11 @@ QString Bridge::loadFile(QString filename)
     }
 
     r.clear();
+    auto lock = r.Lock();
+
     quint32 index;
     QList<quint32> sheets;
+
     while (true)
     {
         quint8 op;
@@ -370,27 +373,30 @@ QString Bridge::loadFile(QString filename)
             QString cell_name;
             QString cell_expr;
             in >> index >> cell_name >> cell_expr;
-            // Do stuff here
+            r.insertCell(sheets.back(), index,
+                    cell_name.toStdString(), cell_expr.toStdString());
         }
         else if (op == 'i')
         {
             QString instance_name;
             quint32 sheet_index;
             in >> index >> instance_name >> sheet_index;
-            // Do stuff here
+            r.insertInstance(sheets.back(), index,
+                    instance_name.toStdString(), sheet_index);
         }
         else if (op == 'n')
         {
             quint32 cell_index;
             QString input_expr;
             in >> cell_index >> input_expr;
-            // Do stuff here
+            r.setInput(index, cell_index, input_expr.toStdString());
         }
         else if (op == 's')
         {
             QString sheet_name;
             in >> index >> sheet_name;
             sheets.push_back(index);
+            r.insertSheet(sheets.back(), index, sheet_name.toStdString());
         }
         else if (op == 'p')
         {

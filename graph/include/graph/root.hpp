@@ -35,6 +35,8 @@ public:
      */
     CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr="");
+    void insertCell(const SheetIndex& parent, const CellIndex& cell,
+                    const std::string& name, const std::string& expr);
 
     /*
      *  Inserts a new instance into the graph
@@ -42,6 +44,10 @@ public:
     InstanceIndex insertInstance(const SheetIndex& parent,
                                  const std::string& name,
                                  const SheetIndex& target);
+    void insertInstance(const SheetIndex& parent,
+                        const InstanceIndex& instance,
+                        const std::string& name,
+                        const SheetIndex& target);
 
     /*
      *  Erases a cell, triggering re-evaluation
@@ -175,9 +181,9 @@ public:
                         const std::string& name) const
         { return checkSheetName(parent, name); }
 
-    SheetIndex insertSheet(const SheetIndex& parent, const std::string& name)
-        { assert(canInsertSheet(parent, name));
-          return lib.insert(parent, name); }
+    SheetIndex insertSheet(const SheetIndex& parent, const std::string& name);
+    void insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
+                     const std::string& name);
 
     /*
      *  Looks up the parent sheet for a sheet
