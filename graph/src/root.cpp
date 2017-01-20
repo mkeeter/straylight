@@ -473,7 +473,7 @@ std::string Root::toString() const
     obj.insert({"version", picojson::value((int64_t)1)});
 
     obj.insert({"root", toJson(SheetIndex(0))});
-    return picojson::value(obj).to_str();
+    return picojson::value(obj).serialize();
 }
 
 picojson::value Root::toJson(SheetIndex sheet) const
