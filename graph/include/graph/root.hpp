@@ -10,6 +10,8 @@
 #include "graph/keys.hpp"
 #include "graph/tree.hpp"
 
+#include "picojson/picojson.h"
+
 namespace Graph {
 
 class Root
@@ -104,7 +106,15 @@ public:
      *  Exports the graph to any object implementing the FlatSerializer API
      *  This is used to save files to disk with an appropriate encoder
      */
-    void serialize(FlatSerializer* s) const;
+    std::string toString() const;
+
+    /*
+     *  Deserializes from string or JSON
+     *
+     *  The existing graph is cleared.
+     *  Returns an error string on failure or the empty string on success
+     */
+    std::string fromString(const std::string& str);
 
     /*
      *  Look up the target sheet for an instance
@@ -116,7 +126,6 @@ public:
      *  Removes all items from the graph
      */
     void clear();
-
 
     ////////////////////////////////////////////////////////////////////////////
     // Forwarding functions from stored Tree
@@ -287,7 +296,20 @@ protected:
      *  Exports the graph to any object implementing the TreeSerializer API
      */
     void serialize(TreeSerializer* s, const Env& env) const;
-    void serialize(FlatSerializer* s, SheetIndex sheet) const;
+
+    /*
+     *  Export the given sheet to JSON (recursively)
+     */
+    picojson::value toJson(SheetIndex sheet) const;
+
+    /*
+     *  Deserializes a particular sheet (recursively)
+     *
+     *  Returns an error string on error, empty string otherwise
+     */
+    std::string fromJson(SheetIndex sheet, const picojson::value& value);
+
+    ////////////////////////////////////////////////////////////////////////////
 
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
     Tree tree;

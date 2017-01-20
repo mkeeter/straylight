@@ -464,38 +464,144 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
     s->pop();
 }
 
-void Root::serialize(FlatSerializer* s) const
+////////////////////////////////////////////////////////////////////////////////
+
+std::string Root::toString() const
 {
-    serialize(s, 0);
+    picojson::value::object obj;
+    obj.insert({"type", picojson::value("Straylight")});
+    obj.insert({"version", picojson::value((int64_t)1)});
+
+    obj.insert({"root", toJson(SheetIndex(0))});
+    return picojson::value(obj).to_str();
 }
 
-void Root::serialize(FlatSerializer* s, SheetIndex sheet) const
+picojson::value Root::toJson(SheetIndex sheet) const
 {
+    picojson::value::array items;
     for (auto i : iterItems(sheet))
     {
+        picojson::value::object obj;
         if (auto n = getItem(i).instance())
         {
-            s->instance(InstanceIndex(i), tree.nameOf(i), n->sheet);
+            obj.insert({"type", picojson::value("instance")});
+            obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
+            picojson::value::array inputs;
             for (const auto& p : n->inputs)
             {
-                s->input(p.first, p.second);
+                picojson::value::object i;
+                i.insert({"cellIndex", picojson::value((int64_t)p.first.i)});
+                i.insert({"inputExpr", picojson::value(p.second)});
+                inputs.push_back(picojson::value(i));
             }
+            obj.insert({"inputs", picojson::value(inputs)});
         }
         else if (auto c = getItem(i).cell())
         {
-            s->cell(CellIndex(i), tree.nameOf(i), c->expr);
+            obj.insert({"type", picojson::value("cell")});
+            obj.insert({"cellIndex", picojson::value((int64_t)i.i)});
+            obj.insert({"cellName", picojson::value(tree.nameOf(i))});
+            obj.insert({"cellExpr", picojson::value(c->expr)});
         }
         else
         {
             assert(false);
         }
+        items.push_back(picojson::value(obj));
     }
 
+    picojson::value::array sheets;
     for (const auto& h : lib.childrenOf(sheet))
     {
-        serialize(s, h);
+        sheets.push_back(toJson(h));
     }
+
+    picojson::value::object out;
+    out.insert({"items", picojson::value(items)});
+    out.insert({"sheets", picojson::value(sheets)});
+
+    return picojson::value(out);
 }
+
+#define REQUIRE(cond, err) if (!(cond)) { return err; }
+#define GET(obj, member, type) \
+    REQUIRE(obj.count(#member), "'" #member "' must be present"); \
+    REQUIRE(obj[#member].is<type>(), "'" #member "' must be " #type); \
+    auto member = obj[#member].get<type>();
+
+std::string Root::fromString(const std::string& str)
+{
+    picojson::value v;
+    std::string err = picojson::parse(v, str);
+    if (!err.empty())
+    {
+        return err;
+    }
+
+    REQUIRE(v.is<picojson::value::object>(), "Root must be a JSON object");
+
+    auto obj = v.get<picojson::value::object>();
+    GET(obj, type, std::string);
+    REQUIRE(type == "Straylight", "Invalid type code");
+
+    GET(obj, version, int64_t);
+    REQUIRE(version != 1, "Invalid version code");
+
+    REQUIRE(obj.count("root"), "'root' member must be present");
+    return fromJson(0, obj["root"]);
+}
+
+std::string fromJson(SheetIndex sheet, const picojson::value& value)
+{
+    REQUIRE(value.is<picojson::value::object>(), "Sheet value must be a JSON object");
+    auto obj = value.get<picojson::value::object>();
+
+    REQUIRE(obj.count("item"), "'items' member must be present");
+
+    auto items = obj["items"];
+    REQUIRE(items.is<picojson::value::array>(), "'items' member must be JSON array");
+    for (const auto& i : items.get<picojson::value::array>())
+    {
+        REQUIRE(i.is<picojson::value::object>(), "'item' must be JSON object");
+        auto item = i.get<picojson::value::object>();
+        GET(item, type, std::string);
+        if (type == "cell")
+        {
+            GET(item, cellIndex, int64_t);
+            GET(item, cellName, std::string);
+            GET(item, cellExpr, std::string);
+        }
+        else if (t == "instance")
+        {
+            GET(item, sheetIndex, int64_t);
+            GET(item, inputs, picojson::value::array);
+            for (auto& n : inputs)
+            {
+                REQUIRE(n.is<picojson::value::object>(), "'input' must be object");
+                auto input = n.get<picojson::value::object>();
+
+                GET(input, cellIndex, int64_t);
+                GET(input, inputExpr, std::string);
+            }
+        }
+        else
+        {
+            return "Unknown item type '" + type + "'";
+        }
+    }
+
+    REQUIRE(obj.count("sheets"), "'sheets' member must be present");
+    auto sheets = obj["sheets"];
+    REQUIRE(sheets.is<picojson::value::array>(), "'sheets' item must be JSON array");
+    for (const auto& s : sheets.get<picojson::value::array>())
+    {
+        (void)s;
+    }
+
+    return "";
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void Root::clear()
 {
