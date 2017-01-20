@@ -411,3 +411,57 @@ TEST_CASE("Root::clear")
         REQUIRE(true /* didn't crash */);
     }
 }
+
+TEST_CASE("Root::fromString")
+{
+    Root r;
+
+    // For now, just check that a few invalid strings return errors
+    REQUIRE(r.fromString("HI THERE") != "");
+    REQUIRE(r.fromString("{}") != "");
+    REQUIRE(r.fromString("{") != "");
+}
+
+TEST_CASE("Root::toString")
+{
+    Root r;
+
+    SECTION("Empty file")
+    {
+        auto before = r.toString();
+        CAPTURE(before);
+        REQUIRE(r.fromString(before) == "");
+        REQUIRE(r.toString() == before);
+    }
+
+    SECTION("Single cell")
+    {
+        r.insertCell(0, "x", "(+ 1 2)");
+        auto before = r.toString();
+        CAPTURE(before);
+        REQUIRE(r.fromString(before) == "");
+        REQUIRE(r.toString() == before);
+    }
+
+    SECTION("Clearing existing values")
+    {
+        r.insertCell(0, "x", "(+ 1 2)");
+        auto before = r.toString();
+        r.insertCell(0, "y", "15");
+
+        CAPTURE(before);
+        REQUIRE(r.fromString(before) == "");
+        REQUIRE(r.toString() == before);
+    }
+
+    SECTION("Sheet")
+    {
+        auto s = r.insertSheet(0, "Sheet");
+        auto a = r.insertCell(s, "a", "15");
+
+        auto before = r.toString();
+        CAPTURE(before);
+        REQUIRE(r.fromString(before) == "");
+        REQUIRE(r.toString() == before);
+    }
+}
