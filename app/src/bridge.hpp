@@ -164,52 +164,6 @@ protected:
         Bridge* parent;
     };
 
-    /*
-     *  This is a serializer that writes a graph to a file
-     *  It is transient, constructed to save a file then discarded
-     *  After construction, the caller should check opened and is only
-     *  allowed to call other functions if true
-     */
-    class BridgeFlatSerializer : public Graph::FlatSerializer
-    {
-    public:
-        BridgeFlatSerializer(QString filename);
-
-        /*
-         *  Describes a cell within the current sheet
-         */
-        void cell(Graph::CellIndex c, const std::string& name,
-                  const std::string& expr) override;
-
-        /*
-         *  Begins an instance within the current sheet
-         *
-         *  input calls after this point refer to this instance
-         *  (until reset by another call to instance)
-         */
-        void instance(Graph::InstanceIndex i, const std::string& name,
-                      Graph::SheetIndex s) override;
-
-        /*
-         *  Stores an input expression
-         */
-        void input(Graph::CellIndex c, const std::string& expr) override;
-
-        /*
-         *  Pushes and pops into a sheet from the library
-         */
-        void push(Graph::SheetIndex i, const std::string& sheet_name) override;
-        void pop() override;
-
-    protected:
-        QFile file;
-        QDataStream out;
-    public:
-        const bool opened;
-        const static QString fileId;
-        const static quint32 version;
-    };
-
     /*  Permanent serializer that's connected to the right places  */
     BridgeTreeSerializer bts;
     bool pinged=false;

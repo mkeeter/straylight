@@ -482,10 +482,14 @@ picojson::value Root::toJson(SheetIndex sheet) const
     for (auto i : iterItems(sheet))
     {
         picojson::value::object obj;
+        obj.insert({"itemIndex", picojson::value((int64_t)i.i)});
+        obj.insert({"itemName", picojson::value(tree.nameOf(i))});
+
         if (auto n = getItem(i).instance())
         {
             obj.insert({"type", picojson::value("instance")});
             obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
+            obj.insert({"sheetName", picojson::value(lib.nameOf(n->sheet))});
             picojson::value::array inputs;
             for (const auto& p : n->inputs)
             {
@@ -499,8 +503,6 @@ picojson::value Root::toJson(SheetIndex sheet) const
         else if (auto c = getItem(i).cell())
         {
             obj.insert({"type", picojson::value("cell")});
-            obj.insert({"cellIndex", picojson::value((int64_t)i.i)});
-            obj.insert({"cellName", picojson::value(tree.nameOf(i))});
             obj.insert({"cellExpr", picojson::value(c->expr)});
         }
         else
@@ -519,6 +521,7 @@ picojson::value Root::toJson(SheetIndex sheet) const
     picojson::value::object out;
     out.insert({"items", picojson::value(items)});
     out.insert({"sheets", picojson::value(sheets)});
+    out.insert({"sheetIndex", picojson::value((int64_t)sheet.i)});
 
     return picojson::value(out);
 }
@@ -551,12 +554,10 @@ std::string Root::fromString(const std::string& str)
     return fromJson(0, obj["root"]);
 }
 
-std::string fromJson(SheetIndex sheet, const picojson::value& value)
+std::string Root::fromJson(SheetIndex sheet, const picojson::value& value)
 {
     REQUIRE(value.is<picojson::value::object>(), "Sheet value must be a JSON object");
     auto obj = value.get<picojson::value::object>();
-
-    REQUIRE(obj.count("item"), "'items' member must be present");
 
     auto items = obj["items"];
     REQUIRE(items.is<picojson::value::array>(), "'items' member must be JSON array");
@@ -564,17 +565,22 @@ std::string fromJson(SheetIndex sheet, const picojson::value& value)
     {
         REQUIRE(i.is<picojson::value::object>(), "'item' must be JSON object");
         auto item = i.get<picojson::value::object>();
+
+        // Common to all items
         GET(item, type, std::string);
+        GET(item, itemIndex, int64_t);
+        GET(item, itemName, std::string);
+
         if (type == "cell")
         {
-            GET(item, cellIndex, int64_t);
-            GET(item, cellName, std::string);
             GET(item, cellExpr, std::string);
+            insertCell(sheet, itemIndex, itemName, cellExpr);
         }
-        else if (t == "instance")
+        else if (type == "instance")
         {
             GET(item, sheetIndex, int64_t);
             GET(item, inputs, picojson::value::array);
+            insertInstance(sheet, itemIndex, itemName, sheetIndex);
             for (auto& n : inputs)
             {
                 REQUIRE(n.is<picojson::value::object>(), "'input' must be object");
@@ -582,6 +588,7 @@ std::string fromJson(SheetIndex sheet, const picojson::value& value)
 
                 GET(input, cellIndex, int64_t);
                 GET(input, inputExpr, std::string);
+                setInput(itemIndex, cellIndex, inputExpr);
             }
         }
         else
@@ -590,12 +597,16 @@ std::string fromJson(SheetIndex sheet, const picojson::value& value)
         }
     }
 
-    REQUIRE(obj.count("sheets"), "'sheets' member must be present");
-    auto sheets = obj["sheets"];
-    REQUIRE(sheets.is<picojson::value::array>(), "'sheets' item must be JSON array");
-    for (const auto& s : sheets.get<picojson::value::array>())
+    GET(obj, sheets, picojson::value::array);
+    for (const auto& s : sheets)
     {
-        (void)s;
+        REQUIRE(s.is<picojson::value::object>(), "'sheet' must be object");
+        auto obj = s.get<picojson::value::object>();
+
+        GET(obj, sheetIndex, int64_t);
+        GET(obj, sheetName, std::string);
+        insertSheet(sheet, sheetIndex, sheetName);
+        fromJson(sheetIndex, s);
     }
 
     return "";
