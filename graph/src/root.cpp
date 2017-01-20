@@ -705,6 +705,24 @@ void Root::eraseSheet(const SheetIndex& s)
     {
         eraseInstance(i);
     }
+
+    for (const auto& c : tree.childrenOf(s))
+    {
+        if (getItem(c).cell())
+        {
+            eraseCell(CellIndex(c));
+        }
+        else if (getItem(c).instance())
+        {
+            eraseInstance(InstanceIndex(c));
+        }
+    }
+
+    for (const auto& c : lib.childrenOf(s))
+    {
+        eraseSheet(c);
+    }
+
     lib.erase(s);
     // Sync is called on lock destruction
 }
