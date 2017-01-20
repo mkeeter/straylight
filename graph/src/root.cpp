@@ -534,6 +534,8 @@ picojson::value Root::toJson(SheetIndex sheet) const
 
 std::string Root::fromString(const std::string& str)
 {
+    clear();
+
     picojson::value v;
     std::string err = picojson::parse(v, str);
     if (!err.empty())
