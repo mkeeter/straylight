@@ -489,7 +489,6 @@ picojson::value Root::toJson(SheetIndex sheet) const
         {
             obj.insert({"type", picojson::value("instance")});
             obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
-            obj.insert({"sheetName", picojson::value(lib.nameOf(n->sheet))});
             picojson::value::array inputs;
             for (const auto& p : n->inputs)
             {
@@ -521,7 +520,13 @@ picojson::value Root::toJson(SheetIndex sheet) const
     picojson::value::object out;
     out.insert({"items", picojson::value(items)});
     out.insert({"sheets", picojson::value(sheets)});
-    out.insert({"sheetIndex", picojson::value((int64_t)sheet.i)});
+
+    // For nested sheets, save their name and index
+    if (sheet.i)
+    {
+        out.insert({"sheetIndex", picojson::value((int64_t)sheet.i)});
+        out.insert({"sheetName", picojson::value(lib.nameOf(sheet))});
+    }
 
     return picojson::value(out);
 }
