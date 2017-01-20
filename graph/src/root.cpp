@@ -548,7 +548,7 @@ std::string Root::fromString(const std::string& str)
     REQUIRE(type == "Straylight", "Invalid type code");
 
     GET(obj, version, int64_t);
-    REQUIRE(version != 1, "Invalid version code");
+    REQUIRE(version == 1, "Invalid version code");
 
     REQUIRE(obj.count("root"), "'root' member must be present");
     return fromJson(0, obj["root"]);
