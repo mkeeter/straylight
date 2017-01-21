@@ -113,7 +113,9 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
                         (copy (cons 'error (cadr args))))))))
       )"))
 {
-    for (s7_pointer ptr: {is_input, is_output, default_expr})
+    for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
+                          check_upstream, value_thunk_factory,
+                          instance_thunk_factory, eval_func})
     {
         s7_gc_protect(interpreter, ptr);
     }
