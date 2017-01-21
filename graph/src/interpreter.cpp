@@ -9,8 +9,124 @@
 namespace Graph {
 
 // Forward declarations
-static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args);
 static bool set_insert_(const char* symbol_name, void* data);
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct ValueThunk {
+    NameKey target;
+    ValuePtr value;
+
+    CellKey looker;
+    Dependencies* deps;
+    static int tag;
+
+    static void free(void* v)
+        { delete static_cast<ValueThunk*>(v); }
+
+    static char* print(s7_scheme* sc, void* s)
+    {
+        (void)sc;
+
+        std::stringstream ss;
+        ss << "#<value-thunk at " << s << ">";
+        auto str = ss.str();
+
+        auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
+        memcpy(out, &str[0], str.length());
+        return out;
+    }
+
+    static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+    {
+        (void)args;
+
+        auto out = static_cast<ValueThunk*>(s7_object_value_checked(obj, tag));
+        assert(out);
+        return apply(sc, out);
+    }
+
+    static s7_pointer apply(s7_scheme* sc, ValueThunk* out)
+    {
+        if (out->deps->insert(out->looker, out->target))
+        {
+            return s7_error(sc, s7_make_symbol(sc, "circular-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Circular lookup")));
+        }
+
+        return (s7_is_eqv(s7_car(out->value), s7_make_symbol(sc, "value")))
+            ? s7_cdr(out->value)
+            : s7_error(sc, s7_make_symbol(sc, "invalid-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Invalid lookup")));
+    }
+};
+int ValueThunk::tag = -1;
+
+struct InstanceThunk {
+    NameKey target;
+    InstanceIndex index;
+    std::map<std::string, ValueThunk> values;
+
+    CellKey looker;
+    Dependencies* deps;
+    static int tag;
+
+    static void free(void* v)
+        { delete static_cast<InstanceThunk*>(v); }
+
+    static char* print(s7_scheme* sc, void* v)
+    {
+        (void)sc;
+
+        std::stringstream ss;
+        ss << "#<instance-thunk at " << v << ">";
+        auto str = ss.str();
+
+        auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
+        memcpy(out, &str[0], str.length());
+        return out;
+    }
+
+    static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+    {
+        if (s7_list_length(sc, args) != 1)
+        {
+            return s7_wrong_number_of_args_error(sc,
+                    "instance-thunk apply: wrong number of args: (~A)", args);
+        }
+        else if (!s7_is_symbol(s7_car(args)))
+        {
+            return s7_wrong_type_arg_error(sc, "instance-thunk apply", 0,
+                    s7_car(args), "symbol");
+        }
+
+        auto out = static_cast<InstanceThunk*>(
+                s7_object_value_checked(obj, tag));
+        assert(out);
+
+        // Record a lookup of the instance, to detect instance name changes
+        if (out->deps->insert(out->looker, out->target))
+        {
+            return s7_error(sc, s7_make_symbol(sc, "circular-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Circular lookup")));
+        }
+
+        auto key = s7_symbol_name(s7_car(args));
+        if (out->values.count(key) == 0)
+        {
+            // Record the failed lookup
+            auto env_ = out->target.first;
+            env_.push_back(out->index);
+
+            out->deps->insert(out->looker, {env_, key});
+            return s7_error(sc, s7_make_symbol(sc, "missing-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Missing instance lookup")));
+        }
+
+        return ValueThunk::apply(sc, &out->values.at(key));
+    }
+};
+int InstanceThunk::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,32 +171,6 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
                     #t))
                 (lambda args #f))))
       )")),
-      check_upstream(s7_make_function(
-                interpreter, "check-upstream", check_upstream_,
-                3, /* required args */
-                0, /* optional args */
-                false, /* rest args */
-                "(check-upstream deps target looker)")),
-      value_thunk_factory(s7_eval_c_string(interpreter,R"(
-           (lambda (deps target looker check-upstream value)
-               (lambda ()
-               (let ((res (check-upstream deps target looker)))
-                   (cond ((=  1 res) (error 'circular-lookup "Circular lookup"))
-                         ((eqv? 'value (car value)) (cdr value))
-                         (else (error 'invalid-lookup "Invalid lookup"))))))
-          )")),
-      instance_thunk_factory(s7_eval_c_string(interpreter, R"(
-          (lambda (deps target target-index looker check-upstream values)
-            (let ((lookup (apply hash-table values))
-                  (keys (apply hash-table
-                    (map (lambda (v) (cons (car v) #t)) values))))
-            (lambda (key)
-              (let ((res (check-upstream deps target looker)))
-                (cond  ((=  1 res) (error 'circular-lookup "Circular lookup"))
-                       ((not (hash-table-ref keys key))
-                         (error 'missing-lookup "~A: missing instance lookup in ~A (~A) " key (car target) target-index))
-                       (else ((hash-table-ref lookup key))))))))
-      )")),
       eval_func(s7_eval_c_string(interpreter, R"(
         (lambda (str env)
           (define (read-all port)
@@ -107,18 +197,39 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
                         (copy (cons 'unbound-var (cadr args))))
-                    ((string=? "~A: missing instance lookup in ~A (~A) " (caadr args))
-                        (copy (cons 'unbound-instance (cadr args))))
                     (else
                         (copy (cons 'error (cadr args))))))))
       )"))
 {
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          check_upstream, value_thunk_factory,
-                          instance_thunk_factory, eval_func})
+                          eval_func})
     {
         s7_gc_protect(interpreter, ptr);
     }
+
+    ValueThunk::tag = s7_new_type_x(interpreter, "value-thunk",
+        ValueThunk::print,
+        ValueThunk::free,
+        nullptr,  /* equal */
+        nullptr,  /* gc_mark */
+        ValueThunk::apply,  /* apply */
+        nullptr,  /* set */
+        nullptr,  /* length */
+        nullptr,  /* copy */
+        nullptr,  /* reverse */
+        nullptr); /* fill */
+
+    InstanceThunk::tag = s7_new_type_x(interpreter, "instance-thunk",
+        InstanceThunk::print,
+        InstanceThunk::free,
+        nullptr,  /* equal */
+        nullptr,  /* gc_mark */
+        InstanceThunk::apply,  /* apply */
+        nullptr,  /* set */
+        nullptr,  /* length */
+        nullptr,  /* copy */
+        nullptr,  /* reverse */
+        nullptr); /* fill */
 }
 
 Interpreter::~Interpreter()
@@ -234,22 +345,6 @@ Value Interpreter::eval(const CellKey& key)
             deps->insert(key, {env, std::string(target)});
             free(target);
         }
-        else if (s7_is_eqv(s7_car(value),
-                      s7_make_symbol(interpreter, "unbound-instance")))
-        {
-            // If we failed to get a variable from an instance, then we need
-            // to push a nested dependency into that instance
-            auto args = s7_cddr(value);
-            auto target = s7_object_to_c_string(interpreter, s7_car(args));
-            auto instance_index = s7_integer(s7_caddr(args));
-
-            // Look up the instance index by name and push it into the env
-            auto env_ = env;
-            env_.push_back({(unsigned)instance_index});
-
-            deps->insert(key, {env_, std::string(target)});
-            free(target);
-        }
     }
 
     // If the value is present and unchanged, return false
@@ -297,21 +392,17 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
     const auto& item = root.getItem(index);
     if (auto cell = item.cell())
     {
-        CellKey lookee = {env, CellIndex(index)};
-
         // Construct a lookup thunk using value_thunk_factory
-        auto args = s7_list(interpreter, 5,
-            s7_make_c_pointer(interpreter, deps),
-            encodeNameKey(root.toNameKey(lookee)),
-            encodeCellKey(looker),
-            check_upstream,
+        return s7_make_object(interpreter, ValueThunk::tag, new ValueThunk {
+            {env, root.itemName(index)},
             cell->values.count(env) ? cell->values.at(env).value
-                                    : s7_nil(interpreter));
-        return s7_call(interpreter, value_thunk_factory, args);
+                                    : s7_nil(interpreter),
+            looker, deps,
+        });
     }
     else if (auto instance = item.instance())
     {
-        s7_pointer values = s7_nil(interpreter);
+        std::map<std::string, ValueThunk> values;
 
         {   // Create a temporary environment inside the instance, and
             // build up a list of OUTPUT cells within this instance
@@ -321,28 +412,27 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
             {
                 if (auto cell = root.getItem(c).cell())
                 {
-                    if (cell->type == Cell::OUTPUT)
+                    if (cell->type >= Cell::INPUT)
                     {
-                        // Prepend (name, value thunk) to the args list
-                        auto pair = s7_cons(interpreter,
-                                s7_make_symbol(
-                                    interpreter, root.itemName(c).c_str()),
-                                getThunk(env_, c, looker));
-                        values = s7_cons(interpreter, pair, values);
+                        values[root.itemName(c)] = ValueThunk {
+                            root.toNameKey({env_, CellIndex(c)}),
+                            cell->values.count(env_)
+                                ? cell->values.at(env_).value
+                                : s7_nil(interpreter),
+                            looker, deps,
+                        };
                     }
                 }
             }
         }
 
-        // Build a thunk with instance_thunk_factory
-        auto args = s7_list(interpreter, 6,
-            s7_make_c_pointer(interpreter, deps),
-            encodeNameKey({env, root.itemName(index)}),
-            s7_make_integer(interpreter, index.i),
-            encodeCellKey(looker),
-            check_upstream,
-            values);
-        return s7_call(interpreter, instance_thunk_factory, args);
+        return s7_make_object(interpreter, InstanceThunk::tag,
+            new InstanceThunk {
+                {env, root.itemName(index)},
+                InstanceIndex(index),
+                values,
+                looker, deps,
+        });
     }
 
     assert(false); // Item index must be either a cell or an instance
@@ -350,62 +440,6 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-s7_pointer Interpreter::encodeCellKey(const CellKey& k) const
-{
-    auto out = s7_nil(interpreter);
-    for (auto& i : k.first)
-    {
-        out = s7_cons(interpreter, s7_make_integer(interpreter, i.i), out);
-    }
-    out = s7_cons(interpreter, s7_make_integer(interpreter, k.second.i), out);
-    return out;
-}
-
-s7_pointer Interpreter::encodeNameKey(const NameKey& k) const
-{
-    auto out = s7_nil(interpreter);
-    for (auto& i : k.first)
-    {
-        out = s7_cons(interpreter, s7_make_integer(interpreter, i.i), out);
-    }
-    out = s7_cons(interpreter, s7_make_string(interpreter, k.second.c_str()), out);
-    return out;
-}
-
-CellKey Interpreter::decodeCellKey(s7_scheme* interpreter, s7_pointer v)
-{
-    CellKey out;
-    out.second = s7_integer(s7_car(v));
-    v = s7_cdr(v);
-
-    // Because of the list's order, we fill the key from back to front
-    out.first.resize(s7_list_length(interpreter, v));
-    for (auto itr = out.first.rbegin(); itr != out.first.rend();
-         ++itr, v = s7_cdr(v))
-    {
-        *itr = s7_integer(s7_car(v));
-    }
-
-    return out;
-}
-
-NameKey Interpreter::decodeNameKey(s7_scheme* interpreter, s7_pointer v)
-{
-    NameKey out;
-    out.second = std::string(s7_string(s7_car(v)));
-    v = s7_cdr(v);
-
-    // Because of the list's order, we fill the key from back to front
-    out.first.resize(s7_list_length(interpreter, v));
-    for (auto itr = out.first.rbegin(); itr != out.first.rend();
-         ++itr, v = s7_cdr(v))
-    {
-        *itr = s7_integer(s7_car(v));
-    }
-
-    return out;
-}
 
 bool Interpreter::isReserved(const std::string& k) const
 {
@@ -426,15 +460,6 @@ std::set<std::string> Interpreter::keywords() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static s7_pointer check_upstream_(s7_scheme* interpreter, s7_pointer args)
-{
-    auto& deps = *static_cast<Dependencies*>(s7_c_pointer(s7_car(args)));
-    auto lookee = Interpreter::decodeNameKey(interpreter, s7_cadr(args));
-    auto looker = Interpreter::decodeCellKey(interpreter, s7_caddr(args));
-
-    return s7_make_integer(interpreter, deps.insert(looker, lookee));
-}
 
 static bool set_insert_(const char* symbol_name, void* data)
 {

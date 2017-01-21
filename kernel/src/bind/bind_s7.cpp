@@ -50,10 +50,7 @@ s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
 
 static void shape_free(void* s)
 {
-    if (s)
-    {
-        delete static_cast<Shape*>(s);
-    }
+    delete static_cast<Shape*>(s);
 }
 
 static char* shape_print(s7_scheme* sc, void* s)
