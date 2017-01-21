@@ -14,6 +14,64 @@ static bool set_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct ValueThunk {
+    NameKey target;
+    ValuePtr value;
+
+    CellKey looker;
+    Dependencies* deps;
+    static int tag;
+
+    static void free(void* v)
+        { delete static_cast<ValueThunk*>(v); }
+
+    static char* print(s7_scheme* sc, void* s)
+    {
+        (void)sc;
+
+        std::stringstream ss;
+        ss << "#<value-thunk at " << s << ">";
+        auto str = ss.str();
+
+        auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
+        memcpy(out, &str[0], str.length());
+        return out;
+    }
+
+    static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+    {
+        (void)args;
+
+        auto out = static_cast<ValueThunk*>(s7_object_value_checked(obj, tag));
+        if (out->deps->insert(out->looker, out->target))
+        {
+            return s7_error(sc, s7_make_symbol(sc, "circular-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Circular lookup")));
+        }
+
+        return (s7_is_eqv(s7_car(out->value), s7_make_symbol(sc, "value")))
+            ? s7_cdr(out->value)
+            : s7_error(sc, s7_make_symbol(sc, "invalid-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Invalid lookup")));
+    }
+};
+int ValueThunk::tag = -1;
+
+struct InstanceThunk {
+    NameKey target;
+    std::map<std::string, ValueThunk> values;
+
+    CellKey looker;
+    Dependencies* deps;
+    static int tag;
+
+    static void free(void* v)
+        { delete static_cast<InstanceThunk*>(v); }
+};
+int InstanceThunk::tag = -1;
+
+////////////////////////////////////////////////////////////////////////////////
+
 Interpreter::Interpreter(const Root& parent, Dependencies* deps)
     : root(parent), deps(deps), interpreter(s7_init()),
       is_input(s7_eval_c_string(interpreter, R"(
@@ -61,14 +119,6 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
                 0, /* optional args */
                 false, /* rest args */
                 "(check-upstream deps target looker)")),
-      value_thunk_factory(s7_eval_c_string(interpreter,R"(
-           (lambda (deps target looker check-upstream value)
-               (lambda ()
-               (let ((res (check-upstream deps target looker)))
-                   (cond ((=  1 res) (error 'circular-lookup "Circular lookup"))
-                         ((eqv? 'value (car value)) (cdr value))
-                         (else (error 'invalid-lookup "Invalid lookup"))))))
-          )")),
       instance_thunk_factory(s7_eval_c_string(interpreter, R"(
           (lambda (deps target target-index looker check-upstream values)
             (let ((lookup (apply hash-table values))
@@ -114,11 +164,23 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
       )"))
 {
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          check_upstream, value_thunk_factory,
+                          check_upstream,
                           instance_thunk_factory, eval_func})
     {
         s7_gc_protect(interpreter, ptr);
     }
+
+    ValueThunk::tag = s7_new_type_x(interpreter, "value-thunk",
+        ValueThunk::print,
+        ValueThunk::free,
+        nullptr,  /* equal */
+        nullptr,  /* gc_mark */
+        ValueThunk::apply,  /* apply */
+        nullptr,  /* set */
+        nullptr,  /* length */
+        nullptr,  /* copy */
+        nullptr,  /* reverse */
+        nullptr); /* fill */
 }
 
 Interpreter::~Interpreter()
@@ -300,14 +362,13 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
         CellKey lookee = {env, CellIndex(index)};
 
         // Construct a lookup thunk using value_thunk_factory
-        auto args = s7_list(interpreter, 5,
-            s7_make_c_pointer(interpreter, deps),
-            encodeNameKey(root.toNameKey(lookee)),
-            encodeCellKey(looker),
-            check_upstream,
+        return s7_make_object(interpreter, ValueThunk::tag, new ValueThunk {
+            root.toNameKey(lookee),
             cell->values.count(env) ? cell->values.at(env).value
-                                    : s7_nil(interpreter));
-        return s7_call(interpreter, value_thunk_factory, args);
+                                    : s7_nil(interpreter),
+            looker,
+            deps,
+        });
     }
     else if (auto instance = item.instance())
     {

@@ -105,7 +105,6 @@ private:
     s7_cell* const name_valid;
 
     s7_cell* const check_upstream;
-    s7_cell* const value_thunk_factory;
     s7_cell* const instance_thunk_factory;
     s7_cell* const eval_func;
 };
