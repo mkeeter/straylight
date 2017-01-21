@@ -144,9 +144,9 @@ QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
     return SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
 }
 
-QString Bridge::saveToFile(QString filename)
+QString Bridge::saveFile(QUrl filename)
 {
-    QFile file(filename);
+    QFile file(filename.toLocalFile());
     if (!file.open(QIODevice::WriteOnly))
     {
         return file.errorString();
@@ -155,6 +155,26 @@ QString Bridge::saveToFile(QString filename)
     auto str = r.toString();
     file.write(str.data(), str.size());
     return "";
+}
+
+QString Bridge::loadFile(QUrl filename)
+{
+    QFile file(filename.toLocalFile());
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return file.errorString();
+    }
+
+    auto str = file.readAll();
+    auto out = QString::fromStdString(r.fromString(str.toStdString()));
+    sync();
+    return out;
+}
+
+void Bridge::clearFile()
+{
+    r.clear();
+    sync();
 }
 
 QString Bridge::nextItemName(int sheet_index) const
@@ -268,18 +288,4 @@ void Bridge::BridgeTreeSerializer::sheet(
         bool editable, bool insertable)
 {
     parent->sheet(s.i, QString::fromStdString(name), editable, insertable);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-QString Bridge::loadFile(QString filename)
-{
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        return file.errorString();
-    }
-
-    auto str = file.readAll();
-    return QString::fromStdString(r.fromString(str.toStdString()));
 }

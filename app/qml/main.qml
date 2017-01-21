@@ -40,19 +40,24 @@ ApplicationWindow {
     //  Menu bar, with all the functions you'd expect
     menuBar: MenuBar {
         Menu {
-            title: qsTr("File")
+            title: "File"
             MenuItem {
-                text: qsTr("&Open")
-                onTriggered: console.log("Open action triggered");
-                shortcut: StandardKey.Open
+                text: "&New"
+                onTriggered: Bridge.clearFile()
+                shortcut: StandardKey.New
             }
             MenuItem {
-                text: qsTr("&Save As")
+                text: "&Save As"
                 onTriggered: saveDialog.visible = true
                 shortcut: StandardKey.SaveAs
             }
             MenuItem {
-                text: qsTr("Exit")
+                text: "&Open"
+                onTriggered: loadDialog.visible = true
+                shortcut: StandardKey.Open
+            }
+            MenuItem {
+                text: "Exit"
                 onTriggered: Qt.quit();
                 shortcut: StandardKey.Quit
             }
@@ -66,10 +71,21 @@ ApplicationWindow {
         title: "Please choose a file"
         folder: shortcuts.home
         onAccepted: {
-            Bridge.saveToFile(saveDialog.fileUrl)
+            Bridge.saveFile(saveDialog.fileUrl)
             // TODO: error handling here
         }
         selectExisting: false
+        visible: false
+    }
+
+    FileDialog {
+        id: loadDialog
+        title: "Please choose a file"
+        folder: shortcuts.home
+        onAccepted: {
+            Bridge.loadFile(loadDialog.fileUrl)
+            // TODO: error handling here
+        }
         visible: false
     }
 

@@ -67,8 +67,9 @@ public:
     /*
      *  Saves to the given file, returning an error string on failure
      */
-    Q_INVOKABLE QString saveToFile(QString filename);
-    Q_INVOKABLE QString loadFile(QString filename);
+    Q_INVOKABLE QString saveFile(QUrl filename);
+    Q_INVOKABLE QString loadFile(QUrl filename);
+    Q_INVOKABLE void clearFile();
 
     /*
      *  Constructor for the QML singleton
