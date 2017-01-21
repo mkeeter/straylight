@@ -51,9 +51,6 @@ public:
      */
     static ValuePtr untag(ValuePtr v);
 
-    static CellKey decodeCellKey(s7_scheme* interpreter, s7_cell* v);
-    static NameKey decodeNameKey(s7_scheme* interpreter, s7_cell* v);
-
     /*
      *  Checks to see if the given string is reserved
      */
@@ -77,13 +74,6 @@ private:
     bool isInput(const std::string& expr) const;
     bool isOutput(const std::string& expr) const;
 
-    s7_cell* encodeCellKey(const CellKey& k) const;
-    s7_cell* encodeNameKey(const NameKey& k) const;
-    CellKey decodeCellKey(s7_cell* v) const
-        { return decodeCellKey(interpreter, v); }
-    NameKey decodeNameKey(s7_cell* v) const
-        { return decodeNameKey(interpreter, v); }
-
     /*
      *  Returns a thunk that looks up a value (for a cell) or an output value
      *  (for an instance)
@@ -104,8 +94,6 @@ private:
     s7_cell* const default_expr;
     s7_cell* const name_valid;
 
-    s7_cell* const check_upstream;
-    s7_cell* const instance_thunk_factory;
     s7_cell* const eval_func;
 };
 
