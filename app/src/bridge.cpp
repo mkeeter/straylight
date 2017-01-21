@@ -146,6 +146,14 @@ QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
 
 QString Bridge::saveToFile(QString filename)
 {
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return file.errorString();
+    }
+
+    auto str = r.toString();
+    file.write(str.data(), str.size());
     return "";
 }
 
@@ -266,5 +274,12 @@ void Bridge::BridgeTreeSerializer::sheet(
 
 QString Bridge::loadFile(QString filename)
 {
-    return "";
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return file.errorString();
+    }
+
+    auto str = file.readAll();
+    return QString::fromStdString(r.fromString(str.toStdString()));
 }
