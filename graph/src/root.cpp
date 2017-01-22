@@ -674,10 +674,20 @@ std::map<std::string, Value> Root::callSheet(
         }
     }
 
-    // Mark all sheet cells as dirty in a free-floating dummy env
-    // (which is only their position in the imaginary instance)
+    // Insert a temporary instance anchored to the parent sheet.
+    // We insert the instance manually here because calling insertInstance
+    // would create O(N^2) operations, as it would insert the instance into
+    // every instance of the parent sheet...
+    auto instance = tree.insertInstance(p, nextItemName(p), sheet);
+
+    // This is our temporary nested execution environment
+    auto env = caller.first;
+    env.push_back(instance);
+
+    // Prepare to iterate over cells, creating a nested dirty queue
     dirty.push({});
     auto itr = inputs.begin();
+
     for (const auto& c : tree.cellsOf(sheet))
     {
         // If this is a top-level cell and is an input cell, then inject an
@@ -694,11 +704,11 @@ std::map<std::string, Value> Root::callSheet(
                 }
             }
             assert(itr->valid == true);
-            setValue(c, *itr++);
+            setValue({env, c.second}, *itr++);
         }
         else
         {
-            pushDirty(c);
+            markDirty(toNameKey({env, c.second}));
         }
     }
 
@@ -726,10 +736,13 @@ std::map<std::string, Value> Root::callSheet(
             auto cell = getItem(c.second).cell();
             if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
             {
-                out.insert({tree.nameOf(c.second), cell->values.at({})});
+                out.insert({tree.nameOf(c.second), cell->values.at(env)});
             }
         }
     }
+
+    // ...and erase the temporary instance
+    tree.erase(instance);
 
     return out;
 }

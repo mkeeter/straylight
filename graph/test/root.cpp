@@ -316,11 +316,6 @@ TEST_CASE("Root::callSheet")
         auto val = r.getItem(c).cell()->values.at({0});
         auto out = r.callSheet({{0}, c}, sum, {val}, &err);
 
-        for (auto& v : out)
-        {
-            printf("key: %s\n", v.first.c_str());
-        }
-
         REQUIRE(err == "");
         REQUIRE(out.size() == 2);
         REQUIRE(out.count("out") == 1);
