@@ -658,12 +658,12 @@ void Root::clear()
     assert(dirty.top().size() == 0);
 }
 
-std::map<std::string, ValuePtr> Root::callSheet(
+std::map<std::string, Value> Root::callSheet(
         const CellKey& caller, const SheetIndex& sheet,
         const std::list<ValuePtr> inputs, std::string* err)
 {
     auto p = itemParent(caller.second);
-    std::map<std::string, ValuePtr> out;
+    std::map<std::string, Value> out;
 
     if (!tree.canInsertInstance(p, sheet))
     {
@@ -714,8 +714,20 @@ std::map<std::string, ValuePtr> Root::callSheet(
     assert(dirty.top().size() == 0);
     dirty.pop();
 
-    return out;
+    // Grab all inputs and outputs and put them in the output map
+    for (const auto& c : tree.cellsOf(sheet))
+    {
+        if (c.first.empty())
+        {
+            auto cell = getItem(c.second).cell();
+            if (cell->type >= Cell::INPUT)
+            {
+                out.insert({tree.nameOf(c.second), cell->values.at({})});
+            }
+        }
+    }
 
+    return out;
 }
 
 bool Root::checkSheetName(const SheetIndex& parent,

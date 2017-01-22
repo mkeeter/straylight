@@ -233,7 +233,7 @@ public:
      *
      *  Returns the sheet's IO values (wrapped); sets *err if an error occurs
      */
-    std::map<std::string, ValuePtr> callSheet(
+    std::map<std::string, Value> callSheet(
             const CellKey& caller, const SheetIndex& sheet,
             const std::list<ValuePtr> inputs, std::string* err=nullptr);
 
