@@ -266,7 +266,9 @@ TEST_CASE("Root::callSheet")
 
     SECTION("No cells")
     {
-        auto out = r.callSheet({{0}, c}, sum, {});
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        REQUIRE(err == "");
         REQUIRE(out.size() == 0);
     }
 
@@ -276,6 +278,7 @@ TEST_CASE("Root::callSheet")
         std::string err;
         auto out = r.callSheet({{0}, c}, sum, {}, &err);
         REQUIRE(err != "");
+        REQUIRE(out.size() == 0);
     }
 
     SECTION("Too many inputs")
@@ -284,6 +287,22 @@ TEST_CASE("Root::callSheet")
         std::string err;
         auto out = r.callSheet({{0}, c}, sum, {nullptr, nullptr}, &err);
         REQUIRE(err != "");
+        REQUIRE(out.size() == 0);
+    }
+
+    SECTION("Correct number of inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+
+        // Get a value from c (this is just a way to get a value interpreter
+        // ValuePtr without jumping through many hoops)
+        auto val = r.getItem(c).cell()->values.at({0}).value;
+
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+        REQUIRE(err == "");
+        REQUIRE(out.size() == 1);
+        REQUIRE(out.count("in") == 1);
     }
 }
 
