@@ -693,7 +693,7 @@ std::map<std::string, ValuePtr> Root::callSheet(
                     return out;
                 }
             }
-            setValue(c, Value(*itr, "", true));
+            setValue(c, Value(*itr++, "", true));
         }
         markDirty({c.first, itemName(c.second)});
     }
