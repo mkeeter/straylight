@@ -269,6 +269,22 @@ TEST_CASE("Root::callSheet")
         auto out = r.callSheet({{0}, c}, sum, {});
         REQUIRE(out.size() == 0);
     }
+
+    SECTION("Too few inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        REQUIRE(err != "");
+    }
+
+    SECTION("Too many inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {nullptr, nullptr}, &err);
+        REQUIRE(err != "");
+    }
 }
 
 TEST_CASE("Root::insertInstance")
