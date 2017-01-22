@@ -262,7 +262,7 @@ TEST_CASE("Root::callSheet")
 {
     Root r;
     auto sum = r.insertSheet(0, "Sum");
-    auto c = r.insertCell(0, "a", "1");
+    auto c = r.insertCell(0, "a", "13.5");
 
     SECTION("No cells")
     {
@@ -285,7 +285,8 @@ TEST_CASE("Root::callSheet")
     {
         r.insertCell(sum, "in", "(input 12)");
         std::string err;
-        auto out = r.callSheet({{0}, c}, sum, {nullptr, nullptr}, &err);
+        auto v = Value(nullptr, "", true);
+        auto out = r.callSheet({{0}, c}, sum, {v, v}, &err);
         REQUIRE(err != "");
         REQUIRE(out.size() == 0);
     }
@@ -296,13 +297,14 @@ TEST_CASE("Root::callSheet")
 
         // Get a value from c (this is just a way to get a value interpreter
         // ValuePtr without jumping through many hoops)
-        auto val = r.getItem(c).cell()->values.at({0}).value;
+        auto val = r.getItem(c).cell()->values.at({0});
 
         std::string err;
         auto out = r.callSheet({{0}, c}, sum, {val}, &err);
         REQUIRE(err == "");
         REQUIRE(out.size() == 1);
         REQUIRE(out.count("in") == 1);
+        REQUIRE(out.at("in").str == "13.5");
     }
 }
 

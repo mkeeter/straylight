@@ -660,7 +660,7 @@ void Root::clear()
 
 std::map<std::string, Value> Root::callSheet(
         const CellKey& caller, const SheetIndex& sheet,
-        const std::list<ValuePtr> inputs, std::string* err)
+        const std::list<Value> inputs, std::string* err)
 {
     auto p = itemParent(caller.second);
     std::map<std::string, Value> out;
@@ -693,7 +693,8 @@ std::map<std::string, Value> Root::callSheet(
                     return out;
                 }
             }
-            setValue(c, Value(*itr++, "", true));
+            assert(itr->valid == true);
+            setValue(c, *itr++);
         }
         markDirty({c.first, itemName(c.second)});
     }
