@@ -825,6 +825,7 @@ void Root::markDirty(const NameKey& k)
     // exists, then push it to the dirty list directly
     if (checkEnv(k.first))
     {
+        assert(k.first.size() >= 1);
         auto sheet = getItem(k.first.back()).instance()->sheet;
         if (hasItem(sheet, k.second) &&
             getItem(sheet, k.second).cell())
