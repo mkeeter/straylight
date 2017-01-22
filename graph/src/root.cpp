@@ -2,6 +2,12 @@
 
 namespace Graph {
 
+Root::Root()
+    : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
+{
+    dirty.push({});
+}
+
 CellKey Root::toCellKey(const NameKey& k) const
 {
     auto sheet = getItem(k.first.back()).instance()->sheet;
@@ -649,7 +655,7 @@ void Root::clear()
         eraseSheet(s);
     }
 
-    assert(dirty.size() == 0);
+    assert(dirty.top().size() == 0);
 }
 
 bool Root::checkSheetName(const SheetIndex& parent,
@@ -764,11 +770,11 @@ void Root::markDirty(const NameKey& k)
 
 void Root::sync()
 {
-    while (!locked && dirty.size())
+    while (!locked && dirty.top().size())
     {
-        const auto k = dirty.front();
+        const auto k = dirty.top().front();
         auto result = interpreter.eval(k);
-        dirty.pop_front();
+        dirty.top().pop_front();
 
         if (result.value)
         {
@@ -783,12 +789,12 @@ void Root::sync()
 
 void Root::pushDirty(const CellKey& c)
 {
-    auto itr = std::find_if(dirty.begin(), dirty.end(),
+    auto itr = std::find_if(dirty.top().begin(), dirty.top().end(),
         [&](CellKey& o){ return deps.isUpstream(o, c); });
 
-    if (itr == dirty.end() || *itr != c)
+    if (itr == dirty.top().end() || *itr != c)
     {
-        dirty.insert(itr, c);
+        dirty.top().insert(itr, c);
     }
 }
 

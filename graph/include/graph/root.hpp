@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "graph/library.hpp"
 #include "graph/cell.hpp"
 #include "graph/item.hpp"
@@ -17,8 +19,7 @@ namespace Graph {
 class Root
 {
 public:
-    Root() : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
-        { /* Nothing to do here */ }
+    Root();
 
     /*
      *  Looks up a name key and converts it to a cell key
@@ -227,6 +228,16 @@ public:
      */
     void eraseSheet(const SheetIndex& s);
 
+    /*
+     *  Temporarily builds up the given sheet, setting the given inputs
+     *
+     *  Returns the sheet's IO values (wrapped); sets *err if an error occurs
+     */
+    std::map<std::string, ValuePtr> callSheet(
+            const CellKey& caller, const SheetIndex& sheet,
+            const std::map<std::string, ValuePtr> inputs,
+            std::string* err);
+
     ////////////////////////////////////////////////////////////////////////////
 
     /*
@@ -327,7 +338,7 @@ protected:
     Interpreter interpreter;
 
     /*  List of keys that need re-evaluation  */
-    std::list<CellKey> dirty;
+    std::stack<std::list<CellKey>> dirty;
 };
 
 }   // namespace Graph
