@@ -696,7 +696,7 @@ std::map<std::string, Value> Root::callSheet(
             assert(itr->valid == true);
             setValue(c, *itr++);
         }
-        markDirty({c.first, itemName(c.second)});
+        pushDirty(c);
     }
 
     // Require that we have exactly the right number of inputs
