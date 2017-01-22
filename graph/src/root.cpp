@@ -721,7 +721,7 @@ std::map<std::string, Value> Root::callSheet(
         if (c.first.empty())
         {
             auto cell = getItem(c.second).cell();
-            if (cell->type >= Cell::INPUT)
+            if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
             {
                 out.insert({tree.nameOf(c.second), cell->values.at({})});
             }

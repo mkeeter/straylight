@@ -306,6 +306,26 @@ TEST_CASE("Root::callSheet")
         REQUIRE(out.count("in") == 1);
         REQUIRE(out.at("in").str == "13.5");
     }
+
+    SECTION("Output value")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        r.insertCell(sum, "out", "(output (+ (in) 15))");
+
+        std::string err;
+        auto val = r.getItem(c).cell()->values.at({0});
+        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+
+        for (auto& v : out)
+        {
+            printf("key: %s\n", v.first.c_str());
+        }
+
+        REQUIRE(err == "");
+        REQUIRE(out.size() == 2);
+        REQUIRE(out.count("out") == 1);
+        REQUIRE(out.at("out").str == "28.5");
+    }
 }
 
 TEST_CASE("Root::insertInstance")
