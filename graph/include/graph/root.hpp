@@ -235,8 +235,7 @@ public:
      */
     std::map<std::string, ValuePtr> callSheet(
             const CellKey& caller, const SheetIndex& sheet,
-            const std::map<std::string, ValuePtr> inputs,
-            std::string* err);
+            const std::list<ValuePtr> inputs, std::string* err=nullptr);
 
     ////////////////////////////////////////////////////////////////////////////
 

@@ -258,6 +258,19 @@ TEST_CASE("Root::eraseSheet")
     REQUIRE(r.checkItemName(0, "i"));
 }
 
+TEST_CASE("Root::callSheet")
+{
+    Root r;
+    auto sum = r.insertSheet(0, "Sum");
+    auto c = r.insertCell(0, "a", "1");
+
+    SECTION("No cells")
+    {
+        auto out = r.callSheet({{0}, c}, sum, {});
+        REQUIRE(out.size() == 0);
+    }
+}
+
 TEST_CASE("Root::insertInstance")
 {
     Root r;

@@ -658,6 +658,66 @@ void Root::clear()
     assert(dirty.top().size() == 0);
 }
 
+std::map<std::string, ValuePtr> Root::callSheet(
+        const CellKey& caller, const SheetIndex& sheet,
+        const std::list<ValuePtr> inputs, std::string* err)
+{
+    auto p = itemParent(caller.second);
+    std::map<std::string, ValuePtr> out;
+
+    if (!tree.canInsertInstance(p, sheet))
+    {
+        if (err)
+        {
+            *err = "Recursive loop when calling sheet";
+            return out;
+        }
+    }
+
+    // Mark all sheet cells as dirty in a free-floating dummy env
+    // (which is only their position in the imaginary instance)
+    dirty.push({});
+    auto itr = inputs.begin();
+    for (const auto& c : tree.cellsOf(sheet))
+    {
+        // If this is a top-level cell and is an input cell, then inject an
+        // value from the input list into the cell for the dummy env
+        if (c.first.empty() && getItem(c.second).cell()->type == Cell::INPUT)
+        {
+            if (itr == inputs.end())
+            {
+                if (err)
+                {
+                    *err = "Too few inputs";
+                    dirty.pop();
+                    return out;
+                }
+            }
+            setValue(c, Value(*itr, "", true));
+        }
+        markDirty({c.first, itemName(c.second)});
+    }
+
+    // Require that we have exactly the right number of inputs
+    if (itr != inputs.end())
+    {
+        if (err)
+        {
+            *err = "Too many inputs";
+            dirty.pop();
+            return out;
+        }
+    }
+
+    // Evaluation!
+    sync();
+    assert(dirty.top().size() == 0);
+    dirty.pop();
+
+    return out;
+
+}
+
 bool Root::checkSheetName(const SheetIndex& parent,
                           const std::string& name,
                           std::string* err) const
