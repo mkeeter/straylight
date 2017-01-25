@@ -16,7 +16,7 @@ class Dependencies;
 class Interpreter
 {
 public:
-    Interpreter(const Root& parent, Dependencies* deps);
+    Interpreter(Root& parent, Dependencies* deps);
     ~Interpreter();
 
     /*
@@ -78,11 +78,17 @@ private:
      *  Returns a thunk that looks up a value (for a cell) or an output value
      *  (for an instance)
      */
-    s7_cell* getThunk(const Env& env, const ItemIndex& item,
-                      const CellKey& caller);
+    s7_cell* getItemThunk(const Env& env, const ItemIndex& item,
+                          const CellKey& caller);
+
+    /*
+     *  Returns a thunk that calls a sheet
+     */
+    s7_cell* getSheetThunk(const SheetIndex& index,
+                           const CellKey& looker);
 
     /*  Reference to graph root  */
-    const Root& root;
+    Root& root;
     Dependencies* deps;
 
     /*  This is the main interpreter process  */

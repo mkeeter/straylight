@@ -258,6 +258,71 @@ TEST_CASE("Root::eraseSheet")
     REQUIRE(r.checkItemName(0, "i"));
 }
 
+TEST_CASE("Root::callSheet")
+{
+    Root r;
+    auto sum = r.insertSheet(0, "Sum");
+    auto c = r.insertCell(0, "a", "13.5");
+
+    SECTION("No cells")
+    {
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        REQUIRE(err == "");
+        REQUIRE(out.size() == 0);
+    }
+
+    SECTION("Too few inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        REQUIRE(err != "");
+        REQUIRE(out.size() == 0);
+    }
+
+    SECTION("Too many inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        std::string err;
+        auto v = Value(nullptr, "", true);
+        auto out = r.callSheet({{0}, c}, sum, {v, v}, &err);
+        REQUIRE(err != "");
+        REQUIRE(out.size() == 0);
+    }
+
+    SECTION("Correct number of inputs")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+
+        // Get a value from c (this is just a way to get a value interpreter
+        // ValuePtr without jumping through many hoops)
+        auto val = r.getItem(c).cell()->values.at({0});
+
+        std::string err;
+        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+        REQUIRE(err == "");
+        REQUIRE(out.size() == 1);
+        REQUIRE(out.count("in") == 1);
+        REQUIRE(out.at("in").str == "13.5");
+    }
+
+    SECTION("Output value")
+    {
+        r.insertCell(sum, "in", "(input 12)");
+        r.insertCell(sum, "out", "(output (+ (in) 15))");
+
+        std::string err;
+        auto val = r.getItem(c).cell()->values.at({0});
+        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+
+        REQUIRE(err == "");
+        REQUIRE(out.size() == 2);
+        REQUIRE(out.count("out") == 1);
+        REQUIRE(out.at("out").str == "28.5");
+    }
+}
+
 TEST_CASE("Root::insertInstance")
 {
     Root r;

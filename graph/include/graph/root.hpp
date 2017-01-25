@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "graph/library.hpp"
 #include "graph/cell.hpp"
 #include "graph/item.hpp"
@@ -17,8 +19,7 @@ namespace Graph {
 class Root
 {
 public:
-    Root() : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
-        { /* Nothing to do here */ }
+    Root();
 
     /*
      *  Looks up a name key and converts it to a cell key
@@ -103,13 +104,14 @@ public:
     void serialize(TreeSerializer* s) const;
 
     /*
-     *  Exports the graph to any object implementing the FlatSerializer API
+     *  Encode the entire graph in JSON
+     *
      *  This is used to save files to disk with an appropriate encoder
      */
     std::string toString() const;
 
     /*
-     *  Deserializes from string or JSON
+     *  Deserializes from string (which should be JSON)
      *
      *  The existing graph is cleared.
      *  Returns an error string on failure or the empty string on success
@@ -227,6 +229,24 @@ public:
      */
     void eraseSheet(const SheetIndex& s);
 
+    /*
+     *  Returns all of the sheets above (contained within) the given env
+     *
+     *  Note that this doesn't tell us whether we can insert an instance
+     *  of these sheets, as this could create a recursive loop; use
+     *  tree.canInsertInstance to check.
+     */
+    std::list<SheetIndex> sheetsAbove(const Env& e) const;
+
+    /*
+     *  Temporarily builds up the given sheet, setting the given inputs
+     *
+     *  Returns the sheet's IO values (wrapped); sets *err if an error occurs
+     */
+    std::map<std::string, Value> callSheet(
+            const CellKey& caller, const SheetIndex& sheet,
+            const std::list<Value> inputs, std::string* err=nullptr);
+
     ////////////////////////////////////////////////////////////////////////////
 
     /*
@@ -313,7 +333,6 @@ protected:
 
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
     Tree tree;
-    std::unique_ptr<Instance> instance;
     Library lib;
 
     /*  When locked, changes don't provoke evaluation
@@ -327,7 +346,7 @@ protected:
     Interpreter interpreter;
 
     /*  List of keys that need re-evaluation  */
-    std::list<CellKey> dirty;
+    std::stack<std::list<CellKey>> dirty;
 };
 
 }   // namespace Graph

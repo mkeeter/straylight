@@ -2,6 +2,12 @@
 
 namespace Graph {
 
+Root::Root()
+    : deps(*this), interpreter(*this, &deps)
+{
+    dirty.push({});
+}
+
 CellKey Root::toCellKey(const NameKey& k) const
 {
     auto sheet = getItem(k.first.back()).instance()->sheet;
@@ -436,29 +442,11 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             }
         }
 
-        {   // Pass all sheets through to the serializer
-            std::set<SheetIndex> sheets_above;
-            std::set<SheetIndex> sheets_direct;
-
-            // Walk through parents, accumulating sheets
-            for (const auto& v : env)
-            {
-                auto es = lib.childrenOf(getItem(v).instance()->sheet);
-                for (const auto& e : es)
-                {
-                    sheets_above.insert(e);
-                }
-            }
-            // Then record the direct sheets here
-            for (const auto& e : lib.childrenOf(sheet))
-            {
-                sheets_direct.insert(e);
-            }
-            for (const auto& e : sheets_above)
-            {
-                s->sheet(e, lib.nameOf(e), sheets_direct.count(e),
-                         tree.canInsertInstance(sheet, e));
-            }
+        // Pass all sheets through to the serializer
+        for (const auto& e : sheetsAbove(env))
+        {
+            s->sheet(e, lib.nameOf(e), lib.parentOf(e) == sheet,
+                     tree.canInsertInstance(sheet, e));
         }
     }
     s->pop();
@@ -649,7 +637,98 @@ void Root::clear()
         eraseSheet(s);
     }
 
-    assert(dirty.size() == 0);
+    assert(dirty.top().size() == 0);
+}
+
+std::map<std::string, Value> Root::callSheet(
+        const CellKey& caller, const SheetIndex& sheet,
+        const std::list<Value> inputs, std::string* err)
+{
+    auto p = itemParent(caller.second);
+    std::map<std::string, Value> out;
+
+    if (!tree.canInsertInstance(p, sheet))
+    {
+        if (err)
+        {
+            *err = "Recursive loop when calling sheet";
+            return out;
+        }
+    }
+
+    // Insert a temporary instance anchored to the parent sheet.
+    // We insert the instance manually here because calling insertInstance
+    // would create O(N^2) operations, as it would insert the instance into
+    // every instance of the parent sheet...
+    auto instance = tree.insertInstance(p, nextItemName(p), sheet);
+
+    // This is our temporary nested execution environment
+    auto env = caller.first;
+    env.push_back(instance);
+
+    // Prepare to iterate over cells, creating a nested dirty queue
+    dirty.push({});
+    auto itr = inputs.begin();
+
+    for (const auto& c : tree.cellsOf(sheet))
+    {
+        // If this is a top-level cell and is an input cell, then inject an
+        // value from the input list into the cell for the dummy env
+        if (c.first.empty() && getItem(c.second).cell()->type == Cell::INPUT)
+        {
+            if (itr == inputs.end())
+            {
+                if (err)
+                {
+                    *err = "Too few inputs";
+                    dirty.pop();
+                    tree.erase(instance);
+                    return out;
+                }
+            }
+            assert(itr->valid == true);
+            setValue({env, c.second}, *itr++);
+        }
+        else
+        {
+            markDirty(toNameKey({env, c.second}));
+        }
+    }
+
+    // Require that we have exactly the right number of inputs
+    if (itr != inputs.end())
+    {
+        if (err)
+        {
+            *err = "Too many inputs";
+            dirty.pop();
+            tree.erase(instance);
+            return out;
+        }
+    }
+
+    // Evaluation!
+    sync();
+    assert(dirty.top().size() == 0);
+    dirty.pop();
+
+    // Grab all inputs and outputs and put them in the output map
+    for (const auto& c : tree.cellsOf(sheet))
+    {
+        if (c.first.empty())
+        {
+            auto cell = getItem(c.second).cell();
+            if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
+            {
+                out.insert({tree.nameOf(c.second), cell->values.at(env)});
+            }
+        }
+    }
+
+    // ...and erase the temporary instance
+    tree.erase(instance);
+
+    return out;
 }
 
 bool Root::checkSheetName(const SheetIndex& parent,
@@ -727,6 +806,23 @@ void Root::eraseSheet(const SheetIndex& s)
     // Sync is called on lock destruction
 }
 
+std::list<SheetIndex> Root::sheetsAbove(const Env& env) const
+{
+    std::list<SheetIndex> out;
+
+    // Walk through parents, accumulating sheets
+    for (const auto& v : env)
+    {
+        auto es = lib.childrenOf(getItem(v).instance()->sheet);
+        for (const auto& e : es)
+        {
+            out.push_back(e);
+        }
+    }
+
+    return out;
+}
+
 bool Root::checkEnv(const Env& env) const
 {
     for (const auto& i : env)
@@ -746,6 +842,7 @@ void Root::markDirty(const NameKey& k)
     // exists, then push it to the dirty list directly
     if (checkEnv(k.first))
     {
+        assert(k.first.size() >= 1);
         auto sheet = getItem(k.first.back()).instance()->sheet;
         if (hasItem(sheet, k.second) &&
             getItem(sheet, k.second).cell())
@@ -764,11 +861,11 @@ void Root::markDirty(const NameKey& k)
 
 void Root::sync()
 {
-    while (!locked && dirty.size())
+    while (!locked && dirty.top().size())
     {
-        const auto k = dirty.front();
+        const auto k = dirty.top().front();
         auto result = interpreter.eval(k);
-        dirty.pop_front();
+        dirty.top().pop_front();
 
         if (result.value)
         {
@@ -783,12 +880,12 @@ void Root::sync()
 
 void Root::pushDirty(const CellKey& c)
 {
-    auto itr = std::find_if(dirty.begin(), dirty.end(),
+    auto itr = std::find_if(dirty.top().begin(), dirty.top().end(),
         [&](CellKey& o){ return deps.isUpstream(o, c); });
 
-    if (itr == dirty.end() || *itr != c)
+    if (itr == dirty.top().end() || *itr != c)
     {
-        dirty.insert(itr, c);
+        dirty.top().insert(itr, c);
     }
 }
 
