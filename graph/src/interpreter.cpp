@@ -150,9 +150,10 @@ struct SheetThunk
 
         std::string err;
         std::list<Value> args_;
+        auto sym = s7_make_symbol(sc, "value");
         for (auto a = args; a != s7_nil(sc); a = s7_cdr(a))
         {
-            args_.push_back(Value(s7_car(a), "", true));
+            args_.push_back(Value(s7_cons(sc, sym, s7_car(a)), "", true));
         }
         auto vals = out->root->callSheet(out->looker, out->target, args_, &err);
 
