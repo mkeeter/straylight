@@ -126,6 +126,57 @@ struct InstanceThunk {
 };
 int InstanceThunk::tag = -1;
 
+struct SheetResultThunk
+{
+    std::map<std::string, Value> values;
+
+    static void free(void* v)
+        { delete static_cast<SheetResultThunk*>(v); }
+
+    static char* print(s7_scheme* sc, void* v)
+    {
+        (void)sc;
+        return print_struct("sheet-result-thunk", v);
+    }
+
+    static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+    {
+        // Only one argument is allowed, and it must be a symbol
+        if (s7_list_length(sc, args) != 1)
+        {
+            return s7_wrong_number_of_args_error(sc,
+                    "sheet-result-thunk apply: wrong number of args: (~A)", args);
+        }
+        else if (!s7_is_symbol(s7_car(args)))
+        {
+            return s7_wrong_type_arg_error(sc, "sheet-result-thunk apply", 0,
+                    s7_car(args), "symbol");
+        }
+
+        auto out = static_cast<SheetResultThunk*>(
+                s7_object_value_checked(obj, tag));
+        assert(out);
+
+        // If the key isn't present, then fail immediately
+        auto key = s7_symbol_name(s7_car(args));
+        if (out->values.count(key) == 0)
+        {
+            return s7_error(sc, s7_make_symbol(sc, "missing-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Missing sheet lookup")));
+        }
+
+        // Otherwise, either return the value or throw an error
+        // (if the value is invalid)
+        auto& v = out->values.at(key);
+        return (s7_is_eqv(s7_car(v.value), s7_make_symbol(sc, "value")))
+            ? s7_cdr(v.value)
+            : s7_error(sc, s7_make_symbol(sc, "invalid-lookup"),
+                    s7_list(sc, 1, s7_make_string(sc, "Invalid lookup")));
+    }
+    static int tag;
+};
+int SheetResultThunk::tag = -1;
+
 struct SheetThunk
 {
     SheetIndex target;
@@ -156,14 +207,16 @@ struct SheetThunk
             args_.push_back(Value(s7_cons(sc, sym, s7_car(a)), "", true));
         }
         auto vals = out->root->callSheet(out->looker, out->target, args_, &err);
-
-        auto hash = s7_make_hash_table(sc, vals.size());
-        for (const auto& v : vals)
+        if (err.length() == 0)
         {
-            s7_hash_table_set(sc, hash,
-                    s7_make_symbol(sc, v.first.c_str()), v.second.value);
+            return s7_make_object(sc, SheetResultThunk::tag,
+                    new SheetResultThunk { vals });
         }
-        return hash;
+        else
+        {
+            return s7_error(sc, s7_make_symbol(sc, "call-sheet"),
+                    s7_list(sc, 1, s7_make_string(sc, err.c_str())));
+        }
     }
 };
 int SheetThunk::tag = -1;
@@ -277,6 +330,18 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
         nullptr,  /* equal */
         nullptr,  /* gc_mark */
         SheetThunk::apply,  /* apply */
+        nullptr,  /* set */
+        nullptr,  /* length */
+        nullptr,  /* copy */
+        nullptr,  /* reverse */
+        nullptr); /* fill */
+
+    SheetResultThunk::tag = s7_new_type_x(interpreter, "sheet-result-thunk",
+        SheetResultThunk::print,
+        SheetResultThunk::free,
+        nullptr,  /* equal */
+        nullptr,  /* gc_mark */
+        SheetResultThunk::apply,  /* apply */
         nullptr,  /* set */
         nullptr,  /* length */
         nullptr,  /* copy */
