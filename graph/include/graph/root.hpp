@@ -332,7 +332,6 @@ protected:
 
     /*  Here's all the data in the graph.  Our default sheet is lib[0] */
     Tree tree;
-    std::unique_ptr<Instance> instance;
     Library lib;
 
     /*  When locked, changes don't provoke evaluation

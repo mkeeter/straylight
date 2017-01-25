@@ -3,7 +3,7 @@
 namespace Graph {
 
 Root::Root()
-    : instance(new Instance(0)), deps(*this), interpreter(*this, &deps)
+    : deps(*this), interpreter(*this, &deps)
 {
     dirty.push({});
 }
