@@ -104,13 +104,14 @@ public:
     void serialize(TreeSerializer* s) const;
 
     /*
-     *  Exports the graph to any object implementing the FlatSerializer API
+     *  Encode the entire graph in JSON
+     *
      *  This is used to save files to disk with an appropriate encoder
      */
     std::string toString() const;
 
     /*
-     *  Deserializes from string or JSON
+     *  Deserializes from string (which should be JSON)
      *
      *  The existing graph is cleared.
      *  Returns an error string on failure or the empty string on success
