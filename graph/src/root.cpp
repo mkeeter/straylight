@@ -682,6 +682,7 @@ std::map<std::string, Value> Root::callSheet(
                 {
                     *err = "Too few inputs";
                     dirty.pop();
+                    tree.erase(instance);
                     return out;
                 }
             }
@@ -701,6 +702,7 @@ std::map<std::string, Value> Root::callSheet(
         {
             *err = "Too many inputs";
             dirty.pop();
+            tree.erase(instance);
             return out;
         }
     }
