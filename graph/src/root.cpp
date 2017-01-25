@@ -442,29 +442,11 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             }
         }
 
-        {   // Pass all sheets through to the serializer
-            std::set<SheetIndex> sheets_above;
-            std::set<SheetIndex> sheets_direct;
-
-            // Walk through parents, accumulating sheets
-            for (const auto& v : env)
-            {
-                auto es = lib.childrenOf(getItem(v).instance()->sheet);
-                for (const auto& e : es)
-                {
-                    sheets_above.insert(e);
-                }
-            }
-            // Then record the direct sheets here
-            for (const auto& e : lib.childrenOf(sheet))
-            {
-                sheets_direct.insert(e);
-            }
-            for (const auto& e : sheets_above)
-            {
-                s->sheet(e, lib.nameOf(e), sheets_direct.count(e),
-                         tree.canInsertInstance(sheet, e));
-            }
+        // Pass all sheets through to the serializer
+        for (const auto& e : sheetsAbove(env))
+        {
+            s->sheet(e, lib.nameOf(e), lib.parentOf(e) == sheet,
+                     tree.canInsertInstance(sheet, e));
         }
     }
     s->pop();
@@ -820,6 +802,23 @@ void Root::eraseSheet(const SheetIndex& s)
 
     lib.erase(s);
     // Sync is called on lock destruction
+}
+
+std::list<SheetIndex> Root::sheetsAbove(const Env& env) const
+{
+    std::list<SheetIndex> out;
+
+    // Walk through parents, accumulating sheets
+    for (const auto& v : env)
+    {
+        auto es = lib.childrenOf(getItem(v).instance()->sheet);
+        for (const auto& e : es)
+        {
+            out.push_back(e);
+        }
+    }
+
+    return out;
 }
 
 bool Root::checkEnv(const Env& env) const

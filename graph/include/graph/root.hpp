@@ -229,6 +229,15 @@ public:
     void eraseSheet(const SheetIndex& s);
 
     /*
+     *  Returns all of the sheets above (contained within) the given env
+     *
+     *  Note that this doesn't tell us whether we can insert an instance
+     *  of these sheets, as this could create a recursive loop; use
+     *  tree.canInsertInstance to check.
+     */
+    std::list<SheetIndex> sheetsAbove(const Env& e) const;
+
+    /*
      *  Temporarily builds up the given sheet, setting the given inputs
      *
      *  Returns the sheet's IO values (wrapped); sets *err if an error occurs
