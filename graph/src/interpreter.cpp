@@ -13,6 +13,18 @@ static bool set_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+static char* print_struct(std::string name, void* v)
+{
+    std::stringstream ss;
+    ss << "#<" << name << " at " << v << ">";
+    auto str = ss.str();
+
+    auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
+    memcpy(out, &str[0], str.length());
+    return out;
+}
+
 struct ValueThunk {
     NameKey target;
     ValuePtr value;
@@ -27,14 +39,7 @@ struct ValueThunk {
     static char* print(s7_scheme* sc, void* s)
     {
         (void)sc;
-
-        std::stringstream ss;
-        ss << "#<value-thunk at " << s << ">";
-        auto str = ss.str();
-
-        auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
-        memcpy(out, &str[0], str.length());
-        return out;
+        return print_struct("value-thunk", s);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -77,14 +82,7 @@ struct InstanceThunk {
     static char* print(s7_scheme* sc, void* v)
     {
         (void)sc;
-
-        std::stringstream ss;
-        ss << "#<instance-thunk at " << v << ">";
-        auto str = ss.str();
-
-        auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
-        memcpy(out, &str[0], str.length());
-        return out;
+        return print_struct("instance-thunk", v);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -127,6 +125,47 @@ struct InstanceThunk {
     }
 };
 int InstanceThunk::tag = -1;
+
+struct SheetThunk
+{
+    SheetIndex target;
+
+    CellKey looker;
+    Root* root;
+    static int tag;
+
+    static void free(void* v)
+        { delete static_cast<SheetThunk*>(v); }
+
+    static char* print(s7_scheme* sc, void* v)
+    {
+        (void)sc;
+        return print_struct("sheet-thunk", v);
+    }
+
+    static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
+    {
+        auto out = static_cast<SheetThunk*>(s7_object_value_checked(obj, tag));
+        assert(out);
+
+        std::string err;
+        std::list<Value> args_;
+        for (auto a = args; a != s7_nil(sc); a = s7_cdr(a))
+        {
+            args_.push_back(Value(s7_car(a), "", true));
+        }
+        auto vals = out->root->callSheet(out->looker, out->target, args_, &err);
+
+        auto hash = s7_make_hash_table(sc, vals.size());
+        for (const auto& v : vals)
+        {
+            s7_hash_table_set(sc, hash,
+                    s7_make_symbol(sc, v.first.c_str()), v.second.value);
+        }
+        return hash;
+    }
+};
+int SheetThunk::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
