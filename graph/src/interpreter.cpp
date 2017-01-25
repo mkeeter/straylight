@@ -169,7 +169,7 @@ int SheetThunk::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Interpreter::Interpreter(const Root& parent, Dependencies* deps)
+Interpreter::Interpreter(Root& parent, Dependencies* deps)
     : root(parent), deps(deps), interpreter(s7_init()),
       is_input(s7_eval_c_string(interpreter, R"(
         (lambda (str)
@@ -269,6 +269,18 @@ Interpreter::Interpreter(const Root& parent, Dependencies* deps)
         nullptr,  /* copy */
         nullptr,  /* reverse */
         nullptr); /* fill */
+
+    SheetThunk::tag = s7_new_type_x(interpreter, "sheet-thunk",
+        SheetThunk::print,
+        SheetThunk::free,
+        nullptr,  /* equal */
+        nullptr,  /* gc_mark */
+        SheetThunk::apply,  /* apply */
+        nullptr,  /* set */
+        nullptr,  /* length */
+        nullptr,  /* copy */
+        nullptr,  /* reverse */
+        nullptr); /* fill */
 }
 
 Interpreter::~Interpreter()
@@ -359,7 +371,15 @@ Value Interpreter::eval(const CellKey& key)
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(interpreter,
                     s7_make_symbol(interpreter, root.itemName(i).c_str()),
-                    s7_cons(interpreter, getThunk(env, i, key),
+                    s7_cons(interpreter, getItemThunk(env, i, key),
+                    bindings));
+        }
+
+        for (auto& i : root.sheetsAbove(env))
+        {
+            bindings = s7_cons(interpreter,
+                    s7_make_symbol(interpreter, root.sheetName(i).c_str()),
+                    s7_cons(interpreter, getSheetThunk(i, key),
                     bindings));
         }
 
@@ -425,13 +445,13 @@ ValuePtr Interpreter::untag(ValuePtr v)
     return s7_cdr(v);
 }
 
-s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
-                               const CellKey& looker)
+s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
+                                   const CellKey& looker)
 {
     const auto& item = root.getItem(index);
     if (auto cell = item.cell())
     {
-        // Construct a lookup thunk using value_thunk_factory
+        // Construct a lookup thunk and return it immediately
         return s7_make_object(interpreter, ValueThunk::tag, new ValueThunk {
             {env, root.itemName(index)},
             cell->values.count(env) ? cell->values.at(env).value
@@ -476,6 +496,14 @@ s7_cell* Interpreter::getThunk(const Env& env, const ItemIndex& index,
 
     assert(false); // Item index must be either a cell or an instance
     return s7_nil(interpreter);
+}
+
+s7_cell* Interpreter::getSheetThunk(const SheetIndex& index,
+                                    const CellKey& looker)
+{
+    return s7_make_object(interpreter, SheetThunk::tag, new SheetThunk {
+        index, looker, &root
+    });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
