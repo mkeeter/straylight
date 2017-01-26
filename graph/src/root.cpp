@@ -322,7 +322,22 @@ const Value& Root::getValue(const CellKey& cell) const
 std::string Root::loadString(const std::string& s)
 {
     clear();
-    return tree.fromString(s);
+    auto err = tree.fromString(s);
+    if (err.size())
+    {
+        clear();
+        return err;
+    }
+    else
+    {
+        for (const auto& c : tree.cellsOf(Tree::ROOT_SHEET))
+        {
+            pushDirty(c);
+        }
+        sync();
+
+        return "";
+    }
 }
 
 bool Root::checkItemName(const SheetIndex& parent,
