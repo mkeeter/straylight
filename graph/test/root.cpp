@@ -336,24 +336,52 @@ TEST_CASE("Root::callSheet (dependencies)")
         REQUIRE(val.valid == true);
     }
 
-    SECTION("Sheet input changes")
+    SECTION("Sheet input count changes")
     {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet 1)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
 
+        REQUIRE(val.valid == false);
+        r.insertCell(s, "a", "(input 15)");
+        REQUIRE(val.valid == true);
     }
 
     SECTION("Sheet is deleted")
     {
-
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        REQUIRE(val.valid == true);
+        r.eraseSheet(s);
+        REQUIRE(val.valid == false);
     }
 
     SECTION("Invalid recursion party")
     {
+        auto sa = r.insertSheet(Tree::ROOT_SHEET, "SheetA");
+        auto sb = r.insertSheet(Tree::ROOT_SHEET, "SheetB");
+        auto a = r.insertCell(sa, "a", "(SheetB)");
 
+        auto ia = r.insertInstance(Tree::ROOT_SHEET, "ia", sa);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, ia}, a}).valid == true);
+
+        auto b = r.insertCell(sb, "b", "(SheetB)");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, ia}, a}).valid == false);
     }
 
     SECTION("Sheet expression changes")
     {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "SheetB");
+        auto a = r.insertCell(s, "a", "(output 15)");
 
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "((Sheet) 'a)");
+
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        REQUIRE(val.valid == true);
+
+        r.setExpr(a, "(output uh-oh)");
+        REQUIRE(val.valid == false);
     }
 }
 
