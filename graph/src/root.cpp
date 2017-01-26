@@ -27,7 +27,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
-    getMutableItem(cell).cell()->type = interpreter.cellType(expr);
+    tree.at(cell).cell()->type = interpreter.cellType(expr);
 
     for (const auto& e : tree.envsOf(sheet))
     {
@@ -42,7 +42,7 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
                       const std::string& name, const std::string& expr)
 {
     tree.insertCell(sheet, cell, name, expr);
-    getMutableItem(cell).cell()->type = interpreter.cellType(expr);
+    tree.at(cell).cell()->type = interpreter.cellType(expr);
 
     for (const auto& e : tree.envsOf(sheet))
     {
@@ -78,7 +78,7 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
         {
             if (c->type == Cell::INPUT)
             {
-                getMutableItem(i).instance()->inputs[CellIndex(t.i)] =
+                tree.at(i).instance()->inputs[CellIndex(t.i)] =
                     interpreter.defaultExpr(c->expr);
             }
         }
@@ -114,7 +114,7 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
         {
             if (c->type == Cell::INPUT)
             {
-                getMutableItem(i).instance()->inputs[CellIndex(t.i)] =
+                tree.at(i).instance()->inputs[CellIndex(t.i)] =
                     interpreter.defaultExpr(c->expr);
             }
         }
@@ -149,7 +149,7 @@ void Root::eraseCell(const CellIndex& cell)
     {
         for (const auto& i : tree.instancesOf(sheet))
         {
-            getMutableItem(i).instance()->inputs.erase(cell);
+            tree.at(i).instance()->inputs.erase(cell);
         }
     }
     sync();
@@ -193,7 +193,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
             auto env_ = env;
             env_.insert(env_.end(), c.first.begin(), c.first.end());
 
-            auto cell = getMutableItem(c.second).cell();
+            auto cell = tree.at(c.second).cell();
             assert(cell != nullptr);
 
             // Release the allocated value, then erase by key
@@ -210,7 +210,8 @@ void Root::eraseInstance(const InstanceIndex& instance)
 
 bool Root::setExpr(const CellIndex& i, const std::string& expr)
 {
-    auto cell = getMutableItem(i).cell();
+    auto cell = tree.at(i).cell();
+    assert(cell);
 
     // Early exit if this is a no-op
     if (cell->expr == expr)
@@ -230,14 +231,14 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
         auto d = interpreter.defaultExpr(expr);
         for (auto instance : tree.instancesOf(tree.parentOf(i)))
         {
-            getMutableItem(instance).instance()->inputs[i] = d;
+            tree.at(instance).instance()->inputs[i] = d;
         }
     }
     else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
     {
         for (auto instance : tree.instancesOf(tree.parentOf(i)))
         {
-            getMutableItem(instance).instance()->inputs.erase(i);
+            tree.at(instance).instance()->inputs.erase(i);
         }
     }
 
@@ -274,7 +275,8 @@ bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
     assert(tree.at(cell).cell()->type == Cell::INPUT);
     assert(instance.i != 0);
 
-    auto i = getMutableItem(instance).instance();
+    auto i = tree.at(instance).instance();
+    assert(i);
     assert(i->inputs.find(cell) != i->inputs.end());
 
     if (i->inputs[cell] != expr)
@@ -297,7 +299,9 @@ bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
 
 void Root::setValue(const CellKey& cell, const Value& v)
 {
-    auto c = getMutableItem(cell.second).cell();
+    auto c = tree.at(cell.second).cell();
+    assert(c);
+
     if (c->values.count(cell.first))
     {
         interpreter.release(c->values.at(cell.first).value);

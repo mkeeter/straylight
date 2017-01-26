@@ -54,13 +54,13 @@ QString Bridge::checkSheetName(int parent_sheet, QString name) const
 
 QString Bridge::checkSheetRename(int sheet_index, QString name) const
 {
-    const auto& current_name = r.sheetName(sheet_index);
+    const auto& current_name = r.getTree().nameOf(sheet_index);
     if (current_name == name.toStdString())
     {
         return "";
     }
 
-    auto sheet = r.sheetParent(sheet_index);
+    auto sheet = r.getTree().parentOf(sheet_index);
     return checkSheetName(sheet.i, name);
 }
 
@@ -131,7 +131,8 @@ void Bridge::eraseInstance(int instance_index)
 
 int Bridge::sheetOf(int instance_index) const
 {
-    return r.instanceSheet(Graph::InstanceIndex(instance_index)).i;
+    return r.getTree().at(
+            Graph::InstanceIndex(instance_index)).instance()->sheet.i;
 }
 
 void Bridge::installHighlighter(QQuickTextDocument* doc)

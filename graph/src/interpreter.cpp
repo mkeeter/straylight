@@ -445,7 +445,7 @@ Value Interpreter::eval(const CellKey& key)
         for (auto& i : root.sheetsAbove(env))
         {
             bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, root.sheetName(i).c_str()),
+                    s7_make_symbol(interpreter, root.getTree().nameOf(i).c_str()),
                     s7_cons(interpreter, getSheetThunk(i, key),
                     bindings));
         }

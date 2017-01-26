@@ -118,12 +118,6 @@ public:
     std::string fromString(const std::string& str);
 
     /*
-     *  Look up the target sheet for an instance
-     */
-    SheetIndex instanceSheet(const InstanceIndex& item) const
-        { return tree.at(item).instance()->sheet; }
-
-    /*
      *  Removes all items from the graph
      */
     void clear();
@@ -145,32 +139,10 @@ public:
                      const std::string& name);
 
     /*
-     *  Looks up the parent sheet for a sheet
-     */
-    SheetIndex sheetParent(const SheetIndex& s) const
-        { return tree.parentOf(s); }
-
-    /*
-     *  Looks up the parent sheet for a sheet
-     */
-    const std::string& sheetName(const SheetIndex& s) const
-        { return tree.nameOf(s); }
-
-    /*
      *  Renames a sheet
      */
     void renameSheet(const SheetIndex& i, const std::string& name)
         { tree.rename(i, name); }
-
-    /*
-     *  Returns the next valid sheet name
-     *
-     *  Prefix must be initially uppercase and must produce valid
-     *  names when followed by numbers
-     */
-    std::string nextSheetName(const SheetIndex& sheet,
-                              const std::string& prefix="S") const
-        { return tree.nextName(sheet, prefix); }
 
     /*
      *  Erases a sheet and any instances thereof
@@ -233,12 +205,6 @@ protected:
      *  (if frozen is true, then this is a no-op)
      */
     void sync();
-
-    /*
-     *  Looks up an item by index (non-const version)
-     */
-    Item& getMutableItem(const ItemIndex& item)
-        { return tree.at(item); }
 
     ////////////////////////////////////////////////////////////////////////////
 
