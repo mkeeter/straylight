@@ -23,7 +23,7 @@ Tree::~Tree()
 void Tree::reset()
 {
     KeyNameStore::reset();
-    order.reset();
+    order.clear();
     storage.insert({ROOT_INSTANCE, Item(ROOT_SHEET)});
     storage.insert({ROOT_SHEET, Item()});
 }
