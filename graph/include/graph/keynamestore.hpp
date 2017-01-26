@@ -155,6 +155,15 @@ public:
         return names.right.at(i).first;
     }
 
+    /*
+     *  Erases all stored items
+     */
+    void reset()
+    {
+        storage.clear();
+        names.clear();
+    }
+
 protected:
     /*  Master storage for all items.  Indices are unique.  */
     std::map<StoredIndex, Stored> storage;

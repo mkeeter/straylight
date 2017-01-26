@@ -6,7 +6,11 @@
 #include "graph/env.hpp"
 #include "graph/keys.hpp"
 
+#include "picojson/picojson.h"
+
 namespace Graph {
+
+class TreeSerializer;
 
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
@@ -21,6 +25,12 @@ public:
      *  On destruction, free all items
      */
     ~Tree();
+
+    /*
+     *  Clears storage, then inserts a sheet with id ROOT_SHEET and instance
+     *  of that sheet with id ROOT_INSTANCE.
+     */
+    void reset();
 
     /*
      *  Insert a new cell with the given expression
@@ -73,7 +83,65 @@ public:
      */
     std::list<CellKey> cellsOf(const SheetIndex& s) const;
 
+    /*
+     *  Exports the graph to any object implementing the TreeSerializer API
+     *  This is commonly used to render into a UI in a immediate style
+     */
+    void serialize(TreeSerializer* s) const;
+
+    /*
+     *  Encode the entire graph in JSON
+     *
+     *  This is used to save files to disk with an appropriate encoder
+     */
+    std::string toString() const;
+
+    /*
+     *  Deserializes from string (which should be JSON)
+     *
+     *  The existing graph must contain only the root sheet and instance.
+     *  Returns an error string on failure or the empty string on success
+     */
+    std::string fromString(const std::string& str);
+
+    /*
+     *  Returns all of the sheets above (contained within) the given env
+     *
+     *  Note that this doesn't tell us whether we can insert an instance
+     *  of these sheets, as this could create a recursive loop; use
+     *  tree.canInsertInstance to check.
+     */
+    std::list<SheetIndex> sheetsAbove(const Env& e) const;
+
+    /*
+     *  Checks to see whether the given env is valid
+     *  (i.e. that every item in it exists and is an instance)
+     */
+    bool checkEnv(const Env& env) const;
+
+    const static SheetIndex ROOT_SHEET;
+    const static InstanceIndex ROOT_INSTANCE;
+
 protected:
+    /*
+     *  Exports the graph to any object implementing the TreeSerializer API
+     */
+    void serialize(TreeSerializer* s, const Env& env) const;
+
+    /*
+     *  Export the given sheet to JSON (recursively)
+     */
+    picojson::value toJson(SheetIndex sheet) const;
+
+    /*
+     *  Deserializes a particular sheet (recursively)
+     *
+     *  Returns an error string on error, empty string otherwise
+     */
+    std::string fromJson(SheetIndex sheet, const picojson::value& value);
+
+    ////////////////////////////////////////////////////////////////////////////
+
     /*
      *  Rendering order for items in a given sheet
      */

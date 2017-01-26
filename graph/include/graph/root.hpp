@@ -2,17 +2,13 @@
 
 #include <stack>
 
-#include "graph/library.hpp"
 #include "graph/cell.hpp"
 #include "graph/item.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
-#include "graph/serializer.hpp"
 #include "graph/keys.hpp"
 #include "graph/tree.hpp"
-
-#include "picojson/picojson.h"
 
 namespace Graph {
 
@@ -98,87 +94,9 @@ public:
     void renameItem(const ItemIndex& i, const std::string& name);
 
     /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     *  This is commonly used to render into a UI in a immediate style
-     */
-    void serialize(TreeSerializer* s) const;
-
-    /*
-     *  Encode the entire graph in JSON
-     *
-     *  This is used to save files to disk with an appropriate encoder
-     */
-    std::string toString() const;
-
-    /*
-     *  Deserializes from string (which should be JSON)
-     *
-     *  The existing graph is cleared.
-     *  Returns an error string on failure or the empty string on success
-     */
-    std::string fromString(const std::string& str);
-
-    /*
-     *  Look up the target sheet for an instance
-     */
-    SheetIndex instanceSheet(const InstanceIndex& item) const
-        { return getItem(item).instance()->sheet; }
-
-    /*
      *  Removes all items from the graph
      */
     void clear();
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Forwarding functions from stored Tree
-
-    /*
-     *  Looks up an item by index
-     */
-    const Item& getItem(const ItemIndex& item) const
-        { return tree.at(item); }
-
-    /*
-     *  Looks up the name of an item
-     */
-    const std::string& itemName(const ItemIndex& item) const
-        { return tree.nameOf(item); }
-
-    /*
-     *  Check to see whether the given sheet has a particular item
-     */
-    bool hasItem(const SheetIndex& sheet, const std::string& name) const
-        {   return tree.hasItem(sheet, name); }
-
-    /*
-     *  Looks up an item by name
-     */
-    const Item& getItem(const SheetIndex& sheet, const std::string& name) const
-        {   return tree.at(sheet, name); }
-
-    /*
-     *  Iterate over items belonging to a particular sheet
-     */
-    const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
-        { return tree.iterItems(parent); }
-
-    /*
-     *  Looks up the parent sheet for an item
-     */
-    SheetIndex itemParent(const ItemIndex& item) const
-        { return tree.parentOf(item); }
-
-    /*
-     *  Returns the next available item name
-     *
-     *  Prefix must be initially lowercase and must produce valid
-     *  names when followed by numbers
-     */
-    std::string nextItemName(const SheetIndex& sheet,
-                             const std::string& prefix="i") const
-        { return tree.nextName(sheet, prefix); }
-
-    ////////////////////////////////////////////////////////////////////////////
 
     /*
      *  Checks to see whether the given sheet name is valid
@@ -197,46 +115,15 @@ public:
                      const std::string& name);
 
     /*
-     *  Looks up the parent sheet for a sheet
-     */
-    SheetIndex sheetParent(const SheetIndex& s) const
-        { return lib.parentOf(s); }
-
-    /*
-     *  Looks up the parent sheet for a sheet
-     */
-    const std::string& sheetName(const SheetIndex& s) const
-        { return lib.nameOf(s); }
-
-    /*
      *  Renames a sheet
      */
     void renameSheet(const SheetIndex& i, const std::string& name)
-        { lib.rename(i, name); }
-
-    /*
-     *  Returns the next valid sheet name
-     *
-     *  Prefix must be initially uppercase and must produce valid
-     *  names when followed by numbers
-     */
-    std::string nextSheetName(const SheetIndex& sheet,
-                              const std::string& prefix="S") const
-        { return lib.nextName(sheet, prefix); }
+        { tree.rename(i, name); }
 
     /*
      *  Erases a sheet and any instances thereof
      */
     void eraseSheet(const SheetIndex& s);
-
-    /*
-     *  Returns all of the sheets above (contained within) the given env
-     *
-     *  Note that this doesn't tell us whether we can insert an instance
-     *  of these sheets, as this could create a recursive loop; use
-     *  tree.canInsertInstance to check.
-     */
-    std::list<SheetIndex> sheetsAbove(const Env& e) const;
 
     /*
      *  Temporarily builds up the given sheet, setting the given inputs
@@ -246,6 +133,16 @@ public:
     std::map<std::string, Value> callSheet(
             const CellKey& caller, const SheetIndex& sheet,
             const std::list<Value> inputs, std::string* err=nullptr);
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    /*
+     *  Clears the graph and loads the given string
+     *
+     *  Returns an error string if there was an error, or empty string
+     *  on success.
+     */
+    std::string loadString(const std::string& s);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -276,6 +173,9 @@ public:
     };
     Lock_ Lock() { return Lock_(this); }
 
+    /*  Get const reference to our internally mutable tree */
+    const Tree& getTree() const { return tree; }
+
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -283,19 +183,7 @@ protected:
      */
     void sync();
 
-    /*
-     *  Looks up an item by index (non-const version)
-     */
-    Item& getMutableItem(const ItemIndex& item)
-        { return tree.at(item); }
-
     ////////////////////////////////////////////////////////////////////////////
-
-    /*
-     *  Checks to see whether the given env is valid
-     *  (i.e. that every item in it exists and is an instance)
-     */
-    bool checkEnv(const Env& env) const;
 
     /*
      *  Mark a particular key as dirty (if it exists); otherwise, marks
@@ -312,28 +200,8 @@ protected:
 
     ////////////////////////////////////////////////////////////////////////////
 
-    /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     */
-    void serialize(TreeSerializer* s, const Env& env) const;
-
-    /*
-     *  Export the given sheet to JSON (recursively)
-     */
-    picojson::value toJson(SheetIndex sheet) const;
-
-    /*
-     *  Deserializes a particular sheet (recursively)
-     *
-     *  Returns an error string on error, empty string otherwise
-     */
-    std::string fromJson(SheetIndex sheet, const picojson::value& value);
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    /*  Here's all the data in the graph.  Our default sheet is lib[0] */
+    /*  Here's all the data in the graph.  */
     Tree tree;
-    Library lib;
 
     /*  When locked, changes don't provoke evaluation
      *  (though the dirty list is still populated)  */

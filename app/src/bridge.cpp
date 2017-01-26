@@ -27,13 +27,13 @@ QString Bridge::checkItemName(int sheet_index, QString name) const
 
 QString Bridge::checkItemRename(int item_index, QString name) const
 {
-    const auto& current_name = r.itemName(item_index);
+    const auto& current_name = r.getTree().nameOf(item_index);
     if (current_name == name.toStdString())
     {
         return "";
     }
 
-    auto sheet = r.itemParent(item_index);
+    auto sheet = r.getTree().parentOf(item_index);
     return checkItemName(sheet.i, name);
 }
 
@@ -54,13 +54,13 @@ QString Bridge::checkSheetName(int parent_sheet, QString name) const
 
 QString Bridge::checkSheetRename(int sheet_index, QString name) const
 {
-    const auto& current_name = r.sheetName(sheet_index);
+    const auto& current_name = r.getTree().nameOf(sheet_index);
     if (current_name == name.toStdString())
     {
         return "";
     }
 
-    auto sheet = r.sheetParent(sheet_index);
+    auto sheet = r.getTree().parentOf(sheet_index);
     return checkSheetName(sheet.i, name);
 }
 
@@ -131,7 +131,8 @@ void Bridge::eraseInstance(int instance_index)
 
 int Bridge::sheetOf(int instance_index) const
 {
-    return r.instanceSheet(Graph::InstanceIndex(instance_index)).i;
+    return r.getTree().at(
+            Graph::InstanceIndex(instance_index)).instance()->sheet.i;
 }
 
 void Bridge::installHighlighter(QQuickTextDocument* doc)
@@ -152,7 +153,7 @@ QString Bridge::saveFile(QUrl filename)
         return file.errorString();
     }
 
-    auto str = r.toString();
+    auto str = r.getTree().toString();
     file.write(str.data(), str.size());
     return "";
 }
@@ -166,7 +167,7 @@ QString Bridge::loadFile(QUrl filename)
     }
 
     auto str = file.readAll();
-    auto out = QString::fromStdString(r.fromString(str.toStdString()));
+    auto out = QString::fromStdString(r.loadString(str.toStdString()));
     sync();
     return out;
 }
@@ -180,13 +181,13 @@ void Bridge::clearFile()
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextItemName(Graph::SheetIndex(sheet_index), "i"));
+            r.getTree().nextName(Graph::SheetIndex(sheet_index), "i"));
 }
 
 QString Bridge::nextSheetName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextSheetName(Graph::SheetIndex(sheet_index), "S"));
+            r.getTree().nextName(Graph::SheetIndex(sheet_index), "S"));
 }
 
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
@@ -227,7 +228,7 @@ Graph::Root* Bridge::root()
 void Bridge::sync()
 {
     assert(QObject::thread() == QThread::currentThread());
-    r.serialize(&bts);
+    r.getTree().serialize(&bts);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

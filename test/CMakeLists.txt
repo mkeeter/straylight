@@ -16,7 +16,6 @@ add_executable(straylight-test main.cpp
     ../graph/test/dependencies.cpp
     ../graph/test/interpreter.cpp
     ../graph/test/item.cpp
-    ../graph/test/library.cpp
     ../graph/test/root.cpp
     ../graph/test/tree.cpp
 )

@@ -40,6 +40,8 @@ struct ItemIndex : public Index<ItemIndex_>
     ItemIndex(unsigned i) : Index(i) {}
     ItemIndex(const CellIndex& j) : Index(j.i) {}
     ItemIndex(const InstanceIndex& j) : Index(j.i) {}
+    ItemIndex(const SheetIndex& j) : Index(j.i) {}
+
     bool operator<(const ItemIndex& other) const {
         return i < other.i;
     }
