@@ -89,6 +89,11 @@ public:
                        const std::string& name, std::string* err=nullptr) const;
 
     /*
+     *  Checks whether the given string is a valid item name
+     */
+    bool isItemName(const std::string& name, std::string* err=nullptr) const;
+
+    /*
      *  Renames an item, resynching anything that looked for it
      */
     void renameItem(const ItemIndex& i, const std::string& name);
@@ -105,6 +110,11 @@ public:
      */
     bool checkSheetName(const SheetIndex& parent,
                         const std::string& name, std::string* err=nullptr) const;
+
+    /*
+     *  Checks whether the given string is a valid sheet name
+     */
+    bool isSheetName(const std::string& name, std::string* err=nullptr) const;
 
     bool canInsertSheet(const SheetIndex& parent,
                         const std::string& name) const

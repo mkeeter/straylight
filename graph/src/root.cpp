@@ -341,9 +341,7 @@ std::string Root::loadString(const std::string& s)
     }
 }
 
-bool Root::checkItemName(const SheetIndex& parent,
-                         const std::string& name,
-                         std::string* err) const
+bool Root::isItemName(const std::string& name, std::string* err) const
 {
     if (name.size() == 0)
     {
@@ -358,14 +356,6 @@ bool Root::checkItemName(const SheetIndex& parent,
         if (err)
         {
             *err = "Name must begin with a lowercase letter";
-        }
-        return false;
-    }
-    else if (!tree.canInsert(parent, name))
-    {
-        if (err)
-        {
-            *err = "Duplicate name";
         }
         return false;
     }
@@ -387,6 +377,22 @@ bool Root::checkItemName(const SheetIndex& parent,
     }
 
     return true;
+}
+
+bool Root::checkItemName(const SheetIndex& parent,
+                         const std::string& name,
+                         std::string* err) const
+{
+    if (!tree.canInsert(parent, name))
+    {
+        if (err)
+        {
+            *err = "Duplicate name";
+        }
+        return false;
+    }
+
+    return isItemName(name, err);;
 }
 
 void Root::renameItem(const ItemIndex& i, const std::string& name)
@@ -515,9 +521,7 @@ std::map<std::string, Value> Root::callSheet(
     return out;
 }
 
-bool Root::checkSheetName(const SheetIndex& parent,
-                          const std::string& name,
-                          std::string* err) const
+bool Root::isSheetName(const std::string& name, std::string* err) const
 {
     if (name.size() == 0)
     {
@@ -535,7 +539,14 @@ bool Root::checkSheetName(const SheetIndex& parent,
         }
         return false;
     }
-    else if (!tree.canInsert(parent, name))
+    return true;
+}
+
+bool Root::checkSheetName(const SheetIndex& parent,
+                          const std::string& name,
+                          std::string* err) const
+{
+    if (!tree.canInsert(parent, name))
     {
         if (err)
         {
@@ -544,13 +555,20 @@ bool Root::checkSheetName(const SheetIndex& parent,
         return false;
     }
 
-    return true;
+    return isSheetName(name, err);;
 }
 
 SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
     assert(canInsertSheet(parent, name));
-    return SheetIndex(tree.insert(parent, name, Item()));
+    auto s = SheetIndex(tree.insert(parent, name, Item()));
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+    }
+    sync();
+    return s;
 }
 
 void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
@@ -558,6 +576,12 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
 {
     assert(canInsertSheet(parent, name));
     tree.insert(parent, sheet, name, Item());
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+    }
+    sync();
 }
 
 void Root::eraseSheet(const SheetIndex& s)

@@ -467,9 +467,23 @@ Value Interpreter::eval(const CellKey& key)
         if (s7_is_eqv(s7_car(value),
                       s7_make_symbol(interpreter, "unbound-var")))
         {
-            auto target = s7_object_to_c_string(interpreter, s7_caddr(value));
-            deps->insert(key, {env, std::string(target)});
-            free(target);
+            auto target_ = s7_object_to_c_string(interpreter, s7_caddr(value));
+            std::string target(target_);
+            free(target_);
+
+            if (root.isItemName(target))
+            {
+                deps->insert(key, {env, std::string(target)});
+            }
+            else if (root.isSheetName(target))
+            {
+                Env env_;
+                for (const auto& e : env)
+                {
+                    env_.push_back(e);
+                    deps->insert(key, {env_, std::string(target)});
+                }
+            }
         }
     }
 
