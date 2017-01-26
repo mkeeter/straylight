@@ -181,12 +181,16 @@ void Root::eraseInstance(const InstanceIndex& instance)
         // Mark the instance itself as dirty
         markDirty({env, name});
 
-        // Then mark all outputs as dirty
+        // Then mark all outputs as dirty, so that anything watching
+        // then will also be triggered to re-evaluate itself
         env.push_back(instance);
         for (const auto& o : outputs)
         {
             markDirty({env, o});
         }
+
+        // Finally, clean up all of the cell values so they're not left
+        // floating around.
         for (const auto& c : cells)
         {
             // Make a new cell key with the nested environment

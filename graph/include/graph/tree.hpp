@@ -93,7 +93,7 @@ public:
     /*
      *  Deserializes from string (which should be JSON)
      *
-     *  The existing graph is cleared.
+     *  The existing graph must contain only the root sheet and instance.
      *  Returns an error string on failure or the empty string on success
      */
     std::string fromString(const std::string& str);
