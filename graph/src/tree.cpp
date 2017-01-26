@@ -195,7 +195,6 @@ void Tree::serialize(TreeSerializer* s, const Env& env) const
                 InstanceIndex index(i.i);
                 s->instance(index, name, nameOf(n->sheet));
 
-                // TODO: draw inputs and outputs here
                 auto env_ = env;
                 env_.push_back(index);
 
