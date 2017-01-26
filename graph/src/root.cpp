@@ -26,7 +26,15 @@ NameKey Root::toNameKey(const CellKey& k) const
 CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
-    auto cell = tree.insertCell(sheet, name, expr);
+    auto cell = CellIndex(tree.nextIndex());
+    insertCell(sheet, cell, name, expr);
+    return cell;
+}
+
+void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
+                      const std::string& name, const std::string& expr)
+{
+    tree.insertCell(sheet, name, expr);
     auto type = interpreter.cellType(expr);
     tree.at(cell).cell()->type = type;
 
@@ -54,21 +62,6 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
         markDirty({{}, ss.str()});
     }
 
-    sync();
-
-    return cell;
-}
-
-void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
-                      const std::string& name, const std::string& expr)
-{
-    tree.insertCell(sheet, cell, name, expr);
-    tree.at(cell).cell()->type = interpreter.cellType(expr);
-
-    for (const auto& e : tree.envsOf(sheet))
-    {
-        markDirty({e, name});
-    }
     sync();
 }
 
