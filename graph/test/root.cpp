@@ -323,6 +323,40 @@ TEST_CASE("Root::callSheet")
     }
 }
 
+TEST_CASE("Root::callSheet (dependencies)")
+{
+    Root r;
+
+    SECTION("Sheet is created")
+    {
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        REQUIRE(val.valid == false);
+        r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        REQUIRE(val.valid == true);
+    }
+
+    SECTION("Sheet input changes")
+    {
+
+    }
+
+    SECTION("Sheet is deleted")
+    {
+
+    }
+
+    SECTION("Invalid recursion party")
+    {
+
+    }
+
+    SECTION("Sheet expression changes")
+    {
+
+    }
+}
+
 TEST_CASE("Root::insertInstance")
 {
     Root r;
