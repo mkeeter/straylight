@@ -27,6 +27,12 @@ public:
     ~Tree();
 
     /*
+     *  Clears storage, then inserts a sheet with id ROOT_SHEET and instance
+     *  of that sheet with id ROOT_INSTANCE.
+     */
+    void reset();
+
+    /*
      *  Insert a new cell with the given expression
      */
     CellIndex insertCell(const SheetIndex& parent, const std::string& name,

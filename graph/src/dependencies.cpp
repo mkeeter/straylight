@@ -3,6 +3,13 @@
 
 namespace Graph {
 
+void Dependencies::reset()
+{
+    forward.clear();
+    inverse.clear();
+    upstream.clear();
+}
+
 int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
 {
     forward[looker].insert(lookee);

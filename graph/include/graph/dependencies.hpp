@@ -15,6 +15,11 @@ public:
     Dependencies(const Root& parent) : root(parent) {}
 
     /*
+     *  Resets all stored dependencies
+     */
+    void reset();
+
+    /*
      *  Insert a lookup
      *  Returns 1 if the lookup is recursive, 0 otherwise
      */

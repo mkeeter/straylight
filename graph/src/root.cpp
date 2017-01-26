@@ -420,28 +420,8 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
 void Root::clear()
 {
-    auto lock = Lock();
-
-    // Erase every item in the root sheet
-    const auto items = tree.iterItems(Tree::ROOT_SHEET);
-    for (auto i : items)
-    {
-        if (tree.at(i).instance())
-        {
-            eraseInstance(InstanceIndex(i));
-        }
-        else if (tree.at(i).cell())
-        {
-            eraseCell(CellIndex(i));
-        }
-        else if (tree.at(i).sheet())
-        {
-            eraseSheet(SheetIndex(i));
-        }
-    }
-    // TODO: could we use eraseSheet here directly?
-
-    assert(dirty.top().size() == 0);
+    tree.reset();
+    deps.reset();
 }
 
 std::map<std::string, Value> Root::callSheet(
@@ -591,7 +571,11 @@ void Root::eraseSheet(const SheetIndex& s)
 
     for (const auto& c : tree.childrenOf(s))
     {
-        if (tree.at(c).cell())
+        if (!tree.isValid(c))
+        {
+            // Already got erased, e.g. an instance whose sheet was erased
+        }
+        else if (tree.at(c).cell())
         {
             eraseCell(CellIndex(c));
         }

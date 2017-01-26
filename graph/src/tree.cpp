@@ -9,8 +9,7 @@ const InstanceIndex Tree::ROOT_INSTANCE = 1;
 
 Tree::Tree()
 {
-    storage.insert({ROOT_INSTANCE, Item(ROOT_SHEET)});
-    storage.insert({ROOT_SHEET, Item()});
+    reset();
 }
 
 Tree::~Tree()
@@ -19,6 +18,14 @@ Tree::~Tree()
     {
         i.second.dealloc();
     }
+}
+
+void Tree::reset()
+{
+    KeyNameStore::reset();
+    order.reset();
+    storage.insert({ROOT_INSTANCE, Item(ROOT_SHEET)});
+    storage.insert({ROOT_SHEET, Item()});
 }
 
 /*

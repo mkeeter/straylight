@@ -476,7 +476,7 @@ TEST_CASE("Root::clear")
         REQUIRE(true /* didn't crash */);
     }
 
-    SECTION("Clear")
+    SECTION("With sheets")
     {
         auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
         auto a = r.insertCell(s, "a", "15");
