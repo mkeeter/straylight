@@ -297,7 +297,7 @@ TEST_CASE("Root::callSheet")
 
         // Get a value from c (this is just a way to get a value interpreter
         // ValuePtr without jumping through many hoops)
-        auto val = r.getItem(c).cell()->values.at({Tree::ROOT_INSTANCE});
+        auto val = r.getTree().at(c).cell()->values.at({Tree::ROOT_INSTANCE});
 
         std::string err;
         auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
@@ -313,7 +313,7 @@ TEST_CASE("Root::callSheet")
         r.insertCell(sum, "out", "(output (+ (in) 15))");
 
         std::string err;
-        auto val = r.getItem(c).cell()->values.at({Tree::ROOT_INSTANCE});
+        auto val = r.getTree().at(c).cell()->values.at({Tree::ROOT_INSTANCE});
         auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
 
         REQUIRE(err == "");
@@ -430,15 +430,15 @@ TEST_CASE("Root::eraseInstance")
     SECTION("Cleaning of values")
     {
         auto a = r.insertCell(sum, "a", " 12");
-        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+        REQUIRE(r.getTree().at(a).cell()->values.size() == 0);
 
         // Insert an instance; one value should be created
         auto i = r.insertInstance(0, "instance", sum);
-        REQUIRE(r.getItem(a).cell()->values.size() == 1);
+        REQUIRE(r.getTree().at(a).cell()->values.size() == 1);
 
         // After erasing the instance, that values should be cleaned up
         r.eraseInstance(i);
-        REQUIRE(r.getItem(a).cell()->values.size() == 0);
+        REQUIRE(r.getTree().at(a).cell()->values.size() == 0);
     }
 
     SECTION("Cleaning of dependency list")

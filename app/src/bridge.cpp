@@ -27,13 +27,13 @@ QString Bridge::checkItemName(int sheet_index, QString name) const
 
 QString Bridge::checkItemRename(int item_index, QString name) const
 {
-    const auto& current_name = r.itemName(item_index);
+    const auto& current_name = r.getTree().nameOf(item_index);
     if (current_name == name.toStdString())
     {
         return "";
     }
 
-    auto sheet = r.itemParent(item_index);
+    auto sheet = r.getTree().parentOf(item_index);
     return checkItemName(sheet.i, name);
 }
 
@@ -180,13 +180,13 @@ void Bridge::clearFile()
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextItemName(Graph::SheetIndex(sheet_index), "i"));
+            r.getTree().nextName(Graph::SheetIndex(sheet_index), "i"));
 }
 
 QString Bridge::nextSheetName(int sheet_index) const
 {
     return QString::fromStdString(
-            r.nextSheetName(Graph::SheetIndex(sheet_index), "S"));
+            r.getTree().nextName(Graph::SheetIndex(sheet_index), "S"));
 }
 
 QObject* Bridge::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)

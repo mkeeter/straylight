@@ -121,63 +121,12 @@ public:
      *  Look up the target sheet for an instance
      */
     SheetIndex instanceSheet(const InstanceIndex& item) const
-        { return getItem(item).instance()->sheet; }
+        { return tree.at(item).instance()->sheet; }
 
     /*
      *  Removes all items from the graph
      */
     void clear();
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Forwarding functions from stored Tree
-
-    /*
-     *  Looks up an item by index
-     */
-    const Item& getItem(const ItemIndex& item) const
-        { return tree.at(item); }
-
-    /*
-     *  Looks up the name of an item
-     */
-    const std::string& itemName(const ItemIndex& item) const
-        { return tree.nameOf(item); }
-
-    /*
-     *  Check to see whether the given sheet has a particular item
-     */
-    bool hasItem(const SheetIndex& sheet, const std::string& name) const
-        {   return tree.hasItem(sheet, name); }
-
-    /*
-     *  Looks up an item by name
-     */
-    const Item& getItem(const SheetIndex& sheet, const std::string& name) const
-        {   return tree.at(sheet, name); }
-
-    /*
-     *  Iterate over items belonging to a particular sheet
-     */
-    const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const
-        { return tree.iterItems(parent); }
-
-    /*
-     *  Looks up the parent sheet for an item
-     */
-    SheetIndex itemParent(const ItemIndex& item) const
-        { return tree.parentOf(item); }
-
-    /*
-     *  Returns the next available item name
-     *
-     *  Prefix must be initially lowercase and must produce valid
-     *  names when followed by numbers
-     */
-    std::string nextItemName(const SheetIndex& sheet,
-                             const std::string& prefix="i") const
-        { return tree.nextName(sheet, prefix); }
-
-    ////////////////////////////////////////////////////////////////////////////
 
     /*
      *  Checks to see whether the given sheet name is valid
@@ -275,6 +224,9 @@ public:
     };
     Lock_ Lock() { return Lock_(this); }
 
+    /*  Get const reference to our internally mutable tree */
+    const Tree& getTree() const { return tree; }
+
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -331,6 +283,8 @@ protected:
     ////////////////////////////////////////////////////////////////////////////
 
     /*  Here's all the data in the graph.  */
+    /*  This is our mutable tree; we also define a const reference to it
+     *  named tree that is accessible for others to read */
     Tree tree;
 
     /*  When locked, changes don't provoke evaluation

@@ -10,10 +10,10 @@ Root::Root()
 
 CellKey Root::toCellKey(const NameKey& k) const
 {
-    auto sheet = getItem(k.first.back()).instance()->sheet;
+    auto sheet = tree.at(k.first.back()).instance()->sheet;
     auto i = tree.indexOf(sheet, k.second);
 
-    assert(getItem(i).cell());
+    assert(tree.at(i).cell());
 
     return {k.first, CellIndex(i)};
 }
@@ -67,14 +67,14 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
             auto env = e; // copy
             env.push_back(i);
             env.insert(e.end(), c.first.begin(), c.first.end());
-            markDirty({env, itemName(c.second)});
+            markDirty({env, tree.nameOf(c.second)});
         }
     }
 
     // Assign default expressions for inputs
-    for (const auto& t : iterItems(target))
+    for (const auto& t : tree.iterItems(target))
     {
-        if (auto c = getItem(t).cell())
+        if (auto c = tree.at(t).cell())
         {
             if (c->type == Cell::INPUT)
             {
@@ -103,14 +103,14 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
             auto env = e; // copy
             env.push_back(i);
             env.insert(e.end(), c.first.begin(), c.first.end());
-            markDirty({env, itemName(c.second)});
+            markDirty({env, tree.nameOf(c.second)});
         }
     }
 
     // Assign default expressions for inputs
-    for (const auto& t : iterItems(target))
+    for (const auto& t : tree.iterItems(target))
     {
-        if (auto c = getItem(t).cell())
+        if (auto c = tree.at(t).cell())
         {
             if (c->type == Cell::INPUT)
             {
@@ -127,10 +127,10 @@ void Root::eraseCell(const CellIndex& cell)
 {
     auto sheet = tree.parentOf(cell);
     auto name = tree.nameOf(cell);
-    bool was_input = getItem(cell).cell()->type == Cell::INPUT;
+    bool was_input = tree.at(cell).cell()->type == Cell::INPUT;
 
     // Release all interpreter-allocated values
-    for (const auto& v : getItem(cell).cell()->values)
+    for (const auto& v : tree.at(cell).cell()->values)
     {
         interpreter.release(v.second.value);
     }
@@ -160,11 +160,11 @@ void Root::eraseInstance(const InstanceIndex& instance)
     // Find all output cells in this instance
     std::set<std::string> outputs;
 
-    auto sheet = getItem(instance).instance()->sheet;
+    auto sheet = tree.at(instance).instance()->sheet;
     auto cells = tree.cellsOf(sheet);
-    for (auto i : iterItems(sheet))
+    for (auto i : tree.iterItems(sheet))
     {
-        if (auto cell = getItem(i).cell())
+        if (auto cell = tree.at(i).cell())
         {
             if (cell->type == Cell::OUTPUT)
             {
@@ -271,7 +271,7 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
 bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
                     const std::string& expr)
 {
-    assert(getItem(cell).cell()->type == Cell::INPUT);
+    assert(tree.at(cell).cell()->type == Cell::INPUT);
     assert(instance.i != 0);
 
     auto i = getMutableItem(instance).instance();
@@ -308,7 +308,7 @@ void Root::setValue(const CellKey& cell, const Value& v)
 
 const Value& Root::getValue(const CellKey& cell) const
 {
-    return getItem(cell.second).cell()->values.at(cell.first);
+    return tree.at(cell.second).cell()->values.at(cell.first);
 }
 
 bool Root::checkItemName(const SheetIndex& parent,
@@ -371,7 +371,7 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
     tree.rename(i, name);
 
-    for (const auto& env : tree.envsOf(itemParent(i)))
+    for (const auto& env : tree.envsOf(tree.parentOf(i)))
     {
         // Mark the old name as dirty
         // (which propagates to anything that looked it up)
@@ -395,15 +395,15 @@ void Root::serialize(TreeSerializer* s) const
 void Root::serialize(TreeSerializer* s, const Env& env) const
 {
     auto instance = env.back();
-    auto sheet = getItem(instance).instance()->sheet;
+    auto sheet = tree.at(instance).instance()->sheet;
 
     if (s->push(instance.i, instance.i ? tree.nameOf(instance) : "",
                 sheet.i ? tree.nameOf(sheet) : ""))
     {
-        for (auto i : iterItems(sheet))
+        for (auto i : tree.iterItems(sheet))
         {
             const auto& name = tree.nameOf(i);
-            const auto& item = getItem(i);
+            const auto& item = tree.at(i);
 
             if (auto c = item.cell())
             {
@@ -420,20 +420,20 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
                 auto env_ = env;
                 env_.push_back(index);
 
-                for (auto item : iterItems(n->sheet))
+                for (auto item : tree.iterItems(n->sheet))
                 {
-                    if (auto c = getItem(item).cell())
+                    if (auto c = tree.at(item).cell())
                     {
                         const auto& v = c->values.at(env_);
                         if (c->type == Cell::INPUT)
                         {
-                            s->input(CellIndex(item), itemName(item),
+                            s->input(CellIndex(item), tree.nameOf(item),
                                      n->inputs.at(CellIndex(item)),
                                      v.valid, v.str);
                         }
                         else if (c->type == Cell::OUTPUT)
                         {
-                            s->output(CellIndex(item), itemName(item),
+                            s->output(CellIndex(item), tree.nameOf(item),
                                       v.valid, v.str);
                         }
                     }
@@ -469,13 +469,13 @@ picojson::value Root::toJson(SheetIndex sheet) const
     picojson::value::array items;
     picojson::value::array sheets;
 
-    for (auto i : iterItems(sheet))
+    for (auto i : tree.iterItems(sheet))
     {
         picojson::value::object obj;
         obj.insert({"itemIndex", picojson::value((int64_t)i.i)});
         obj.insert({"itemName", picojson::value(tree.nameOf(i))});
 
-        if (auto n = getItem(i).instance())
+        if (auto n = tree.at(i).instance())
         {
             obj.insert({"type", picojson::value("instance")});
             obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
@@ -489,12 +489,12 @@ picojson::value Root::toJson(SheetIndex sheet) const
             }
             obj.insert({"inputs", picojson::value(inputs)});
         }
-        else if (auto c = getItem(i).cell())
+        else if (auto c = tree.at(i).cell())
         {
             obj.insert({"type", picojson::value("cell")});
             obj.insert({"cellExpr", picojson::value(c->expr)});
         }
-        else if (getItem(i).sheet())
+        else if (tree.at(i).sheet())
         {
             sheets.push_back(toJson(SheetIndex(i)));
             continue;
@@ -611,18 +611,18 @@ void Root::clear()
     auto lock = Lock();
 
     // Erase every item in the root sheet
-    const auto items = iterItems(Tree::ROOT_SHEET);
+    const auto items = tree.iterItems(Tree::ROOT_SHEET);
     for (auto i : items)
     {
-        if (getItem(i).instance())
+        if (tree.at(i).instance())
         {
             eraseInstance(InstanceIndex(i));
         }
-        else if (getItem(i).cell())
+        else if (tree.at(i).cell())
         {
             eraseCell(CellIndex(i));
         }
-        else if (getItem(i).sheet())
+        else if (tree.at(i).sheet())
         {
             eraseSheet(SheetIndex(i));
         }
@@ -636,7 +636,7 @@ std::map<std::string, Value> Root::callSheet(
         const CellKey& caller, const SheetIndex& sheet,
         const std::list<Value> inputs, std::string* err)
 {
-    auto p = itemParent(caller.second);
+    auto p = tree.parentOf(caller.second);
     std::map<std::string, Value> out;
 
     if (!tree.canInsertInstance(p, sheet))
@@ -652,7 +652,7 @@ std::map<std::string, Value> Root::callSheet(
     // We insert the instance manually here because calling insertInstance
     // would create O(N^2) operations, as it would insert the instance into
     // every instance of the parent sheet...
-    auto instance = tree.insertInstance(p, nextItemName(p), sheet);
+    auto instance = tree.insertInstance(p, tree.nextName(p, "i"), sheet);
 
     // This is our temporary nested execution environment
     auto env = caller.first;
@@ -666,7 +666,7 @@ std::map<std::string, Value> Root::callSheet(
     {
         // If this is a top-level cell and is an input cell, then inject an
         // value from the input list into the cell for the dummy env
-        if (c.first.empty() && getItem(c.second).cell()->type == Cell::INPUT)
+        if (c.first.empty() && tree.at(c.second).cell()->type == Cell::INPUT)
         {
             if (itr == inputs.end())
             {
@@ -709,7 +709,7 @@ std::map<std::string, Value> Root::callSheet(
     {
         if (c.first.empty())
         {
-            auto cell = getItem(c.second).cell();
+            auto cell = tree.at(c.second).cell();
             if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
             {
                 out.insert({tree.nameOf(c.second), cell->values.at(env)});
@@ -779,15 +779,15 @@ void Root::eraseSheet(const SheetIndex& s)
 
     for (const auto& c : tree.childrenOf(s))
     {
-        if (getItem(c).cell())
+        if (tree.at(c).cell())
         {
             eraseCell(CellIndex(c));
         }
-        else if (getItem(c).instance())
+        else if (tree.at(c).instance())
         {
             eraseInstance(InstanceIndex(c));
         }
-        else if (getItem(c).sheet())
+        else if (tree.at(c).sheet())
         {
             eraseSheet(SheetIndex(c));
         }
@@ -804,10 +804,10 @@ std::list<SheetIndex> Root::sheetsAbove(const Env& env) const
     // Walk through parents, accumulating sheets
     for (const auto& v : env)
     {
-        auto es = tree.childrenOf(getItem(v).instance()->sheet);
+        auto es = tree.childrenOf(tree.at(v).instance()->sheet);
         for (const auto& e : es)
         {
-            if (getItem(e).sheet())
+            if (tree.at(e).sheet())
             {
                 out.push_back(SheetIndex(e));
             }
@@ -822,7 +822,7 @@ bool Root::checkEnv(const Env& env) const
     for (const auto& i : env)
     {
         if (!tree.isValid(i) ||
-            getItem(i).instance() == nullptr)
+            tree.at(i).instance() == nullptr)
         {
             return false;
         }
@@ -837,9 +837,9 @@ void Root::markDirty(const NameKey& k)
     if (checkEnv(k.first))
     {
         assert(k.first.size() >= 1);
-        auto sheet = getItem(k.first.back()).instance()->sheet;
-        if (hasItem(sheet, k.second) &&
-            getItem(sheet, k.second).cell())
+        auto sheet = tree.at(k.first.back()).instance()->sheet;
+        if (tree.hasItem(sheet, k.second) &&
+            tree.at(sheet, k.second).cell())
         {
             pushDirty(toCellKey(k));
             return;
