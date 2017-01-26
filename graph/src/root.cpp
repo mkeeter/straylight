@@ -27,12 +27,27 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
     auto cell = tree.insertCell(sheet, name, expr);
-    tree.at(cell).cell()->type = interpreter.cellType(expr);
+    auto type = interpreter.cellType(expr);
+    tree.at(cell).cell()->type = type;
 
+    // Mark the newly-create cell as dirty in all its environments
     for (const auto& e : tree.envsOf(sheet))
     {
         markDirty({e, name});
     }
+
+    // If this could influence sheets that are invoked as functions, then
+    // mark all of them for re-evaluation
+    if ((type == Cell::INPUT || type == Cell::OUTPUT) &&
+        sheet != Tree::ROOT_SHEET)
+    {
+        auto sheetName = tree.nameOf(sheet);
+        for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
+        {
+            markDirty({e, sheetName});
+        }
+    }
+
     sync();
 
     return cell;
@@ -436,6 +451,23 @@ std::map<std::string, Value> Root::callSheet(
 {
     auto p = tree.parentOf(caller.second);
     std::map<std::string, Value> out;
+
+    {   // Find and push a dependency on the sheet in its parent environment
+        //
+        // The sheet will notify this dependency network when I/O changes or
+        // when it is erased, triggering re-evaluation of this cell
+        auto sheet_parent = tree.parentOf(sheet);
+        Env sheet_env = {};
+        for (auto& e : caller.first)
+        {
+            sheet_env.push_back(e);
+            if (tree.at(e).instance()->sheet == sheet_parent)
+            {
+                break;
+            }
+        }
+        deps.insert(caller, {sheet_env, tree.nameOf(sheet)});
+    }
 
     if (!tree.canInsertInstance(p, sheet))
     {

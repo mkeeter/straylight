@@ -477,6 +477,8 @@ Value Interpreter::eval(const CellKey& key)
             }
             else if (root.isSheetName(target))
             {
+                // The target sheet could be inserted in any of the parent
+                // environments, so we'll insert a dependency on all of them
                 Env env_;
                 for (const auto& e : env)
                 {
