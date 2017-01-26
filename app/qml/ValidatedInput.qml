@@ -27,6 +27,7 @@ ColumnLayout {
 
     RowLayout {
         Layout.alignment: Qt.AlignTop
+        id: editRow
 
         Text {
             id: textLabel
@@ -77,6 +78,7 @@ ColumnLayout {
         visible: !valid
 
         Text {
+            id: warnIcon
             text: Awesome.fa_exclamation_triangle
             color: errorMessage.color
             font.family: fontAwesome.name
@@ -84,9 +86,11 @@ ColumnLayout {
 
         Text {
             id: errorMessage
+            width: editRow.width - warnIcon.width
             text: error
             color: Style.textDarkSecondary
             leftPadding: 5
+            wrapMode: Text.Wrap
         }
     }
 
