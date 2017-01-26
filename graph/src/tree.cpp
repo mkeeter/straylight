@@ -175,8 +175,9 @@ void Tree::serialize(TreeSerializer* s, const Env& env) const
     auto instance = env.back();
     auto sheet = at(instance).instance()->sheet;
 
-    if (s->push(instance.i, instance.i ? nameOf(instance) : "",
-                sheet.i ? nameOf(sheet) : ""))
+    if (s->push(instance.i,
+                instance == Tree::ROOT_INSTANCE ? "" : nameOf(instance),
+                sheet == Tree::ROOT_SHEET ? "" : nameOf(sheet)))
     {
         for (auto i : iterItems(sheet))
         {

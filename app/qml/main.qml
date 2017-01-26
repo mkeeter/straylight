@@ -139,7 +139,7 @@ ApplicationWindow {
         }
 
         Component.onCompleted: {
-            sheetStack.openTo([0])
+            sheetStack.openTo([1])
         }
     }
 }
