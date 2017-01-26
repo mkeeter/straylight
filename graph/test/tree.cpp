@@ -8,47 +8,47 @@ TEST_CASE("Tree::canInsert")
 {
     Tree s;
 
-    REQUIRE(s.canInsert(0, "a"));
-    REQUIRE(s.canInsert(0, "b"));
-    REQUIRE(!s.canInsert(0, ""));
+    REQUIRE(s.canInsert(Tree::ROOT_SHEET, "a"));
+    REQUIRE(s.canInsert(Tree::ROOT_SHEET, "b"));
+    REQUIRE(!s.canInsert(Tree::ROOT_SHEET, ""));
 }
 
 TEST_CASE("Tree::insertCell")
 {
     Tree s;
-    auto a = s.insertCell(0, "a", "(+ 1 2)");
+    auto a = s.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
 
-    REQUIRE(a.i == 1);
-    REQUIRE(!s.canInsert(0, "a"));
+    REQUIRE(a.i == 2);
+    REQUIRE(!s.canInsert(Tree::ROOT_SHEET, "a"));
 }
 
 TEST_CASE("Tree::insertInstance")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
 
-    REQUIRE(a.i == 1);
-    REQUIRE(!s.canInsert(0, "a"));
+    REQUIRE(a.i == 2);
+    REQUIRE(!s.canInsert(Tree::ROOT_SHEET, "a"));
 }
 
 TEST_CASE("Tree::rename")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
-    auto b = s.insertCell(0, "b", "(+ 1 2)");
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
+    auto b = s.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
 
     s.rename(a, "c");
     s.rename(b, "d");
 
-    REQUIRE(!s.canInsert(0, "c"));
-    REQUIRE(!s.canInsert(0, "d"));
+    REQUIRE(!s.canInsert(Tree::ROOT_SHEET, "c"));
+    REQUIRE(!s.canInsert(Tree::ROOT_SHEET, "d"));
 }
 
 TEST_CASE("Tree::at(ItemIndex)")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
-    auto b = s.insertCell(0, "b", "(+ 1 2)");
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
+    auto b = s.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
 
     s.at(a);
     s.at(b);
@@ -69,17 +69,17 @@ TEST_CASE("Tree::at(ItemIndex)")
 TEST_CASE("Tree::at(std::string)")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
-    auto b = s.insertCell(0, "b", "(+ 1 2)");
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
+    auto b = s.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
 
-    s.at(0, "a");
-    s.at(0, "b");
+    s.at(Tree::ROOT_SHEET, "a");
+    s.at(Tree::ROOT_SHEET, "b");
     REQUIRE(true); // Didn't crash!
 
     bool threw = false;
     try
     {
-        auto c = s.at(0, "c");
+        auto c = s.at(Tree::ROOT_SHEET, "c");
     }
     catch (const std::out_of_range&)
     {
@@ -91,19 +91,19 @@ TEST_CASE("Tree::at(std::string)")
 TEST_CASE("Tree::hasItem")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
-    auto b = s.insertCell(0, "b", "(+ 1 2)");
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
+    auto b = s.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
 
-    REQUIRE(s.hasItem(0, "a"));
-    REQUIRE(s.hasItem(0, "b"));
-    REQUIRE(!s.hasItem(0, "c"));
+    REQUIRE(s.hasItem(Tree::ROOT_SHEET, "a"));
+    REQUIRE(s.hasItem(Tree::ROOT_SHEET, "b"));
+    REQUIRE(!s.hasItem(Tree::ROOT_SHEET, "c"));
 }
 
 TEST_CASE("Tree::nameOf")
 {
     Tree s;
-    auto a = s.insertInstance(0, "a", 0);
-    auto b = s.insertCell(0, "b", "(+ 1 2)");
+    auto a = s.insertInstance(Tree::ROOT_SHEET, "a", 0);
+    auto b = s.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
 
     REQUIRE(s.nameOf(a) == "a");
     REQUIRE(s.nameOf(b) == "b");
@@ -115,13 +115,13 @@ TEST_CASE("Tree::iterItems")
 
     SECTION("Top level")
     {
-        auto a = t.insertInstance(0, "a", 0);
-        auto b = t.insertCell(0, "b", "(+ 1 2)");
-        auto iter = t.iterItems(0);
+        auto a = t.insertInstance(Tree::ROOT_SHEET, "a", 0);
+        auto b = t.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 2)");
+        auto iter = t.iterItems(Tree::ROOT_SHEET);
         REQUIRE(iter.size() == 2);
-        REQUIRE(iter.front() == 1); // a
+        REQUIRE(iter.front() == a);
         iter.pop_front();
-        REQUIRE(iter.front() == 2); // b
+        REQUIRE(iter.front() == b);
 
         auto i1 = t.iterItems(1);
         REQUIRE(i1.size() == 0);
@@ -129,19 +129,20 @@ TEST_CASE("Tree::iterItems")
 
     SECTION("Nested")
     {
-        auto a = t.insertInstance(1, "a", 0);
-        auto b = t.insertCell(2, "b", "(+ 1 2)");
+        // 3 and 4 are dummy sheets here
+        auto a = t.insertInstance(3, "a", 0);
+        auto b = t.insertCell(4, "b", "(+ 1 2)");
 
-        auto i0 = t.iterItems(0);
+        auto i0 = t.iterItems(Tree::ROOT_SHEET);
         REQUIRE(i0.size() == 0);
 
-        auto i1 = t.iterItems(1);
+        auto i1 = t.iterItems(3);
         REQUIRE(i1.size() == 1);
-        REQUIRE(i1.front() == 1); // a
+        REQUIRE(i1.front() == a);
 
-        auto i2 = t.iterItems(2);
+        auto i2 = t.iterItems(4);
         REQUIRE(i2.size() == 1);
-        REQUIRE(i2.front() == 2); // b
+        REQUIRE(i2.front() == b);
     }
 }
 
@@ -149,11 +150,11 @@ TEST_CASE("Tree::parentOf")
 {
     Tree t;
 
-    auto a = t.insertInstance(1, "a", 0);
-    auto b = t.insertCell(2, "b", "(+ 1 2)");
+    auto a = t.insertInstance(2, "a", 0);
+    auto b = t.insertCell(3, "b", "(+ 1 2)");
 
-    REQUIRE(t.parentOf(a) == 1);
-    REQUIRE(t.parentOf(b) == 2);
+    REQUIRE(t.parentOf(a) == 2);
+    REQUIRE(t.parentOf(b) == 3);
 }
 
 TEST_CASE("Tree::envsOf")
@@ -163,14 +164,14 @@ TEST_CASE("Tree::envsOf")
 
     SECTION("Single instance")
     {
-        auto a = t.insertInstance(0, "a", sheet);
+        auto a = t.insertInstance(Tree::ROOT_SHEET, "a", sheet);
 
         auto envs = t.envsOf(sheet);
         REQUIRE(envs.size() == 1);
 
         auto f = envs.front();
         REQUIRE(f.size() == 2);
-        REQUIRE(f.front() == 0);
+        REQUIRE(f.front() == Tree::ROOT_INSTANCE);
         f.pop_front();
         REQUIRE(f.front() == a);
     }
@@ -184,8 +185,8 @@ TEST_CASE("Tree::envsOf")
         auto i3 = t.insertInstance(parent, "c", sheet);
         REQUIRE(i1 != i2);
 
-        auto a = t.insertInstance(0, "a", parent);
-        auto b = t.insertInstance(0, "b", parent);
+        auto a = t.insertInstance(Tree::ROOT_SHEET, "a", parent);
+        auto b = t.insertInstance(Tree::ROOT_SHEET, "b", parent);
 
         {
             auto envs = t.envsOf(sheet);
@@ -207,7 +208,7 @@ TEST_CASE("Tree::instancesOf")
 
     SECTION("Single instance")
     {
-        auto a = t.insertInstance(0, "a", sheet);
+        auto a = t.insertInstance(Tree::ROOT_SHEET, "a", sheet);
 
         auto ins = t.instancesOf(sheet);
         REQUIRE(ins.size() == 1);
@@ -223,8 +224,8 @@ TEST_CASE("Tree::instancesOf")
         auto i3 = t.insertInstance(parent, "c", sheet);
         REQUIRE(i1 != i2);
 
-        auto a = t.insertInstance(0, "a", parent);
-        auto b = t.insertInstance(0, "b", parent);
+        auto a = t.insertInstance(Tree::ROOT_SHEET, "a", parent);
+        auto b = t.insertInstance(Tree::ROOT_SHEET, "b", parent);
 
         {
             auto ins = t.instancesOf(sheet);
@@ -240,19 +241,19 @@ TEST_CASE("Tree::instancesOf")
 TEST_CASE("Tree::erase")
 {
     Tree t;
-    auto c = t.insertCell(0, "c", "12");
-    REQUIRE(t.iterItems(0).size() == 1);
+    auto c = t.insertCell(Tree::ROOT_SHEET, "c", "12");
+    REQUIRE(t.iterItems(Tree::ROOT_SHEET).size() == 1);
     t.erase(c);
-    REQUIRE(t.iterItems(0).size() == 0);
+    REQUIRE(t.iterItems(Tree::ROOT_SHEET).size() == 0);
 }
 
 TEST_CASE("Tree::nextName")
 {
     Tree t;
-    REQUIRE(t.nextName(SheetIndex(0), "c") == "c0");
-    auto c = t.insertCell(0, "c0", "12");
-    REQUIRE(t.nextName(SheetIndex(0), "c") == "c1");
-    REQUIRE(t.nextName(SheetIndex(0), "prefix") == "prefix0");
+    REQUIRE(t.nextName(SheetIndex(Tree::ROOT_SHEET), "c") == "c0");
+    auto c = t.insertCell(Tree::ROOT_SHEET, "c0", "12");
+    REQUIRE(t.nextName(SheetIndex(Tree::ROOT_SHEET), "c") == "c1");
+    REQUIRE(t.nextName(SheetIndex(Tree::ROOT_SHEET), "prefix") == "prefix0");
 }
 
 TEST_CASE("Tree::canInsertInstance")
@@ -260,9 +261,9 @@ TEST_CASE("Tree::canInsertInstance")
     Tree t;
 
     // Dummy sheet indices
-    SheetIndex root(0);
-    SheetIndex a(1);
-    SheetIndex b(2);
+    SheetIndex root(Tree::ROOT_SHEET);
+    SheetIndex a(2);
+    SheetIndex b(3);
 
     SECTION("Self")
     {

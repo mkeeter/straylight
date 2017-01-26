@@ -37,9 +37,9 @@ TEST_CASE("Interpreter::eval")
     auto lock = r.Lock();
 
     auto interp = Interpreter(r, &d);
-    auto cell = r.insertCell(0, "c", "");
+    auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "");
     auto c = r.getItem(cell).cell();
-    CellKey key = {{0}, cell};
+    CellKey key = {{Tree::ROOT_INSTANCE}, cell};
 
     SECTION("Basic eval")
     {
