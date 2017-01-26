@@ -26,28 +26,42 @@ NameKey Root::toNameKey(const CellKey& k) const
 CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
                            const std::string& expr)
 {
-    auto cell = tree.insertCell(sheet, name, expr);
-    tree.at(cell).cell()->type = interpreter.cellType(expr);
-
-    for (const auto& e : tree.envsOf(sheet))
-    {
-        markDirty({e, name});
-    }
-    sync();
-
+    auto cell = CellIndex(tree.nextIndex());
+    insertCell(sheet, cell, name, expr);
     return cell;
 }
 
 void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
                       const std::string& name, const std::string& expr)
 {
-    tree.insertCell(sheet, cell, name, expr);
-    tree.at(cell).cell()->type = interpreter.cellType(expr);
+    tree.insertCell(sheet, name, expr);
+    auto type = interpreter.cellType(expr);
+    tree.at(cell).cell()->type = type;
 
+    // Mark the newly-create cell as dirty in all its environments
     for (const auto& e : tree.envsOf(sheet))
     {
         markDirty({e, name});
     }
+
+    // If this could influence sheets that are invoked as functions, then
+    // mark all of them for re-evaluation
+    if ((type == Cell::INPUT || type == Cell::OUTPUT) &&
+        sheet != Tree::ROOT_SHEET)
+    {
+        auto sheetName = tree.nameOf(sheet);
+        for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
+        {
+            markDirty({e, sheetName});
+        }
+    }
+
+    {   // Mark everything that looked at the cell's dummy key as dirty
+        std::stringstream ss;
+        ss << cell.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 }
 
@@ -55,36 +69,8 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
                                    const std::string& name,
                                    const SheetIndex& target)
 {
-    auto i = tree.insertInstance(parent, name, target);
-
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-
-        // Then, mark all cells as dirty
-        for (const auto& c : tree.cellsOf(target))
-        {
-            auto env = e; // copy
-            env.push_back(i);
-            env.insert(e.end(), c.first.begin(), c.first.end());
-            markDirty({env, tree.nameOf(c.second)});
-        }
-    }
-
-    // Assign default expressions for inputs
-    for (const auto& t : tree.iterItems(target))
-    {
-        if (auto c = tree.at(t).cell())
-        {
-            if (c->type == Cell::INPUT)
-            {
-                tree.at(i).instance()->inputs[CellIndex(t.i)] =
-                    interpreter.defaultExpr(c->expr);
-            }
-        }
-    }
-
-    sync();
+    auto i = InstanceIndex(tree.nextIndex());
+    insertInstance(parent, i, name, target);
     return i;
 }
 
@@ -152,6 +138,13 @@ void Root::eraseCell(const CellIndex& cell)
             tree.at(i).instance()->inputs.erase(cell);
         }
     }
+
+    {   // Mark everything that looked at the cell's dummy key as dirty
+        std::stringstream ss;
+        ss << cell.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 }
 
@@ -268,6 +261,15 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     {
         markDirty({e, tree.nameOf(i)});
     }
+
+    {   // Mark anything that looked for the cell's dummy NameKey as dirty
+        // This is how we properly re-evaluate things that call a sheet when
+        // a cell internal to that sheet changes.
+        std::stringstream ss;
+        ss << i.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 
     return true;
@@ -341,9 +343,7 @@ std::string Root::loadString(const std::string& s)
     }
 }
 
-bool Root::checkItemName(const SheetIndex& parent,
-                         const std::string& name,
-                         std::string* err) const
+bool Root::isItemName(const std::string& name, std::string* err) const
 {
     if (name.size() == 0)
     {
@@ -358,14 +358,6 @@ bool Root::checkItemName(const SheetIndex& parent,
         if (err)
         {
             *err = "Name must begin with a lowercase letter";
-        }
-        return false;
-    }
-    else if (!tree.canInsert(parent, name))
-    {
-        if (err)
-        {
-            *err = "Duplicate name";
         }
         return false;
     }
@@ -387,6 +379,22 @@ bool Root::checkItemName(const SheetIndex& parent,
     }
 
     return true;
+}
+
+bool Root::checkItemName(const SheetIndex& parent,
+                         const std::string& name,
+                         std::string* err) const
+{
+    if (!tree.canInsert(parent, name))
+    {
+        if (err)
+        {
+            *err = "Duplicate name";
+        }
+        return false;
+    }
+
+    return isItemName(name, err);;
 }
 
 void Root::renameItem(const ItemIndex& i, const std::string& name)
@@ -430,6 +438,23 @@ std::map<std::string, Value> Root::callSheet(
 {
     auto p = tree.parentOf(caller.second);
     std::map<std::string, Value> out;
+
+    {   // Find and push a dependency on the sheet in its parent environment
+        //
+        // The sheet will notify this dependency network when I/O changes or
+        // when it is erased, triggering re-evaluation of this cell
+        auto sheet_parent = tree.parentOf(sheet);
+        Env sheet_env = {};
+        for (auto& e : caller.first)
+        {
+            sheet_env.push_back(e);
+            if (tree.at(e).instance()->sheet == sheet_parent)
+            {
+                break;
+            }
+        }
+        deps.insert(caller, {sheet_env, tree.nameOf(sheet)});
+    }
 
     if (!tree.canInsertInstance(p, sheet))
     {
@@ -496,16 +521,33 @@ std::map<std::string, Value> Root::callSheet(
     assert(dirty.top().size() == 0);
     dirty.pop();
 
-    // Grab all inputs and outputs and put them in the output map
-    for (const auto& c : tree.cellsOf(sheet))
-    {
-        if (c.first.empty())
+    {   // Grab all inputs and outputs and put them in the output map
+        std::set<CellIndex> cells;
+        for (const auto& c : tree.cellsOf(sheet))
         {
-            auto cell = tree.at(c.second).cell();
-            if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
+            cells.insert(c.second);
+            if (c.first.empty())
             {
-                out.insert({tree.nameOf(c.second), cell->values.at(env)});
+                auto cell = tree.at(c.second).cell();
+                if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
+                {
+                    out.insert({tree.nameOf(c.second), cell->values.at(env)});
+                }
             }
+        }
+
+        // Then, record a dependency all of the cells.  This is a bit of a
+        // hack: because dependencies are stored by {Env, Name}, we convert
+        // the CellIndex into a string and use it as the name (with an empty
+        // Env).  Cells notify this dummy NameKey when they change.
+        //
+        // TODO: This could be made more efficient by only encoding the
+        // upstream deps of output cells in the temporary instance
+        for (const auto& c : cells)
+        {
+            std::stringstream ss;
+            ss << c.i;
+            deps.insert(caller, {{}, ss.str()});
         }
     }
 
@@ -515,9 +557,7 @@ std::map<std::string, Value> Root::callSheet(
     return out;
 }
 
-bool Root::checkSheetName(const SheetIndex& parent,
-                          const std::string& name,
-                          std::string* err) const
+bool Root::isSheetName(const std::string& name, std::string* err) const
 {
     if (name.size() == 0)
     {
@@ -535,7 +575,14 @@ bool Root::checkSheetName(const SheetIndex& parent,
         }
         return false;
     }
-    else if (!tree.canInsert(parent, name))
+    return true;
+}
+
+bool Root::checkSheetName(const SheetIndex& parent,
+                          const std::string& name,
+                          std::string* err) const
+{
+    if (!tree.canInsert(parent, name))
     {
         if (err)
         {
@@ -544,13 +591,20 @@ bool Root::checkSheetName(const SheetIndex& parent,
         return false;
     }
 
-    return true;
+    return isSheetName(name, err);;
 }
 
 SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
     assert(canInsertSheet(parent, name));
-    return SheetIndex(tree.insert(parent, name, Item()));
+    auto s = SheetIndex(tree.insert(parent, name, Item()));
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+    }
+    sync();
+    return s;
 }
 
 void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
@@ -558,12 +612,35 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
 {
     assert(canInsertSheet(parent, name));
     tree.insert(parent, sheet, name, Item());
+
+    for (const auto& e : tree.envsOf(parent))
+    {
+        markDirty({e, name});
+    }
+    sync();
+}
+
+void Root::renameSheet(const SheetIndex& i, const std::string& name)
+{
+    tree.rename(i, name);
+
+    for (const auto& e : tree.envsOf(tree.parentOf(i)))
+    {
+        markDirty({e, name});
+    }
 }
 
 void Root::eraseSheet(const SheetIndex& s)
 {
     auto lock = Lock();
-    auto instances = tree.instancesOf(s);
+
+    const auto instances = tree.instancesOf(s);
+
+    // Store parent envs and sheet name so that we can trigger re-evaluation
+    // of everything watching the sheet by name
+    const auto envs = tree.envsOf(tree.parentOf(s));
+    const auto name = tree.nameOf(s);
+
     for (const auto& i : instances)
     {
         eraseInstance(i);
@@ -590,6 +667,12 @@ void Root::eraseSheet(const SheetIndex& s)
     }
 
     tree.erase(s);
+
+    //  Re-evaluate anything that was watching the sheet (by name)
+    for (const auto& e : envs)
+    {
+        markDirty({e, name});
+    }
     // Sync is called on lock destruction
 }
 
@@ -597,9 +680,8 @@ void Root::markDirty(const NameKey& k)
 {
     // If the key refers to a valid environment and a cell that still
     // exists, then push it to the dirty list directly
-    if (tree.checkEnv(k.first))
+    if (k.first.size() && tree.checkEnv(k.first))
     {
-        assert(k.first.size() >= 1);
         auto sheet = tree.at(k.first.back()).instance()->sheet;
         if (tree.hasItem(sheet, k.second) &&
             tree.at(sheet, k.second).cell())

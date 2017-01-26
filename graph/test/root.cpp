@@ -313,13 +313,77 @@ TEST_CASE("Root::callSheet")
         r.insertCell(sum, "out", "(output (+ (in) 15))");
 
         std::string err;
-        auto val = r.getTree().at(c).cell()->values.at({Tree::ROOT_INSTANCE});
+        auto val = r.getValue({{Tree::ROOT_INSTANCE}, c});
         auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
 
         REQUIRE(err == "");
         REQUIRE(out.size() == 2);
         REQUIRE(out.count("out") == 1);
         REQUIRE(out.at("out").str == "28.5");
+    }
+}
+
+TEST_CASE("Root::callSheet (dependencies)")
+{
+    Root r;
+
+    SECTION("Sheet is created")
+    {
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        REQUIRE(val.valid == false);
+        r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        REQUIRE(val.valid == true);
+    }
+
+    SECTION("Sheet input count changes")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet 1)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+
+        REQUIRE(val.valid == false);
+        r.insertCell(s, "a", "(input 15)");
+        REQUIRE(val.valid == true);
+    }
+
+    SECTION("Sheet is deleted")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        REQUIRE(val.valid == true);
+        r.eraseSheet(s);
+        REQUIRE(val.valid == false);
+    }
+
+    SECTION("Invalid recursion party")
+    {
+        auto sa = r.insertSheet(Tree::ROOT_SHEET, "SheetA");
+        auto sb = r.insertSheet(Tree::ROOT_SHEET, "SheetB");
+        auto a = r.insertCell(sa, "a", "((SheetB) 'b)");
+        auto b = r.insertCell(sb, "b", "((SheetA) 'a)");
+
+        auto ia = r.insertInstance(Tree::ROOT_SHEET, "ia", sa);
+        CAPTURE(r.getValue({{Tree::ROOT_INSTANCE, ia}, a}).str);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, ia}, a}).valid == false);
+        // TODO: This is passing, when it should be recursing to death
+    }
+
+    SECTION("Sheet expression changes")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto a = r.insertCell(s, "a", "(output 15)");
+
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "((Sheet) 'a)");
+
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        CAPTURE(val.str);
+        REQUIRE(val.valid == true);
+
+        r.setExpr(a, "(output uh-oh)");
+        CAPTURE(val.str);
+        REQUIRE(val.valid == false);
     }
 }
 

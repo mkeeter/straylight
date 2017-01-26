@@ -27,9 +27,7 @@ public:
     {
         assert(canInsert(parent, name));
 
-        StoredIndex next = {storage.size() ? storage.rbegin()->first.i + 1
-                                           : 0};
-
+        StoredIndex next = nextIndex();
         storage.insert({next, s});
         names.left.insert({std::make_pair(parent, name), next});
 
@@ -162,6 +160,14 @@ public:
     {
         storage.clear();
         names.clear();
+    }
+
+    /*
+     *  Returns the next available index
+     */
+    StoredIndex nextIndex() const
+    {
+        return storage.size() ? storage.rbegin()->first.i + 1 : 0;
     }
 
 protected:
