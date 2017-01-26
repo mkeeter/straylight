@@ -2,7 +2,6 @@
 
 #include <stack>
 
-#include "graph/library.hpp"
 #include "graph/cell.hpp"
 #include "graph/item.hpp"
 #include "graph/interpreter.hpp"
@@ -200,19 +199,19 @@ public:
      *  Looks up the parent sheet for a sheet
      */
     SheetIndex sheetParent(const SheetIndex& s) const
-        { return lib.parentOf(s); }
+        { return tree.parentOf(s); }
 
     /*
      *  Looks up the parent sheet for a sheet
      */
     const std::string& sheetName(const SheetIndex& s) const
-        { return lib.nameOf(s); }
+        { return tree.nameOf(s); }
 
     /*
      *  Renames a sheet
      */
     void renameSheet(const SheetIndex& i, const std::string& name)
-        { lib.rename(i, name); }
+        { tree.rename(i, name); }
 
     /*
      *  Returns the next valid sheet name
@@ -222,7 +221,7 @@ public:
      */
     std::string nextSheetName(const SheetIndex& sheet,
                               const std::string& prefix="S") const
-        { return lib.nextName(sheet, prefix); }
+        { return tree.nextName(sheet, prefix); }
 
     /*
      *  Erases a sheet and any instances thereof
@@ -331,9 +330,8 @@ protected:
 
     ////////////////////////////////////////////////////////////////////////////
 
-    /*  Here's all the data in the graph.  Our default sheet is lib[0] */
+    /*  Here's all the data in the graph.  */
     Tree tree;
-    Library lib;
 
     /*  When locked, changes don't provoke evaluation
      *  (though the dirty list is still populated)  */

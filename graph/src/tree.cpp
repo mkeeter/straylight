@@ -5,8 +5,8 @@ namespace Graph {
 
 Tree::Tree()
 {
-    SheetIndex default_sheet(0);
-    storage.insert({0, default_sheet});
+    storage.insert({0, Item(1)});   // root instance
+    storage.insert({1, Item()});    // root sheet
 }
 
 Tree::~Tree()

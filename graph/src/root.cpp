@@ -398,7 +398,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
     auto sheet = getItem(instance).instance()->sheet;
 
     if (s->push(instance.i, instance.i ? tree.nameOf(instance) : "",
-                sheet.i ? lib.nameOf(sheet) : ""))
+                sheet.i ? tree.nameOf(sheet) : ""))
     {
         for (auto i : iterItems(sheet))
         {
@@ -414,7 +414,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
             else if (auto n = item.instance())
             {
                 InstanceIndex index(i.i);
-                s->instance(index, name, lib.nameOf(n->sheet));
+                s->instance(index, name, tree.nameOf(n->sheet));
 
                 // TODO: draw inputs and outputs here
                 auto env_ = env;
@@ -445,7 +445,7 @@ void Root::serialize(TreeSerializer* s, const Env& env) const
         // Pass all sheets through to the serializer
         for (const auto& e : sheetsAbove(env))
         {
-            s->sheet(e, lib.nameOf(e), lib.parentOf(e) == sheet,
+            s->sheet(e, tree.nameOf(e), tree.parentOf(e) == sheet,
                      tree.canInsertInstance(sheet, e));
         }
     }
@@ -467,6 +467,8 @@ std::string Root::toString() const
 picojson::value Root::toJson(SheetIndex sheet) const
 {
     picojson::value::array items;
+    picojson::value::array sheets;
+
     for (auto i : iterItems(sheet))
     {
         picojson::value::object obj;
@@ -492,17 +494,12 @@ picojson::value Root::toJson(SheetIndex sheet) const
             obj.insert({"type", picojson::value("cell")});
             obj.insert({"cellExpr", picojson::value(c->expr)});
         }
-        else
+        else if (getItem(i).sheet())
         {
-            assert(false);
+            sheets.push_back(toJson(SheetIndex(i)));
+            continue;
         }
         items.push_back(picojson::value(obj));
-    }
-
-    picojson::value::array sheets;
-    for (const auto& h : lib.childrenOf(sheet))
-    {
-        sheets.push_back(toJson(h));
     }
 
     picojson::value::object out;
@@ -513,7 +510,7 @@ picojson::value Root::toJson(SheetIndex sheet) const
     if (sheet.i)
     {
         out.insert({"sheetIndex", picojson::value((int64_t)sheet.i)});
-        out.insert({"sheetName", picojson::value(lib.nameOf(sheet))});
+        out.insert({"sheetName", picojson::value(tree.nameOf(sheet))});
     }
 
     return picojson::value(out);
@@ -625,17 +622,12 @@ void Root::clear()
         {
             eraseCell(CellIndex(i));
         }
-        else
+        else if (getItem(i).sheet())
         {
-            assert(false);
+            eraseSheet(SheetIndex(i));
         }
     }
-
-    const auto sheets = lib.childrenOf(0);
-    for (const auto& s : sheets)
-    {
-        eraseSheet(s);
-    }
+    // TODO: could we use eraseSheet here directly?
 
     assert(dirty.top().size() == 0);
 }
@@ -751,7 +743,7 @@ bool Root::checkSheetName(const SheetIndex& parent,
         }
         return false;
     }
-    else if (!lib.canInsert(parent, name))
+    else if (!tree.canInsert(parent, name))
     {
         if (err)
         {
@@ -766,14 +758,14 @@ bool Root::checkSheetName(const SheetIndex& parent,
 SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
     assert(canInsertSheet(parent, name));
-    return lib.insert(parent, name);
+    return SheetIndex(tree.insert(parent, name, Item()));
 }
 
 void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
                        const std::string& name)
 {
     assert(canInsertSheet(parent, name));
-    return lib.insert(parent, sheet, name);
+    tree.insert(parent, sheet, name, Item());
 }
 
 void Root::eraseSheet(const SheetIndex& s)
@@ -795,14 +787,13 @@ void Root::eraseSheet(const SheetIndex& s)
         {
             eraseInstance(InstanceIndex(c));
         }
+        else if (getItem(c).sheet())
+        {
+            eraseSheet(SheetIndex(c));
+        }
     }
 
-    for (const auto& c : lib.childrenOf(s))
-    {
-        eraseSheet(c);
-    }
-
-    lib.erase(s);
+    tree.erase(s);
     // Sync is called on lock destruction
 }
 
@@ -813,10 +804,13 @@ std::list<SheetIndex> Root::sheetsAbove(const Env& env) const
     // Walk through parents, accumulating sheets
     for (const auto& v : env)
     {
-        auto es = lib.childrenOf(getItem(v).instance()->sheet);
+        auto es = tree.childrenOf(getItem(v).instance()->sheet);
         for (const auto& e : es)
         {
-            out.push_back(e);
+            if (getItem(e).sheet())
+            {
+                out.push_back(SheetIndex(e));
+            }
         }
     }
 

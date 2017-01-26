@@ -7,12 +7,14 @@ namespace Graph {
 
 struct Instance;
 struct Cell;
+struct Sheet;
 
 class Item
 {
 public:
-    Item(const std::string& e);
-    Item(SheetIndex sheet);
+    explicit Item(const std::string& e);
+    explicit Item(SheetIndex sheet);
+    explicit Item();
 
     void dealloc();
 
@@ -20,8 +22,9 @@ public:
     Instance* instance();
     const Cell* cell() const;
     Cell* cell();
+    bool sheet() const;
 
-    enum Type {ITEM_CELL, ITEM_INSTANCE};
+    enum Type {ITEM_CELL, ITEM_INSTANCE, ITEM_SHEET};
 private:
     const Type type;
     union {
