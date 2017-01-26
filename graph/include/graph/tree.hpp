@@ -73,6 +73,9 @@ public:
      */
     std::list<CellKey> cellsOf(const SheetIndex& s) const;
 
+    const static SheetIndex ROOT_SHEET;
+    const static InstanceIndex ROOT_INSTANCE;
+
 protected:
     /*
      *  Rendering order for items in a given sheet

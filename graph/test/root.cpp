@@ -7,28 +7,28 @@ using namespace Graph;
 TEST_CASE("Root::toCellKey")
 {
     Root r;
-    auto a = r.insertCell(0, "a", "(+ 1 2)");
-    auto ck = r.toCellKey({{0}, "a"});
+    auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
+    auto ck = r.toCellKey({{Tree::ROOT_INSTANCE}, "a"});
     REQUIRE(ck.first.size() == 1);
-    REQUIRE(ck.first.front() == 0);
+    REQUIRE(ck.first.front() == Tree::ROOT_INSTANCE);
     REQUIRE(ck.second == a);
 }
 
 TEST_CASE("Root::toNameKey")
 {
     Root r;
-    auto a = r.insertCell(0, "a", "(+ 1 2)");
-    auto nk = r.toNameKey({{0}, a});
+    auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
+    auto nk = r.toNameKey({{Tree::ROOT_INSTANCE}, a});
     REQUIRE(nk.first.size() == 1);
-    REQUIRE(nk.first.front() == 0);
+    REQUIRE(nk.first.front() == Tree::ROOT_INSTANCE);
     REQUIRE(nk.second == "a");
 }
 
 TEST_CASE("Root::getValue")
 {
     Root r;
-    auto a = r.insertCell(0, "a", "(+ 1 2)");
-    auto v = r.getValue({{0}, a});
+    auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
+    auto v = r.getValue({{Tree::ROOT_INSTANCE}, a});
     REQUIRE(v.value != nullptr);
     REQUIRE(v.valid == true);
     REQUIRE(v.str == "3");
@@ -40,8 +40,8 @@ TEST_CASE("Root::insertCell")
 
     SECTION("Basic")
     {
-        auto a = r.insertCell(0, "a", "(+ 1 2)");
-        auto v = r.getValue({{0}, a});
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, a});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "3");
@@ -49,9 +49,9 @@ TEST_CASE("Root::insertCell")
 
     SECTION("With lookups (ordered)")
     {
-        auto x = r.insertCell(0, "x", "1");
-        auto y = r.insertCell(0, "y", "(+ 1 (x))");
-        auto v = r.getValue({{0}, y});
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
+        auto y = r.insertCell(Tree::ROOT_SHEET, "y", "(+ 1 (x))");
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, y});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "2");
@@ -59,9 +59,9 @@ TEST_CASE("Root::insertCell")
 
     SECTION("With lookups (unordered)")
     {
-        auto y = r.insertCell(0, "y", "(+ 1 (x))");
-        auto x = r.insertCell(0, "x", "1");
-        auto v = r.getValue({{0}, y});
+        auto y = r.insertCell(Tree::ROOT_SHEET, "y", "(+ 1 (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, y});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "2");
@@ -69,8 +69,8 @@ TEST_CASE("Root::insertCell")
 
     SECTION("Single-item circular lookup")
     {
-        auto a = r.insertCell(0, "a", "(a)");
-        auto v = r.getValue({{0}, a});
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(a)");
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, a});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == false);
         REQUIRE(v.str == "Circular lookup");
@@ -83,25 +83,25 @@ TEST_CASE("Root::renameItem")
 
     SECTION("Change tracking")
     {
-        auto a = r.insertCell(0, "a", "12");
-        auto b = r.insertCell(0, "b", "(/ (d) 2)");
-        auto c = r.insertCell(0, "c", "(+ (a) 5)");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "12");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(/ (d) 2)");
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(+ (a) 5)");
 
         r.renameItem(a, "d");
 
-        auto vb = r.getValue({{0}, b});
+        auto vb = r.getValue({{Tree::ROOT_INSTANCE}, b});
         REQUIRE(vb.value != nullptr);
         REQUIRE(vb.valid == true);
         REQUIRE(vb.str == "6");
 
-        auto vc = r.getValue({{0}, c});
+        auto vc = r.getValue({{Tree::ROOT_INSTANCE}, c});
         REQUIRE(vc.value != nullptr);
         REQUIRE(vc.valid == false);
     }
 
     SECTION("Renaming to self")
     {
-        auto a = r.insertCell(0, "a", "12");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "12");
         r.renameItem(a, "a");
         REQUIRE(true /* didn't crash */);
     }
@@ -113,29 +113,29 @@ TEST_CASE("Root::eraseCell")
 
     SECTION("Basic erasing")
     {
-        auto x = r.insertCell(0, "x", "(+ 1 2)");
-        REQUIRE(!r.checkItemName(0, "x"));
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
+        REQUIRE(!r.checkItemName(Tree::ROOT_SHEET, "x"));
         r.eraseCell(x);
-        REQUIRE(r.checkItemName(0, "x"));
+        REQUIRE(r.checkItemName(Tree::ROOT_SHEET, "x"));
     }
 
     SECTION("Change detection")
     {
-        auto x = r.insertCell(0, "x", "(+ 1 2)");
-        auto a = r.insertCell(0, "a", "(+ 1 (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 (x))");
 
         r.eraseCell(x);
-        REQUIRE(!r.getValue({{0}, a}).valid);
+        REQUIRE(!r.getValue({{Tree::ROOT_INSTANCE}, a}).valid);
     }
 
     SECTION("Dependency cleanup")
     {
-        auto x = r.insertCell(0, "x", "(+ 1 2)");
-        auto a = r.insertCell(0, "a", "(+ 1 (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 (x))");
 
         r.eraseCell(a);
         r.setExpr(x, "15");
-        REQUIRE(r.getValue({{0}, x}).str == "15");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, x}).str == "15");
     }
 }
 
@@ -145,18 +145,18 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Return value")
     {
-        auto x = r.insertCell(0, "x", "1");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
         REQUIRE(!r.setExpr(x, "1"));
         REQUIRE(r.setExpr(x, "2"));
     }
 
     SECTION("Re-evaluation on parent change")
     {
-        auto x = r.insertCell(0, "x", "1");
-        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
+        auto y = r.insertCell(Tree::ROOT_SHEET, "y", "(+ 1 (x))");
 
         r.setExpr(x, "10");
-        auto v = r.getValue({{0}, y});
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, y});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "11");
@@ -164,11 +164,11 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Upstream becoming invalid")
     {
-        auto x = r.insertCell(0, "x", "1");
-        auto y = r.insertCell(0, "y", "(+ 1 (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
+        auto y = r.insertCell(Tree::ROOT_SHEET, "y", "(+ 1 (x))");
 
         r.setExpr(x, "this isn't a valid expression");
-        auto v = r.getValue({{0}, y});
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, y});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == false);
         REQUIRE(v.str == "Invalid lookup");
@@ -176,12 +176,12 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Multiple evaluation paths")
     {
-        auto x = r.insertCell(0, "x", "1");
-        r.insertCell(0, "a", "(+ 2 (x))");
-        auto y = r.insertCell(0, "y", "(+ (a) (x))");
+        auto x = r.insertCell(Tree::ROOT_SHEET, "x", "1");
+        r.insertCell(Tree::ROOT_SHEET, "a", "(+ 2 (x))");
+        auto y = r.insertCell(Tree::ROOT_SHEET, "y", "(+ (a) (x))");
         r.setExpr(x, "3");
 
-        auto v = r.getValue({{0}, y});
+        auto v = r.getValue({{Tree::ROOT_INSTANCE}, y});
         REQUIRE(v.value != nullptr);
         REQUIRE(v.valid == true);
         REQUIRE(v.str == "8");
@@ -189,85 +189,85 @@ TEST_CASE("Root::setExpr")
 
     SECTION("Cell becoming an output")
     {
-        auto sum = r.insertSheet(0, "Sum");
+        auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
         auto a = r.insertCell(sum, "a", "10");
-        auto i = r.insertInstance(0, "i", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
 
-        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 (i 'a))");
         r.setExpr(a, "(output 5)");
 
-        REQUIRE(r.getValue({{0}, b}).str == "6");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str == "6");
     }
 
     SECTION("Cell becoming an output (same value)")
     {
-        auto sum = r.insertSheet(0, "Sum");
+        auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
         auto a = r.insertCell(sum, "a", "10");
-        auto i = r.insertInstance(0, "i", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
 
-        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 (i 'a))");
         r.setExpr(a, "(output 10)");
 
-        REQUIRE(r.getValue({{0}, b}).str == "11");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str == "11");
     }
 }
 
 TEST_CASE("Root::canInsertSheet")
 {
     Root r;
-    REQUIRE(r.canInsertSheet(0, "Sum"));
-    REQUIRE(!r.canInsertSheet(0, "sum"));
-    REQUIRE(!r.canInsertSheet(0, ""));
+    REQUIRE(r.canInsertSheet(Tree::ROOT_SHEET, "Sum"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "sum"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, ""));
 
-    REQUIRE(r.canInsertSheet(0, "A"));
-    REQUIRE(r.canInsertSheet(0, "B"));
-    REQUIRE(r.canInsertSheet(0, "C"));
+    REQUIRE(r.canInsertSheet(Tree::ROOT_SHEET, "A"));
+    REQUIRE(r.canInsertSheet(Tree::ROOT_SHEET, "B"));
+    REQUIRE(r.canInsertSheet(Tree::ROOT_SHEET, "C"));
 
-    REQUIRE(!r.canInsertSheet(0, ""));
-    REQUIRE(!r.canInsertSheet(0, "a"));
-    REQUIRE(!r.canInsertSheet(0, "b"));
-    REQUIRE(!r.canInsertSheet(0, "c"));
-    REQUIRE(!r.canInsertSheet(0, "12c"));
-    REQUIRE(!r.canInsertSheet(0, "with a space"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, ""));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "a"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "b"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "c"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "12c"));
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "with a space"));
 
-    r.insertSheet(0, "Sum");
-    REQUIRE(!r.canInsertSheet(0, "Sum"));
+    r.insertSheet(Tree::ROOT_SHEET, "Sum");
+    REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "Sum"));
 }
 
 TEST_CASE("Root::insertSheet")
 {
     Root r;
-    auto sum = r.insertSheet(0, "Sum");
-    REQUIRE(sum.i == 1);
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
+    REQUIRE(sum.i == 2);
 
-    auto mul = r.insertSheet(0, "Mul");
-    REQUIRE(mul.i == 2);
+    auto mul = r.insertSheet(Tree::ROOT_SHEET, "Mul");
+    REQUIRE(mul.i == 3);
 }
 
 TEST_CASE("Root::eraseSheet")
 {
     Root r;
-    auto sum = r.insertSheet(0, "Sum");
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
-    auto i = r.insertInstance(0, "i", sum);
-    REQUIRE(!r.checkItemName(0, "i"));
+    auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
+    REQUIRE(!r.checkItemName(Tree::ROOT_SHEET, "i"));
 
     r.eraseSheet(sum);
-    REQUIRE(r.checkItemName(0, "i"));
+    REQUIRE(r.checkItemName(Tree::ROOT_SHEET, "i"));
 }
 
 TEST_CASE("Root::callSheet")
 {
     Root r;
-    auto sum = r.insertSheet(0, "Sum");
-    auto c = r.insertCell(0, "a", "13.5");
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
+    auto c = r.insertCell(Tree::ROOT_SHEET, "a", "13.5");
 
     SECTION("No cells")
     {
         std::string err;
-        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {}, &err);
         REQUIRE(err == "");
         REQUIRE(out.size() == 0);
     }
@@ -276,7 +276,7 @@ TEST_CASE("Root::callSheet")
     {
         r.insertCell(sum, "in", "(input 12)");
         std::string err;
-        auto out = r.callSheet({{0}, c}, sum, {}, &err);
+        auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {}, &err);
         REQUIRE(err != "");
         REQUIRE(out.size() == 0);
     }
@@ -286,7 +286,7 @@ TEST_CASE("Root::callSheet")
         r.insertCell(sum, "in", "(input 12)");
         std::string err;
         auto v = Value(nullptr, "", true);
-        auto out = r.callSheet({{0}, c}, sum, {v, v}, &err);
+        auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {v, v}, &err);
         REQUIRE(err != "");
         REQUIRE(out.size() == 0);
     }
@@ -297,10 +297,10 @@ TEST_CASE("Root::callSheet")
 
         // Get a value from c (this is just a way to get a value interpreter
         // ValuePtr without jumping through many hoops)
-        auto val = r.getItem(c).cell()->values.at({0});
+        auto val = r.getItem(c).cell()->values.at({Tree::ROOT_INSTANCE});
 
         std::string err;
-        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+        auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
         REQUIRE(err == "");
         REQUIRE(out.size() == 1);
         REQUIRE(out.count("in") == 1);
@@ -313,8 +313,8 @@ TEST_CASE("Root::callSheet")
         r.insertCell(sum, "out", "(output (+ (in) 15))");
 
         std::string err;
-        auto val = r.getItem(c).cell()->values.at({0});
-        auto out = r.callSheet({{0}, c}, sum, {val}, &err);
+        auto val = r.getItem(c).cell()->values.at({Tree::ROOT_INSTANCE});
+        auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
 
         REQUIRE(err == "");
         REQUIRE(out.size() == 2);
@@ -327,7 +327,7 @@ TEST_CASE("Root::insertInstance")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "Sum");
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
     SECTION("Cells within sheet")
     {
@@ -335,8 +335,8 @@ TEST_CASE("Root::insertInstance")
         auto b = r.insertCell(sum, "b", "2");
         auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto i = r.insertInstance(0, "instance", sum);
-        REQUIRE(r.getValue({{0, i}, out}).str == "3");
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, out}).str == "3");
     }
 
     SECTION("Multiple instances")
@@ -345,10 +345,10 @@ TEST_CASE("Root::insertInstance")
         auto b = r.insertCell(sum, "b", "2");
         auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto i = r.insertInstance(0, "instance", sum);
-        auto j = r.insertInstance(0, "jnstance", sum);
-        REQUIRE(r.getValue({{0, i}, out}).value !=
-                r.getValue({{0, j}, out}).value);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
+        auto j = r.insertInstance(Tree::ROOT_SHEET, "jnstance", sum);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, out}).value !=
+                r.getValue({{Tree::ROOT_INSTANCE, j}, out}).value);
     }
 
     SECTION("Sheet input default")
@@ -357,39 +357,39 @@ TEST_CASE("Root::insertInstance")
         auto b = r.insertCell(sum, "b", "2");
         auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-        auto i = r.insertInstance(0, "instance", sum);
-        REQUIRE(r.getValue({{0, i}, out}).str == "12");
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, out}).str == "12");
     }
 
     SECTION("Input evaluation environment")
     {
         auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
-        auto i = r.insertInstance(0, "instance", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
 
-        auto a = r.insertCell(0, "a", "12");
-        REQUIRE(r.getValue({{0, i}, input}).str == "13");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "12");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, input}).str == "13");
 
         r.setExpr(a, "13");
-        REQUIRE(r.getValue({{0, i}, input}).str == "14");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, input}).str == "14");
     }
 
     SECTION("Output values")
     {
         auto a = r.insertCell(sum, "a", "(output 10)");
-        auto i = r.insertInstance(0, "i", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
 
-        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
-        REQUIRE(r.getValue({{0}, b}).str == "11");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 (i 'a))");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str == "11");
     }
 
     SECTION("Detecting a new instance + output")
     {
-        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 (i 'a))");
 
         auto a = r.insertCell(sum, "a", "(output 10)");
-        auto i = r.insertInstance(0, "i", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
 
-        REQUIRE(r.getValue({{0}, b}).str == "11");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str == "11");
     }
 }
 
@@ -397,34 +397,34 @@ TEST_CASE("Root::setInput")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "Sum");
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
     auto a = r.insertCell(sum, "a", "(input 10)");
     auto b = r.insertCell(sum, "b", "2");
     auto out = r.insertCell(sum, "out", "(+ (a) (b))");
 
-    auto i = r.insertInstance(0, "instance", sum);
+    auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
     r.setInput(i, a, "12");
 
-    REQUIRE(r.getValue({{0, i}, out}).str == "14");
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, out}).str == "14");
 }
 
 TEST_CASE("Root::eraseInstance")
 {
     Root r;
 
-    auto sum = r.insertSheet(0, "Sum");
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
 
     SECTION("Re-evaluating outputs")
     {
-        auto b = r.insertCell(0, "b", "(+ 1 (i 'a))");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "(+ 1 (i 'a))");
 
         auto a = r.insertCell(sum, "a", "(output 10)");
-        auto i = r.insertInstance(0, "i", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "i", sum);
 
         r.eraseInstance(i);
-        CAPTURE(r.getValue({{0}, b}).str);
-        REQUIRE(r.getValue({{0}, b}).valid == false);
+        CAPTURE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).valid == false);
     }
 
     SECTION("Cleaning of values")
@@ -444,9 +444,9 @@ TEST_CASE("Root::eraseInstance")
     SECTION("Cleaning of dependency list")
     {
         auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
-        auto i = r.insertInstance(0, "instance", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
 
-        auto a = r.insertCell(0, "a", "12"); // used in input
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "12"); // used in input
         r.eraseInstance(i);
 
         r.setExpr(a, "13");
@@ -460,18 +460,18 @@ TEST_CASE("Root::clear")
 
     SECTION("Basic")
     {
-        auto a = r.insertCell(0, "a", "(+ 1 2)");
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)");
         r.clear();
         REQUIRE(true /* didn't crash */);
     }
 
     SECTION("With inputs")
     {
-        auto sum = r.insertSheet(0, "Sum");
+        auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
         auto input = r.insertCell(sum, "in", "(input (+ 1 (a)))");
-        auto i = r.insertInstance(0, "instance", sum);
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
 
-        auto a = r.insertCell(0, "a", "12"); // used in input
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "12"); // used in input
         r.clear();
         REQUIRE(true /* didn't crash */);
     }
@@ -501,7 +501,7 @@ TEST_CASE("Root::toString")
 
     SECTION("Single cell")
     {
-        r.insertCell(0, "x", "(+ 1 2)");
+        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
         auto before = r.toString();
         CAPTURE(before);
         REQUIRE(r.fromString(before) == "");
@@ -510,9 +510,9 @@ TEST_CASE("Root::toString")
 
     SECTION("Clearing existing values")
     {
-        r.insertCell(0, "x", "(+ 1 2)");
+        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
         auto before = r.toString();
-        r.insertCell(0, "y", "15");
+        r.insertCell(Tree::ROOT_SHEET, "y", "15");
 
         CAPTURE(before);
         REQUIRE(r.fromString(before) == "");
@@ -521,7 +521,7 @@ TEST_CASE("Root::toString")
 
     SECTION("Sheet")
     {
-        auto s = r.insertSheet(0, "Sheet");
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
         auto a = r.insertCell(s, "a", "15");
 
         auto before = r.toString();

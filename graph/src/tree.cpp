@@ -3,10 +3,13 @@
 
 namespace Graph {
 
+const SheetIndex Tree::ROOT_SHEET = 0;
+const InstanceIndex Tree::ROOT_INSTANCE = 1;
+
 Tree::Tree()
 {
-    storage.insert({0, Item(1)});   // root instance
-    storage.insert({1, Item()});    // root sheet
+    storage.insert({ROOT_INSTANCE, Item(ROOT_SHEET)});
+    storage.insert({ROOT_SHEET, Item()});
 }
 
 Tree::~Tree()
@@ -78,7 +81,8 @@ const std::list<ItemIndex>& Tree::iterItems(const SheetIndex& parent) const
 
 std::list<Env> Tree::envsOf(const SheetIndex& s) const
 {
-    std::list<std::pair<Env, SheetIndex>> todo = {{{0}, 0}};
+    std::list<std::pair<Env, SheetIndex>> todo =
+            {{{ROOT_INSTANCE}, ROOT_SHEET}};
     std::list<Env> found;
 
     while (todo.size())

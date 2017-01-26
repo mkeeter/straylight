@@ -388,8 +388,8 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
 
 void Root::serialize(TreeSerializer* s) const
 {
-    s->instance(0, "", "");
-    serialize(s, {0});
+    s->instance(Tree::ROOT_INSTANCE, "", "");
+    serialize(s, {Tree::ROOT_INSTANCE});
 }
 
 void Root::serialize(TreeSerializer* s, const Env& env) const
@@ -460,7 +460,7 @@ std::string Root::toString() const
     obj.insert({"type", picojson::value("Straylight")});
     obj.insert({"version", picojson::value((int64_t)1)});
 
-    obj.insert({"root", toJson(SheetIndex(0))});
+    obj.insert({"root", toJson(Tree::ROOT_SHEET)});
     return picojson::value(obj).serialize();
 }
 
@@ -543,7 +543,7 @@ std::string Root::fromString(const std::string& str)
     REQUIRE(version == 1, "Invalid version code");
 
     REQUIRE(obj.count("root"), "'root' member must be present");
-    return fromJson(0, obj["root"]);
+    return fromJson(Tree::ROOT_SHEET, obj["root"]);
 }
 
 std::string Root::fromJson(SheetIndex sheet, const picojson::value& value)
@@ -611,7 +611,7 @@ void Root::clear()
     auto lock = Lock();
 
     // Erase every item in the root sheet
-    const auto items = iterItems({0});
+    const auto items = iterItems(Tree::ROOT_SHEET);
     for (auto i : items)
     {
         if (getItem(i).instance())
