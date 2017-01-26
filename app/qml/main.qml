@@ -93,7 +93,6 @@ ApplicationWindow {
     //  This splitview contains our sheets on the left and the OpenGL canvas
     //  on the right.  The OpenGL canvas is a minimal object that forwards
     //  everything through the Bridge
-    //  TODO: make the Canvas call its own functions (instead of fowarding)
     SplitView {
         anchors.fill: parent
         orientation: Qt.Horizontal
