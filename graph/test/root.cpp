@@ -313,7 +313,7 @@ TEST_CASE("Root::callSheet")
         r.insertCell(sum, "out", "(output (+ (in) 15))");
 
         std::string err;
-        auto val = r.getTree().at(c).cell()->values.at({Tree::ROOT_INSTANCE});
+        auto val = r.getValue({{Tree::ROOT_INSTANCE}, c});
         auto out = r.callSheet({{Tree::ROOT_INSTANCE}, c}, sum, {val}, &err);
 
         REQUIRE(err == "");
