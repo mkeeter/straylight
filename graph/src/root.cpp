@@ -69,36 +69,8 @@ InstanceIndex Root::insertInstance(const SheetIndex& parent,
                                    const std::string& name,
                                    const SheetIndex& target)
 {
-    auto i = tree.insertInstance(parent, name, target);
-
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-
-        // Then, mark all cells as dirty
-        for (const auto& c : tree.cellsOf(target))
-        {
-            auto env = e; // copy
-            env.push_back(i);
-            env.insert(e.end(), c.first.begin(), c.first.end());
-            markDirty({env, tree.nameOf(c.second)});
-        }
-    }
-
-    // Assign default expressions for inputs
-    for (const auto& t : tree.iterItems(target))
-    {
-        if (auto c = tree.at(t).cell())
-        {
-            if (c->type == Cell::INPUT)
-            {
-                tree.at(i).instance()->inputs[CellIndex(t.i)] =
-                    interpreter.defaultExpr(c->expr);
-            }
-        }
-    }
-
-    sync();
+    auto i = InstanceIndex(tree.nextIndex());
+    insertInstance(parent, i, name, target);
     return i;
 }
 
