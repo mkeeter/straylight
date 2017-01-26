@@ -249,8 +249,6 @@ protected:
     ////////////////////////////////////////////////////////////////////////////
 
     /*  Here's all the data in the graph.  */
-    /*  This is our mutable tree; we also define a const reference to it
-     *  named tree that is accessible for others to read */
     Tree tree;
 
     /*  When locked, changes don't provoke evaluation
