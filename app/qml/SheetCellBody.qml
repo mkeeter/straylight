@@ -48,6 +48,7 @@ GridLayout {
 
             id: exprText
             property string expr
+            property bool hasMatch
 
             function syncText() {
                 var c = cursorPosition
@@ -59,13 +60,13 @@ GridLayout {
 
             Rectangle {
                 id: matchA
-                visible: false
+                visible: parent.hasMatch && parent.activeFocus
                 color: Material.lime
                 opacity: 0.5
             }
             Rectangle {
                 id: matchB
-                visible: false
+                visible: parent.hasMatch && parent.activeFocus
                 color: Material.lime
                 opacity: 0.5
             }
@@ -90,9 +91,9 @@ GridLayout {
                 if (pos.x != -1 && pos.y != -1) {
                     highlightPos(pos.x, matchA)
                     highlightPos(pos.y, matchB)
+                    hasMatch = true;
                 } else {
-                    matchA.visible = false;
-                    matchB.visible = false;
+                    hasMatch = false;
                 }
             }
 
@@ -105,7 +106,6 @@ GridLayout {
 
                 obj.x = r.x
                 obj.y = r.y
-                obj.visible = true;
                 obj.height = r.height
                 obj.width = positionToRectangle(pos + 1).x - r.x
             }
