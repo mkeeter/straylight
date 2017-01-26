@@ -48,6 +48,12 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
         }
     }
 
+    {   // Mark everything that looked at the cell's dummy key as dirty
+        std::stringstream ss;
+        ss << cell.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 
     return cell;
@@ -167,6 +173,13 @@ void Root::eraseCell(const CellIndex& cell)
             tree.at(i).instance()->inputs.erase(cell);
         }
     }
+
+    {   // Mark everything that looked at the cell's dummy key as dirty
+        std::stringstream ss;
+        ss << cell.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 }
 
@@ -283,6 +296,15 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     {
         markDirty({e, tree.nameOf(i)});
     }
+
+    {   // Mark anything that looked for the cell's dummy NameKey as dirty
+        // This is how we properly re-evaluate things that call a sheet when
+        // a cell internal to that sheet changes.
+        std::stringstream ss;
+        ss << i.i;
+        markDirty({{}, ss.str()});
+    }
+
     sync();
 
     return true;
@@ -534,16 +556,33 @@ std::map<std::string, Value> Root::callSheet(
     assert(dirty.top().size() == 0);
     dirty.pop();
 
-    // Grab all inputs and outputs and put them in the output map
-    for (const auto& c : tree.cellsOf(sheet))
-    {
-        if (c.first.empty())
+    {   // Grab all inputs and outputs and put them in the output map
+        std::set<CellIndex> cells;
+        for (const auto& c : tree.cellsOf(sheet))
         {
-            auto cell = tree.at(c.second).cell();
-            if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
+            cells.insert(c.second);
+            if (c.first.empty())
             {
-                out.insert({tree.nameOf(c.second), cell->values.at(env)});
+                auto cell = tree.at(c.second).cell();
+                if (cell->type == Cell::INPUT || cell->type == Cell::OUTPUT)
+                {
+                    out.insert({tree.nameOf(c.second), cell->values.at(env)});
+                }
             }
+        }
+
+        // Then, record a dependency all of the cells.  This is a bit of a
+        // hack: because dependencies are stored by {Env, Name}, we convert
+        // the CellIndex into a string and use it as the name (with an empty
+        // Env).  Cells notify this dummy NameKey when they change.
+        //
+        // TODO: This could be made more efficient by only encoding the
+        // upstream deps of output cells in the temporary instance
+        for (const auto& c : cells)
+        {
+            std::stringstream ss;
+            ss << c.i;
+            deps.insert(caller, {{}, ss.str()});
         }
     }
 
@@ -676,9 +715,8 @@ void Root::markDirty(const NameKey& k)
 {
     // If the key refers to a valid environment and a cell that still
     // exists, then push it to the dirty list directly
-    if (tree.checkEnv(k.first))
+    if (k.first.size() && tree.checkEnv(k.first))
     {
-        assert(k.first.size() >= 1);
         auto sheet = tree.at(k.first.back()).instance()->sheet;
         if (tree.hasItem(sheet, k.second) &&
             tree.at(sheet, k.second).cell())
