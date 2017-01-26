@@ -475,6 +475,15 @@ TEST_CASE("Root::clear")
         r.clear();
         REQUIRE(true /* didn't crash */);
     }
+
+    SECTION("Clear")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto a = r.insertCell(s, "a", "15");
+
+        r.clear();
+        REQUIRE(r.insertCell(Tree::ROOT_SHEET, "a", "15").i == 2);
+    }
 }
 
 TEST_CASE("Root::loadString")
