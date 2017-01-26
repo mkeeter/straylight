@@ -330,8 +330,9 @@ std::string Root::loadString(const std::string& s)
     }
     else
     {
-        for (const auto& c : tree.cellsOf(Tree::ROOT_SHEET))
+        for (auto& c : tree.cellsOf(Tree::ROOT_SHEET))
         {
+            c.first.push_front(Tree::ROOT_INSTANCE);
             pushDirty(c);
         }
         sync();
