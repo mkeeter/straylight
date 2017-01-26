@@ -127,8 +127,7 @@ public:
     /*
      *  Renames a sheet
      */
-    void renameSheet(const SheetIndex& i, const std::string& name)
-        { tree.rename(i, name); }
+    void renameSheet(const SheetIndex& i, const std::string& name);
 
     /*
      *  Erases a sheet and any instances thereof

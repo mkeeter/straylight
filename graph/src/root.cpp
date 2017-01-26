@@ -616,10 +616,27 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     sync();
 }
 
+void Root::renameSheet(const SheetIndex& i, const std::string& name)
+{
+    tree.rename(i, name);
+
+    for (const auto& e : tree.envsOf(tree.parentOf(i)))
+    {
+        markDirty({e, name});
+    }
+}
+
 void Root::eraseSheet(const SheetIndex& s)
 {
     auto lock = Lock();
-    auto instances = tree.instancesOf(s);
+
+    const auto instances = tree.instancesOf(s);
+
+    // Store parent envs and sheet name so that we can trigger re-evaluation
+    // of everything watching the sheet by name
+    const auto envs = tree.envsOf(tree.parentOf(s));
+    const auto name = tree.nameOf(s);
+
     for (const auto& i : instances)
     {
         eraseInstance(i);
@@ -646,6 +663,12 @@ void Root::eraseSheet(const SheetIndex& s)
     }
 
     tree.erase(s);
+
+    //  Re-evaluate anything that was watching the sheet (by name)
+    for (const auto& e : envs)
+    {
+        markDirty({e, name});
+    }
     // Sync is called on lock destruction
 }
 
