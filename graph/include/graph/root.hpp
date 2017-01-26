@@ -7,11 +7,8 @@
 #include "graph/interpreter.hpp"
 #include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
-#include "graph/serializer.hpp"
 #include "graph/keys.hpp"
 #include "graph/tree.hpp"
-
-#include "picojson/picojson.h"
 
 namespace Graph {
 
@@ -97,27 +94,6 @@ public:
     void renameItem(const ItemIndex& i, const std::string& name);
 
     /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     *  This is commonly used to render into a UI in a immediate style
-     */
-    void serialize(TreeSerializer* s) const;
-
-    /*
-     *  Encode the entire graph in JSON
-     *
-     *  This is used to save files to disk with an appropriate encoder
-     */
-    std::string toString() const;
-
-    /*
-     *  Deserializes from string (which should be JSON)
-     *
-     *  The existing graph is cleared.
-     *  Returns an error string on failure or the empty string on success
-     */
-    std::string fromString(const std::string& str);
-
-    /*
      *  Removes all items from the graph
      */
     void clear();
@@ -150,15 +126,6 @@ public:
     void eraseSheet(const SheetIndex& s);
 
     /*
-     *  Returns all of the sheets above (contained within) the given env
-     *
-     *  Note that this doesn't tell us whether we can insert an instance
-     *  of these sheets, as this could create a recursive loop; use
-     *  tree.canInsertInstance to check.
-     */
-    std::list<SheetIndex> sheetsAbove(const Env& e) const;
-
-    /*
      *  Temporarily builds up the given sheet, setting the given inputs
      *
      *  Returns the sheet's IO values (wrapped); sets *err if an error occurs
@@ -166,6 +133,16 @@ public:
     std::map<std::string, Value> callSheet(
             const CellKey& caller, const SheetIndex& sheet,
             const std::list<Value> inputs, std::string* err=nullptr);
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    /*
+     *  Clears the graph and loads the given string
+     *
+     *  Returns an error string if there was an error, or empty string
+     *  on success.
+     */
+    std::string loadString(const std::string& s);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -209,12 +186,6 @@ protected:
     ////////////////////////////////////////////////////////////////////////////
 
     /*
-     *  Checks to see whether the given env is valid
-     *  (i.e. that every item in it exists and is an instance)
-     */
-    bool checkEnv(const Env& env) const;
-
-    /*
      *  Mark a particular key as dirty (if it exists); otherwise, marks
      *  everything that looked at it (the second case matters when we're
      *  deleting items from the graph)
@@ -226,25 +197,6 @@ protected:
      *  position in the list to minimize re-evaluation.
      */
     void pushDirty(const CellKey& k);
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     */
-    void serialize(TreeSerializer* s, const Env& env) const;
-
-    /*
-     *  Export the given sheet to JSON (recursively)
-     */
-    picojson::value toJson(SheetIndex sheet) const;
-
-    /*
-     *  Deserializes a particular sheet (recursively)
-     *
-     *  Returns an error string on error, empty string otherwise
-     */
-    std::string fromJson(SheetIndex sheet, const picojson::value& value);
 
     ////////////////////////////////////////////////////////////////////////////
 

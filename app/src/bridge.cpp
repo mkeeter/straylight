@@ -153,7 +153,7 @@ QString Bridge::saveFile(QUrl filename)
         return file.errorString();
     }
 
-    auto str = r.toString();
+    auto str = r.getTree().toString();
     file.write(str.data(), str.size());
     return "";
 }
@@ -167,7 +167,7 @@ QString Bridge::loadFile(QUrl filename)
     }
 
     auto str = file.readAll();
-    auto out = QString::fromStdString(r.fromString(str.toStdString()));
+    auto out = QString::fromStdString(r.loadString(str.toStdString()));
     sync();
     return out;
 }
@@ -228,7 +228,7 @@ Graph::Root* Bridge::root()
 void Bridge::sync()
 {
     assert(QObject::thread() == QThread::currentThread());
-    r.serialize(&bts);
+    r.getTree().serialize(&bts);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

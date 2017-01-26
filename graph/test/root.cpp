@@ -477,56 +477,25 @@ TEST_CASE("Root::clear")
     }
 }
 
-TEST_CASE("Root::fromString")
+TEST_CASE("Root::loadString")
 {
     Root r;
 
-    // For now, just check that a few invalid strings return errors
-    REQUIRE(r.fromString("HI THERE") != "");
-    REQUIRE(r.fromString("{}") != "");
-    REQUIRE(r.fromString("{") != "");
-}
-
-TEST_CASE("Root::toString")
-{
-    Root r;
-
-    SECTION("Empty file")
+    SECTION("Invalid strings")
     {
-        auto before = r.toString();
-        CAPTURE(before);
-        REQUIRE(r.fromString(before) == "");
-        REQUIRE(r.toString() == before);
+        REQUIRE(r.loadString("HI THERE") != "");
+        REQUIRE(r.loadString("{}") != "");
+        REQUIRE(r.loadString("{") != "");
     }
 
-    SECTION("Single cell")
+    SECTION("Value construction")
     {
-        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
-        auto before = r.toString();
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "15");
+
+        auto before = r.getTree().toString();
         CAPTURE(before);
-        REQUIRE(r.fromString(before) == "");
-        REQUIRE(r.toString() == before);
-    }
-
-    SECTION("Clearing existing values")
-    {
-        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
-        auto before = r.toString();
-        r.insertCell(Tree::ROOT_SHEET, "y", "15");
-
-        CAPTURE(before);
-        REQUIRE(r.fromString(before) == "");
-        REQUIRE(r.toString() == before);
-    }
-
-    SECTION("Sheet")
-    {
-        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
-        auto a = r.insertCell(s, "a", "15");
-
-        auto before = r.toString();
-        CAPTURE(before);
-        REQUIRE(r.fromString(before) == "");
-        REQUIRE(r.toString() == before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, a}).str == "15");
     }
 }
+

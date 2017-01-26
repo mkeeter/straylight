@@ -1,6 +1,7 @@
 #include "catch/catch.hpp"
 
 #include "graph/tree.hpp"
+#include "graph/root.hpp"
 
 using namespace Graph;
 
@@ -282,5 +283,49 @@ TEST_CASE("Tree::canInsertInstance")
     {
         auto ia = t.insertInstance(root, "ia", a);
         REQUIRE(t.canInsertInstance(root, a));
+    }
+}
+
+TEST_CASE("Tree::toString")
+{
+    Root r;
+
+    SECTION("Empty file")
+    {
+        auto before = r.getTree().toString();
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().toString() == before);
+    }
+
+    SECTION("Single cell")
+    {
+        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
+        auto before = r.getTree().toString();
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().toString() == before);
+    }
+
+    SECTION("Clearing existing values")
+    {
+        r.insertCell(Tree::ROOT_SHEET, "x", "(+ 1 2)");
+        auto before = r.getTree().toString();
+        r.insertCell(Tree::ROOT_SHEET, "y", "15");
+
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().toString() == before);
+    }
+
+    SECTION("Sheet")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto a = r.insertCell(s, "a", "15");
+
+        auto before = r.getTree().toString();
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().toString() == before);
     }
 }

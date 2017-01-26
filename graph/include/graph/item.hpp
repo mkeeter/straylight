@@ -7,7 +7,6 @@ namespace Graph {
 
 struct Instance;
 struct Cell;
-struct Sheet;
 
 class Item
 {

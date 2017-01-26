@@ -442,7 +442,7 @@ Value Interpreter::eval(const CellKey& key)
                     bindings));
         }
 
-        for (auto& i : root.sheetsAbove(env))
+        for (auto& i : root.getTree().sheetsAbove(env))
         {
             bindings = s7_cons(interpreter,
                     s7_make_symbol(interpreter, root.getTree().nameOf(i).c_str()),
