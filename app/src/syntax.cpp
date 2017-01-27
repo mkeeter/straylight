@@ -169,8 +169,8 @@ void SyntaxHighlighter::buildRules()
         keyword_format.setForeground(Material::blue_500);
         for (const auto& k : Bridge::singleton()->keywords())
         {
-            rules << Rule(QRegularExpression::escape(QString::fromStdString(k)),
-                          keyword_format);
+            auto esc = QRegularExpression::escape(QString::fromStdString(k));
+            rules << Rule("\\b" + esc + "\\b", keyword_format);
         }
     }
 
