@@ -6,6 +6,7 @@
 #include <QQuickItem>
 
 #include "bridge.hpp"
+#include "undo.hpp"
 #include "material.hpp"
 #include "canvas.hpp"
 
@@ -25,7 +26,10 @@ int main(int argc, char**argv)
     qmlRegisterType<CanvasObject>("Canvas", 1, 0, "Canvas");
 
     // Install Bridge singleton
-    qmlRegisterSingletonType<Bridge>("Bridge", 1, 0, "Bridge", Bridge::singleton);
+    qmlRegisterSingletonType<Bridge>(
+            "Bridge", 1, 0, "Bridge", Bridge::singleton);
+    qmlRegisterSingletonType<UndoStack>(
+            "UndoStack", 1, 0, "UndoStack", UndoStack::singleton);
     qmlRegisterSingletonType<Material>(
             "Material", 1, 0, "Material", Material::singleton);
 
