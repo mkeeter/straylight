@@ -8,6 +8,9 @@ SplitView {
     id: sstack
     width: 0
 
+    // Global variable to keep track of the selected item
+    property var selectedItem: undefined
+
     // This is the component that's initialized in our stack of sheets
     Component {
         id: sheetViewComponent
