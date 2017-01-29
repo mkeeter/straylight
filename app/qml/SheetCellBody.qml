@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 
 import Style 1.0
 import Bridge 1.0
+import UndoStack 1.0
 import Awesome 4.7
 import Material 1.0
 
@@ -56,6 +57,17 @@ GridLayout {
                     (ioType == 'input' ? '(input ...)' :
                         (expr.length ? expr : 'Expression'))
                 cursorPosition = Math.min(text.length, c)
+            }
+
+            // Catch undo / redo keys to use the global undo / redo stack
+            Keys.onPressed: {
+                if (event.matches(StandardKey.Undo)) {
+                    UndoStack.tryUndo();
+                    event.accepted = true
+                } else if (event.matches(StandardKey.Redo)) {
+                    UndoStack.tryRedo();
+                    event.accepted = true
+                }
             }
 
             Rectangle {

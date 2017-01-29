@@ -20,6 +20,22 @@ UndoStack* UndoStack::singleton()
     return _instance;
 }
 
+void UndoStack::tryUndo()
+{
+    if (canUndo())
+    {
+        undo();
+    }
+}
+
+void UndoStack::tryRedo()
+{
+    if (canRedo())
+    {
+        redo();
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 UndoCommand::UndoCommand(Bridge& bridge, Graph::Root& root,

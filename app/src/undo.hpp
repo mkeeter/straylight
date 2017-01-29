@@ -11,12 +11,16 @@ class Bridge;
 
 class UndoStack : public QUndoStack
 {
+    Q_OBJECT
 public:
     /*
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
     static UndoStack* singleton();
+
+    Q_INVOKABLE void tryUndo();
+    Q_INVOKABLE void tryRedo();
 
 protected:
     static UndoStack* _instance;
