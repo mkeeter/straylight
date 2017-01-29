@@ -27,7 +27,7 @@ protected:
 class UndoCommand : public QUndoCommand
 {
 public:
-    UndoCommand(Bridge& bridge, Graph::Root& root,
+    UndoCommand(Bridge& bridge, Graph::Root& root, const QString& desc,
                 const std::string& before, const std::string& after);
 
     void undo() override;

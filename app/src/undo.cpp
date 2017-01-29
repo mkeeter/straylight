@@ -23,9 +23,11 @@ UndoStack* UndoStack::singleton()
 ////////////////////////////////////////////////////////////////////////////////
 
 UndoCommand::UndoCommand(Bridge& bridge, Graph::Root& root,
+                         const QString& desc,
                          const std::string& before,
                          const std::string& after)
-    : bridge(bridge), root(root), before(before), after(after)
+    : QUndoCommand(desc), bridge(bridge), root(root),
+      before(before), after(after)
 {
     // Nothing to do here
 }
