@@ -139,7 +139,7 @@ Column {
                 color: Style.primary
                 width: 10
                 height: itemDelegate.height
-                opacity: isInstanceOpen || sstack.selectedItem == itemDelegate
+                opacity: isInstanceOpen
                 Behavior on opacity { OpacityAnimator { duration: 100 }}
             }
 
@@ -151,8 +151,26 @@ Column {
         }
         MouseArea {
             anchors.fill: fullDelegate
-            onPressed: { sstack.selectedItem = itemDelegate }
+            onPressed: {
+                if (sstack.selectedItem == itemDelegate) {
+                    sstack.selectedItem = undefined
+                } else {
+                    sstack.selectedItem = itemDelegate
+                }
+            }
             z: -100
+        }
+        Rectangle {
+            anchors.left: fullDelegate.left
+            anchors.verticalCenter: fullDelegate.verticalCenter
+
+            width: fullDelegate.width + 15
+            height: fullDelegate.height + 10
+
+            color: Style.itemSelect
+            opacity: sstack.selectedItem == itemDelegate
+            Behavior on opacity { OpacityAnimator { duration: 100 }}
+            z: -1
         }
     }
     property bool isInstanceOpen: sheetStack.env.indexOf(uniqueIndex) != -1

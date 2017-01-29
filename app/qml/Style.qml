@@ -21,4 +21,6 @@ readonly property color sheetTitle: primary
 readonly property color textEditValid: Material.green_500
 readonly property color textEditInvalid: Material.red_500
 readonly property color textSelect: Material.blue_grey_500
+
+readonly property color itemSelect: Material.blue_grey_100
 }
