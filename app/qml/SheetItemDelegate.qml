@@ -127,22 +127,32 @@ Column {
         }
     }
 
-    Row {
+    Item {
         width: parent.width
+        height: fullDelegate.height
 
-        Rectangle {
-            id: instancePadding
-            color: Style.primary
-            width: 10
-            height: del.height
-            opacity: isInstanceOpen
-            Behavior on opacity { OpacityAnimator { duration: 100 }}
+        Row {
+            width: parent.width
+            id: fullDelegate
+            Rectangle {
+                id: instancePadding
+                color: Style.primary
+                width: 10
+                height: itemDelegate.height
+                opacity: isInstanceOpen
+                Behavior on opacity { OpacityAnimator { duration: 100 }}
+            }
+
+            Loader {
+                id: itemDelegate
+                width: parent.width - instancePadding.width
+                sourceComponent: bestDelegate(type)
+            }
         }
-
-        Loader {
-            id: del
-            width: parent.width - instancePadding.width
-            sourceComponent: bestDelegate(type)
+        MouseArea {
+            anchors.fill: fullDelegate
+            onPressed: { console.log("PRESSED") }
+            z: -100
         }
     }
     property bool isInstanceOpen: sheetStack.env.indexOf(uniqueIndex) != -1
