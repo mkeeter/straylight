@@ -13,7 +13,7 @@ import "/js/vendor/underscore.js" as Underscore
 
 ApplicationWindow {
     visible: true
-    title: "Straylight"
+    title: "Straylight [" + (file ? Bridge.filePath(file) : "unsaved") + "]"
 
     width: 640
     height: 480
@@ -38,13 +38,29 @@ ApplicationWindow {
 
     ////////////////////////////////////////////////////////////////////////////
     //  Menu bar, with all the functions you'd expect
+    property var file: false
+
     menuBar: MenuBar {
         Menu {
             title: "File"
             MenuItem {
                 text: "&New"
-                onTriggered: Bridge.clearFile()
+                onTriggered: {
+                    Bridge.clearFile()
+                    file = false
+                }
                 shortcut: StandardKey.New
+            }
+            MenuItem {
+                text: "&Save"
+                onTriggered: {
+                    if (file) {
+                        Bridge.saveFile(file)
+                    } else {
+                        saveDialog.visible = true
+                    }
+                }
+                shortcut: StandardKey.Save
             }
             MenuItem {
                 text: "&Save As"
@@ -71,7 +87,8 @@ ApplicationWindow {
         title: "Please choose a file"
         folder: shortcuts.home
         onAccepted: {
-            Bridge.saveFile(saveDialog.fileUrl)
+            file = saveDialog.fileUrl
+            Bridge.saveFile(file)
             // TODO: error handling here
         }
         selectExisting: false

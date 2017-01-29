@@ -178,6 +178,11 @@ void Bridge::clearFile()
     sync();
 }
 
+QString Bridge::filePath(QUrl filename) const
+{
+    return filename.toLocalFile();
+}
+
 QString Bridge::nextItemName(int sheet_index) const
 {
     return QString::fromStdString(

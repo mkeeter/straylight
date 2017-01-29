@@ -72,6 +72,11 @@ public:
     Q_INVOKABLE void clearFile();
 
     /*
+     *  Extracts the path from a QUrl
+     */
+    Q_INVOKABLE QString filePath(QUrl filename) const;
+
+    /*
      *  Constructor for the QML singleton
      */
     static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
