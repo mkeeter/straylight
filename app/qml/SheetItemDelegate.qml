@@ -134,6 +134,8 @@ Column {
         Row {
             width: parent.width
             id: fullDelegate
+
+            // This rectangle is colorful when an instance is open
             Rectangle {
                 id: instancePadding
                 color: Style.primary
@@ -143,6 +145,7 @@ Column {
                 Behavior on opacity { OpacityAnimator { duration: 100 }}
             }
 
+            // Here, we load the correct item delegate
             Loader {
                 id: itemDelegate
                 width: parent.width - instancePadding.width
@@ -152,15 +155,21 @@ Column {
         MouseArea {
             anchors.fill: fullDelegate
             onPressed: {
+                // TODO: use currentItem / currentIndex of the ListView
                 if (sstack.selectedItem == itemDelegate) {
                     sstack.selectedItem = undefined
                 } else {
                     sstack.selectedItem = itemDelegate
+                    selectRect.focus = true
                 }
             }
             z: -100
         }
+
+        // This rectangle handles selection and the actions that can be taken
+        // when an item is selected (mostly deletion at the moment)
         Rectangle {
+            id: selectRect
             anchors.left: fullDelegate.left
             anchors.verticalCenter: fullDelegate.verticalCenter
 
@@ -169,7 +178,19 @@ Column {
 
             color: Style.itemSelect
             opacity: sstack.selectedItem == itemDelegate
-            Behavior on opacity { OpacityAnimator { duration: 100 }}
+            Behavior on opacity { OpacityAnimator { duration: 50 }}
+            Shortcut {
+                sequence: StandardKey.Delete
+                onActivated: {
+                    if (type == 'cell') {
+                        Bridge.eraseCell(uniqueIndex)
+                    } else if (type == 'instance') {
+                        Bridge.eraseInstance(uniqueIndex)
+                    } else {
+                        console.log("Unknown type " + type)
+                    }
+                }
+            }
             z: -1
         }
     }
