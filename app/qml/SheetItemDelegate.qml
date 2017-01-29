@@ -139,7 +139,7 @@ Column {
                 color: Style.primary
                 width: 10
                 height: itemDelegate.height
-                opacity: isInstanceOpen
+                opacity: isInstanceOpen || sstack.selectedItem == itemDelegate
                 Behavior on opacity { OpacityAnimator { duration: 100 }}
             }
 
@@ -151,7 +151,7 @@ Column {
         }
         MouseArea {
             anchors.fill: fullDelegate
-            onPressed: { console.log("PRESSED") }
+            onPressed: { sstack.selectedItem = itemDelegate }
             z: -100
         }
     }
