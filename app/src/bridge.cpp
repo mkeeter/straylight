@@ -40,8 +40,12 @@ QString Bridge::checkItemRename(int item_index, QString name) const
 
 void Bridge::renameItem(int item_index, QString name)
 {
-    auto c = Checkpoint("Rename item");
-    r.renameItem(item_index, name.toStdString());
+    const auto n = name.toStdString();
+    if (n != r.getTree().nameOf(item_index))
+    {
+        auto c = Checkpoint("Rename item");
+        r.renameItem(item_index, n);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +71,12 @@ QString Bridge::checkSheetRename(int sheet_index, QString name) const
 
 void Bridge::renameSheet(int sheet_index, QString name)
 {
-    auto c = Checkpoint("Rename sheet");
-    r.renameSheet(sheet_index, name.toStdString());
+    const auto n = name.toStdString();
+    if (n != r.getTree().nameOf(sheet_index))
+    {
+        auto c = Checkpoint("Rename sheet");
+        r.renameSheet(sheet_index, name.toStdString());
+    }
 }
 
 void Bridge::insertSheet(int sheet_index, QString name)
