@@ -262,8 +262,7 @@ Bridge::Checkpoint::Checkpoint(const QString& desc)
 Bridge::Checkpoint::~Checkpoint()
 {
     UndoStack::singleton()->push(new UndoCommand(
-                *Bridge::singleton(), *Bridge::root(), desc,
-                before, Bridge::root()->getTree().toString()));
+                desc, before, Bridge::root()->getTree().toString()));
     Bridge::singleton()->sync();
 }
 

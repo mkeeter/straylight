@@ -50,6 +50,7 @@ GridLayout {
             id: exprText
             property string expr
             property bool hasMatch
+            property bool undoing: false
 
             function syncText() {
                 var c = cursorPosition
@@ -62,10 +63,11 @@ GridLayout {
             // Catch undo / redo keys to use the global undo / redo stack
             Keys.onPressed: {
                 if (event.matches(StandardKey.Undo)) {
-                    UndoStack.tryUndo();
+                    storeUndo()
+                    UndoStack.tryUndo()
                     event.accepted = true
                 } else if (event.matches(StandardKey.Redo)) {
-                    UndoStack.tryRedo();
+                    UndoStack.tryRedo()
                     event.accepted = true
                 }
             }
@@ -87,11 +89,63 @@ GridLayout {
                 syncText()
                 Bridge.installHighlighter(textDocument)
             }
-            onActiveFocusChanged: syncText()
+            onActiveFocusChanged: {
+                syncText()
+                // If we're losing focus, then store the undo command now
+                // (rather than waiting two seconds for the timer to elapse)
+                if (!activeFocus) {
+                    storeUndo()
+                }
+            }
             onExprChanged: syncText()
 
+            onCanUndoChanged: {
+                if (canUndo) {
+                    UndoStack.mark("edit text")
+                }
+            }
+
+            function storeUndo() {
+                if (undoTimer.running) {
+                    undoTimer.stop()
+                }
+                if (canUndo)
+                {
+                    // Store the actual undo command to the stack
+                    UndoStack.finish()
+
+                    // Store the final state so we can restore it
+                    var textAfter = text
+                    var c = cursorPosition
+
+                    // Here, we call undo just to clear out the undo stack
+                    // (because otherwise the onCanUndoChanged handler won't
+                    // be called ever again), then immediately restore text
+                    // and cursor position.
+                    undoing = true;
+                        undo()
+                        text = textAfter
+                    undoing = false;
+
+                    cursorPosition = Math.min(text.length, c)
+
+                    if (canUndo) {
+                        console.log("ERROR: too many undos in stack")
+                    }
+                }
+            }
+
+            Timer {
+                id: undoTimer
+                interval: 2000
+                onTriggered: {
+                    exprText.storeUndo()
+                }
+            }
+
             onTextChanged: {
-                if (activeFocus) {
+                if (activeFocus && !undoing) {
+                    undoTimer.restart()
                     Bridge.setExpr(uniqueIndex, text)
                 }
                 onCursorPositionChanged()

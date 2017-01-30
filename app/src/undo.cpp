@@ -36,26 +36,35 @@ void UndoStack::tryRedo()
     }
 }
 
+void UndoStack::mark(const QString& d)
+{
+    desc = d;
+    state = Bridge::singleton()->root()->getTree().toString();
+}
+
+void UndoStack::finish()
+{
+    push(new UndoCommand(desc, state, Bridge::root()->getTree().toString()));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-UndoCommand::UndoCommand(Bridge& bridge, Graph::Root& root,
-                         const QString& desc,
+UndoCommand::UndoCommand(const QString& desc,
                          const std::string& before,
                          const std::string& after)
-    : QUndoCommand(desc), bridge(bridge), root(root),
-      before(before), after(after)
+    : QUndoCommand(desc), before(before), after(after)
 {
     // Nothing to do here
 }
 
 void UndoCommand::undo()
 {
-    root.loadString(before);
-    bridge.sync();
+    Bridge::singleton()->root()->loadString(before);
+    Bridge::singleton()->sync();
 }
 
 void UndoCommand::redo()
 {
-    root.loadString(after);
-    bridge.sync();
+    Bridge::singleton()->root()->loadString(after);
+    Bridge::singleton()->sync();
 }

@@ -22,7 +22,20 @@ public:
     Q_INVOKABLE void tryUndo();
     Q_INVOKABLE void tryRedo();
 
+    /*
+     *  Stores the state of the graph in state
+     */
+    Q_INVOKABLE void mark(const QString& d);
+
+    /*
+     *  Pushes a new UndoCommand from state to current state
+     */
+    Q_INVOKABLE void finish();
+
 protected:
+    std::string state;
+    QString desc;
+
     static UndoStack* _instance;
 };
 
@@ -31,16 +44,13 @@ protected:
 class UndoCommand : public QUndoCommand
 {
 public:
-    UndoCommand(Bridge& bridge, Graph::Root& root, const QString& desc,
-                const std::string& before, const std::string& after);
+    UndoCommand(const QString& desc, const std::string& before,
+                const std::string& after);
 
     void undo() override;
     void redo() override;
 
 protected:
-    Bridge& bridge;
-    Graph::Root& root;
-
     const std::string before;
     const std::string after;
 };
