@@ -20,24 +20,13 @@ GridLayout {
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
-    TextEdit {
+    ExpressionEdit {
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
-        font.family: fixedWidth.name
-        selectionColor: Style.textSelect
-        selectByMouse: true
-
-        id: exprText
-        property string expr
-
-        onActiveFocusChanged: { syncText() }
-        onExprChanged: { syncText() }
-
-        onTextChanged: {
+        function setExpr() {
             if (activeFocus) {
                 Bridge.setInput(instanceIndex, uniqueIndex, text)
             }
