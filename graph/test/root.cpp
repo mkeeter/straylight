@@ -570,5 +570,16 @@ TEST_CASE("Root::loadString")
         REQUIRE(r.loadString(before) == "");
         REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, a}).str == "15");
     }
+
+    SECTION("Cell types")
+    {
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "(input 15)");
+        REQUIRE(r.getTree().at(a).cell()->type == Cell::INPUT);
+
+        auto before = r.getTree().toString();
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().at(a).cell()->type == Cell::INPUT);
+    }
 }
 
