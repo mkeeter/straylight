@@ -332,10 +332,20 @@ std::string Root::loadString(const std::string& s)
     }
     else
     {
+        std::set<Cell*> cells;
+
         for (auto& c : tree.cellsOf(Tree::ROOT_SHEET))
         {
             c.first.push_front(Tree::ROOT_INSTANCE);
+            cells.insert(tree.at(c.second).cell());
             pushDirty(c);
+        }
+
+        // Parse cells to grab expression type here
+        for (auto& c : cells)
+        {
+            assert(c);
+            c->type = interpreter.cellType(c->expr);
         }
         sync();
 
