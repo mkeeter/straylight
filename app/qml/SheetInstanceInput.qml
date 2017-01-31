@@ -28,7 +28,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        function setExpr() {
+        function setExpr(text) {
             Bridge.setInput(instanceIndex, uniqueIndex, text)
         }
 
