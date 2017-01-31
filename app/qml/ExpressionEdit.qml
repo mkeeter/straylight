@@ -5,131 +5,158 @@ import Style 1.0
 import Material 1.0
 import UndoStack 1.0
 
-TextEdit {
-    font.family: fixedWidth.name
-    selectionColor: Style.textSelect
-    selectByMouse: true
-    color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
+Flickable {
+    id: flick
+    clip: true
+    height: txt.height
 
+    function scrollTo(r) {
+        if (contentX >= r.x) {
+            contentX = r.x;
+        } else if (contentX + width <= r.x + r.width) {
+            contentX = r.x + r.width - width;
+        }
+    }
+
+    // Anything using an ExpressionEdit must define setExpr and getText
     property string expr: ""
-    property bool undoing: false
-    property bool hasMatch: false
+    property alias lineCount: txt.lineCount
 
-    // Catch undo / redo keys to use the global undo / redo stack
-    Keys.onPressed: {
-        if (event.matches(StandardKey.Undo)) {
-            storeUndo()
-            UndoStack.tryUndo()
-            event.accepted = true
-        } else if (event.matches(StandardKey.Redo)) {
-            UndoStack.tryRedo()
-            event.accepted = true
-        }
-    }
+    function setFocus() { txt.forceActiveFocus() }
 
-    // Rectangles to highlight matched parentheses
-    Rectangle {
-        id: matchA
-        visible: parent.hasMatch && parent.activeFocus
-        color: Material.lime
-        opacity: 0.5
-    }
-    Rectangle {
-        id: matchB
-        visible: parent.hasMatch && parent.activeFocus
-        color: Material.lime
-        opacity: 0.5
-    }
+    onExprChanged: txt.syncText()
 
-    Component.onCompleted: {
-        syncText()
-        Bridge.installHighlighter(textDocument)
-    }
-    onActiveFocusChanged: {
-        syncText()
-        // If we're losing focus, then store the undo command now
-        // (rather than waiting two seconds for the timer to elapse)
-        if (!activeFocus) {
-            storeUndo()
-        }
-    }
-    onExprChanged: syncText()
+    TextEdit {
+        id: txt
+        font.family: fixedWidth.name
+        selectionColor: Style.textSelect
+        selectByMouse: true
+        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
 
-    onTextChanged: {
-        if (activeFocus && !undoing) {
-            undoTimer.restart()
-            setExpr()
-        }
-        onCursorPositionChanged()
-    }
+        property bool undoing: false
+        property bool hasMatch: false
 
-    onCanUndoChanged: {
-        if (canUndo) {
-            UndoStack.mark("edit text")
-        }
-    }
-
-    function storeUndo() {
-        if (undoTimer.running) {
-            undoTimer.stop()
-        }
-        if (canUndo)
-        {
-            // Store the actual undo command to the stack
-            UndoStack.finish()
-
-            // Store the final state so we can restore it
-            var textAfter = text
-            var c = cursorPosition
-
-            // Here, we call undo just to clear out the undo stack
-            // (because otherwise the onCanUndoChanged handler won't
-            // be called ever again), then immediately restore text
-            // and cursor position.
-            undoing = true;
-                undo()
-                text = textAfter
-            undoing = false;
-
-            cursorPosition = Math.min(text.length, c)
-
-            if (canUndo) {
-                console.log("ERROR: too many undos in stack")
+        // Catch undo / redo keys to use the global undo / redo stack
+        Keys.onPressed: {
+            if (event.matches(StandardKey.Undo)) {
+                storeUndo()
+                UndoStack.tryUndo()
+                event.accepted = true
+            } else if (event.matches(StandardKey.Redo)) {
+                UndoStack.tryRedo()
+                event.accepted = true
             }
         }
-    }
 
-    Timer {
-        id: undoTimer
-        interval: 2000
-        onTriggered: {
-            console.log(parent)
-            parent.storeUndo()
+        // Rectangles to highlight matched parentheses
+        Rectangle {
+            id: matchA
+            visible: parent.hasMatch && parent.activeFocus
+            color: Material.lime
+            opacity: 0.5
         }
-    }
-
-    onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
-    onCursorPositionChanged: {
-        var pos = Bridge.matchedParen(textDocument, cursorPosition)
-        if (pos.x != -1 && pos.y != -1) {
-            highlightPos(pos.x, matchA)
-            highlightPos(pos.y, matchB)
-            hasMatch = true;
-        } else {
-            hasMatch = false;
+        Rectangle {
+            id: matchB
+            visible: parent.hasMatch && parent.activeFocus
+            color: Material.lime
+            opacity: 0.5
         }
-    }
 
-    /*
-     *  Helper function that moves the given object to a particular
-     *  position.  The object should be a semi-transparent Rectangle
-     */
-    function highlightPos(pos, obj) {
-        var r = positionToRectangle(pos)
+        Component.onCompleted: {
+            syncText()
+            Bridge.installHighlighter(textDocument)
+        }
+        onActiveFocusChanged: {
+            syncText()
+            // If we're losing focus, then store the undo command now
+            // (rather than waiting two seconds for the timer to elapse)
+            if (!activeFocus) {
+                storeUndo()
+            }
+        }
 
-        obj.x = r.x
-        obj.y = r.y
-        obj.height = r.height
-        obj.width = positionToRectangle(pos + 1).x - r.x
+        onTextChanged: {
+            if (activeFocus && !undoing) {
+                undoTimer.restart()
+                setExpr(text)
+            }
+            onCursorPositionChanged()
+        }
+
+        onCanUndoChanged: {
+            if (canUndo) {
+                UndoStack.mark("edit text")
+            }
+        }
+
+        function storeUndo() {
+            if (undoTimer.running) {
+                undoTimer.stop()
+            }
+            if (canUndo)
+            {
+                // Store the actual undo command to the stack
+                UndoStack.finish()
+
+                // Store the final state so we can restore it
+                var textAfter = text
+                var c = cursorPosition
+
+                // Here, we call undo just to clear out the undo stack
+                // (because otherwise the onCanUndoChanged handler won't
+                // be called ever again), then immediately restore text
+                // and cursor position.
+                undoing = true;
+                    undo()
+                    text = textAfter
+                undoing = false;
+
+                cursorPosition = Math.min(text.length, c)
+
+                if (canUndo) {
+                    console.log("ERROR: too many undos in stack")
+                }
+            }
+        }
+
+        Timer {
+            id: undoTimer
+            interval: 2000
+            onTriggered: {
+                console.log(parent)
+                parent.storeUndo()
+            }
+        }
+
+        onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
+        onCursorPositionChanged: {
+            var pos = Bridge.matchedParen(textDocument, cursorPosition)
+            if (pos.x != -1 && pos.y != -1) {
+                highlightPos(pos.x, matchA)
+                highlightPos(pos.y, matchB)
+                hasMatch = true;
+            } else {
+                hasMatch = false;
+            }
+        }
+
+        /*
+         *  Helper function that moves the given object to a particular
+         *  position.  The object should be a semi-transparent Rectangle
+         */
+        function highlightPos(pos, obj) {
+            var r = positionToRectangle(pos)
+
+            obj.x = r.x
+            obj.y = r.y
+            obj.height = r.height
+            obj.width = positionToRectangle(pos + 1).x - r.x
+        }
+
+        function syncText() {
+            var c = cursorPosition
+            text = flick.getText(activeFocus)
+            cursorPosition = Math.min(text.length, c)
+        }
     }
 }

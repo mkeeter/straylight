@@ -18,43 +18,28 @@ GridLayout {
         Layout.fillHeight: true
         width: 2
         color: indicatorColor
-        opacity: exprText.lineCount > 1
+        opacity: exprEdit.lineCount > 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
-    function setFocus() {  exprText.forceActiveFocus() }
+    function setFocus() {  exprEdit.setFocus() }
 
-    Flickable {
-        id: flick
+    ExpressionEdit {
+        id: exprEdit
 
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
-        Layout.preferredHeight: exprText.height
-        clip: true
+        Layout.preferredHeight: height
 
-        function scrollTo(r) {
-            if (contentX >= r.x) {
-                contentX = r.x;
-            } else if (contentX + width <= r.x + r.width) {
-                contentX = r.x + r.width - width;
-            }
+        function getText(focus) {
+            return focus ? expr :
+                (ioType == 'input' ? '(input ...)' :
+                    (expr.length ? expr : 'Expression'))
         }
 
-        ExpressionEdit {
-            id: exprText
-
-            function syncText() {
-                var c = cursorPosition
-                text = activeFocus ? expr :
-                    (ioType == 'input' ? '(input ...)' :
-                        (expr.length ? expr : 'Expression'))
-                cursorPosition = Math.min(text.length, c)
-            }
-
-            function setExpr() {
-                Bridge.setExpr(uniqueIndex, text)
-            }
+        function setExpr(text) {
+            Bridge.setExpr(uniqueIndex, text)
         }
     }
 
@@ -64,7 +49,7 @@ GridLayout {
         Layout.fillWidth: true
         height: 2
         color: indicatorColor
-        opacity: exprText.lineCount <= 1
+        opacity: exprEdit.lineCount <= 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
@@ -73,7 +58,7 @@ GridLayout {
         Layout.column: 1
         Layout.fillWidth: true
 
-        visible: !(resultText.text.trim() === exprText.text.trim())
+        visible: !(resultText.text.trim() === exprEdit.expr.trim())
         Text {
             id: statusIcon
             text: valid ? Awesome.fa_long_arrow_right
@@ -99,8 +84,8 @@ GridLayout {
     }
 
     function setExpr(e)  {
-        if (exprText.expr != e) {
-            exprText.expr = e
+        if (exprEdit.expr != e) {
+            exprEdit.expr = e
         }
     }
 }
