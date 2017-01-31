@@ -93,15 +93,8 @@ Column {
     Rectangle {
         visible: !last
         width: parent.width
-        color: Style.dividerDark
-        height: 2
-    }
-
-    Rectangle {
-        visible: !last
-        height: 4
-        width: parent.width
         color: 'transparent'
+        height: 2
     }
 
     property alias labelWidth: nameLabel.implicitWidth
