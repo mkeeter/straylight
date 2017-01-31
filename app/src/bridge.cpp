@@ -43,7 +43,7 @@ void Bridge::renameItem(int item_index, QString name)
     const auto n = name.toStdString();
     if (n != r.getTree().nameOf(item_index))
     {
-        auto c = Checkpoint("Rename item");
+        auto c = Checkpoint("(rename item)");
         r.renameItem(item_index, n);
     }
 }
@@ -74,20 +74,20 @@ void Bridge::renameSheet(int sheet_index, QString name)
     const auto n = name.toStdString();
     if (n != r.getTree().nameOf(sheet_index))
     {
-        auto c = Checkpoint("Rename sheet");
+        auto c = Checkpoint("(rename sheet)");
         r.renameSheet(sheet_index, name.toStdString());
     }
 }
 
 void Bridge::insertSheet(int sheet_index, QString name)
 {
-    auto c = Checkpoint("Insert sheet");
+    auto c = Checkpoint("(insert sheet)");
     r.insertSheet(sheet_index, name.toStdString());
 }
 
 void Bridge::eraseSheet(int sheet_index)
 {
-    auto c = Checkpoint("Erase sheet");
+    auto c = Checkpoint("(erase sheet)");
     r.eraseSheet(Graph::SheetIndex(sheet_index));
 }
 
@@ -95,7 +95,7 @@ void Bridge::eraseSheet(int sheet_index)
 
 void Bridge::insertCell(int sheet_index, const QString& name)
 {
-    auto c = Checkpoint("Insert cell");
+    auto c = Checkpoint("(insert cell)");
     r.insertCell(sheet_index, name.toStdString());
 }
 
@@ -123,21 +123,21 @@ void Bridge::setInput(int instance_index, int cell_index,
 
 void Bridge::eraseCell(int cell_index)
 {
-    auto c = Checkpoint("Erase cell");
+    auto c = Checkpoint("(erase cell)");
     r.eraseCell(cell_index);
 }
 
 void Bridge::insertInstance(int parent_sheet_index, QString name,
                             int target_sheet_index)
 {
-    auto c = Checkpoint("Insert instance");
+    auto c = Checkpoint("(insert instance)");
     r.insertInstance(Graph::SheetIndex(parent_sheet_index), name.toStdString(),
                      Graph::SheetIndex(target_sheet_index));
 }
 
 void Bridge::eraseInstance(int instance_index)
 {
-    auto c = Checkpoint("Erase instance");
+    auto c = Checkpoint("(erase instance)");
     r.eraseInstance(Graph::InstanceIndex(instance_index));
 }
 
