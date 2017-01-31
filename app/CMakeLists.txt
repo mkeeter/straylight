@@ -24,6 +24,7 @@ add_executable(Straylight MACOSX_BUNDLE
     src/axes.cpp
     src/renderer.cpp
     src/blitter.cpp
+    src/undo.cpp
     resources.qrc)
 
 target_link_libraries(Straylight

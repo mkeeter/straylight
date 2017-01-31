@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 
 import Style 1.0
 import Bridge 1.0
+import UndoStack 1.0
 import Awesome 4.7
 import Material 1.0
 
@@ -17,98 +18,28 @@ GridLayout {
         Layout.fillHeight: true
         width: 2
         color: indicatorColor
-        opacity: exprText.lineCount > 1
+        opacity: exprEdit.lineCount > 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
-    function setFocus() {  exprText.forceActiveFocus() }
+    function setFocus() {  exprEdit.setFocus() }
 
-    Flickable {
-        id: flick
+    ExpressionEdit {
+        id: exprEdit
 
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
-        Layout.preferredHeight: exprText.height
-        clip: true
+        Layout.preferredHeight: height
 
-        function scrollTo(r) {
-            if (contentX >= r.x) {
-                contentX = r.x;
-            } else if (contentX + width <= r.x + r.width) {
-                contentX = r.x + r.width - width;
-            }
+        function getText(focus) {
+            return focus ? expr :
+                (ioType == 'input' ? '(input ...)' :
+                    (expr.length ? expr : 'Expression'))
         }
 
-        TextEdit {
-            color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
-            font.family: fixedWidth.name
-            selectionColor: Style.textSelect
-            selectByMouse: true
-
-            id: exprText
-            property string expr
-            property bool hasMatch
-
-            function syncText() {
-                var c = cursorPosition
-                text = activeFocus ? expr :
-                    (ioType == 'input' ? '(input ...)' :
-                        (expr.length ? expr : 'Expression'))
-                cursorPosition = Math.min(text.length, c)
-            }
-
-            Rectangle {
-                id: matchA
-                visible: parent.hasMatch && parent.activeFocus
-                color: Material.lime
-                opacity: 0.5
-            }
-            Rectangle {
-                id: matchB
-                visible: parent.hasMatch && parent.activeFocus
-                color: Material.lime
-                opacity: 0.5
-            }
-
-            Component.onCompleted: {
-                syncText()
-                Bridge.installHighlighter(textDocument)
-            }
-            onActiveFocusChanged: syncText()
-            onExprChanged: syncText()
-
-            onTextChanged: {
-                if (activeFocus) {
-                    Bridge.setExpr(uniqueIndex, text)
-                }
-                onCursorPositionChanged()
-            }
-
-            onCursorRectangleChanged: flick.scrollTo(cursorRectangle)
-            onCursorPositionChanged: {
-                var pos = Bridge.matchedParen(textDocument, cursorPosition)
-                if (pos.x != -1 && pos.y != -1) {
-                    highlightPos(pos.x, matchA)
-                    highlightPos(pos.y, matchB)
-                    hasMatch = true;
-                } else {
-                    hasMatch = false;
-                }
-            }
-
-            /*
-             *  Helper function that moves the given object to a particular
-             *  position.  The object should be a semi-transparent Rectangle
-             */
-            function highlightPos(pos, obj) {
-                var r = positionToRectangle(pos)
-
-                obj.x = r.x
-                obj.y = r.y
-                obj.height = r.height
-                obj.width = positionToRectangle(pos + 1).x - r.x
-            }
+        function setExpr(text) {
+            Bridge.setExpr(uniqueIndex, text)
         }
     }
 
@@ -118,7 +49,7 @@ GridLayout {
         Layout.fillWidth: true
         height: 2
         color: indicatorColor
-        opacity: exprText.lineCount <= 1
+        opacity: exprEdit.lineCount <= 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
@@ -127,7 +58,7 @@ GridLayout {
         Layout.column: 1
         Layout.fillWidth: true
 
-        visible: !(resultText.text.trim() === exprText.text.trim())
+        visible: !(resultText.text.trim() === exprEdit.expr.trim())
         Text {
             id: statusIcon
             text: valid ? Awesome.fa_long_arrow_right
@@ -153,8 +84,8 @@ GridLayout {
     }
 
     function setExpr(e)  {
-        if (exprText.expr != e) {
-            exprText.expr = e
+        if (exprEdit.expr != e) {
+            exprEdit.expr = e
         }
     }
 }

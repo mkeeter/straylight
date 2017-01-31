@@ -3,13 +3,14 @@
 #include "bridge.hpp"
 #include "canvas.hpp"
 #include "syntax.hpp"
+#include "undo.hpp"
 
 #include "kernel/bind/bind_s7.h"
 
 Bridge* Bridge::_instance = nullptr;
 
 Bridge::Bridge()
-    : bts(this)
+    : bts(this), undo_stack(UndoStack::singleton())
 {
     // Inject the kernel bindings into the interpreter
     r.call(kernel_bind_s7);
@@ -39,8 +40,12 @@ QString Bridge::checkItemRename(int item_index, QString name) const
 
 void Bridge::renameItem(int item_index, QString name)
 {
-    r.renameItem(item_index, name.toStdString());
-    sync();
+    const auto n = name.toStdString();
+    if (n != r.getTree().nameOf(item_index))
+    {
+        auto c = Checkpoint("Rename item");
+        r.renameItem(item_index, n);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,32 +71,39 @@ QString Bridge::checkSheetRename(int sheet_index, QString name) const
 
 void Bridge::renameSheet(int sheet_index, QString name)
 {
-    r.renameSheet(sheet_index, name.toStdString());
-    sync();
+    const auto n = name.toStdString();
+    if (n != r.getTree().nameOf(sheet_index))
+    {
+        auto c = Checkpoint("Rename sheet");
+        r.renameSheet(sheet_index, name.toStdString());
+    }
 }
 
 void Bridge::insertSheet(int sheet_index, QString name)
 {
+    auto c = Checkpoint("Insert sheet");
     r.insertSheet(sheet_index, name.toStdString());
-    sync();
 }
 
 void Bridge::eraseSheet(int sheet_index)
 {
+    auto c = Checkpoint("Erase sheet");
     r.eraseSheet(Graph::SheetIndex(sheet_index));
-    sync();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void Bridge::insertCell(int sheet_index, const QString& name)
 {
+    auto c = Checkpoint("Insert cell");
     r.insertCell(sheet_index, name.toStdString());
-    sync();
 }
 
 void Bridge::setExpr(int cell_index, const QString& expr)
 {
+    // We don't use Checkpoint here, because this is called on every
+    // character when we only want to set undo/redo when the document
+    // changes substantially.
     if (r.setExpr(cell_index, expr.toStdString()))
     {
         sync();
@@ -111,22 +123,22 @@ void Bridge::setInput(int instance_index, int cell_index,
 
 void Bridge::eraseCell(int cell_index)
 {
+    auto c = Checkpoint("Erase cell");
     r.eraseCell(cell_index);
-    sync();
 }
 
 void Bridge::insertInstance(int parent_sheet_index, QString name,
                             int target_sheet_index)
 {
+    auto c = Checkpoint("Insert instance");
     r.insertInstance(Graph::SheetIndex(parent_sheet_index), name.toStdString(),
                      Graph::SheetIndex(target_sheet_index));
-    sync();
 }
 
 void Bridge::eraseInstance(int instance_index)
 {
+    auto c = Checkpoint("Erase instance");
     r.eraseInstance(Graph::InstanceIndex(instance_index));
-    sync();
 }
 
 int Bridge::sheetOf(int instance_index) const
@@ -155,6 +167,7 @@ QString Bridge::saveFile(QUrl filename)
 
     auto str = r.getTree().toString();
     file.write(str.data(), str.size());
+    undo_stack->setClean();
     return "";
 }
 
@@ -169,12 +182,14 @@ QString Bridge::loadFile(QUrl filename)
     auto str = file.readAll();
     auto out = QString::fromStdString(r.loadString(str.toStdString()));
     sync();
+    undo_stack->clear();
     return out;
 }
 
 void Bridge::clearFile()
 {
     r.clear();
+    undo_stack->clear();
     sync();
 }
 
@@ -234,6 +249,21 @@ void Bridge::sync()
 {
     assert(QObject::thread() == QThread::currentThread());
     r.getTree().serialize(&bts);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Bridge::Checkpoint::Checkpoint(const QString& desc)
+    : desc(desc), before(Bridge::root()->getTree().toString())
+{
+    // Nothing to do here
+}
+
+Bridge::Checkpoint::~Checkpoint()
+{
+    UndoStack::singleton()->push(new UndoCommand(
+                desc, before, Bridge::root()->getTree().toString()));
+    Bridge::singleton()->sync();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

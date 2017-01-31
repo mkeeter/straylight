@@ -25,6 +25,14 @@ ColumnLayout {
     onCancelled: { active = false }
     onAccepted:  { active = false }
 
+    // When active becomes false, steal focus so that undo actions
+    // are propagated up to the top of the UI.
+    onActiveChanged: {
+        if (!active) {
+            forceActiveFocus()
+        }
+    }
+
     RowLayout {
         Layout.alignment: Qt.AlignTop
         id: editRow

@@ -8,6 +8,7 @@ import Canvas 1.0
 import Style 1.0
 import Material 1.0
 import Bridge 1.0
+import UndoStack 1.0
 
 import "/js/vendor/underscore.js" as Underscore
 
@@ -76,6 +77,37 @@ ApplicationWindow {
                 text: "Exit"
                 onTriggered: Qt.quit();
                 shortcut: StandardKey.Quit
+            }
+        }
+        Menu {
+            title: "Edit"
+            MenuItem {
+                text: "Undo " + desc
+                property string desc: ""
+                id: undoItem
+                enabled: false
+                shortcut: StandardKey.Undo
+                Component.onCompleted: {
+                    UndoStack.canUndoChanged.connect(setEnabled)
+                    UndoStack.undoTextChanged.connect(setDesc)
+                    onTriggered.connect(UndoStack.undo)
+                }
+                function setEnabled(e) { enabled = e }
+                function setDesc(t) { desc = t }
+            }
+            MenuItem {
+                text: "Redo " + desc
+                property string desc: ""
+                id: redoItem
+                enabled: false
+                shortcut: StandardKey.Redo
+                Component.onCompleted: {
+                    UndoStack.canRedoChanged.connect(setEnabled)
+                    UndoStack.redoTextChanged.connect(setDesc)
+                    onTriggered.connect(UndoStack.redo)
+                }
+                function setEnabled(e) { enabled = e }
+                function setDesc(t) { desc = t }
             }
         }
     }

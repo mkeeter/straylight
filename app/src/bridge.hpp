@@ -6,8 +6,9 @@
 #include "graph/root.hpp"
 #include "graph/serializer.hpp"
 
-// Forward declaration of Canvas
+// Forward declarations
 class Canvas;
+class UndoStack;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,6 +140,23 @@ protected:
     Graph::Root r;
 
     /*
+     *  RAII checkpoint system
+     *
+     *  On creation, records the graph state
+     *  On destruction, stores an undo command
+     */
+    class Checkpoint
+    {
+    public:
+        Checkpoint(const QString& desc);
+        ~Checkpoint();
+
+    protected:
+        const QString desc;
+        const std::string before;
+    };
+
+    /*
      *  Lightweight TreeSerializer class
      *  (passes everything back to its parent signals)
      */
@@ -172,6 +190,8 @@ protected:
 
     /*  Permanent serializer that's connected to the right places  */
     BridgeTreeSerializer bts;
+
+    UndoStack* undo_stack;
     bool pinged=false;
 
     static Bridge* _instance;

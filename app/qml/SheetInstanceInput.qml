@@ -16,37 +16,24 @@ GridLayout {
         Layout.fillHeight: true
         width: 2
         color: indicatorColor
-        opacity: exprText.lineCount > 1
+        opacity: exprEdit.lineCount > 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
-    TextEdit {
+    ExpressionEdit {
+        id: exprEdit
+
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        color: expr.length ? Style.textDarkPrimary : Style.textDarkHint
-        font.family: fixedWidth.name
-        selectionColor: Style.textSelect
-        selectByMouse: true
-
-        id: exprText
-        property string expr
-
-        onActiveFocusChanged: { syncText() }
-        onExprChanged: { syncText() }
-
-        onTextChanged: {
-            if (activeFocus) {
-                Bridge.setInput(instanceIndex, uniqueIndex, text)
-            }
+        function setExpr(text) {
+            Bridge.setInput(instanceIndex, uniqueIndex, text)
         }
 
-        function syncText() {
-            var c = cursorPosition
-            text = (activeFocus || expr.length) ? expr : 'Expression'
-            cursorPosition = Math.min(text.length, c)
+        function getText(focus) {
+            return (activeFocus || expr.length) ? expr : 'Expression'
         }
     }
 
@@ -56,7 +43,7 @@ GridLayout {
         Layout.fillWidth: true
         height: 2
         color: indicatorColor
-        opacity: exprText.lineCount <= 1
+        opacity: exprEdit.lineCount <= 1
         Behavior on opacity { OpacityAnimator { duration: 100 }}
     }
 
@@ -65,7 +52,7 @@ GridLayout {
         Layout.column: 1
         Layout.fillWidth: true
 
-        visible: !(resultText.text.trim() === exprText.text.trim())
+        visible: !(resultText.text.trim() === exprEdit.expr.trim())
 
         Text {
             id: statusIcon
@@ -92,8 +79,8 @@ GridLayout {
     }
 
     function setExpr(e)  {
-        if (exprText.expr != e) {
-            exprText.expr = e
+        if (exprEdit.expr != e) {
+            exprEdit.expr = e
         }
     }
 

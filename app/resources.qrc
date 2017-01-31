@@ -15,6 +15,7 @@
         <file>qml/ValidatedInput.qml</file>
         <file>qml/IconButton.qml</file>
         <file>qml/TextRect.qml</file>
+        <file>qml/ExpressionEdit.qml</file>
 
         <file>qml/Awesome.qml</file>
         <file>qml/Style.qml</file>
