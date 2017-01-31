@@ -36,10 +36,8 @@ Column {
 
             Text {
                 id: statusIcon
-                visible: !valid
-                text: Awesome.fa_exclamation_triangle
-
-                color: Style.textEditInvalid
+                text: valid ? Awesome.fa_check : Awesome.fa_exclamation_triangle
+                color: valid ? Style.textEditValid : Style.textEditInvalid
                 font.family: fontAwesome.name
                 font.pointSize: 14
 
