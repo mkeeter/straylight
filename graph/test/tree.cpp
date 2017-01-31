@@ -327,5 +327,6 @@ TEST_CASE("Tree::toString")
         CAPTURE(before);
         REQUIRE(r.loadString(before) == "");
         REQUIRE(r.getTree().toString() == before);
+        REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "Sheet"));
     }
 }
