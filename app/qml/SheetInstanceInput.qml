@@ -33,7 +33,7 @@ GridLayout {
         }
 
         function getText(focus) {
-            return (activeFocus || expr.length) ? expr : 'Expression'
+            return (focus || expr.length) ? expr : 'Expression'
         }
     }
 
