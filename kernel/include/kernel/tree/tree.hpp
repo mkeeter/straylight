@@ -81,6 +81,14 @@ public:
      */
     Tree operator-() const;
 
+    /*
+     *  Comparison operator for trees
+     */
+    bool operator==(const Tree& other) const {
+        return parent.get() == other.parent.get() &&
+               id == other.id;
+    }
+
 protected:
     /*
      *  Private constructor

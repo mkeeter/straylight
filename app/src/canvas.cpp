@@ -84,7 +84,19 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         if (is_shape(v))
         {
             auto s = get_shape(v);
-            if (shapes.count({key, s}) == 0)
+            bool found = shapes.count({key, s});
+
+            for (auto itr=shapes.lower_bound({key, nullptr});
+                 !found && itr->first.first == key; ++itr)
+            {
+                if (itr->first.second->tree == s->tree)
+                {
+                    found = true;
+                    visited.insert({key, itr->first.second});
+                }
+            }
+
+            if (!found)
             {
                 auto r = new ::Renderer(s->tree);
                 shapes[{key, s}] = r;
