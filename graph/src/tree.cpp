@@ -247,37 +247,39 @@ picojson::value Tree::toJson(SheetIndex sheet) const
     picojson::value::array items;
     picojson::value::array sheets;
 
-    for (auto i : iterItems(sheet))
+    for (auto i : childrenOf(sheet))
     {
-        picojson::value::object obj;
-        obj.insert({"itemIndex", picojson::value((int64_t)i.i)});
-        obj.insert({"itemName", picojson::value(nameOf(i))});
-
-        if (auto n = at(i).instance())
-        {
-            obj.insert({"type", picojson::value("instance")});
-            obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
-            picojson::value::array inputs;
-            for (const auto& p : n->inputs)
-            {
-                picojson::value::object i;
-                i.insert({"cellIndex", picojson::value((int64_t)p.first.i)});
-                i.insert({"inputExpr", picojson::value(p.second)});
-                inputs.push_back(picojson::value(i));
-            }
-            obj.insert({"inputs", picojson::value(inputs)});
-        }
-        else if (auto c = at(i).cell())
-        {
-            obj.insert({"type", picojson::value("cell")});
-            obj.insert({"cellExpr", picojson::value(c->expr)});
-        }
-        else if (at(i).sheet())
+        if (at(i).sheet())
         {
             sheets.push_back(toJson(SheetIndex(i)));
-            continue;
         }
-        items.push_back(picojson::value(obj));
+        else
+        {
+            picojson::value::object obj;
+            obj.insert({"itemIndex", picojson::value((int64_t)i.i)});
+            obj.insert({"itemName", picojson::value(nameOf(i))});
+
+            if (auto n = at(i).instance())
+            {
+                obj.insert({"type", picojson::value("instance")});
+                obj.insert({"sheetIndex", picojson::value((int64_t)n->sheet.i)});
+                picojson::value::array inputs;
+                for (const auto& p : n->inputs)
+                {
+                    picojson::value::object i;
+                    i.insert({"cellIndex", picojson::value((int64_t)p.first.i)});
+                    i.insert({"inputExpr", picojson::value(p.second)});
+                    inputs.push_back(picojson::value(i));
+                }
+                obj.insert({"inputs", picojson::value(inputs)});
+            }
+            else if (auto c = at(i).cell())
+            {
+                obj.insert({"type", picojson::value("cell")});
+                obj.insert({"cellExpr", picojson::value(c->expr)});
+            }
+            items.push_back(picojson::value(obj));
+        }
     }
 
     picojson::value::object out;
