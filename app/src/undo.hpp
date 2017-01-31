@@ -53,4 +53,6 @@ public:
 protected:
     const std::string before;
     const std::string after;
+
+    bool once=true;
 };

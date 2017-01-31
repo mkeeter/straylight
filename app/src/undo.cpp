@@ -65,6 +65,10 @@ void UndoCommand::undo()
 
 void UndoCommand::redo()
 {
-    Bridge::singleton()->root()->loadString(after);
-    Bridge::singleton()->sync();
+    if (!once)
+    {
+        Bridge::singleton()->root()->loadString(after);
+        Bridge::singleton()->sync();
+    }
+    once = false;
 }
