@@ -124,7 +124,6 @@ Flickable {
             id: undoTimer
             interval: 2000
             onTriggered: {
-                console.log(parent)
                 parent.storeUndo()
             }
         }
