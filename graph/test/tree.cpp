@@ -329,4 +329,20 @@ TEST_CASE("Tree::toString")
         REQUIRE(r.getTree().toString() == before);
         REQUIRE(!r.canInsertSheet(Tree::ROOT_SHEET, "Sheet"));
     }
+
+    SECTION("Preserving order")
+    {
+        // TODO once we can re-order tree
+        auto a = r.insertCell(Tree::ROOT_SHEET, "a", "15");
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "15");
+
+        REQUIRE(r.getTree().iterItems(Tree::ROOT_SHEET).front() == a);
+
+        auto before = r.getTree().toString();
+        CAPTURE(before);
+        REQUIRE(r.loadString(before) == "");
+        REQUIRE(r.getTree().toString() == before);
+
+        REQUIRE(r.getTree().iterItems(Tree::ROOT_SHEET).front() == a);
+    }
 }
