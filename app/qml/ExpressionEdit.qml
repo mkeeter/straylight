@@ -28,6 +28,7 @@ Flickable {
 
     TextEdit {
         id: txt
+        width: parent.width
         font.family: fixedWidth.name
         selectionColor: Style.textSelect
         selectByMouse: true
