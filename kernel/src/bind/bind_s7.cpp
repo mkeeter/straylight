@@ -53,6 +53,12 @@ static void shape_free(void* s)
     delete static_cast<Shape*>(s);
 }
 
+static bool shape_equal(void* a, void* b)
+{
+    return static_cast<Shape*>(a)->tree ==
+           static_cast<Shape*>(b)->tree;
+}
+
 static char* shape_print(s7_scheme* sc, void* s)
 {
     (void)sc;
@@ -361,7 +367,7 @@ void kernel_bind_s7(s7_scheme* sc)
     shape_type_tag = s7_new_type_x(sc, "shape",
         shape_print,
         shape_free,
-        nullptr,  /* equal */
+        shape_equal,
         nullptr,  /* gc_mark */
         shape_apply,  /* apply */
         nullptr,  /* set */
