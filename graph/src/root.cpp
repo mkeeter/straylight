@@ -88,7 +88,7 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
         {
             auto env = e; // copy
             env.push_back(i);
-            env.insert(e.end(), c.first.begin(), c.first.end());
+            env.insert(env.end(), c.first.begin(), c.first.end());
             markDirty({env, tree.nameOf(c.second)});
         }
     }
