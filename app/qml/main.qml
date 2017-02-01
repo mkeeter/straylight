@@ -132,7 +132,8 @@ ApplicationWindow {
         title: "Please choose a file"
         folder: shortcuts.home
         onAccepted: {
-            Bridge.loadFile(loadDialog.fileUrl)
+            file = loadDialog.fileUrl
+            Bridge.loadFile(file)
             // TODO: error handling here
         }
         visible: false
