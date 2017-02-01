@@ -346,3 +346,35 @@ TEST_CASE("Tree::toString")
         REQUIRE(r.getTree().iterItems(Tree::ROOT_SHEET).front() == a);
     }
 }
+
+TEST_CASE("Tree::cellsOf")
+{
+    SECTION("Nested instances")
+    {
+        Root r;
+
+        auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
+        auto z = r.insertSheet(Tree::ROOT_SHEET, "Zero");
+        auto is = r.insertInstance(Tree::ROOT_SHEET, "s", sum);
+        auto iz = r.insertInstance(sum, "z-instance", z);
+        auto c = r.insertCell(z, "a", "15");
+
+        {   // Check with respect to root
+            auto cs = r.getTree().cellsOf(Tree::ROOT_SHEET);
+            REQUIRE(cs.size() == 1);
+
+            auto cell = cs.front();
+            REQUIRE(cell.first.size() == 2);
+            REQUIRE(cell.second == c.i);
+        }
+
+        {   // Check with respect to inner sheet
+            auto cs = r.getTree().cellsOf(sum);
+            REQUIRE(cs.size() == 1);
+
+            auto cell = cs.front();
+            REQUIRE(cell.first.size() == 1);
+            REQUIRE(cell.second == c.i);
+        }
+    }
+}

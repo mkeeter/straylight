@@ -455,6 +455,28 @@ TEST_CASE("Root::insertInstance")
 
         REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, b}).str == "11");
     }
+
+    SECTION("Nested instances (in-to-out)")
+    {
+        auto z = r.insertSheet(Tree::ROOT_SHEET, "Zero");
+        auto c = r.insertCell(z, "a", "15");
+
+        auto is = r.insertInstance(Tree::ROOT_SHEET, "s", sum);
+        auto iz = r.insertInstance(sum, "z-instance", z);
+
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, is, iz}, c}).str == "15");
+    }
+
+    SECTION("Nested instances (out-to-in)")
+    {
+        auto z = r.insertSheet(Tree::ROOT_SHEET, "Zero");
+        auto iz = r.insertInstance(sum, "z-instance", z);
+        auto c = r.insertCell(z, "a", "15");
+
+        auto is = r.insertInstance(Tree::ROOT_SHEET, "s", sum);
+
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, is, iz}, c}).str == "15");
+    }
 }
 
 TEST_CASE("Root::setInput")
