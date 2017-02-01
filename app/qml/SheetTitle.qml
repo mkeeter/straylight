@@ -26,7 +26,7 @@ Item {
                 color: Style.textLightPrimary
                 font.family: fixedWidth.name
                 font.pointSize: 18
-                leftPadding: 5
+                leftPadding: 10
                 topPadding: 3
                 bottomPadding: 3
             }
