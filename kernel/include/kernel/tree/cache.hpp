@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <map>
 #include <set>
 #include <vector>
@@ -20,6 +21,8 @@ namespace Kernel {
 class Cache
 {
 public:
+    ~Cache();
+
     /*
      *  Look up the local Cache instance
      *  (which is on a per-thread basis)
@@ -94,6 +97,18 @@ public:
     Id rhs(Id id) const { return token(id).rhs(); }
     size_t rank(Id id) const { return token(id).rank(); }
     float value(Id id) const { return token(id).value(); }
+
+    /*
+     *  Read and set tags
+     */
+    void* tag(Id id) const
+    { return tags.count(id) ? tags.at(id) : nullptr; }
+
+    void*& tag(Id id) { return tags[id]; }
+
+    template <typename T>
+    T* tag(Id id) const
+    { return static_cast<T*>(tags.count(id) ? tags.at(id) : nullptr); }
 
 protected:
     /*
@@ -170,6 +185,12 @@ protected:
 
     boost::bimap<Key, Id> data;
     Id next=1;
+
+    /*  Per-Id tagged data
+     *
+     *  The pointers should be allocated with malloc and are freed
+     *  (with free) when the Cache is destroyed */
+    std::map<Id, void*> tags;
 
     /*  Here's the master list of per-thread caches */
     static std::map<std::thread::id, std::shared_ptr<Cache>> instances;

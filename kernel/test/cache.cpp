@@ -168,6 +168,21 @@ TEST_CASE("Cache::var")
     REQUIRE(a != b);
 }
 
+TEST_CASE("Cache::tag")
+{
+    Cache::reset();
+    auto t = Cache::instance();
+
+    auto v = t->var(3.0);
+    REQUIRE(t->tag(v) == nullptr);
+
+    t->tag(v) = malloc(sizeof(float));
+    *t->tag<float>(v) = 4.0f;
+    REQUIRE(*t->tag<float>(v) == 4.0f);
+
+    REQUIRE(t->tag(v + 1) == nullptr);
+}
+
 TEST_CASE("Cache::checkCommutative")
 {
     Cache::reset();
