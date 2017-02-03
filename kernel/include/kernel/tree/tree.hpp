@@ -77,6 +77,15 @@ public:
     size_t var() const              { return parent->lhs(id); }
 
     /*
+     *  Read and set tags
+     */
+    void* tag() const   { return parent->tag(id); }
+    void*& tag()        { return parent->tag(id); }
+
+    template <typename T>   T* tag() const
+    { return parent->tag<T>(id); }
+
+    /*
      *  Overloaded operators
      */
     Tree operator-() const;
