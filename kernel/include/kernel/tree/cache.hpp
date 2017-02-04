@@ -115,6 +115,12 @@ public:
      */
     uint8_t flags(Id id) const { return flags_.at(id); }
 
+    /*
+     *  Sets the value for a particular variable
+     *  id must point to a VAR node
+     */
+    void setValue(Id id, float v);
+
 protected:
     /*
      *  Cache constructor is private so outsiders must use instance()

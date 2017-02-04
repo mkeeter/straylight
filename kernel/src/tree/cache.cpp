@@ -431,4 +431,15 @@ Cache::Id Cache::collapse(Id root)
     return rebuild(root, changed);
 }
 
+void Cache::setValue(Id id, float v)
+{
+    assert(opcode(id) == Opcode::VAR);
+
+    auto it = data.right.find(id);
+    assert(it != data.right.end());
+
+    auto s = data.right.modify_data(it, [=](Key& k){ std::get<4>(k) = v; });
+    assert(s);
+}
+
 }   // namespace Kernel

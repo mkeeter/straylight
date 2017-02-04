@@ -183,6 +183,18 @@ TEST_CASE("Cache::tag")
     REQUIRE(t->tag(v + 1) == nullptr);
 }
 
+TEST_CASE("Cache::setValue")
+{
+    Cache::reset();
+    auto t = Cache::instance();
+
+    auto v = t->var(3.4);
+    REQUIRE(t->value(v) == Approx(3.4));
+
+    t->setValue(v, 5);
+    REQUIRE(t->value(v) == Approx(5));
+}
+
 TEST_CASE("Cache::checkCommutative")
 {
     Cache::reset();
