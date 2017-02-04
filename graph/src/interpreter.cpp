@@ -265,7 +265,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (lambda args #f))))
       )")),
       eval_func(s7_eval_c_string(interpreter, R"(
-        (lambda (str env)
+        (lambda (str env reader)
           (define (read-all port)
             (let recurse ()
               (let ((r (read port)))
@@ -285,17 +285,20 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
             (lambda ()
               (let* ((i (read-all (open-input-string str)))
                      (j (strip-output i))
-                     (r (cons 'begin j)))
+                     (r (cons 'begin (reader j))))
                 (cons 'value (eval r env))))
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
                         (copy (cons 'unbound-var (cadr args))))
                     (else
                         (copy (cons 'error (cadr args))))))))
+      )")),
+      default_reader(s7_eval_c_string(interpreter, R"(
+        (lambda (sexp) sexp)
       )"))
 {
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          eval_func})
+                          eval_func, default_reader})
     {
         s7_gc_protect(interpreter, ptr);
     }
@@ -451,9 +454,10 @@ Value Interpreter::eval(const CellKey& key)
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(interpreter, 2,
+        auto args = s7_list(interpreter, 3,
                 s7_make_string(interpreter, expr.c_str()),
-                s7_inlet(interpreter, bindings));
+                s7_inlet(interpreter, bindings),
+                reader == nullptr ? default_reader : reader);
         value = s7_call(interpreter, eval_func, args);
     }
 
@@ -526,6 +530,12 @@ void Interpreter::release(ValuePtr v)
 ValuePtr Interpreter::untag(ValuePtr v)
 {
     return s7_cdr(v);
+}
+
+void Interpreter::setReader(s7_cell* r)
+{
+    s7_gc_protect(interpreter, r);
+    reader = r;
 }
 
 s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,

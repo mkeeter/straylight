@@ -52,6 +52,13 @@ public:
     static ValuePtr untag(ValuePtr v);
 
     /*
+     *  Installs a reader macro
+     *  The reader macro is evaluated after things like 'output'
+     *  are stripped and before 'begin is prepended to the cells
+     */
+    void setReader(s7_cell* r);
+
+    /*
      *  Checks to see if the given string is reserved
      */
     bool isReserved(const std::string& k) const;
@@ -102,6 +109,8 @@ private:
     s7_cell* const name_valid;
 
     s7_cell* const eval_func;
+    s7_cell* const default_reader;
+    s7_cell* reader=nullptr;
 };
 
 }   // namespace Graph

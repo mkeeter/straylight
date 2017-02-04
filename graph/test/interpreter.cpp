@@ -3,6 +3,8 @@
 #include "graph/interpreter.hpp"
 #include "graph/root.hpp"
 
+#include "s7/s7.h"
+
 using namespace Graph;
 
 TEST_CASE("Interpreter::cellType")
@@ -173,4 +175,27 @@ TEST_CASE("Interpreter::nameValid")
     REQUIRE(!interp.nameValid("15"));
     REQUIRE(!interp.nameValid("(aaaa)"));
     REQUIRE(!interp.nameValid("with spaces"));
+}
+
+static s7_cell* customReader(s7_scheme* sc)
+{
+    return s7_eval_c_string(sc, "(lambda (sexp) '(123))");
+}
+
+TEST_CASE("Interpreter::setReader")
+{
+    Root r;
+    Dependencies d(r);
+    auto interp = Interpreter(r, &d);
+
+    auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "");
+    auto c = r.getTree().at(cell).cell();
+    CellKey key = {{Tree::ROOT_INSTANCE}, cell};
+
+    // Install a custom reader that turns anything into 123
+    interp.setReader(interp.call(customReader));
+
+    r.setExpr(cell, "1");
+    auto value = interp.eval(key);
+    REQUIRE(value.str == "123");
 }
