@@ -84,6 +84,11 @@ public:
     void* tag() const   { return parent->tag(id); }
     void*& tag()        { return parent->tag(id); }
 
+    /*
+     *  Sets a VAR tree's value
+     */
+    void setValue(float v) { return parent->setValue(id, v); }
+
     template <typename T>   T* tag() const
     { return parent->tag<T>(id); }
 
