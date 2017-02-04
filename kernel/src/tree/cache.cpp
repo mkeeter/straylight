@@ -54,7 +54,9 @@ Cache::Id Cache::constant(float v)
     auto k = key(v);
     if (data.left.find(k) == data.left.end())
     {
-        data.insert({k, next++});
+        data.insert({k, next});
+        flags_.insert({next++, Tree::FLAG_COLLAPSED|
+                               Tree::FLAG_LOCATION_AGNOSTIC});
     }
     return data.left.at(k);
 }
@@ -63,11 +65,13 @@ Cache::Id Cache::var(float v)
 {
     auto k = Key(v, next);
     assert(data.left.find(k) == data.left.end());
-    data.insert({k, next++});
+    data.insert({k, next});
+    flags_.insert({next++, Tree::FLAG_COLLAPSED|
+                           Tree::FLAG_LOCATION_AGNOSTIC});
     return data.left.at(k);
 }
 
-Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
+Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
 {
     // These are opcodes that you're not allowed to use here
     assert(op != Opcode::CONST &&
@@ -78,7 +82,7 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
 
     // See if we can simplify the expression, either because it's an identity
     // operation (e.g. X + 0) or a linear combination of affine forms
-    if (collapse)
+    if (simplify)
     {
         if (auto t = checkIdentity(op, a, b))
         {
@@ -98,7 +102,19 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
     auto k = key(op, a, b);
     if (data.left.find(k) == data.left.end())
     {
-        data.insert({k, next++});
+        data.insert({k, next});
+        flags_.insert({next++,
+
+                (((!a || (flags(a) & Tree::FLAG_COLLAPSED)) &&
+                  (!b || (flags(b) & Tree::FLAG_COLLAPSED)) &&
+                  op != Opcode::AFFINE_VEC) ? Tree::FLAG_COLLAPSED : 0) |
+
+                (((!a || (flags(a) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+                  (!b || (flags(b) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+                  op != Opcode::VAR_X &&
+                  op != Opcode::VAR_Y &&
+                  op != Opcode::VAR_Z)
+                  ? Tree::FLAG_LOCATION_AGNOSTIC : 0)});
     }
 
     // If both sides of the operation are constant, then return a constant
@@ -116,8 +132,8 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool collapse)
 
 Cache::Id Cache::affine(float a, float b, float c, float d)
 {
-    // Build up the desired tree structure with collapse = false
-    // to keep branches from automatically collapsing.
+    // Build up the desired tree structure with simplify = false
+    // to keep branches from automatically simplifying themselves.
     return operation(Opcode::AFFINE_VEC,
             operation(Opcode::ADD,
                 operation(Opcode::MUL, X(), constant(a), false),

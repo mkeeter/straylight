@@ -34,8 +34,8 @@ public:
      *  (otherwise an assertion will be triggered).
      *  If the opcode is NTH_ROOT, b must be > 0.
      */
-    explicit Tree(Opcode::Opcode op, Tree a=Tree(nullptr, 0, false),
-                                     Tree b=Tree(nullptr, 0, false));
+    explicit Tree(Opcode::Opcode op, Tree a=Tree(nullptr, 0),
+                                     Tree b=Tree(nullptr, 0));
 
     /*
      *  Constructors for individual axes (non-affine)
@@ -76,6 +76,8 @@ public:
     float value() const             { return parent->value(id); }
     size_t var() const              { return parent->lhs(id); }
 
+    uint8_t flags() const           { return parent->flags(id); }
+
     /*
      *  Read and set tags
      */
@@ -98,13 +100,24 @@ public:
                id == other.id;
     }
 
+    /*  Bitfield enum for node flags */
+    enum Flags {
+        /* Has this Id been collapsed?
+         * A collapsed Id doesn't contain any magical tokens
+         * (e.g. AFFINE) and is ready for evaluation  */
+        FLAG_COLLAPSED          = (1<<0),
+
+        /*  Does this Id only contain constants and variables
+         *  (no VAR_X, VAR_Y, or VAR_Z opcodes allowed) */
+        FLAG_LOCATION_AGNOSTIC  = (1<<1),
+    };
+
 protected:
     /*
      *  Private constructor
      */
-    explicit Tree(std::shared_ptr<Cache> parent, Cache::Id id=0,
-                  bool collapsed=false)
-        : parent(parent), id(id), collapsed(collapsed) {}
+    explicit Tree(std::shared_ptr<Cache> parent, Cache::Id id=0)
+        : parent(parent), id(id) {}
 
     /*  Shared pointer to parent Cache
      *  Every token that refers back to this cache has a pointer to it,
@@ -113,9 +126,6 @@ protected:
 
     /*  ID indexing into the parent Cache */
     const Cache::Id id;
-
-    /*  Is this tree pre-collapsed and suitable for rendering?  */
-    const bool collapsed;
 
     /*  An Evaluator needs to be able to pull out the parent Cache */
     friend class EvaluatorBase;

@@ -161,3 +161,23 @@ TEST_CASE("Tree::tag")
     *a.tag<float>() = 4.0;
     REQUIRE(*a.tag<float>() == 4.0);
 }
+
+TEST_CASE("Tree::flags")
+{
+    Cache::reset();
+
+    auto a = Tree::var(3.0);
+    REQUIRE(a.flags() == (Tree::FLAG_COLLAPSED | Tree::FLAG_LOCATION_AGNOSTIC));
+
+    auto b = Tree(4.0);
+    REQUIRE(b.flags() == (Tree::FLAG_COLLAPSED | Tree::FLAG_LOCATION_AGNOSTIC));
+
+    auto c = a + b;
+    REQUIRE(c.flags() == (Tree::FLAG_COLLAPSED | Tree::FLAG_LOCATION_AGNOSTIC));
+
+    auto d = c + Tree::affine(1,2,3,4);
+    REQUIRE(d.flags() == 0);
+
+    auto e = c + Tree::X();
+    REQUIRE(e.flags() == Tree::FLAG_COLLAPSED);
+}

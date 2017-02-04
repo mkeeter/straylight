@@ -47,10 +47,10 @@ public:
      *  Arguments should be filled in from left to right
      *  (i.e. a must not be null if b is not null)
      *
-     *  If collapse is true (the default), identity and affine operations will
-     *  be collapsed; if false, all branches will be created
+     *  If simplify is true (the default), identity and affine operations will
+     *  be simplified; if false, all branches will be created
      */
-    Id operation(Opcode::Opcode op, Id a=0, Id b=0, bool collapse=true);
+    Id operation(Opcode::Opcode op, Id a=0, Id b=0, bool simplify=true);
 
     /*
      *  Returns a new variable node with the given value
@@ -109,6 +109,11 @@ public:
     template <typename T>
     T* tag(Id id) const
     { return static_cast<T*>(tags.count(id) ? tags.at(id) : nullptr); }
+
+    /*
+     *  Looks up flags for a node.  The id must exist in this cache.
+     */
+    uint8_t flags(Id id) const { return flags_.at(id); }
 
 protected:
     /*
@@ -185,6 +190,12 @@ protected:
 
     boost::bimap<Key, Id> data;
     Id next=1;
+
+    /*  Per-Id flags
+     *  These could be deterministically calculated from the state
+     *  of the Cache, but it is less expensive to calculate them once per
+     *  Id and store them here.  This should be a bitwise Or of Flags */
+    std::map<Id, uint8_t> flags_;
 
     /*  Per-Id tagged data
      *

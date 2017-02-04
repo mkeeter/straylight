@@ -52,8 +52,8 @@ Tree Tree::var(float v)
 
 Tree Tree::collapse() const
 {
-    return collapsed ? *this :
-           Tree(parent, parent->collapse(id), true);
+    return (flags() & FLAG_COLLAPSED) ? *this :
+           Tree(parent, parent->collapse(id));
 }
 
 }   // namespace Kernel
