@@ -60,7 +60,8 @@ public:
      *  Calls a function with the interpreter
      *  Used to install custom bindings
      */
-    void call(void (*f)(s7_scheme*)) { f(interpreter); }
+    template<typename T>
+    T call(T (*f)(s7_scheme*)) { return f(interpreter); }
 
     /*
      *  Returns a set of keywords
