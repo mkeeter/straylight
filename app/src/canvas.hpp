@@ -7,12 +7,11 @@
 #include "graph/root.hpp"
 
 #include "kernel/tree/tree.hpp"
+#include "kernel/bind/bind_s7.h"
 
 #include "axes.hpp"
 #include "renderer.hpp"
 #include "blitter.hpp"
-
-struct Shape;
 
 class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {
@@ -45,7 +44,7 @@ protected:
     QSize window_size;
 
     /*  Here, we store the set of shapes to be drawn */
-    typedef std::pair<Graph::CellKey, const Shape*> ShapeKey;
+    typedef std::pair<Graph::CellKey, const Kernel::Bind::Shape*> ShapeKey;
     std::map<ShapeKey, ::Renderer*> shapes;
 
     /*  Used in graph serialization to keep track of which keys are active */

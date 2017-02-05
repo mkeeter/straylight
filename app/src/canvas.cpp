@@ -81,9 +81,9 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
 
         // If this is a (Scheme) shape, then extract it and make a Renderer
         // for it (if one doesn't already exist)
-        if (is_shape(v))
+        if (Kernel::Bind::is_shape(v))
         {
-            auto s = get_shape(v);
+            auto s = Kernel::Bind::get_shape(v);
 
             if (shapes.count({key, s}) == 0)
             {

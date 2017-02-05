@@ -21,7 +21,7 @@ double num(s7_scheme* sc, std::string expr)
 s7_scheme* get_scm()
 {
     s7_scheme* sc = s7_init();
-    kernel_bind_s7(sc);
+    Kernel::Bind::init(sc);
     s7_set_current_error_port(sc, s7_open_output_string(sc));
     return sc;
 }

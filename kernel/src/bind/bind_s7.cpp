@@ -3,7 +3,10 @@
 #include "kernel/bind/bind_s7.h"
 #include "kernel/eval/evaluator.hpp"
 
-// Populated in kernel_bind_s7; left uninitialized to make Valgrind warn
+namespace Kernel {
+namespace Bind {
+
+// Populated in bind_s7; left uninitialized to make Valgrind warn
 // if we ever try to use it at the wrong time.
 static int shape_type_tag;
 
@@ -42,8 +45,8 @@ static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
  *
  *  On failure, returns an error message with the given function name
  */
-s7_pointer shape_new(s7_scheme* sc, s7_pointer obj,
-                     const char* func_name="shape_new")
+static s7_pointer shape_new(s7_scheme* sc, s7_pointer obj,
+                            const char* func_name="shape_new")
 {
     if (is_shape(obj))
     {
@@ -134,6 +137,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
     {
         case 0:
         {
+            // On an empty list, return the default value or an error
             if (d != nullptr)
             {
                 return shape_new(sc, Kernel::Tree(*d));
@@ -368,7 +372,7 @@ static void install_overload(s7_scheme* sc, const char* op,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void kernel_bind_s7(s7_scheme* sc)
+void init(s7_scheme* sc)
 {
     shape_type_tag = s7_new_type_x(sc, "shape",
         shape_print,
@@ -407,3 +411,6 @@ void kernel_bind_s7(s7_scheme* sc)
     install_overload(sc, "acos", shape_acos);
     install_overload(sc, "exp", shape_exp);
 }
+
+}   // namespace Bind
+}   // namespace Kernel

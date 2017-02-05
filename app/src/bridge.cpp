@@ -13,8 +13,12 @@ Bridge::Bridge()
     : bts(this), undo_stack(UndoStack::singleton())
 {
     // Inject the kernel bindings into the interpreter
-    r.call(kernel_bind_s7);
+    r.call(Kernel::Bind::init);
+
+    // Construct a default cell
     r.insertCell(0, "s", "(make-shape (lambda (x y z) (max (- z 1) (- -1 z) (+ (* x x) (* y y) -1) (- (max x y)))))");
+
+    // Connect async call to sync
     connect(this, &Bridge::syncLater,
             this, &Bridge::sync, Qt::QueuedConnection);
 }
