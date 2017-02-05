@@ -21,7 +21,7 @@ static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 }
 
 /*
- *  Shape constructor (callable from Scheme)
+ *  Shape constructor from an arbitrary function object
  */
 static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
 {
