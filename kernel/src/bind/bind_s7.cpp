@@ -123,7 +123,7 @@ static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
     return s7_make_boolean(sc, is_shape(s7_car(args)));
 }
 
-const Shape* get_shape(s7_cell* obj)
+const Shape* get_shape(s7_pointer obj)
 {
     return static_cast<Shape*>(s7_object_value_checked(obj, shape_type_tag));
 }
