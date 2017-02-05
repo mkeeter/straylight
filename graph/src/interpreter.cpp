@@ -13,7 +13,6 @@ static bool set_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
 static char* print_struct(std::string name, void* v)
 {
     std::stringstream ss;
@@ -224,8 +223,8 @@ int SheetThunk::tag = -1;
 ////////////////////////////////////////////////////////////////////////////////
 
 Interpreter::Interpreter(Root& parent, Dependencies* deps)
-    : root(parent), deps(deps), interpreter(s7_init()),
-      is_input(s7_eval_c_string(interpreter, R"(
+    : root(parent), deps(deps), sc(s7_init()),
+      is_input(s7_eval_c_string(sc, R"(
         (lambda (str)
           (catch #t
             (lambda ()
@@ -233,7 +232,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (eqv? (car r) 'input)))
             (lambda args #f)))
       )")),
-      is_output(s7_eval_c_string(interpreter, R"(
+      is_output(s7_eval_c_string(sc, R"(
         (lambda (str)
           (catch #t
             (lambda ()
@@ -241,7 +240,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (eqv? (car r) 'output)))
             (lambda args #f)))
       )")),
-      default_expr(s7_eval_c_string(interpreter, R"(
+      default_expr(s7_eval_c_string(sc, R"(
         (lambda (str)
           (catch #t
             (lambda ()
@@ -251,7 +250,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                     "")))
             (lambda args "")))
       )")),
-      name_valid(s7_eval_c_string(interpreter, R"(
+      name_valid(s7_eval_c_string(sc, R"(
         (lambda (str)
           (and (not (char-position #\( str))
                (not (char-position #\) str))
@@ -264,7 +263,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                     #t))
                 (lambda args #f))))
       )")),
-      eval_func(s7_eval_c_string(interpreter, R"(
+      eval_func(s7_eval_c_string(sc, R"(
         (lambda (str env reader)
           (define (read-all port)
             (let recurse ()
@@ -293,17 +292,17 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                     (else
                         (copy (cons 'error (cadr args))))))))
       )")),
-      default_reader(s7_eval_c_string(interpreter, R"(
+      default_reader(s7_eval_c_string(sc, R"(
         (lambda (sexp) sexp)
       )"))
 {
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
                           eval_func, default_reader})
     {
-        s7_gc_protect(interpreter, ptr);
+        s7_gc_protect(sc, ptr);
     }
 
-    ValueThunk::tag = s7_new_type_x(interpreter, "value-thunk",
+    ValueThunk::tag = s7_new_type_x(sc, "value-thunk",
         ValueThunk::print,
         ValueThunk::free,
         nullptr,  /* equal */
@@ -315,7 +314,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
         nullptr,  /* reverse */
         nullptr); /* fill */
 
-    InstanceThunk::tag = s7_new_type_x(interpreter, "instance-thunk",
+    InstanceThunk::tag = s7_new_type_x(sc, "instance-thunk",
         InstanceThunk::print,
         InstanceThunk::free,
         nullptr,  /* equal */
@@ -327,7 +326,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
         nullptr,  /* reverse */
         nullptr); /* fill */
 
-    SheetThunk::tag = s7_new_type_x(interpreter, "sheet-thunk",
+    SheetThunk::tag = s7_new_type_x(sc, "sheet-thunk",
         SheetThunk::print,
         SheetThunk::free,
         nullptr,  /* equal */
@@ -339,7 +338,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
         nullptr,  /* reverse */
         nullptr); /* fill */
 
-    SheetResultThunk::tag = s7_new_type_x(interpreter, "sheet-result-thunk",
+    SheetResultThunk::tag = s7_new_type_x(sc, "sheet-result-thunk",
         SheetResultThunk::print,
         SheetResultThunk::free,
         nullptr,  /* equal */
@@ -354,34 +353,34 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
 
 Interpreter::~Interpreter()
 {
-    free(interpreter);
+    free(sc);
 }
 
 bool Interpreter::isInput(const std::string& expr) const
 {
     return
-        s7_is_eq(s7_t(interpreter),
-            s7_call(interpreter, is_input,
-                s7_list(interpreter, 1,
-                    s7_make_string(interpreter, expr.c_str()))));
+        s7_is_eq(s7_t(sc),
+            s7_call(sc, is_input,
+                s7_list(sc, 1,
+                    s7_make_string(sc, expr.c_str()))));
 }
 
 bool Interpreter::isOutput(const std::string& expr) const
 {
     return
-        s7_is_eq(s7_t(interpreter),
-            s7_call(interpreter, is_output,
-                s7_list(interpreter, 1,
-                    s7_make_string(interpreter, expr.c_str()))));
+        s7_is_eq(s7_t(sc),
+            s7_call(sc, is_output,
+                s7_list(sc, 1,
+                    s7_make_string(sc, expr.c_str()))));
 }
 
 std::string Interpreter::defaultExpr(const std::string& expr) const
 {
     auto s =
-        s7_object_to_c_string(interpreter,
-            s7_call(interpreter, default_expr,
-                s7_list(interpreter, 1,
-                    s7_make_string(interpreter, expr.c_str()))));
+        s7_object_to_c_string(sc,
+            s7_call(sc, default_expr,
+                s7_list(sc, 1,
+                    s7_make_string(sc, expr.c_str()))));
     std::string out(s);
     free(s);
     return out;
@@ -397,10 +396,10 @@ Cell::Type Interpreter::cellType(const std::string& expr) const
 bool Interpreter::nameValid(const std::string& str) const
 {
     return
-        s7_is_eq(s7_t(interpreter),
-            s7_call(interpreter, name_valid,
-                s7_list(interpreter, 1,
-                    s7_make_string(interpreter, str.c_str()))));
+        s7_is_eq(s7_t(sc),
+            s7_call(sc, name_valid,
+                s7_list(sc, 1,
+                    s7_make_string(sc, str.c_str()))));
 }
 
 Value Interpreter::eval(const CellKey& key)
@@ -418,7 +417,7 @@ Value Interpreter::eval(const CellKey& key)
     {
         if (env.size() == 1)
         {
-            value = s7_eval_c_string(interpreter,
+            value = s7_eval_c_string(sc,
                     "(list 'error \"Input at top level\")");
         }
         else
@@ -435,57 +434,57 @@ Value Interpreter::eval(const CellKey& key)
     // If we didn't get an error, then make bindings for all symbols
     if (value == nullptr)
     {
-        auto bindings = s7_nil(interpreter); // empty list
+        auto bindings = s7_nil(sc); // empty list
         const auto& sheet = root.getTree().at(env.back()).instance()->sheet;
         for (auto& i : root.getTree().iterItems(sheet))
         {
             // Prepend (symbol name, thunk) to the bindings list
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, root.getTree().nameOf(i).c_str()),
-                    s7_cons(interpreter, getItemThunk(env, i, key),
+            bindings = s7_cons(sc,
+                    s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
+                    s7_cons(sc, getItemThunk(env, i, key),
                     bindings));
         }
 
         for (auto& i : root.getTree().sheetsAbove(env))
         {
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, root.getTree().nameOf(i).c_str()),
-                    s7_cons(interpreter, getSheetThunk(i, key),
+            bindings = s7_cons(sc,
+                    s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
+                    s7_cons(sc, getSheetThunk(i, key),
                     bindings));
         }
 
         {   // Insert *env* into the bindings list, where *env* is the full
             // path to the cell (instance indices followed by a cell index)
-            auto env = s7_cons(interpreter, s7_make_integer(interpreter, key.second.i),
-                               s7_nil(interpreter));
+            auto env = s7_cons(sc, s7_make_integer(sc, key.second.i),
+                               s7_nil(sc));
             for (auto itr=key.first.rbegin(); itr != key.first.rend(); ++itr)
             {
-                env = s7_cons(interpreter, s7_make_integer(interpreter, itr->i), env);
+                env = s7_cons(sc, s7_make_integer(sc, itr->i), env);
             }
-            bindings = s7_cons(interpreter,
-                    s7_make_symbol(interpreter, "*env*"),
-                    s7_cons(interpreter, env, bindings));
+            bindings = s7_cons(sc,
+                    s7_make_symbol(sc, "*env*"),
+                    s7_cons(sc, env, bindings));
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(interpreter, 3,
-                s7_make_string(interpreter, expr.c_str()),
-                s7_inlet(interpreter, bindings),
+        auto args = s7_list(sc, 3,
+                s7_make_string(sc, expr.c_str()),
+                s7_inlet(sc, bindings),
                 reader == nullptr ? default_reader : reader);
-        value = s7_call(interpreter, eval_func, args);
+        value = s7_call(sc, eval_func, args);
     }
 
     // If the output is not tagged as a value, handle the error
     const bool valid = s7_is_eqv(s7_car(value),
-                                 s7_make_symbol(interpreter, "value"));
+                                 s7_make_symbol(sc, "value"));
     if (!valid)
     {
         // If the error was due to an unbound variable, then record the
         // attempted lookup in our dependencies table.
         if (s7_is_eqv(s7_car(value),
-                      s7_make_symbol(interpreter, "unbound-var")))
+                      s7_make_symbol(sc, "unbound-var")))
         {
-            auto target_ = s7_object_to_c_string(interpreter, s7_caddr(value));
+            auto target_ = s7_object_to_c_string(sc, s7_caddr(value));
             std::string target(target_);
             free(target_);
 
@@ -510,7 +509,7 @@ Value Interpreter::eval(const CellKey& key)
     // If the value is present and unchanged, return false
     auto c = root.getTree().at(cell).cell();
     if (c->values.count(env) &&
-        s7_is_equal(interpreter, value, c->values.at(env).value))
+        s7_is_equal(sc, value, c->values.at(env).value))
     {
         return Value(nullptr, "", false);
     }
@@ -518,19 +517,19 @@ Value Interpreter::eval(const CellKey& key)
     else
     {
         // Protect the new value from the GC
-        s7_gc_protect(interpreter, value);
+        s7_gc_protect(sc, value);
 
         // Get a string representation out
         std::string repr;
         if (valid)
         {
-            char* str_ptr = s7_object_to_c_string(interpreter, s7_cdr(value));
+            char* str_ptr = s7_object_to_c_string(sc, s7_cdr(value));
             repr = std::string(str_ptr);
             free(str_ptr);
         }
         else
         {
-            repr = s7_format(interpreter, s7_cdr(value));
+            repr = s7_format(sc, s7_cdr(value));
         }
         return {value, repr, valid};
     }
@@ -538,7 +537,7 @@ Value Interpreter::eval(const CellKey& key)
 
 void Interpreter::release(ValuePtr v)
 {
-    s7_gc_unprotect(interpreter, v);
+    s7_gc_unprotect(sc, v);
 }
 
 ValuePtr Interpreter::untag(ValuePtr v)
@@ -548,7 +547,7 @@ ValuePtr Interpreter::untag(ValuePtr v)
 
 void Interpreter::setReader(s7_cell* r)
 {
-    s7_gc_protect(interpreter, r);
+    s7_gc_protect(sc, r);
     reader = r;
 }
 
@@ -559,10 +558,10 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
     if (auto cell = item.cell())
     {
         // Construct a lookup thunk and return it immediately
-        return s7_make_object(interpreter, ValueThunk::tag, new ValueThunk {
+        return s7_make_object(sc, ValueThunk::tag, new ValueThunk {
             {env, root.getTree().nameOf(index)},
             cell->values.count(env) ? cell->values.at(env).value
-                                    : s7_nil(interpreter),
+                                    : s7_nil(sc),
             looker, deps,
         });
     }
@@ -584,7 +583,7 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
                             root.toNameKey({env_, CellIndex(c)}),
                             cell->values.count(env_)
                                 ? cell->values.at(env_).value
-                                : s7_nil(interpreter),
+                                : s7_nil(sc),
                             looker, deps,
                         };
                     }
@@ -592,7 +591,7 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
             }
         }
 
-        return s7_make_object(interpreter, InstanceThunk::tag,
+        return s7_make_object(sc, InstanceThunk::tag,
             new InstanceThunk {
                 {env, root.getTree().nameOf(index)},
                 InstanceIndex(index),
@@ -602,13 +601,13 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
     }
 
     assert(false); // Item index must be either a cell or an instance
-    return s7_nil(interpreter);
+    return s7_nil(sc);
 }
 
 s7_cell* Interpreter::getSheetThunk(const SheetIndex& index,
                                     const CellKey& looker)
 {
-    return s7_make_object(interpreter, SheetThunk::tag, new SheetThunk {
+    return s7_make_object(sc, SheetThunk::tag, new SheetThunk {
         index, looker, &root
     });
 }
@@ -619,7 +618,7 @@ bool Interpreter::isReserved(const std::string& k) const
 {
     // For simplicity, reserve all names starting in #
     return (k.size() && k[0] == '#') || k == "input" || k == "output" ||
-           s7_name_to_value(interpreter, k.c_str()) != s7_undefined(interpreter);
+           s7_name_to_value(sc, k.c_str()) != s7_undefined(sc);
 }
 
 std::set<std::string> Interpreter::keywords() const
@@ -628,8 +627,8 @@ std::set<std::string> Interpreter::keywords() const
     std::set<std::string> keywords = {
         "#t", "#f", "#<unspecified>", "#<undefined>",
         "#<eof>", "#true", "#false"};
-    std::pair<s7_scheme*, decltype(keywords)*> data = {interpreter, &keywords};
-    s7_for_each_symbol_name(interpreter, set_insert_, &data);
+    std::pair<s7_scheme*, decltype(keywords)*> data = {sc, &keywords};
+    s7_for_each_symbol_name(sc, set_insert_, &data);
     return keywords;
 }
 

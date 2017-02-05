@@ -68,7 +68,7 @@ public:
      *  Used to install custom bindings
      */
     template<typename T>
-    T call(T (*f)(s7_scheme*)) { return f(interpreter); }
+    T call(T (*f)(s7_scheme*)) { return f(sc); }
 
     /*
      *  Returns a set of keywords
@@ -100,7 +100,7 @@ private:
     Dependencies* deps;
 
     /*  This is the main interpreter process  */
-    s7_scheme* const interpreter;
+    s7_scheme* const sc;
 
     /*  Scheme function pointers */
     s7_cell* const is_input;
