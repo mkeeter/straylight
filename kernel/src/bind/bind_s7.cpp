@@ -12,23 +12,38 @@ static int shape_type_tag;
 /*
  *  Converts a Tree into an allocated Scheme shape
  */
-static s7_pointer to_shape(s7_scheme* sc, Kernel::Tree t)
+static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
     return s7_make_object(sc, shape_type_tag, new Shape { t });
 }
 
-static Kernel::Tree to_tree(s7_pointer obj)
+/*
+ *  Shape constructor (callable from Scheme)
+ */
+static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
 {
-    return get_shape(obj)->tree;
+    auto obj = s7_call(sc, s7_car(args), s7_list(sc, 3,
+            shape_new(sc, Kernel::Tree::affine(1, 0, 0, 0)),
+            shape_new(sc, Kernel::Tree::affine(0, 1, 0, 0)),
+            shape_new(sc, Kernel::Tree::affine(0, 0, 1, 0))));
+
+    if (s7_is_number(obj))
+    {
+        return shape_new(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
+    }
+    else
+    {
+        return obj;
+    }
 }
 
 /*
- *  Tries to convert a Scheme object into a shape
+ *  Shape constructor from arbitrary Scheme object
  *
  *  On failure, returns an error message with the given function name
  */
-s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
-                        const char* func_name="ensure_shape")
+s7_pointer shape_new(s7_scheme* sc, s7_pointer obj,
+                     const char* func_name="shape_new")
 {
     if (is_shape(obj))
     {
@@ -36,7 +51,7 @@ s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
     }
     else if (s7_is_number(obj))
     {
-        return to_shape(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
+        return shape_new(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
     }
     else
     {
@@ -44,7 +59,15 @@ s7_pointer ensure_shape(s7_scheme* sc, s7_pointer obj,
                 "shape or real");
     }
 }
+
 #define CHECK_SHAPE(OBJ) {   if (!is_shape(OBJ)) return OBJ; }
+
+////////////////////////////////////////////////////////////////////////////////
+
+static Kernel::Tree to_tree(s7_pointer obj)
+{
+    return get_shape(obj)->tree;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,23 +95,6 @@ static char* shape_print(s7_scheme* sc, void* s)
     return out;
 }
 
-static s7_pointer shape_new(s7_scheme* sc, s7_pointer args)
-{
-    auto obj = s7_call(sc, s7_car(args), s7_list(sc, 3,
-            to_shape(sc, Kernel::Tree::affine(1, 0, 0, 0)),
-            to_shape(sc, Kernel::Tree::affine(0, 1, 0, 0)),
-            to_shape(sc, Kernel::Tree::affine(0, 0, 1, 0))));
-
-    if (s7_is_number(obj))
-    {
-        return to_shape(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
-    }
-    else
-    {
-        return obj;
-    }
-}
-
 static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
 {
     if (s7_list_length(sc, args) != 3)
@@ -109,14 +115,14 @@ bool is_shape(s7_pointer s)
     return s7_is_object(s) && s7_object_type(s) == shape_type_tag;
 }
 
+static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
+{
+    return s7_make_boolean(sc, is_shape(s7_car(args)));
+}
+
 const Shape* get_shape(s7_cell* obj)
 {
     return static_cast<Shape*>(s7_object_value_checked(obj, shape_type_tag));
-}
-
-static s7_pointer is_shape_(s7_scheme *sc, s7_pointer args)
-{
-    return s7_make_boolean(sc, is_shape(s7_car(args)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +136,7 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
         {
             if (d != nullptr)
             {
-                return to_shape(sc, Kernel::Tree(*d));
+                return shape_new(sc, Kernel::Tree(*d));
             }
             else
             {
@@ -139,17 +145,17 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
         }
         case 1:
         {
-            return ensure_shape(sc, s7_car(list), func_name);
+            return shape_new(sc, s7_car(list), func_name);
         }
         default:
         {
-            auto front = ensure_shape(sc, s7_car(list), func_name);
+            auto front = shape_new(sc, s7_car(list), func_name);
             CHECK_SHAPE(front);
 
             auto rest = reduce(sc, s7_cdr(list), func_name, op, d);
             CHECK_SHAPE(rest);
 
-            return to_shape(sc, Kernel::Tree(op, to_tree(front), to_tree(rest)));
+            return shape_new(sc, Kernel::Tree(op, to_tree(front), to_tree(rest)));
         }
     }
 }
@@ -200,19 +206,19 @@ static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
         }
         case 1:
         {
-            auto s = ensure_shape(sc, s7_car(args), "-");
+            auto s = shape_new(sc, s7_car(args), "-");
             CHECK_SHAPE(s);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::NEG, to_tree(s))));
         }
         default:
         {
-            auto lhs = ensure_shape(sc, s7_car(args), "-");
+            auto lhs = shape_new(sc, s7_car(args), "-");
             CHECK_SHAPE(lhs);
             const float d = 0;
             auto rhs = reduce(sc, s7_cdr(args), "-", Kernel::Opcode::ADD, &d);
             CHECK_SHAPE(rhs);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::SUB,
                             to_tree(lhs), to_tree(rhs))));
         }
@@ -229,19 +235,19 @@ static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
         }
         case 1:
         {
-            auto s = ensure_shape(sc, s7_car(args), "/");
+            auto s = shape_new(sc, s7_car(args), "/");
             CHECK_SHAPE(s);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::DIV, 1.0f, to_tree(s))));
         }
         default:
         {
-            auto lhs = ensure_shape(sc, s7_car(args), "/");
+            auto lhs = shape_new(sc, s7_car(args), "/");
             CHECK_SHAPE(lhs);
             const float d = 1;
             auto rhs = reduce(sc, s7_cdr(args), "/", Kernel::Opcode::MUL, &d);
             CHECK_SHAPE(rhs);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::DIV,
                             to_tree(lhs), to_tree(rhs))));
         }
@@ -254,18 +260,18 @@ static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
     {
         case 1:
         {
-            auto s = ensure_shape(sc, s7_car(args), "atan");
+            auto s = shape_new(sc, s7_car(args), "atan");
             CHECK_SHAPE(s);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::ATAN, to_tree(s))));
         }
         case 2:
         {
-            auto a = ensure_shape(sc, s7_car(args), "atan");
+            auto a = shape_new(sc, s7_car(args), "atan");
             CHECK_SHAPE(a);
-            auto b = ensure_shape(sc, s7_cadr(args), "atan");
+            auto b = shape_new(sc, s7_cadr(args), "atan");
             CHECK_SHAPE(b);
-            return result_to_const(sc, to_shape(sc,
+            return result_to_const(sc, shape_new(sc,
                         Kernel::Tree(Kernel::Opcode::ATAN2, to_tree(a), to_tree(b))));
         }
         default:    return s7_wrong_number_of_args_error(sc, "atan: wrong number of args: ~A", args);
@@ -285,17 +291,17 @@ static s7_pointer shape_expt(s7_scheme* sc, s7_pointer args)
                                         s7_number_to_real(sc, b)));
         }
 
-        auto lhs = ensure_shape(sc, s7_car(args), "expt");
+        auto lhs = shape_new(sc, s7_car(args), "expt");
         CHECK_SHAPE(a);
 
         if (s7_is_integer(b))
         {
-            return to_shape(sc, Kernel::Tree(Kernel::Opcode::POW,
+            return shape_new(sc, Kernel::Tree(Kernel::Opcode::POW,
                 to_tree(lhs), Kernel::Tree(s7_integer(b))));
         }
         else if (s7_is_ratio(b) && s7_numerator(b) == 1)
         {
-            return to_shape(sc, Kernel::Tree(Kernel::Opcode::NTH_ROOT,
+            return shape_new(sc, Kernel::Tree(Kernel::Opcode::NTH_ROOT,
                 to_tree(lhs), Kernel::Tree(s7_denominator(b))));
         }
         else
@@ -319,12 +325,12 @@ static s7_pointer shape_modulo(s7_scheme* sc, s7_pointer args)
                 "modulo: wrong number of args: ~A", args);
     }
 
-    auto lhs = ensure_shape(sc, s7_car(args), "modulo");
+    auto lhs = shape_new(sc, s7_car(args), "modulo");
     CHECK_SHAPE(lhs);
-    auto rhs = ensure_shape(sc, s7_cadr(args), "modulo");
+    auto rhs = shape_new(sc, s7_cadr(args), "modulo");
     CHECK_SHAPE(rhs);
 
-    return result_to_const(sc, to_shape(sc, Kernel::Tree(Kernel::Opcode::MOD,
+    return result_to_const(sc, shape_new(sc, Kernel::Tree(Kernel::Opcode::MOD,
         to_tree(lhs), to_tree(rhs))));
 }
 
@@ -336,10 +342,10 @@ static s7_pointer NAME(s7_scheme* sc, s7_pointer args) \
         return s7_wrong_number_of_args_error(sc,        \
                 FUNC ": wrong number of args: ~A", args);   \
     }   \
-    auto lhs = ensure_shape(sc, s7_car(args), FUNC);    \
+    auto lhs = shape_new(sc, s7_car(args), FUNC);    \
     CHECK_SHAPE(lhs);   \
     return result_to_const(sc,  \
-            to_shape(sc, Kernel::Tree(OPCODE, to_tree(lhs)))); \
+            shape_new(sc, Kernel::Tree(OPCODE, to_tree(lhs)))); \
 }
 OVERLOAD_UNARY(shape_square, "square", Kernel::Opcode::SQUARE);
 OVERLOAD_UNARY(shape_sqrt, "sqrt", Kernel::Opcode::SQRT);
@@ -378,7 +384,7 @@ void kernel_bind_s7(s7_scheme* sc)
 
     s7_define_function(sc, "make-shape", shape_new, 1, 0, false,
             "(make-shape func) makes a new shape");
-    s7_define_function(sc, "shape?", is_shape_, 1, 0, false,
+    s7_define_function(sc, "shape?", is_shape, 1, 0, false,
             "(shape? s) checks if something is a shape");
 
     install_overload(sc, "+", shape_add);

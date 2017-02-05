@@ -3,8 +3,6 @@
 #include "s7/s7.h"
 #include "kernel/bind/bind_s7.h"
 
-#define EVAL(s) s7_object_to_c_string(sc, s7_eval_c_string(sc, s))
-
 std::string eval(s7_scheme* sc, std::string expr)
 {
     auto out = s7_object_to_c_string(sc, s7_eval_c_string(sc, expr.c_str()));
