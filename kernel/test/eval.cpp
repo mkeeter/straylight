@@ -107,6 +107,21 @@ TEST_CASE("Evaluator::varValues")
     }
 }
 
+TEST_CASE("Evaluator::updateVars")
+{
+    // Deliberately construct out of order
+    auto a = Tree::var(3.0);
+    Evaluator e(a);
+
+    a.setValue(5.0);
+    REQUIRE(e.updateVars(a.cache()));
+    REQUIRE(!e.updateVars(a.cache()));
+
+    auto v = e.varValues();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v.at(a.var()) == 5.0);
+}
+
 TEST_CASE("Float evaluation")
 {
     SECTION("X + 1")

@@ -117,6 +117,11 @@ public:
         FLAG_LOCATION_AGNOSTIC  = (1<<1),
     };
 
+    /*
+     *  Returns the parent Cache
+     */
+    const Cache& cache() const { return *parent; }
+
 protected:
     /*
      *  Private constructor

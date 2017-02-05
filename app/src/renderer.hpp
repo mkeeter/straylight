@@ -23,6 +23,12 @@ public:
      */
     void deleteWhenNotRunning();
 
+    /*
+     *  Updates each of the stored Evaluators with changed
+     *  variable values, return true if there's a change.
+     */
+    bool updateVars(Kernel::Tree tree);
+
     struct Result {
         Kernel::DepthImage* depth;
         Kernel::NormalImage* norm;

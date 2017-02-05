@@ -105,6 +105,14 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
                 // Kick off an initial render
                 r->onViewChanged(M, window_size);
             }
+            else
+            {
+                auto r = shapes.at({key, s});
+                if (r->updateVars(s->tree))
+                {
+                    r->onViewChanged(M, window_size);
+                }
+            }
 
             // Make sure we don't delete this renderer
             visited.insert({key, s});

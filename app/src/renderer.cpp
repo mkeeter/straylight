@@ -41,6 +41,16 @@ void Renderer::deleteWhenNotRunning()
     }
 }
 
+bool Renderer::updateVars(Kernel::Tree tree)
+{
+    bool changed = false;
+    for (auto& e : evaluators)
+    {
+        changed |= e->updateVars(tree.cache());
+    }
+    return changed;
+}
+
 void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
 {
     if (todo != DELETE)

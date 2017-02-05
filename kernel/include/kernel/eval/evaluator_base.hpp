@@ -126,6 +126,11 @@ public:
      */
     std::map<Cache::Id, float> varValues() const;
 
+    /*
+     *  Updates variable values, returning true if changed
+     */
+    bool updateVars(const Cache& cache);
+
 protected:
     /*
      *  Evaluate a single clause, populating the out array

@@ -1022,4 +1022,19 @@ std::map<Cache::Id, float> EvaluatorBase::varValues() const
     return out;
 }
 
+bool EvaluatorBase::updateVars(const Cache& cache)
+{
+    bool changed = false;
+    for (const auto& v : vars.left)
+    {
+        auto val = cache.value(v.second);
+        if (val != result.f[v.first][0])
+        {
+            setVar(v.second, val);
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 }   // namespace Kernel
