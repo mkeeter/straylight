@@ -1,4 +1,4 @@
-#include "material.hpp"
+#include "ui/material.hpp"
 
 QObject* Material::singleton(QQmlEngine *engine,
                              QJSEngine *scriptEngine)

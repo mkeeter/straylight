@@ -13,17 +13,6 @@ static bool set_insert_(const char* symbol_name, void* data);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static char* print_struct(std::string name, void* v)
-{
-    std::stringstream ss;
-    ss << "#<" << name << " at " << v << ">";
-    auto str = ss.str();
-
-    auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
-    memcpy(out, &str[0], str.length());
-    return out;
-}
-
 struct ValueThunk {
     NameKey target;
     ValuePtr value;
@@ -38,7 +27,7 @@ struct ValueThunk {
     static char* print(s7_scheme* sc, void* s)
     {
         (void)sc;
-        return print_struct("value-thunk", s);
+        return Interpreter::print("value-thunk", s);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -81,7 +70,7 @@ struct InstanceThunk {
     static char* print(s7_scheme* sc, void* v)
     {
         (void)sc;
-        return print_struct("instance-thunk", v);
+        return Interpreter::print("instance-thunk", v);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -135,7 +124,7 @@ struct SheetResultThunk
     static char* print(s7_scheme* sc, void* v)
     {
         (void)sc;
-        return print_struct("sheet-result-thunk", v);
+        return Interpreter::print("sheet-result-thunk", v);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -190,7 +179,7 @@ struct SheetThunk
     static char* print(s7_scheme* sc, void* v)
     {
         (void)sc;
-        return print_struct("sheet-thunk", v);
+        return Interpreter::print("sheet-thunk", v);
     }
 
     static s7_pointer apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
@@ -630,6 +619,17 @@ std::set<std::string> Interpreter::keywords() const
     std::pair<s7_scheme*, decltype(keywords)*> data = {sc, &keywords};
     s7_for_each_symbol_name(sc, set_insert_, &data);
     return keywords;
+}
+
+char* Interpreter::print(const std::string& type, void* s)
+{
+    std::stringstream ss;
+    ss << "#<" << type << " at " << s << ">";
+    auto str = ss.str();
+
+    auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
+    memcpy(out, &str[0], str.length());
+    return out;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

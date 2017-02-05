@@ -75,6 +75,13 @@ public:
      */
     std::set<std::string> keywords() const;
 
+    /*
+     *  Helpful pretty-printer for arbitrary bound objects
+     *
+     *  Returns a string of the form "#<type at 0x1234>"
+     */
+    static char* print(const std::string& type, void* s);
+
 private:
     /*
      *  Helper functions used in cellType

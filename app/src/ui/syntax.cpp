@@ -1,8 +1,9 @@
 #include <cassert>
 
-#include "bridge.hpp"
-#include "syntax.hpp"
-#include "material.hpp"
+#include "ui/syntax.hpp"
+#include "ui/material.hpp"
+
+#include "core/bridge.hpp"
 
 QList<SyntaxHighlighter::Rule> SyntaxHighlighter::rules;
 

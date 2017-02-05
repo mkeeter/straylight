@@ -17,14 +17,15 @@ find_package(Qt5Concurrent REQUIRED)
 
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
-    src/bridge.cpp
-    src/material.cpp
-    src/syntax.cpp
-    src/canvas.cpp
-    src/axes.cpp
-    src/renderer.cpp
-    src/blitter.cpp
-    src/undo.cpp
+    src/core/bridge.cpp
+    src/core/undo.cpp
+    src/ui/material.cpp
+    src/ui/syntax.cpp
+    src/render/canvas.cpp
+    src/render/axes.cpp
+    src/render/renderer.cpp
+    src/render/blitter.cpp
+    src/bind/bind_s7.cpp
     resources.qrc)
 
 target_link_libraries(Straylight
@@ -35,7 +36,7 @@ target_link_libraries(Straylight
     straylight-graph
     straylight-kernel
     ${OPENGL_LIBRARIES})
-target_include_directories(Straylight PRIVATE inc)
+target_include_directories(Straylight PRIVATE src)
 
 # Set application Info.plist file
 set_target_properties(Straylight PROPERTIES

@@ -9,9 +9,9 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/bind/bind_s7.h"
 
-#include "axes.hpp"
-#include "renderer.hpp"
-#include "blitter.hpp"
+#include "render/axes.hpp"
+#include "render/renderer.hpp"
+#include "render/blitter.hpp"
 
 class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {

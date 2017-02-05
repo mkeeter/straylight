@@ -1,4 +1,4 @@
-#include "axes.hpp"
+#include "render/axes.hpp"
 
 Axes::Axes()
 {

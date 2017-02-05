@@ -1,5 +1,5 @@
-#include "undo.hpp"
-#include "bridge.hpp"
+#include "core/undo.hpp"
+#include "core/bridge.hpp"
 
 UndoStack* UndoStack::_instance = nullptr;
 

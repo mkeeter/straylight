@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QThread>
 
-#include "blitter.hpp"
+#include "render/blitter.hpp"
 
 Blitter::Blitter()
 {

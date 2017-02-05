@@ -6,9 +6,8 @@
 namespace Kernel {
 namespace Bind {
 
-// Populated in bind_s7; left uninitialized to make Valgrind warn
-// if we ever try to use it at the wrong time.
-static int shape_type_tag;
+// Populated in bind_s7
+int Shape::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +16,7 @@ static int shape_type_tag;
  */
 static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
-    return s7_make_object(sc, shape_type_tag, new Shape { t });
+    return s7_make_object(sc, Shape::tag, new Shape { t });
 }
 
 /*
@@ -115,7 +114,7 @@ static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
 
 bool is_shape(s7_pointer s)
 {
-    return s7_is_object(s) && s7_object_type(s) == shape_type_tag;
+    return s7_is_object(s) && s7_object_type(s) == Shape::tag;
 }
 
 static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
@@ -125,7 +124,7 @@ static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
 
 const Shape* get_shape(s7_pointer obj)
 {
-    return static_cast<Shape*>(s7_object_value_checked(obj, shape_type_tag));
+    return static_cast<Shape*>(s7_object_value_checked(obj, Shape::tag));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -374,7 +373,7 @@ static void install_overload(s7_scheme* sc, const char* op,
 
 void init(s7_scheme* sc)
 {
-    shape_type_tag = s7_new_type_x(sc, "shape",
+    Shape::tag = s7_new_type_x(sc, "shape",
         shape_print,
         shape_free,
         shape_equal,

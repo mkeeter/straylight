@@ -1,10 +1,11 @@
 #include <QThread>
 
-#include "bridge.hpp"
-#include "canvas.hpp"
-#include "syntax.hpp"
-#include "undo.hpp"
+#include "core/bridge.hpp"
+#include "core/undo.hpp"
+#include "render/canvas.hpp"
+#include "ui/syntax.hpp"
 
+#include "bind/bind_s7.h"
 #include "kernel/bind/bind_s7.h"
 
 Bridge* Bridge::_instance = nullptr;
@@ -14,6 +15,7 @@ Bridge::Bridge()
 {
     // Inject the kernel bindings into the interpreter
     r.call(Kernel::Bind::init);
+    r.call(App::Bind::init);
 
     // Construct a default cell
     r.insertCell(0, "s", "(make-shape (lambda (x y z) (max (- z 1) (- -1 z) (+ (* x x) (* y y) -1) (- (max x y)))))");

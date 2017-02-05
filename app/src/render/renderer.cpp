@@ -3,7 +3,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "renderer.hpp"
+#include "render/renderer.hpp"
 
 Renderer::Renderer(Kernel::Tree t)
     : todo(NOTHING)

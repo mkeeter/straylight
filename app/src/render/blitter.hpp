@@ -8,7 +8,7 @@
 #include <QOpenGLTexture>
 #include <QQuickWindow>
 
-#include "renderer.hpp"
+#include "render/renderer.hpp"
 
 class Blitter : public QObject, public QOpenGLFunctions
 {
