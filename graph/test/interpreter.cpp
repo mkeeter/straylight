@@ -199,3 +199,11 @@ TEST_CASE("Interpreter::setReader")
     auto value = interp.eval(key);
     REQUIRE(value.str == "123");
 }
+
+TEST_CASE("Interpreter: *env*")
+{
+    Root r;
+
+    auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "*env*");
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, cell}).str == "(1 2)");
+}

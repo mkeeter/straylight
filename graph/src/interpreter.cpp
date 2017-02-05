@@ -432,6 +432,7 @@ Value Interpreter::eval(const CellKey& key)
         }
     }
 
+    // If we didn't get an error, then make bindings for all symbols
     if (value == nullptr)
     {
         auto bindings = s7_nil(interpreter); // empty list
@@ -451,6 +452,19 @@ Value Interpreter::eval(const CellKey& key)
                     s7_make_symbol(interpreter, root.getTree().nameOf(i).c_str()),
                     s7_cons(interpreter, getSheetThunk(i, key),
                     bindings));
+        }
+
+        {   // Insert *env* into the bindings list, where *env* is the full
+            // path to the cell (instance indices followed by a cell index)
+            auto env = s7_cons(interpreter, s7_make_integer(interpreter, key.second.i),
+                               s7_nil(interpreter));
+            for (auto itr=key.first.rbegin(); itr != key.first.rend(); ++itr)
+            {
+                env = s7_cons(interpreter, s7_make_integer(interpreter, itr->i), env);
+            }
+            bindings = s7_cons(interpreter,
+                    s7_make_symbol(interpreter, "*env*"),
+                    s7_cons(interpreter, env, bindings));
         }
 
         // Run the evaluation and get out a value
