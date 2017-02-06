@@ -171,4 +171,17 @@ TEST_CASE("*cell-reader*")
         REQUIRE(!(Kernel::Bind::get_shape(a)->tree ==
                   Kernel::Bind::get_shape(b)->tree));
     }
+
+    SECTION("Getting env back out")
+    {
+        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+
+        auto env = Kernel::Bind::envOf(sc, Kernel::Bind::get_shape(a)->tree);
+        REQUIRE(env.size() == 3);
+
+        auto itr = env.begin();
+        REQUIRE(*itr++ == 1);
+        REQUIRE(*itr++ == 2);
+        REQUIRE(*itr++ == 3);
+    }
 }

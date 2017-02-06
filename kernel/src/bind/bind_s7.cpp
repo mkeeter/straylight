@@ -16,7 +16,7 @@ int Shape::tag = -1;
  */
 static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
-    return s7_make_object(sc, Shape::tag, new Shape { t });
+    return s7_make_object(sc, Shape::tag, new Shape(t));
 }
 
 /*
@@ -80,10 +80,14 @@ static void shape_free(void* s)
 
 static bool shape_equal(void* a, void* b)
 {
-    return (static_cast<Shape*>(a)->tree ==
-            static_cast<Shape*>(b)->tree) &&
-           !(static_cast<Shape*>(a)->tree.flags() &
-             Tree::FLAG_LOCATION_AGNOSTIC);
+    auto sa = static_cast<Shape*>(a);
+    auto sb = static_cast<Shape*>(b);
+
+    const bool value_changed = sa->value_changed || sb->value_changed;
+    sa->value_changed = false;
+    sb->value_changed = false;
+
+    return !value_changed && (sa->tree == sb->tree);
 }
 
 static char* shape_print(s7_scheme* sc, void* s)
@@ -415,10 +419,14 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
         {
             cell_ref = shape_new(sc, Kernel::Tree::var(v));
             s7_hash_table_set(sc, env_tree_map, env, cell_ref);
+
+            auto tree_env_map = s7_name_to_value(sc, "*tree-env-map*");
+            s7_hash_table_set(sc, tree_env_map, cell_ref, env);
         }
         else
         {
             to_tree(cell_ref).setValue(v);
+            get_mutable_shape(cell_ref)->value_changed = true;
         }
 
         return s7_list(sc, 1, cell_ref);
@@ -510,7 +518,28 @@ void init(s7_scheme* sc)
         "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
 
     s7_define_constant(sc, "*env-tree-map*", s7_make_hash_table(sc, 128));
+    s7_define_constant(sc, "*tree-env-map*", s7_make_hash_table(sc, 128));
 
+}
+
+std::list<int> envOf(s7_scheme* sc, Kernel::Tree t)
+{
+    auto tree_env_map = s7_name_to_value(sc, "*tree-env-map*");
+    auto env_ref = s7_hash_table_ref(sc, tree_env_map, shape_new(sc, t));
+
+    if (env_ref == s7_f(sc))
+    {
+        return {};
+    }
+    else
+    {
+        std::list<int> out;
+        for (auto a = env_ref; a != s7_nil(sc); a = s7_cdr(a))
+        {
+            out.push_back(s7_number_to_integer(sc, s7_car(a)));
+        }
+        return out;
+    }
 }
 
 }   // namespace Bind
