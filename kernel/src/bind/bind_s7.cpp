@@ -88,8 +88,24 @@ static char* shape_print(s7_scheme* sc, void* s)
 {
     (void)sc;
 
+    Tree t = static_cast<Shape*>(s)->tree;
     std::stringstream ss;
-    ss << "#<shape at " << s << ">";
+
+    if (t.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
+    {
+        if (t.opcode() == Kernel::Opcode::VAR)
+        {
+            ss << t.value() << " (variable)";
+        }
+        else
+        {
+            ss << t.value() << " (expression)";
+        }
+    }
+    else
+    {
+        ss << "#<shape at " << s << ">";
+    }
     auto str = ss.str();
 
     auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
@@ -383,6 +399,19 @@ static void install_overload(s7_scheme* sc, const char* op,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+s7_pointer reader(s7_scheme* sc, s7_pointer args)
+{
+    args = s7_car(args);
+    if (s7_list_length(sc, args) == 1 && s7_is_number(s7_car(args)))
+    {
+        return s7_list(sc, 1, shape_new(sc,
+                    Kernel::Tree::var(s7_number_to_real(sc, s7_car(args)))));
+    }
+    return args;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void init(s7_scheme* sc)
 {
     Shape::tag = s7_new_type_x(sc, "shape",
@@ -421,6 +450,10 @@ void init(s7_scheme* sc)
     install_overload(sc, "asin", shape_asin);
     install_overload(sc, "acos", shape_acos);
     install_overload(sc, "exp", shape_exp);
+
+    s7_define_function(sc, "*cell-reader*", reader, 1, 0, 0,
+            "Reads a list of s-exprs, recording solo floats in *var-cell-map*"
+            " and *float-tree-map*");
 }
 
 }   // namespace Bind
