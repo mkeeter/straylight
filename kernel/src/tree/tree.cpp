@@ -64,8 +64,8 @@ void Tree::checkValue()
 
     auto t = Tree(opcode(), Tree(lhs().value()),
                             Tree(rhs().value()));
-    Evaluator e(t);
-    setValue(e.values(1)[0]);
+    assert(t.opcode() == Opcode::CONST);
+    setValue(t.value());
 }
 
 }   // namespace Kernel
