@@ -86,6 +86,9 @@ public:
 
     /*
      *  Sets a VAR tree's value
+     *
+     *  Note that this may invalidate values of trees that use this variable;
+     *  recursively call checkValue to make sure these values are valid.
      */
     void setValue(float v) { return parent->setValue(id, v); }
 

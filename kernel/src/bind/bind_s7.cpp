@@ -428,6 +428,43 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static s7_pointer detree_args(s7_scheme* sc, s7_pointer args)
+{
+    bool has_tree = false;
+    for (auto a = args; !has_tree && a != s7_nil(sc); a = s7_cdr(a))
+    {
+        auto f = s7_car(a);
+        has_tree |= (is_shape(f) &&
+                    (to_tree(f).flags() & Tree::FLAG_LOCATION_AGNOSTIC));
+    }
+
+    if (has_tree)
+    {
+        auto new_args = s7_nil(sc);
+        for (auto a = args; a != s7_nil(sc); a = s7_cdr(a))
+        {
+            auto f = s7_car(a);
+            new_args = s7_cons(sc, is_shape(f)
+                    ? s7_make_real(sc, to_tree(f).value())
+                    : f, new_args);
+        }
+        return s7_reverse(sc, new_args);
+    }
+    else
+    {
+        return args;
+    }
+}
+
+s7_pointer custom_lt(s7_scheme* sc, s7_pointer args)
+{
+    static s7_pointer op = s7_eval_c_string(sc, "#_<");
+    args = detree_args(sc, args);
+    return s7_apply_function(sc, op, args);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void init(s7_scheme* sc)
 {
     Shape::tag = s7_new_type_x(sc, "shape",
@@ -466,6 +503,8 @@ void init(s7_scheme* sc)
     install_overload(sc, "asin", shape_asin);
     install_overload(sc, "acos", shape_acos);
     install_overload(sc, "exp", shape_exp);
+
+    install_overload(sc, "<", custom_lt);
 
     s7_define_function(sc, "*cell-reader*", reader, 1, 0, 0,
         "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
