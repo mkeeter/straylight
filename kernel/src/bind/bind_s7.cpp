@@ -80,8 +80,10 @@ static void shape_free(void* s)
 
 static bool shape_equal(void* a, void* b)
 {
-    return static_cast<Shape*>(a)->tree ==
-           static_cast<Shape*>(b)->tree;
+    return (static_cast<Shape*>(a)->tree ==
+            static_cast<Shape*>(b)->tree) &&
+           !(static_cast<Shape*>(a)->tree.flags() &
+             Tree::FLAG_LOCATION_AGNOSTIC);
 }
 
 static char* shape_print(s7_scheme* sc, void* s)
