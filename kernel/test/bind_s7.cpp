@@ -160,4 +160,15 @@ TEST_CASE("*cell-reader*")
         REQUIRE(Kernel::Bind::get_shape(a)->tree ==
                 Kernel::Bind::get_shape(b)->tree);
     }
+
+    SECTION("Different *env* produces different Tree")
+    {
+        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+
+        s7_define_variable(sc, "*env*", s7_list(sc, 1, s7_make_integer(sc, 1)));
+        auto b = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+
+        REQUIRE(!(Kernel::Bind::get_shape(a)->tree ==
+                  Kernel::Bind::get_shape(b)->tree));
+    }
 }
