@@ -253,7 +253,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (lambda args #f))))
       )")),
       eval_func(s7_eval_c_string(sc, R"(
-        (lambda (str env reader)
+        (lambda (str env)
           (define (read-all port)
             (let recurse ()
               (let ((r (read port)))
@@ -273,20 +273,20 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
             (lambda ()
               (let* ((i (read-all (open-input-string str)))
                      (j (strip-output i))
-                     (r (cons 'begin (reader j))))
+                     (r (cons 'begin (*cell-reader* j))))
                 (cons 'value (eval r env))))
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
                         (copy (cons 'unbound-var (cadr args))))
                     (else
                         (copy (cons 'error (cadr args))))))))
-      )")),
-      default_reader(s7_eval_c_string(sc, R"(
-        (lambda (sexp) sexp)
       )"))
 {
+    // Install default *cell-reader*
+    setReader(s7_eval_c_string(sc, "(lambda (s) s)"));
+
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          eval_func, default_reader})
+                          eval_func})
     {
         s7_gc_protect(sc, ptr);
     }
@@ -456,10 +456,9 @@ Value Interpreter::eval(const CellKey& key)
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(sc, 3,
+        auto args = s7_list(sc, 2,
                 s7_make_string(sc, expr.c_str()),
-                s7_inlet(sc, bindings),
-                reader == nullptr ? default_reader : reader);
+                s7_inlet(sc, bindings));
         value = s7_call(sc, eval_func, args);
     }
 
@@ -536,8 +535,9 @@ ValuePtr Interpreter::untag(ValuePtr v)
 
 void Interpreter::setReader(s7_cell* r)
 {
+    s7_gc_unprotect(sc, s7_name_to_value(sc, "*cell-reader*"));
     s7_gc_protect(sc, r);
-    reader = r;
+    s7_define_variable(sc, "*cell-reader*", r);
 }
 
 s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,

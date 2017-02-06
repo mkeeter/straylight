@@ -116,8 +116,6 @@ private:
     s7_cell* const name_valid;
 
     s7_cell* const eval_func;
-    s7_cell* const default_reader;
-    s7_cell* reader=nullptr;
 };
 
 }   // namespace Graph
