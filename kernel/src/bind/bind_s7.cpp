@@ -404,8 +404,22 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
     args = s7_car(args);
     if (s7_list_length(sc, args) == 1 && s7_is_number(s7_car(args)))
     {
-        return s7_list(sc, 1, shape_new(sc,
-                    Kernel::Tree::var(s7_number_to_real(sc, s7_car(args)))));
+        auto env_tree_map = s7_name_to_value(sc, "*env-tree-map*");
+        auto env = s7_name_to_value(sc, "*env*");
+        auto cell_ref = s7_hash_table_ref(sc, env_tree_map, env);
+
+        const auto v = s7_number_to_real(sc, s7_car(args));
+        if (cell_ref == s7_f(sc))
+        {
+            cell_ref = shape_new(sc, Kernel::Tree::var(v));
+            s7_hash_table_set(sc, env_tree_map, env, cell_ref);
+        }
+        else
+        {
+            to_tree(cell_ref).setValue(v);
+        }
+
+        return s7_list(sc, 1, cell_ref);
     }
     return args;
 }
@@ -452,8 +466,10 @@ void init(s7_scheme* sc)
     install_overload(sc, "exp", shape_exp);
 
     s7_define_function(sc, "*cell-reader*", reader, 1, 0, 0,
-            "Reads a list of s-exprs, recording solo floats in *var-cell-map*"
-            " and *float-tree-map*");
+        "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
+
+    s7_define_constant(sc, "*env-tree-map*", s7_make_hash_table(sc, 128));
+
 }
 
 }   // namespace Bind
