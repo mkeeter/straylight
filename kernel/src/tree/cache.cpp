@@ -433,7 +433,7 @@ Cache::Id Cache::collapse(Id root)
 
 void Cache::setValue(Id id, float v)
 {
-    assert(opcode(id) == Opcode::VAR);
+    assert(flags(id) & Tree::FLAG_LOCATION_AGNOSTIC);
 
     auto it = data.right.find(id);
     assert(it != data.right.end());

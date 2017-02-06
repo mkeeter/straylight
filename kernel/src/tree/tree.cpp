@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "kernel/tree/tree.hpp"
+#include "kernel/eval/evaluator.hpp"
 
 namespace Kernel {
 
@@ -54,6 +55,17 @@ Tree Tree::collapse() const
 {
     return (flags() & FLAG_COLLAPSED) ? *this :
            Tree(parent, parent->collapse(id));
+}
+
+void Tree::checkValue()
+{
+    assert((opcode() != Opcode::VAR) &&
+           (flags() & Tree::FLAG_LOCATION_AGNOSTIC));
+
+    auto t = Tree(opcode(), Tree(lhs().value()),
+                            Tree(rhs().value()));
+    Evaluator e(t);
+    setValue(e.values(1)[0]);
 }
 
 }   // namespace Kernel

@@ -89,6 +89,13 @@ public:
      */
     void setValue(float v) { return parent->setValue(id, v); }
 
+    /*
+     *  Checks that a location-agnostic tree has the correct value
+     *
+     *  Requires that both children have correct values as well.
+     */
+    void checkValue();
+
     template <typename T>   T* tag() const
     { return parent->tag<T>(id); }
 

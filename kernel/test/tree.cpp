@@ -181,3 +181,15 @@ TEST_CASE("Tree::flags")
     auto e = c + Tree::X();
     REQUIRE(e.flags() == Tree::FLAG_COLLAPSED);
 }
+
+TEST_CASE("Tree::checkValue")
+{
+    Cache::reset();
+
+    auto a = Tree::var(3.0);
+    auto b = a + Tree(4.5);
+    REQUIRE(b.value() != 7.5);
+
+    b.checkValue();
+    REQUIRE(b.value() == 7.5);
+}
