@@ -127,6 +127,11 @@ const Shape* get_shape(s7_pointer obj)
     return static_cast<Shape*>(s7_object_value_checked(obj, Shape::tag));
 }
 
+static Shape* get_mutable_shape(s7_pointer obj)
+{
+    return static_cast<Shape*>(s7_object_value_checked(obj, Shape::tag));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
@@ -169,7 +174,7 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
 {
     CHECK_SHAPE(out);
 
-    const auto& tree = get_shape(out)->tree;
+    auto& tree = get_mutable_shape(out)->tree;
 
     // If the result is a constant (indicating that there was no Shape
     // involved in the reduction), then convert back to an ordinary
@@ -177,6 +182,13 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
     if (tree.opcode() == Kernel::Opcode::CONST)
     {
         return s7_make_real(sc, tree.value());
+    }
+    // If this is a location-agnostic expression but not directly a VAR,
+    // then make sure that it has the correct value
+    else if ((tree.flags() & Tree::FLAG_LOCATION_AGNOSTIC) &&
+             (tree.opcode() != Kernel::Opcode::VAR))
+    {
+        tree.checkValue();
     }
     return out;
 }
