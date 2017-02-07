@@ -253,7 +253,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (lambda args #f))))
       )")),
       eval_func(s7_eval_c_string(sc, R"(
-        (lambda (str env)
+        (lambda (str eval-env cell-env)
           (define (read-all port)
             (let recurse ()
               (let ((r (read port)))
@@ -273,8 +273,8 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
             (lambda ()
               (let* ((i (read-all (open-input-string str)))
                      (j (strip-output i))
-                     (r (cons 'begin (*cell-reader* j))))
-                (cons 'value (eval r env))))
+                     (r (cons 'begin (*cell-reader* j cell-env))))
+                (cons 'value (eval r eval-env))))
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
                         (copy (cons 'unbound-var (cadr args))))
@@ -283,7 +283,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
       )"))
 {
     // Install default *cell-reader*
-    setReader(s7_eval_c_string(sc, "(lambda (s) s)"));
+    setReader(s7_eval_c_string(sc, "(lambda (s c) s)"));
 
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
                           eval_func})
@@ -442,23 +442,19 @@ Value Interpreter::eval(const CellKey& key)
                     bindings));
         }
 
-        {   // Insert *env* into the bindings list, where *env* is the full
-            // path to the cell (instance indices followed by a cell index)
-            auto env = s7_cons(sc, s7_make_integer(sc, key.second.i),
-                               s7_nil(sc));
-            for (auto itr=key.first.rbegin(); itr != key.first.rend(); ++itr)
-            {
-                env = s7_cons(sc, s7_make_integer(sc, itr->i), env);
-            }
-            bindings = s7_cons(sc,
-                    s7_make_symbol(sc, "*env*"),
-                    s7_cons(sc, env, bindings));
+        // Calculate cell-env, where cell-env is the full path to the
+        // cell (instance indices followed by a cell index)
+        auto env = s7_cons(sc, s7_make_integer(sc, key.second.i),
+                           s7_nil(sc));
+        for (auto itr=key.first.rbegin(); itr != key.first.rend(); ++itr)
+        {
+            env = s7_cons(sc, s7_make_integer(sc, itr->i), env);
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(sc, 2,
+        auto args = s7_list(sc, 3,
                 s7_make_string(sc, expr.c_str()),
-                s7_inlet(sc, bindings));
+                s7_inlet(sc, bindings), env);
         value = s7_call(sc, eval_func, args);
     }
 

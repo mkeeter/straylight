@@ -179,7 +179,7 @@ TEST_CASE("Interpreter::nameValid")
 
 static s7_cell* customReader(s7_scheme* sc)
 {
-    return s7_eval_c_string(sc, "(lambda (sexp) '(123))");
+    return s7_eval_c_string(sc, "(lambda (sexp c) '(123))");
 }
 
 TEST_CASE("Interpreter::setReader")
@@ -198,12 +198,4 @@ TEST_CASE("Interpreter::setReader")
     r.setExpr(cell, "1");
     auto value = interp.eval(key);
     REQUIRE(value.str == "123");
-}
-
-TEST_CASE("Interpreter: *env*")
-{
-    Root r;
-
-    auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "*env*");
-    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, cell}).str == "(1 2)");
 }

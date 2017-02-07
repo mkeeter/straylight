@@ -101,11 +101,11 @@ static char* shape_print(s7_scheme* sc, void* s)
     {
         if (t.opcode() == Kernel::Opcode::VAR)
         {
-            ss << t.value() << " (variable)";
+            ss << t.value() << " (variable at <" << s << ">)";
         }
         else
         {
-            ss << t.value() << " (expression)";
+            ss << t.value() << " (expression at <" << s << ">)";
         }
     }
     else
@@ -407,14 +407,14 @@ static void install_overload(s7_scheme* sc, const char* op,
 
 s7_pointer reader(s7_scheme* sc, s7_pointer args)
 {
-    args = s7_car(args);
-    if (s7_list_length(sc, args) == 1 && s7_is_number(s7_car(args)))
+    auto begin = s7_car(args);
+    if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
         auto env_tree_map = s7_name_to_value(sc, "*env-tree-map*");
-        auto env = s7_name_to_value(sc, "*env*");
+        auto env = s7_cadr(args);
         auto cell_ref = s7_hash_table_ref(sc, env_tree_map, env);
 
-        const auto v = s7_number_to_real(sc, s7_car(args));
+        const auto v = s7_number_to_real(sc, s7_car(begin));
         if (cell_ref == s7_f(sc))
         {
             cell_ref = shape_new(sc, Kernel::Tree::var(v));
@@ -431,7 +431,7 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
 
         return s7_list(sc, 1, cell_ref);
     }
-    return args;
+    return begin;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -514,7 +514,7 @@ void init(s7_scheme* sc)
 
     install_overload(sc, "<", custom_lt);
 
-    s7_define_function(sc, "*cell-reader*", reader, 1, 0, 0,
+    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
         "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
 
     s7_define_constant(sc, "*env-tree-map*", s7_make_hash_table(sc, 128));

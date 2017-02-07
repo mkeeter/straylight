@@ -140,33 +140,25 @@ TEST_CASE("*cell-reader*")
 {
     auto sc = get_scm();
 
-    // Load a dummy environment
-    s7_define_variable(sc, "*env*", s7_list(sc, 3,
-        s7_make_integer(sc, 1),
-        s7_make_integer(sc, 2),
-        s7_make_integer(sc, 3)));
-
     SECTION("Number -> Shape")
     {
-        auto out = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+        auto out = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 2 3)))))");
         CAPTURE(s7_object_to_c_string(sc, out));
         REQUIRE(Kernel::Bind::is_shape(out));
     }
 
     SECTION("Same *env* produces same Tree")
     {
-        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
-        auto b = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 2 3)))))");
+        auto b = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 2 3)))))");
         REQUIRE(Kernel::Bind::get_shape(a)->tree ==
                 Kernel::Bind::get_shape(b)->tree);
     }
 
     SECTION("Different *env* produces different Tree")
     {
-        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
-
-        s7_define_variable(sc, "*env*", s7_list(sc, 1, s7_make_integer(sc, 1)));
-        auto b = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 2)))))");
+        auto b = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 3)))))");
 
         REQUIRE(!(Kernel::Bind::get_shape(a)->tree ==
                   Kernel::Bind::get_shape(b)->tree));
@@ -174,7 +166,7 @@ TEST_CASE("*cell-reader*")
 
     SECTION("Getting env back out")
     {
-        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12)))))");
+        auto a = s7_eval_c_string(sc, "(eval (car (*cell-reader* '(12) '(1 2 3)))))");
 
         auto env = Kernel::Bind::envOf(sc, Kernel::Bind::get_shape(a)->tree);
         REQUIRE(env.size() == 3);
