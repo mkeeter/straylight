@@ -21,10 +21,15 @@ struct PointHandle {
  */
 void init(s7_scheme* interpreter);
 
-extern "C" {
-    void is_point_handle(s7_cell* obj);
-    const PointHandle* get_point_handle(s7_cell* obj);
-};
+/*
+ *  Checks if the given object is a PointHandle
+ */
+bool is_point_handle(s7_cell* obj);
+
+/*
+ *  Extracts a PointHandle, or nullptr
+ */
+const PointHandle* get_point_handle(s7_cell* obj);
 
 }   // namespace Bind
 }   // namespace App

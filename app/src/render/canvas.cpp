@@ -83,41 +83,44 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         // for it (if one doesn't already exist)
         if (Kernel::Bind::is_shape(v))
         {
-            auto s = Kernel::Bind::get_shape(v);
-
-            if (shapes.count({key, s}) == 0)
-            {
-                auto r = new ::Renderer(s->tree);
-                shapes[{key, s}] = r;
-
-                // Connect the renderer to our viewChanged signal so it will
-                // automatically redraw when necessary
-                connect(this, &Canvas::viewChanged,
-                        r, &::Renderer::onViewChanged);
-
-                // Connect the renderer and the blitter, so bitmaps will
-                // magically appear in the 3D viewport
-                connect(r, &::Renderer::gotResult,
-                        &blitter, &Blitter::addQuad, Qt::DirectConnection);
-                connect(r, &::Renderer::goodbye,
-                        &blitter, &Blitter::forget);
-
-                // Kick off an initial render
-                r->onViewChanged(M, window_size);
-            }
-            else
-            {
-                auto r = shapes.at({key, s});
-                if (r->updateVars(s->tree))
-                {
-                    r->onViewChanged(M, window_size);
-                }
-            }
-
-            // Make sure we don't delete this renderer
-            visited.insert({key, s});
+            installShape({key, Kernel::Bind::get_shape(v)});
         }
     }
+}
+
+void Canvas::installShape(const ShapeKey& k)
+{
+    if (shapes.count(k) == 0)
+    {
+        auto r = new ::Renderer(k.second->tree);
+        shapes[k] = r;
+
+        // Connect the renderer to our viewChanged signal so it will
+        // automatically redraw when necessary
+        connect(this, &Canvas::viewChanged,
+                r, &::Renderer::onViewChanged);
+
+        // Connect the renderer and the blitter, so bitmaps will
+        // magically appear in the 3D viewport
+        connect(r, &::Renderer::gotResult,
+                &blitter, &Blitter::addQuad, Qt::DirectConnection);
+        connect(r, &::Renderer::goodbye,
+                &blitter, &Blitter::forget);
+
+        // Kick off an initial render
+        r->onViewChanged(M, window_size);
+    }
+    else
+    {
+        auto r = shapes.at(k);
+        if (r->updateVars(k.second->tree))
+        {
+            r->onViewChanged(M, window_size);
+        }
+    }
+
+    // Make sure we don't delete this renderer
+    visited.insert(k);
 }
 
 void Canvas::synchronize(QQuickFramebufferObject *item)

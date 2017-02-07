@@ -11,9 +11,6 @@ namespace Bind {
 // s7 type tag for PointHandle
 int PointHandle::tag = -1;
 
-void is_point_handle(s7_cell* obj);
-const PointHandle* get_point_handle(s7_cell* obj);
-
 static char* point_handle_print(s7_scheme* sc, void* s)
 {
     (void)sc;
@@ -29,6 +26,17 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
 {
     (void)args;
     return s7_make_object(sc, PointHandle::tag, new PointHandle { {0,0,0}, 1 });
+}
+
+bool is_point_handle(s7_pointer s)
+{
+    return s7_is_object(s) && s7_object_type(s) == PointHandle::tag;
+}
+
+const PointHandle* get_point_handle(s7_cell* obj)
+{
+    return static_cast<PointHandle*>(
+            s7_object_value_checked(obj, PointHandle::tag));
 }
 
 void init(s7_scheme* sc)

@@ -25,7 +25,7 @@ public:
 public slots:
     ////////////////////////////////////////////////////////////////////////////
     //  Graph serialization
-    //  (which we only track closely enough to get shapes
+    //  (which we only track closely enough to get shapes)
     void push(const int instance_index, const QString& instance_name,
               const QString& sheet_name);
     void pop();
@@ -36,6 +36,13 @@ signals:
     void viewChanged(QMatrix4x4 mat, QSize size);
 
 protected:
+    typedef std::pair<Graph::CellKey, const Kernel::Bind::Shape*> ShapeKey;
+
+    /*
+     *  Checks the shape, installing a new Renderer if necessary
+     */
+    void installShape(const ShapeKey& s);
+
     // Pull in matrix and size from parent
     void synchronize(QQuickFramebufferObject *item) override;
 
@@ -44,7 +51,6 @@ protected:
     QSize window_size;
 
     /*  Here, we store the set of shapes to be drawn */
-    typedef std::pair<Graph::CellKey, const Kernel::Bind::Shape*> ShapeKey;
     std::map<ShapeKey, ::Renderer*> shapes;
 
     /*  Used in graph serialization to keep track of which keys are active */
