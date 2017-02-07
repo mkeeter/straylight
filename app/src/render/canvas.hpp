@@ -13,6 +13,9 @@
 #include "render/renderer.hpp"
 #include "render/blitter.hpp"
 
+namespace App {
+namespace Render {
+
 class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT
@@ -51,7 +54,7 @@ protected:
     QSize window_size;
 
     /*  Here, we store the set of shapes to be drawn */
-    std::map<ShapeKey, ::Renderer*> shapes;
+    std::map<ShapeKey, App::Render::Renderer*> shapes;
 
     /*  Used in graph serialization to keep track of which keys are active */
     std::list<Graph::InstanceIndex> env;
@@ -101,3 +104,6 @@ protected:
     float pitch=0;
     float yaw=0;
 };
+
+}   // namespace Render
+}   // namespace App

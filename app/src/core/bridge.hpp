@@ -6,8 +6,11 @@
 #include "graph/root.hpp"
 #include "graph/serializer.hpp"
 
-// Forward declarations
-class Canvas;
+namespace App {
+
+namespace Render { class Canvas; }
+namespace Core {
+
 class UndoStack;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +101,7 @@ public:
     /*
      *  Installs the Canvas object
      */
-    void attachCanvas(Canvas* c);
+    void attachCanvas(App::Render::Canvas* c);
 
 signals:
     /*
@@ -196,3 +199,6 @@ protected:
 
     static Bridge* _instance;
 };
+
+}   // namespace Core
+}   // namespace App

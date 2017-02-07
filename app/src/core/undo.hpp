@@ -7,6 +7,9 @@
 
 #include "graph/root.hpp"
 
+namespace App {
+namespace Core {
+
 class Bridge;
 
 class UndoStack : public QUndoStack
@@ -56,3 +59,6 @@ protected:
 
     bool once=true;
 };
+
+}   // namespace Core
+}   // namespace App

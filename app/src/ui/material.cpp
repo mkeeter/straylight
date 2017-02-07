@@ -1,5 +1,8 @@
 #include "ui/material.hpp"
 
+namespace App {
+namespace UI {
+
 QObject* Material::singleton(QQmlEngine *engine,
                              QJSEngine *scriptEngine)
 {
@@ -322,3 +325,6 @@ const QColor Material::blue_grey_900("#263238");
 /* White / Black */
 const QColor Material::white("#ffffff");
 const QColor Material::black("#000000");
+
+}   // namespace UI
+}   // namespace App

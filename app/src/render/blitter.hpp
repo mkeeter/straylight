@@ -10,6 +10,9 @@
 
 #include "render/renderer.hpp"
 
+namespace App {
+namespace Render {
+
 class Blitter : public QObject, public QOpenGLFunctions
 {
     Q_OBJECT
@@ -85,3 +88,6 @@ protected:
         Renderer* const R;
     };
 };
+
+}   // namespace Render
+}   // namespace App

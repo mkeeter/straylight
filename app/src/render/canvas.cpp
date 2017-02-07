@@ -5,6 +5,9 @@
 
 #include "kernel/bind/bind_s7.h"
 
+namespace App {
+namespace Render {
+
 Canvas::Canvas()
 {
     connect(&blitter, &Blitter::changed, [=](){ this->update(); });
@@ -92,19 +95,19 @@ void Canvas::installShape(const ShapeKey& k)
 {
     if (shapes.count(k) == 0)
     {
-        auto r = new ::Renderer(k.second->tree);
+        auto r = new App::Render::Renderer(k.second->tree);
         shapes[k] = r;
 
         // Connect the renderer to our viewChanged signal so it will
         // automatically redraw when necessary
         connect(this, &Canvas::viewChanged,
-                r, &::Renderer::onViewChanged);
+                r, &App::Render::Renderer::onViewChanged);
 
         // Connect the renderer and the blitter, so bitmaps will
         // magically appear in the 3D viewport
-        connect(r, &::Renderer::gotResult,
+        connect(r, &App::Render::Renderer::gotResult,
                 &blitter, &Blitter::addQuad, Qt::DirectConnection);
-        connect(r, &::Renderer::goodbye,
+        connect(r, &App::Render::Renderer::goodbye,
                 &blitter, &Blitter::forget);
 
         // Kick off an initial render
@@ -145,7 +148,7 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 QQuickFramebufferObject::Renderer* CanvasObject::createRenderer() const
 {
     auto c = new Canvas();
-    Bridge::singleton()->attachCanvas(c);
+    App::Core::Bridge::singleton()->attachCanvas(c);
     return c;
 }
 
@@ -210,3 +213,6 @@ QMatrix4x4 CanvasObject::view() const
 
     return m;
 }
+
+}   // namespace Render
+}   // namespace App

@@ -3,6 +3,9 @@
 #include <QRegularExpression>
 #include <QSyntaxHighlighter>
 
+namespace App {
+namespace UI {
+
 class SyntaxHighlighter : public QSyntaxHighlighter
 {
 public:
@@ -37,3 +40,6 @@ protected:
 
     void highlightBlock(const QString& text) override;
 };
+
+}   // namespace UI
+}   // namespace App

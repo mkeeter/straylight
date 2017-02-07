@@ -1,5 +1,8 @@
 #include "render/axes.hpp"
 
+namespace App {
+namespace Render {
+
 Axes::Axes()
 {
     initializeOpenGLFunctions();
@@ -127,3 +130,6 @@ void Axes::draw(QMatrix4x4 M)
 
     shader.release();
 }
+
+}   // namespace Render
+}   // namespace App

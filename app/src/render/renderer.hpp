@@ -10,6 +10,9 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/render/heightmap.hpp"
 
+namespace App {
+namespace Render {
+
 class Renderer : public QObject
 {
     Q_OBJECT
@@ -86,3 +89,6 @@ protected:
     QFuture<void> future;
     QFutureWatcher<void> watcher;
 };
+
+}   // namespace Render
+}   // namespace App

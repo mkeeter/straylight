@@ -5,6 +5,9 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 
+namespace App {
+namespace UI {
+
 class Material: public QObject
 {
     Q_OBJECT
@@ -603,3 +606,6 @@ public:
     Q_PROPERTY(QColor black MEMBER black CONSTANT)
     const static QColor black;
 };
+
+}   // namespace UI
+}   // namespace App

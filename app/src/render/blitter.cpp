@@ -3,6 +3,9 @@
 
 #include "render/blitter.hpp"
 
+namespace App {
+namespace Render {
+
 Blitter::Blitter()
 {
     qRegisterMetaType<Renderer::Result>("Result");
@@ -153,3 +156,6 @@ void Blitter::QuadForget::run()
     emit(parent->changed());
 }
 
+
+}   // namespace Render
+}   // namespace App

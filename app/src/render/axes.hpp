@@ -5,6 +5,9 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 
+namespace App {
+namespace Render {
+
 class Axes : public QOpenGLFunctions
 {
 public:
@@ -17,3 +20,6 @@ protected:
 
     QOpenGLShaderProgram shader;
 };
+
+}   // namespace Render
+}   // namespace App

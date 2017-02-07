@@ -8,6 +8,9 @@
 #include "bind/bind_s7.h"
 #include "kernel/bind/bind_s7.h"
 
+namespace App {
+namespace Core {
+
 Bridge* Bridge::_instance = nullptr;
 
 Bridge::Bridge()
@@ -155,12 +158,12 @@ int Bridge::sheetOf(int instance_index) const
 
 void Bridge::installHighlighter(QQuickTextDocument* doc)
 {
-    new SyntaxHighlighter(doc->textDocument());
+    new App::UI::SyntaxHighlighter(doc->textDocument());
 }
 
 QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
 {
-    return SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
+    return App::UI::SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
 }
 
 QString Bridge::saveFile(QUrl filename)
@@ -233,11 +236,11 @@ Bridge* Bridge::singleton()
     return _instance;
 }
 
-void Bridge::attachCanvas(Canvas* c)
+void Bridge::attachCanvas(App::Render::Canvas* c)
 {
-    connect(this, &Bridge::push, c, &Canvas::push);
-    connect(this, &Bridge::pop, c, &Canvas::pop);
-    connect(this, &Bridge::cell, c, &Canvas::cell);
+    connect(this, &Bridge::push, c, &App::Render::Canvas::push);
+    connect(this, &Bridge::pop, c, &App::Render::Canvas::pop);
+    connect(this, &Bridge::cell, c, &App::Render::Canvas::cell);
 
     emit(syncLater());
 }
@@ -331,3 +334,6 @@ void Bridge::BridgeTreeSerializer::sheet(
 {
     parent->sheet(s.i, QString::fromStdString(name), editable, insertable);
 }
+
+}   // namespace Core
+}   // namespace App

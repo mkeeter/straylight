@@ -1,6 +1,9 @@
 #include "core/undo.hpp"
 #include "core/bridge.hpp"
 
+namespace App {
+namespace Core {
+
 UndoStack* UndoStack::_instance = nullptr;
 
 QObject* UndoStack::singleton(QQmlEngine *engine, QJSEngine *scriptEngine)
@@ -72,3 +75,6 @@ void UndoCommand::redo()
     }
     once = false;
 }
+
+}   // namespace Core
+}   // namespace App

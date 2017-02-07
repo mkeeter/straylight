@@ -5,6 +5,9 @@
 
 #include "render/renderer.hpp"
 
+namespace App {
+namespace Render {
+
 Renderer::Renderer(Kernel::Tree t)
     : todo(NOTHING)
 {
@@ -143,3 +146,6 @@ void Renderer::run(Task t)
         }
     }
 }
+
+}   // namespace Render
+}   // namespace App

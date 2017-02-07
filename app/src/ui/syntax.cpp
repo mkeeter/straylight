@@ -5,6 +5,9 @@
 
 #include "core/bridge.hpp"
 
+namespace App {
+namespace UI {
+
 QList<SyntaxHighlighter::Rule> SyntaxHighlighter::rules;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +171,7 @@ void SyntaxHighlighter::buildRules()
     {
         QTextCharFormat keyword_format;
         keyword_format.setForeground(Material::blue_500);
-        for (const auto& k : Bridge::singleton()->keywords())
+        for (const auto& k : App::Core::Bridge::singleton()->keywords())
         {
             auto esc = QRegularExpression::escape(QString::fromStdString(k));
             rules << Rule("\\b" + esc + "\\b", keyword_format);
@@ -237,3 +240,6 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
     setCurrentBlockState(state);
     setCurrentBlockUserData(data);
 }
+
+}   // namespace UI
+}   // namespace App
