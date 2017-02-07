@@ -90,6 +90,10 @@ SplitView {
                 toOpen = []
                 openTo(t)
             }
+            else
+            {
+                Bridge.sync()
+            }
         }
     }
 
