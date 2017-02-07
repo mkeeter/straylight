@@ -41,13 +41,6 @@ void Cache::reset()
 /******************************************************************************
  * Id constructors
  ******************************************************************************/
-Cache::~Cache()
-{
-    for (const auto& v : tags)
-    {
-        free(v.second);
-    }
-}
 
 Cache::Id Cache::constant(float v)
 {

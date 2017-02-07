@@ -21,8 +21,6 @@ namespace Kernel {
 class Cache
 {
 public:
-    ~Cache();
-
     /*
      *  Look up the local Cache instance
      *  (which is on a per-thread basis)
@@ -97,18 +95,6 @@ public:
     Id rhs(Id id) const { return token(id).rhs(); }
     size_t rank(Id id) const { return token(id).rank(); }
     float value(Id id) const { return token(id).value(); }
-
-    /*
-     *  Read and set tags
-     */
-    void* tag(Id id) const
-    { return tags.count(id) ? tags.at(id) : nullptr; }
-
-    void*& tag(Id id) { return tags[id]; }
-
-    template <typename T>
-    T* tag(Id id) const
-    { return static_cast<T*>(tags.count(id) ? tags.at(id) : nullptr); }
 
     /*
      *  Looks up flags for a node.  The id must exist in this cache.
@@ -202,12 +188,6 @@ protected:
      *  of the Cache, but it is less expensive to calculate them once per
      *  Id and store them here.  This should be a bitwise Or of Flags */
     std::map<Id, uint8_t> flags_;
-
-    /*  Per-Id tagged data
-     *
-     *  The pointers should be allocated with malloc and are freed
-     *  (with free) when the Cache is destroyed */
-    std::map<Id, void*> tags;
 
     /*  Here's the master list of per-thread caches */
     static std::map<std::thread::id, std::shared_ptr<Cache>> instances;

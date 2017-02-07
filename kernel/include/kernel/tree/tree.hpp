@@ -79,12 +79,6 @@ public:
     uint8_t flags() const           { return parent->flags(id); }
 
     /*
-     *  Read and set tags
-     */
-    void* tag() const   { return parent->tag(id); }
-    void*& tag()        { return parent->tag(id); }
-
-    /*
      *  Sets a VAR tree's value
      *
      *  Note that this may invalidate values of trees that use this variable;
@@ -98,9 +92,6 @@ public:
      *  Requires that both children have correct values as well.
      */
     void checkValue();
-
-    template <typename T>   T* tag() const
-    { return parent->tag<T>(id); }
 
     /*
      *  Overloaded operators

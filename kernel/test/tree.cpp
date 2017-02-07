@@ -152,16 +152,6 @@ TEST_CASE("Tree::var")
     REQUIRE(c.var() == 3);
 }
 
-TEST_CASE("Tree::tag")
-{
-    Cache::reset();
-
-    auto a = Tree::var(3.0);
-    a.tag() = malloc(sizeof(float));
-    *a.tag<float>() = 4.0;
-    REQUIRE(*a.tag<float>() == 4.0);
-}
-
 TEST_CASE("Tree::flags")
 {
     Cache::reset();
