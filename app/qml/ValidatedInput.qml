@@ -28,7 +28,7 @@ ColumnLayout {
     // When active becomes false, steal focus so that undo actions
     // are propagated up to the top of the UI.
     onActiveChanged: {
-        if (!active) {
+        if (!active && editor.activeFocus) {
             forceActiveFocus()
         }
     }
