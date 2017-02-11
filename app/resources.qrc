@@ -3,6 +3,8 @@
         <file>qml/main.qml</file>
         <file>qml/SheetView.qml</file>
         <file>qml/SheetItemDelegate.qml</file>
+        <file>qml/SheetCellDelegate.qml</file>
+        <file>qml/SheetInstanceDelegate.qml</file>
         <file>qml/SheetItemTitle.qml</file>
         <file>qml/SheetItemsPane.qml</file>
         <file>qml/SheetLibraryPane.qml</file>
