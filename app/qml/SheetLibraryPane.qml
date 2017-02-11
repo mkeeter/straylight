@@ -127,7 +127,6 @@ ColumnLayout {
                 }
             }
 
-            /* TODO: enable these once I figure out layout glitches
             displaced: Transition {
                 NumberAnimation { properties: "x,y"; duration: 100 }
             }
@@ -140,7 +139,6 @@ ColumnLayout {
             add: Transition {
                 NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
             }
-            */
 
             NumberAnimation {
                 id: scrollTo

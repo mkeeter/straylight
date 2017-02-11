@@ -123,15 +123,15 @@ SplitView {
 
     // XXX This is an inelegant strategy to call renameLast
     // after a short wait, which gives the engine time to construct
-    // the Delegate
+    // the Delegate and animate its appearance
     Timer {
         id: renameLastItemTimer
-        interval: 10
+        interval: 100
         onTriggered: { items.renameLast() }
     }
     Timer {
         id: renameLastSheetTimer
-        interval: 10
+        interval: 100
         onTriggered: { lib.renameLast() }
     }
 
