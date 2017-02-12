@@ -18,8 +18,17 @@ public:
      */
     void draw(const QMatrix4x4& m, bool selected);
 
+    /*
+     *  Draws this handle
+     */
     virtual void _draw(const QMatrix4x4& m, bool selected)=0;
-    virtual void updateFrom(Graph::ValuePtr p)=0;
+
+    /*
+     *  Updates the handle's data
+     *
+     *  Returns true if things have changed
+     */
+    virtual bool updateFrom(Graph::ValuePtr p)=0;
 
 protected:
     /*

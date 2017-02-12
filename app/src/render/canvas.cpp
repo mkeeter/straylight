@@ -95,6 +95,7 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         else if (picker.isHandle(v))
         {
             picker.installHandle({key, v});
+            update();
         }
     }
 }

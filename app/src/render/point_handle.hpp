@@ -13,20 +13,23 @@ namespace Render {
 class PointHandle : public Handle
 {
 public:
-    PointHandle(const App::Bind::point_handle_t* p);
+    PointHandle();
 
     void _draw(const QMatrix4x4& m, bool selected) override;
-    void updateFrom(Graph::ValuePtr p) override;
+    bool updateFrom(Graph::ValuePtr p) override;
 
 protected:
     void initGL() override;
 
-    bool gl_ready;
+    QVector3D center;
+
+    // TODO: share these among all instances
     QOpenGLBuffer vbo;
     QOpenGLVertexArrayObject vao;
     QOpenGLShaderProgram shader;
+    bool gl_ready=false;
 
-    static const int segments=16;
+    static const int segments=128;
 };
 
 }   // namespace Render

@@ -9,9 +9,9 @@ namespace Render {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle(const App::Bind::point_handle_t* p)
+PointHandle::PointHandle()
 {
-    (void)p;
+    // Nothing to do here
 }
 
 void PointHandle::_draw(const QMatrix4x4& m, bool selected)
@@ -20,6 +20,7 @@ void PointHandle::_draw(const QMatrix4x4& m, bool selected)
 
     shader.bind();
     glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, m.data());
+    glUniform3f(shader.uniformLocation("p"), center.x(), center.y(), center.z());
 
     vao.bind();
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
@@ -27,10 +28,21 @@ void PointHandle::_draw(const QMatrix4x4& m, bool selected)
     shader.release();
 }
 
-void PointHandle::updateFrom(Graph::ValuePtr ptr)
+bool PointHandle::updateFrom(Graph::ValuePtr ptr)
 {
     auto p = App::Bind::get_point_handle(ptr);
-    (void)p;
+    QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
+
+    qDebug() << center << c;
+    if (c != center)
+    {
+        center = c;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void PointHandle::initGL()

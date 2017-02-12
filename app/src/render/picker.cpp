@@ -44,17 +44,11 @@ void Picker::installHandle(const HandleKey& k)
 {
     // TODO: once we have more than one handle type,
     // check whether the types match here
-    auto p = App::Bind::get_point_handle(k.second);
-    assert(p);
-
     if (handles.count(k) == 0)
     {
-        handles[k] = new PointHandle(p);
+        handles[k] = new PointHandle();
     }
-    else
-    {
-        handles[k]->updateFrom(k.second);
-    }
+    handles[k]->updateFrom(k.second);
 
     visited.insert(k);
 }
