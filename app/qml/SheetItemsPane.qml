@@ -31,6 +31,23 @@ ScrollView {
         children[lastIndex].renameMe()
     }
 
+    // Here, we correct for an bug in QML's ListView interactions with
+    // wrapping text.  A delegate with wrapping text is constructed and
+    // laid out, but then text wrapping is applied, so later delegates
+    // end up in the wrong y position.
+    function fixLayout() {
+        var children = listView.contentItem.children
+        var y = 0
+        for(var i in children) {
+            if (children[i].objectName === "SheetItemDelegate") {
+                if (y != children[i].y) {
+                    children[i].y = y
+                }
+                y += children[i].height + listView.spacing
+            }
+        }
+    }
+
     function push() {
         itemIndex = 0;
     }

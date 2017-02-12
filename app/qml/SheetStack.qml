@@ -11,10 +11,26 @@ SplitView {
     // Global variable to keep track of the selected item
     property var selectedItem: undefined
 
+    // Called when a file is loaded (and used to trigger a layout fix)
+    function fixLayout() { layoutTimer.restart() }
+    signal _fixLayout
+
+    Timer {
+        id: layoutTimer
+        interval: 10
+        onTriggered: {
+            sstack._fixLayout()
+        }
+    }
+
     // This is the component that's initialized in our stack of sheets
     Component {
         id: sheetViewComponent
-        SheetView { }
+        SheetView {
+            Component.onCompleted: {
+                _fixLayout.connect(fixLayout)
+            }
+        }
     }
 
     property var env: []

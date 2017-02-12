@@ -134,6 +134,7 @@ ApplicationWindow {
         onAccepted: {
             file = loadDialog.fileUrl
             Bridge.loadFile(file)
+            sheetStack.fixLayout()
             // TODO: error handling here
         }
         visible: false

@@ -24,6 +24,9 @@ SplitView {
         return _.isEqual(sheetEnv, bridgeEnv)
     }
 
+    // Forwards a call to fix item layout
+    function fixLayout() { items.fixLayout() }
+
     Component.onCompleted: {
         Bridge.push.connect(push)
         Bridge.pop.connect(pop)
