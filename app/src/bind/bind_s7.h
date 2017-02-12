@@ -8,8 +8,8 @@ struct s7_cell;
 namespace App {
 namespace Bind {
 
-struct PointHandle {
-    glm::vec3 pos;
+struct point_handle_t {
+    float pos[3];
     float r;
 
     // Type tag for interpreter
@@ -22,14 +22,14 @@ struct PointHandle {
 void init(s7_scheme* interpreter);
 
 /*
- *  Checks if the given object is a PointHandle
+ *  Checks if the given object is a point_handle_t
  */
 bool is_point_handle(s7_cell* obj);
 
 /*
- *  Extracts a PointHandle, or nullptr
+ *  Extracts a point_handle_t, or nullptr
  */
-const PointHandle* get_point_handle(s7_cell* obj);
+const point_handle_t* get_point_handle(s7_cell* obj);
 
 }   // namespace Bind
 }   // namespace App

@@ -39,7 +39,7 @@ signals:
     void viewChanged(QMatrix4x4 mat, QSize size);
 
 protected:
-    typedef std::pair<Graph::CellKey, const Kernel::Bind::Shape*> ShapeKey;
+    typedef std::pair<Graph::CellKey, const Kernel::Bind::shape_t*> ShapeKey;
 
     /*
      *  Checks the shape, installing a new Renderer if necessary

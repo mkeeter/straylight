@@ -7,7 +7,7 @@ namespace Kernel {
 namespace Bind {
 
 // Populated in bind_s7
-int Shape::tag = -1;
+int shape_t::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@ int Shape::tag = -1;
  */
 static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
-    return s7_make_object(sc, Shape::tag, new Shape(t));
+    return s7_make_object(sc, shape_t::tag, new shape_t(t));
 }
 
 /*
@@ -75,13 +75,13 @@ static Kernel::Tree to_tree(s7_pointer obj)
 
 static void shape_free(void* s)
 {
-    delete static_cast<Shape*>(s);
+    delete static_cast<shape_t*>(s);
 }
 
 static bool shape_equal(void* a, void* b)
 {
-    auto sa = static_cast<Shape*>(a);
-    auto sb = static_cast<Shape*>(b);
+    auto sa = static_cast<shape_t*>(a);
+    auto sb = static_cast<shape_t*>(b);
 
     const bool value_changed = sa->value_changed || sb->value_changed;
     sa->value_changed = false;
@@ -94,7 +94,7 @@ static char* shape_print(s7_scheme* sc, void* s)
 {
     (void)sc;
 
-    Tree t = static_cast<Shape*>(s)->tree;
+    Tree t = static_cast<shape_t*>(s)->tree;
     std::stringstream ss;
 
     if (t.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
@@ -136,7 +136,7 @@ static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
 
 bool is_shape(s7_pointer s)
 {
-    return s7_is_object(s) && s7_object_type(s) == Shape::tag;
+    return s7_is_object(s) && s7_object_type(s) == shape_t::tag;
 }
 
 static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
@@ -144,14 +144,14 @@ static s7_pointer is_shape(s7_scheme *sc, s7_pointer args)
     return s7_make_boolean(sc, is_shape(s7_car(args)));
 }
 
-const Shape* get_shape(s7_pointer obj)
+const shape_t* get_shape(s7_pointer obj)
 {
-    return static_cast<Shape*>(s7_object_value_checked(obj, Shape::tag));
+    return static_cast<shape_t*>(s7_object_value_checked(obj, shape_t::tag));
 }
 
-static Shape* get_mutable_shape(s7_pointer obj)
+static shape_t* get_mutable_shape(s7_pointer obj)
 {
-    return static_cast<Shape*>(s7_object_value_checked(obj, Shape::tag));
+    return static_cast<shape_t*>(s7_object_value_checked(obj, shape_t::tag));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +198,7 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
 
     auto& tree = get_mutable_shape(out)->tree;
 
-    // If the result is a constant (indicating that there was no Shape
+    // If the result is a constant (indicating that there was no shape_t
     // involved in the reduction), then convert back to an ordinary
     // Scheme real to keep addition working as usual.
     if (tree.opcode() == Kernel::Opcode::CONST)
@@ -475,7 +475,7 @@ s7_pointer custom_lt(s7_scheme* sc, s7_pointer args)
 
 void init(s7_scheme* sc)
 {
-    Shape::tag = s7_new_type_x(sc, "shape",
+    shape_t::tag = s7_new_type_x(sc, "shape",
         shape_print,
         shape_free,
         shape_equal,

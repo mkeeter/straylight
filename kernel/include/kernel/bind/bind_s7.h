@@ -9,8 +9,8 @@ namespace Kernel {
 
 namespace Bind {
 
-struct Shape {
-    Shape(Kernel::Tree t) : tree(t) {}
+struct shape_t {
+    shape_t(Kernel::Tree t) : tree(t) {}
 
     Kernel::Tree tree;
 
@@ -18,7 +18,7 @@ struct Shape {
      *  (which is used to deny equality comparisons)    */
     bool value_changed=false;
 
-    // Type tag for every Shape in s7 interpreter
+    // Type tag for every shape_t in s7 interpreter
     static int tag;
 };
 
@@ -34,7 +34,7 @@ std::list<int> envOf(s7_scheme* sc, Kernel::Tree t);
 
 extern "C" {
     bool is_shape(s7_cell* obj);
-    const Shape* get_shape(s7_cell* obj);
+    const shape_t* get_shape(s7_cell* obj);
 };
 
 }   // namespace Bind

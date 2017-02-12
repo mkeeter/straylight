@@ -23,6 +23,8 @@ add_executable(Straylight MACOSX_BUNDLE
     src/ui/syntax.cpp
     src/render/canvas.cpp
     src/render/axes.cpp
+    src/render/picker.cpp
+    src/render/point_handle.cpp
     src/render/renderer.cpp
     src/render/blitter.cpp
     src/bind/bind_s7.cpp
