@@ -34,8 +34,8 @@ function findItem(item_type, unique_index, startIndex, model, params) {
  *  Erases remaining items and sets the 'last' property of a model
  */
 function pop(model, i) {
-    while (i < model.count) {
-        model.remove(i++)
+    while (model.count > i) {
+        model.remove(i)
     }
     for (var i=0; i < model.count; ++i) {
         model.setProperty(i, 'last', i == model.count - 1)
