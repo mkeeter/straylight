@@ -39,7 +39,9 @@ GridLayout {
         }
 
         function setExpr(text) {
-            Bridge.setExpr(uniqueIndex, text)
+            if (text != expr) {
+                Bridge.setExpr(uniqueIndex, text)
+            }
         }
     }
 
