@@ -21,7 +21,7 @@ ScrollView {
         var lastIndex = 0
         for(var i in children) {
             if (children[i].objectName === "SheetItemDelegate") {
-                y += children[i].height
+                y += children[i].height + listView.spacing
                 lastIndex = i
             }
         }
