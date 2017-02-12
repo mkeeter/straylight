@@ -31,6 +31,7 @@ void Canvas::render()
     const auto mat = M;
     axes.draw(mat);
     blitter.draw(mat);
+    picker.draw({0,0});
 }
 
 void Canvas::push(int instance_index, const QString& instance_name,
@@ -42,6 +43,7 @@ void Canvas::push(int instance_index, const QString& instance_name,
     if (env.size() == 0)
     {
         assert(visited.size() == 0);
+        picker.beginUpdate();
     }
     env.push_back(instance_index);
 }
@@ -66,6 +68,8 @@ void Canvas::pop()
             shapes.erase(e);
         }
         visited.clear();
+
+        picker.endUpdate();
     }
 }
 
@@ -87,6 +91,10 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         if (Kernel::Bind::is_shape(v))
         {
             installShape({key, Kernel::Bind::get_shape(v)});
+        }
+        else if (picker.isHandle(v))
+        {
+            picker.installHandle({key, v});
         }
     }
 }

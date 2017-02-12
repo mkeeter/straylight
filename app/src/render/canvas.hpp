@@ -12,6 +12,7 @@
 #include "render/axes.hpp"
 #include "render/renderer.hpp"
 #include "render/blitter.hpp"
+#include "render/picker.hpp"
 
 namespace App {
 namespace Render {
@@ -64,6 +65,8 @@ protected:
     Axes axes;
     /*  Responsible for actually blitting rendered shapes to the screen */
     Blitter blitter;
+    /*  Used to pick items */
+    Picker picker;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

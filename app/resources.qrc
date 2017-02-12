@@ -32,5 +32,7 @@
         <file>gl/axes.frag</file>
         <file>gl/depthquad.vert</file>
         <file>gl/depthquad.frag</file>
+        <file>gl/point_handle.vert</file>
+        <file>gl/point_handle.frag</file>
     </qresource>
 </RCC>

@@ -1,18 +1,34 @@
 #pragma once
 
 #include <QMatrix4x4>
+#include <QOpenGLFunctions>
 
 #include "graph/ptr.hpp"
 
 namespace App {
 namespace Render {
 
-class Handle
+class Handle : public QOpenGLFunctions
 {
 public:
     virtual ~Handle() { /* Nothing to do here */ }
-    virtual void draw(const QMatrix4x4& m, bool selected)=0;
+
+    /*
+     *  Initializes OpenGL functions if not ready, then calls _draw
+     */
+    void draw(const QMatrix4x4& m, bool selected);
+
+    virtual void _draw(const QMatrix4x4& m, bool selected)=0;
     virtual void updateFrom(Graph::ValuePtr p)=0;
+
+protected:
+    /*
+     *  Overloaded by derived classes to build VBOs, etc
+     */
+    virtual void initGL() { }
+
+    /*  Stores whether we've called initalizeOpenGLFunctions */
+    bool gl_ready = false;
 };
 
 }   // namespace Render
