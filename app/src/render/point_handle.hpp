@@ -15,7 +15,8 @@ class PointHandle : public Handle
 public:
     PointHandle();
 
-    void _draw(const QMatrix4x4& m, bool selected) override;
+    void _draw(const QMatrix4x4& world, const QMatrix4x4& view,
+               Handle::DrawMode mode) override;
     bool updateFrom(Graph::ValuePtr p) override;
 
 protected:

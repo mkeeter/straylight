@@ -24,9 +24,11 @@ static void point_handle_free(void* p)
 
 static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
 {
-    (void)args;
+    float x = s7_number_to_real(sc, s7_car(args));
+    float y = s7_number_to_real(sc, s7_cadr(args));
+    float z = s7_number_to_real(sc, s7_caddr(args));
     return s7_make_object(sc, point_handle_t::tag,
-            new point_handle_t { {0,0,0}, 1 });
+            new point_handle_t { {x,y,z} });
 }
 
 bool is_point_handle(s7_pointer s)

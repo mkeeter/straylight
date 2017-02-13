@@ -3,7 +3,8 @@
 namespace App {
 namespace Render {
 
-void Handle::draw(const QMatrix4x4& m, bool selected)
+void Handle::draw(const QMatrix4x4& world, const QMatrix4x4& proj,
+                  Handle::DrawMode mode)
 {
     if (!gl_ready)
     {
@@ -11,7 +12,7 @@ void Handle::draw(const QMatrix4x4& m, bool selected)
         initGL();
         gl_ready = true;
     }
-    _draw(m, selected);
+    _draw(world, proj, mode);
 }
 
 }   // namespace Render

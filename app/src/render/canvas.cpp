@@ -11,6 +11,7 @@ namespace Render {
 Canvas::Canvas()
 {
     connect(&blitter, &Blitter::changed, [=](){ this->update(); });
+    connect(this, &Canvas::viewChanged, &picker, &Picker::onViewChanged);
 }
 
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
@@ -92,9 +93,8 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         {
             installShape({key, Kernel::Bind::get_shape(v)});
         }
-        else if (picker.isHandle(v))
+        else if (picker.isHandle(v) && picker.installHandle({key, v}))
         {
-            picker.installHandle({key, v});
             update();
         }
     }
@@ -199,14 +199,13 @@ QMatrix4x4 CanvasObject::proj() const
     //  Compress the Z axis to avoid clipping
     //  The value 4 isn't anything magical here, just seems to work well
     const float Z_COMPRESS = 4;
-    const float frac = width() / height();
+    const float frac = width() / float(height());
     if (frac > 1)
     {
         m.scale(1/frac, 1, 1/Z_COMPRESS);
     }
     else
     {
-        const float frac = width()/float(height());
         m.scale(1, frac, 1/Z_COMPRESS);
     }
     return m;

@@ -14,13 +14,16 @@ PointHandle::PointHandle()
     // Nothing to do here
 }
 
-void PointHandle::_draw(const QMatrix4x4& m, bool selected)
+void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
+                        Handle::DrawMode mode)
 {
-    (void)selected;
+    (void)mode;
 
     shader.bind();
-    glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, m.data());
-    glUniform3f(shader.uniformLocation("p"), center.x(), center.y(), center.z());
+    qDebug() << proj;
+    glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
+    glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
+    glUniform3f(shader.uniformLocation("pos"), center.x(), center.y(), center.z());
 
     vao.bind();
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
@@ -33,7 +36,6 @@ bool PointHandle::updateFrom(Graph::ValuePtr ptr)
     auto p = App::Bind::get_point_handle(ptr);
     QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
 
-    qDebug() << center << c;
     if (c != center)
     {
         center = c;
@@ -61,8 +63,8 @@ void PointHandle::initGL()
             data.push_back(0);
             for (int i=0; i <= segments; ++i)
             {
-                data.push_back(cos(i / 16.0f * 2 * pi));
-                data.push_back(sin(i / 16.0f * 2 * pi));
+                data.push_back(cos(2.0f * pi * i / segments));
+                data.push_back(sin(2.0f * pi * i / segments));
             }
             vbo.create();
             vbo.bind();

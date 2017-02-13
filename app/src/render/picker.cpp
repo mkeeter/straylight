@@ -23,10 +23,11 @@ Handle* Picker::pickAt(QPoint p)
 
 void Picker::draw(QPoint p)
 {
-    auto picked = pickAt(p);
+    (void)p;
+    //auto picked = pickAt(p);
     for (auto& h : handles)
     {
-        h.second->draw(M, h.second == picked);
+        h.second->draw(M, proj, Handle::BASE);
     }
 }
 
@@ -40,17 +41,21 @@ bool Picker::isHandle(Graph::ValuePtr ptr)
     return App::Bind::is_point_handle(ptr);
 }
 
-void Picker::installHandle(const HandleKey& k)
+bool Picker::installHandle(const HandleKey& k)
 {
+    bool changed = false;
+
     // TODO: once we have more than one handle type,
     // check whether the types match here
     if (handles.count(k) == 0)
     {
         handles[k] = new PointHandle();
+        changed = true;
     }
-    handles[k]->updateFrom(k.second);
-
     visited.insert(k);
+
+    changed |= handles[k]->updateFrom(k.second);
+    return changed;
 }
 
 void Picker::endUpdate()
@@ -72,12 +77,21 @@ void Picker::endUpdate()
 
 void Picker::onViewChanged(QMatrix4x4 mat, QSize size)
 {
-    bool changed = (M != mat) || (window_size != size);
-
     M = mat;
     window_size = size;
 
-    (void)changed;
+    //  Compress the Z axis to avoid clipping
+    //  The value 4 isn't anything magical here, just seems to work well
+    const float frac = window_size.width() / float(window_size.height());
+    proj = QMatrix4x4();
+    if (frac > 1)
+    {
+        proj.scale(1/frac, 1, 1);
+    }
+    else
+    {
+        proj.scale(1, frac, 1);
+    }
 }
 
 }   // namespace Render

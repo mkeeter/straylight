@@ -10,7 +10,6 @@ namespace Bind {
 
 struct point_handle_t {
     float pos[3];
-    float r;
 
     // Type tag for interpreter
     static int tag;

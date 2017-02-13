@@ -51,7 +51,7 @@ public:
      *  it has been visited (so it won't be erased)
      */
     typedef std::pair<Graph::CellKey, Graph::ValuePtr> HandleKey;
-    void installHandle(const HandleKey& k);
+    bool installHandle(const HandleKey& k);
 
 public slots:
     void onViewChanged(QMatrix4x4 mat, QSize size);
@@ -63,11 +63,16 @@ protected:
     std::set<HandleKey> visited;
     std::map<QRgb, Handle*> colors;
 
-    // Properties used in drawing and rendering
+    /*  Global transform matrix, used to position centers */
     QMatrix4x4 M;
+
+    /*  Projection-only matrix, used to adjust for aspect ratio  */
+    QMatrix4x4 proj;
+
+    /*  Window size  */
     QSize window_size;
 
-    //  This is the image where pick data is stored
+    /*  img is where pick data is stored  */
     QImage img;
 };
 
