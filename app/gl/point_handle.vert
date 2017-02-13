@@ -7,7 +7,7 @@ uniform mat4 m_proj;
 uniform vec3 pos;
 
 out float radius;
-out float angle;
+out vec2 pt;
 
 void main()
 {
@@ -16,5 +16,5 @@ void main()
     gl_Position = vec4(p.xy*0.025f + v.xy, v.z, 1.0f);
 
     radius = length(vertex_position);
-    angle = (vertex_position.y == 0 && vertex_position.x == 0) ? 0 : atan(vertex_position.y, vertex_position.x);
+    pt = vertex_position.xy;
 }
