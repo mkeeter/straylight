@@ -34,5 +34,6 @@
         <file>gl/depthquad.frag</file>
         <file>gl/point_handle.vert</file>
         <file>gl/point_handle.frag</file>
+        <file>gl/point_handle_dotted.frag</file>
     </qresource>
 </RCC>

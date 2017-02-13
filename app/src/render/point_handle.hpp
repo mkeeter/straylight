@@ -21,13 +21,16 @@ public:
 
 protected:
     void initGL() override;
+    void setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
+                 QOpenGLShaderProgram& shader);
 
     QVector3D center;
 
     // TODO: share these among all instances
     QOpenGLBuffer vbo;
     QOpenGLVertexArrayObject vao;
-    QOpenGLShaderProgram shader;
+    QOpenGLShaderProgram shader_solid;
+    QOpenGLShaderProgram shader_dotted;
     bool gl_ready=false;
 
     static const int segments=128;
