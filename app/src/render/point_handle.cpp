@@ -1,6 +1,7 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "render/point_handle.hpp"
+#include "ui/material.hpp"
 
 using namespace boost::math::float_constants;
 
@@ -14,12 +15,22 @@ PointHandle::PointHandle()
     // Nothing to do here
 }
 
+static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
+                             const QColor& color)
+{
+    glUniform3f(shader.uniformLocation(var),
+                color.red()/255.0f, color.green()/255.0f, color.blue()/255.0f);
+}
+
 void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
                           QOpenGLShaderProgram& shader)
 {
     glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
     glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
     glUniform3f(shader.uniformLocation("pos"), center.x(), center.y(), center.z());
+
+    glUniformColor3f(shader, "color_center", App::UI::Material::blue_grey_200);
+    glUniformColor3f(shader, "color_edge", App::UI::Material::blue_grey_500);
 }
 
 void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
