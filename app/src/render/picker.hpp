@@ -7,6 +7,8 @@
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 
+#include <boost/bimap.hpp>
+
 #include "graph/keys.hpp"
 #include "graph/ptr.hpp"
 
@@ -63,7 +65,7 @@ protected:
     /*  Here, we store the set of handles to be drawn & picked */
     std::map<HandleKey, Handle*> handles;
     std::set<HandleKey> visited;
-    std::map<QRgb, Handle*> colors;
+    boost::bimap<QRgb, HandleKey> colors;
 
     /*  Global transform matrix, used to position centers */
     QMatrix4x4 M;

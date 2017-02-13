@@ -17,8 +17,8 @@ Handle* Picker::pickAt(QPoint p)
 {
     auto rgb = img.pixel(p);
 
-    auto f = colors.find(rgb);
-    return (f == colors.end()) ? nullptr : f->second;
+    auto f = colors.left.find(rgb);
+    return (f == colors.left.end()) ? nullptr : handles.at(f->second);
 }
 
 void Picker::draw(QPoint p)
@@ -50,6 +50,8 @@ bool Picker::installHandle(const HandleKey& k)
     if (handles.count(k) == 0)
     {
         handles[k] = new PointHandle();
+        auto rgb = colors.size() ? (colors.left.rbegin()->first + 1) : 1;
+        colors.insert({rgb, k});
         changed = true;
     }
     visited.insert(k);
