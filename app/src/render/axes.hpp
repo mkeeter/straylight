@@ -18,6 +18,9 @@ protected:
     QOpenGLBuffer solid_vbo;
     QOpenGLVertexArrayObject solid_vao;
 
+    QOpenGLBuffer wire_vbo;
+    QOpenGLVertexArrayObject wire_vao;
+
     QOpenGLShaderProgram shader;
 };
 

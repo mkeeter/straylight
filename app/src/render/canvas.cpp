@@ -30,8 +30,8 @@ void Canvas::render()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     const auto mat = M;
-    axes.draw(mat);
     blitter.draw(mat);
+    axes.draw(mat);
     picker.draw({0,0});
 }
 
