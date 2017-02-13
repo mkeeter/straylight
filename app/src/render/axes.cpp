@@ -1,4 +1,5 @@
 #include "render/axes.hpp"
+#include "ui/material.hpp"
 
 namespace App {
 namespace Render {
@@ -16,9 +17,10 @@ Axes::Axes()
     {   // In-line data for axes model
         const float o = 0.05;
 
-#define MATERIAL_RED    0.957, 0.263, 0.212
-#define MATERIAL_GREEN  0.298, 0.686, 0.314
-#define MATERIAL_BLUE   0.129, 0.588, 0.953
+#define MATERIAL(m)     m.red()/255.0f, m.green()/255.0f, m.blue()/255.0f
+#define MATERIAL_RED    MATERIAL(App::UI::Material::red)
+#define MATERIAL_GREEN  MATERIAL(App::UI::Material::green)
+#define MATERIAL_BLUE   MATERIAL(App::UI::Material::blue)
         // Data is arranged  x   y   z   r   g   b
         GLfloat data[] = {   /********************/
                              /*    X axis        */
