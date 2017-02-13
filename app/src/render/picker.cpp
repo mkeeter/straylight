@@ -58,7 +58,7 @@ bool Picker::installHandle(const HandleKey& k)
     return changed;
 }
 
-void Picker::endUpdate()
+bool Picker::endUpdate()
 {
     std::set<HandleKey> to_erase;
     for (auto h : handles)
@@ -72,7 +72,10 @@ void Picker::endUpdate()
     {
         delete handles[e];
         handles.erase(e);
+        colors.right.erase(e);
     }
+
+    return to_erase.size();
 }
 
 void Picker::onViewChanged(QMatrix4x4 mat, QSize size)

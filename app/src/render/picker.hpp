@@ -38,8 +38,10 @@ public:
 
     /*
      *  Erase all unseen handles
+     *
+     *  Returns true if anything changed
      */
-    void endUpdate();
+    bool endUpdate();
 
     /*
      *  Checks to see if the pointer is any handle type

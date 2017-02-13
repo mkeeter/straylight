@@ -70,7 +70,10 @@ void Canvas::pop()
         }
         visited.clear();
 
-        picker.endUpdate();
+        if (picker.endUpdate())
+        {
+            update();
+        }
     }
 }
 
