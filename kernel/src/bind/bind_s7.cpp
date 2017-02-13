@@ -464,12 +464,21 @@ static s7_pointer detree_args(s7_scheme* sc, s7_pointer args)
     }
 }
 
-s7_pointer custom_lt(s7_scheme* sc, s7_pointer args)
-{
-    static s7_pointer op = s7_eval_c_string(sc, "#_<");
-    args = detree_args(sc, args);
-    return s7_apply_function(sc, op, args);
-}
+#define DETREE_FUNC(NAME, STR) \
+s7_pointer NAME(s7_scheme* sc, s7_pointer args)             \
+{                                                           \
+    static s7_pointer op = s7_eval_c_string(sc, "#_" STR);  \
+    args = detree_args(sc, args);                           \
+    return s7_apply_function(sc, op, args);                 \
+}                                                           \
+
+DETREE_FUNC(custom_lt, "<");
+DETREE_FUNC(custom_leq, "<=");
+DETREE_FUNC(custom_gt, ">");
+DETREE_FUNC(custom_geq, ">=");
+DETREE_FUNC(custom_equ, "=");
+DETREE_FUNC(custom_eq, "eq?");
+DETREE_FUNC(custom_equal, "equal?");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -513,6 +522,12 @@ void init(s7_scheme* sc)
     install_overload(sc, "exp", shape_exp);
 
     install_overload(sc, "<", custom_lt);
+    install_overload(sc, "<=", custom_leq);
+    install_overload(sc, ">", custom_gt);
+    install_overload(sc, ">=", custom_geq);
+    install_overload(sc, "=", custom_equ);
+    install_overload(sc, "eq?", custom_eq);
+    install_overload(sc, "equal?", custom_equal);
 
     s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
         "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
