@@ -156,12 +156,10 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     const QSize window_size_(c->width(), c->height());
 
     auto p = picker.pickAt(mouse);
-    mouse = c->mouse;
+    mouse = c->mouse * (picker.width() / c->width());
 
     const bool changed = (M != M_) || (window_size != window_size_) ||
                          (p != picker.pickAt(mouse));
-
-    qDebug() << mouse << p << picker.pickAt(mouse);
 
     if (changed)
     {

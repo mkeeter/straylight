@@ -58,7 +58,16 @@ public:
     typedef std::pair<Graph::CellKey, Graph::ValuePtr> HandleKey;
     bool installHandle(const HandleKey& k);
 
+    /*
+     *  Loads the picker image!
+     */
     void setImage(QImage i) { img = i; }
+
+    /*
+     *  Returns the picker image width
+     *  (used to compensate for high-DPI screens)
+     */
+    float width() const { return img.width(); }
 
 public slots:
     void onViewChanged(QMatrix4x4 mat, QSize size);
