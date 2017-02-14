@@ -22,26 +22,42 @@ static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
                 color.red()/255.0f, color.green()/255.0f, color.blue()/255.0f);
 }
 
+static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
+                             const QRgb color)
+{
+    glUniformColor3f(shader, var, QColor::fromRgb(color));
+}
+
 void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
                           QOpenGLShaderProgram& shader, Picker::DrawMode mode,
                           QRgb color)
 {
-    (void)mode;
-    (void)color;
-
     glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
     glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
     glUniform3f(shader.uniformLocation("pos"), center.x(), center.y(), center.z());
     glUniform1f(shader.uniformLocation("scale"), 0.025f);
 
-    glUniformColor3f(shader, "color_center", App::UI::Material::blue_grey_200);
-    glUniformColor3f(shader, "color_edge", App::UI::Material::blue_grey_500);
+    switch (mode)
+    {
+        case Picker::DRAW_PICKER:
+            glUniformColor3f(shader, "color_center", color);
+            glUniformColor3f(shader, "color_edge", color);
+            break;
+        case Picker::DRAW_NORMAL:
+            glUniformColor3f(shader, "color_center", App::UI::Material::blue_grey_200);
+            glUniformColor3f(shader, "color_edge", App::UI::Material::blue_grey_500);
+            break;
+        case Picker::DRAW_HOVER:    // fallthrough
+        case Picker::DRAW_DRAG:
+            glUniformColor3f(shader, "color_center", App::UI::Material::blue_grey_100);
+            glUniformColor3f(shader, "color_edge", App::UI::Material::blue_grey_400);
+            break;
+    }
 }
 
 void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
                         Picker::DrawMode mode, QRgb color)
 {
-    (void)mode;
     vao.bind();
 
     shader_solid.bind();
@@ -49,14 +65,17 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
     shader_solid.release();
 
-    shader_dotted.bind();
-    setVars(world, proj, shader_dotted, mode, color);
-    glDisable(GL_DEPTH_TEST);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
-    glEnable(GL_DEPTH_TEST);
+    if (mode != Picker::DRAW_PICKER)
+    {
+        shader_dotted.bind();
+        setVars(world, proj, shader_dotted, mode, color);
+        glDisable(GL_DEPTH_TEST);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
+        glEnable(GL_DEPTH_TEST);
+        shader_dotted.release();
+    }
 
     vao.release();
-    shader_dotted.release();
 }
 
 bool PointHandle::updateFrom(Graph::ValuePtr ptr)

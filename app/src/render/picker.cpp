@@ -15,19 +15,29 @@ Picker::Picker()
 
 Handle* Picker::pickAt(QPoint p)
 {
-    auto rgb = img.pixel(p);
+    if (p.x() >= img.size().width() ||
+        p.y() >= img.size().width() ||
+        img.isNull())
+    {
+        return nullptr;
+    }
+    else
+    {
+        auto rgb = img.pixel(p);
 
-    auto f = colors.left.find(rgb);
-    return (f == colors.left.end()) ? nullptr : handles.at(f->second);
+        auto f = colors.left.find(rgb);
+        return (f == colors.left.end()) ? nullptr : handles.at(f->second);
+    }
 }
 
-void Picker::draw(QPoint p, Picker::DrawMode mode, QRgb color)
+void Picker::draw(QPoint p, Picker::DrawMode mode)
 {
-    (void)p;
-    //auto picked = pickAt(p);
+    auto picked = pickAt(p);
     for (auto& h : handles)
     {
-        h.second->draw(M, proj, mode, color);
+        h.second->draw(M, proj, (mode == DRAW_NORMAL)
+                ? (h.second == picked ? DRAW_HOVER : DRAW_NORMAL)
+                : mode, colors.right.at(h.first));
     }
 }
 
