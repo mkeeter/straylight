@@ -29,10 +29,18 @@ void Canvas::render()
     glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+    picker.draw({0,0}, Picker::DRAW_PICKER);
+    picker.setImage(framebufferObject()->toImage());
+
+    //  toImage releases binding for some reason
+    framebufferObject()->bind();
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
     const auto mat = M;
     blitter.draw(mat);
     axes.draw(mat);
     picker.draw({0,0});
+
 }
 
 void Canvas::push(int instance_index, const QString& instance_name,

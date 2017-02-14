@@ -4,7 +4,7 @@ namespace App {
 namespace Render {
 
 void Handle::draw(const QMatrix4x4& world, const QMatrix4x4& proj,
-                  Handle::DrawMode mode)
+                  Picker::DrawMode mode, QRgb color)
 {
     if (!gl_ready)
     {
@@ -12,7 +12,7 @@ void Handle::draw(const QMatrix4x4& world, const QMatrix4x4& proj,
         initGL();
         gl_ready = true;
     }
-    _draw(world, proj, mode);
+    _draw(world, proj, mode, color);
 }
 
 }   // namespace Render

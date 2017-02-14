@@ -23,29 +23,34 @@ static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
 }
 
 void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
-                          QOpenGLShaderProgram& shader)
+                          QOpenGLShaderProgram& shader, Picker::DrawMode mode,
+                          QRgb color)
 {
+    (void)mode;
+    (void)color;
+
     glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
     glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
     glUniform3f(shader.uniformLocation("pos"), center.x(), center.y(), center.z());
+    glUniform1f(shader.uniformLocation("scale"), 0.025f);
 
     glUniformColor3f(shader, "color_center", App::UI::Material::blue_grey_200);
     glUniformColor3f(shader, "color_edge", App::UI::Material::blue_grey_500);
 }
 
 void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
-                        Handle::DrawMode mode)
+                        Picker::DrawMode mode, QRgb color)
 {
     (void)mode;
     vao.bind();
 
     shader_solid.bind();
-    setVars(world, proj, shader_solid);
+    setVars(world, proj, shader_solid, mode, color);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
     shader_solid.release();
 
     shader_dotted.bind();
-    setVars(world, proj, shader_dotted);
+    setVars(world, proj, shader_dotted, mode, color);
     glDisable(GL_DEPTH_TEST);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
     glEnable(GL_DEPTH_TEST);

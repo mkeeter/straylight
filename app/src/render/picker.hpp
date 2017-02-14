@@ -26,7 +26,8 @@ public:
     /*
      *  Renders all Handles, using the mouse position for highlights
      */
-    void draw(QPoint p);
+    enum DrawMode { DRAW_PICKER, DRAW_NORMAL, DRAW_HOVER, DRAW_DRAG };
+    void draw(QPoint p, DrawMode mode=DRAW_NORMAL, QRgb color=0);
 
     /*
      *  Returns a handle at the given point, or nullptr
@@ -56,6 +57,8 @@ public:
      */
     typedef std::pair<Graph::CellKey, Graph::ValuePtr> HandleKey;
     bool installHandle(const HandleKey& k);
+
+    void setImage(QImage i) { img = i; }
 
 public slots:
     void onViewChanged(QMatrix4x4 mat, QSize size);

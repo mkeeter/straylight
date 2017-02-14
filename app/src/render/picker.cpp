@@ -21,13 +21,13 @@ Handle* Picker::pickAt(QPoint p)
     return (f == colors.left.end()) ? nullptr : handles.at(f->second);
 }
 
-void Picker::draw(QPoint p)
+void Picker::draw(QPoint p, Picker::DrawMode mode, QRgb color)
 {
     (void)p;
     //auto picked = pickAt(p);
     for (auto& h : handles)
     {
-        h.second->draw(M, proj, Handle::BASE);
+        h.second->draw(M, proj, mode, color);
     }
 }
 

@@ -16,13 +16,14 @@ public:
     PointHandle();
 
     void _draw(const QMatrix4x4& world, const QMatrix4x4& view,
-               Handle::DrawMode mode) override;
+               Picker::DrawMode mode, QRgb color=0) override;
     bool updateFrom(Graph::ValuePtr p) override;
 
 protected:
     void initGL() override;
     void setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
-                 QOpenGLShaderProgram& shader);
+                 QOpenGLShaderProgram& shader, Picker::DrawMode mode,
+                 QRgb color);
 
     QVector3D center;
 
