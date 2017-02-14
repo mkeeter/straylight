@@ -31,7 +31,7 @@ void Canvas::render()
 
     // Draw the picker layer (with a dummy mouse position)
     picker.draw({0,0}, Picker::DRAW_PICKER);
-    picker.setImage(framebufferObject()->toImage());
+    picker.setImage(framebufferObject()->toImage(false));
 
     //  toImage releases binding for some reason
     framebufferObject()->bind();
