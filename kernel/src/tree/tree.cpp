@@ -62,8 +62,9 @@ void Tree::checkValue()
     assert((opcode() != Opcode::VAR) &&
            (flags() & Tree::FLAG_LOCATION_AGNOSTIC));
 
-    auto t = Tree(opcode(), Tree(lhs().value()),
-                            Tree(rhs().value()));
+    auto t = Opcode::args(opcode()) == 1
+        ? Tree(opcode(), Tree(lhs().value()))
+        : Tree(opcode(), Tree(lhs().value()), Tree(rhs().value()));
     assert(t.opcode() == Opcode::CONST);
     setValue(t.value());
 }
