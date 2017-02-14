@@ -42,6 +42,12 @@ const point_handle_t* get_point_handle(s7_cell* obj)
             s7_object_value_checked(obj, point_handle_t::tag));
 }
 
+int get_handle_tag(s7_cell* obj)
+{
+    assert(s7_is_object(obj));
+    return s7_object_type(obj);
+}
+
 void init(s7_scheme* sc)
 {
     point_handle_t::tag = s7_new_type_x(sc, "point-handle",
@@ -59,7 +65,6 @@ void init(s7_scheme* sc)
     s7_define_function(sc, "ui-point", point_handle_new, 3, 0, false,
             "(ui-point x y z) makes a point handle in the 3D viewport");
 }
-
 
 }   // namespace Bind
 }   // namespace App

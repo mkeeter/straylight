@@ -51,22 +51,24 @@ bool Picker::isHandle(Graph::ValuePtr ptr)
     return App::Bind::is_point_handle(ptr);
 }
 
-bool Picker::installHandle(const HandleKey& k)
+bool Picker::installHandle(const Graph::CellKey& k, Graph::ValuePtr p)
 {
     bool changed = false;
 
     // TODO: once we have more than one handle type,
     // check whether the types match here
-    if (handles.count(k) == 0)
+    auto tag = App::Bind::get_handle_tag(p);
+    HandleKey key = {k, tag};
+    if (handles.count(key) == 0)
     {
-        handles[k] = new PointHandle();
+        handles[key] = new PointHandle();
         auto rgb = colors.size() ? (colors.left.rbegin()->first + 1) : 1;
-        colors.insert({rgb, k});
+        colors.insert({rgb, key});
         changed = true;
     }
-    visited.insert(k);
+    visited.insert(key);
 
-    changed |= handles[k]->updateFrom(k.second);
+    changed |= handles[key]->updateFrom(p);
     return changed;
 }
 

@@ -1,6 +1,7 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "render/point_handle.hpp"
+#include "render/point_drag.hpp"
 #include "ui/material.hpp"
 
 using namespace boost::math::float_constants;
@@ -81,17 +82,17 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
 bool PointHandle::updateFrom(Graph::ValuePtr ptr)
 {
     auto p = App::Bind::get_point_handle(ptr);
-    QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
 
-    if (c != center)
-    {
-        center = c;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
+    bool changed = (c != center);
+    center = c;
+
+    return changed;
+}
+
+Drag* PointHandle::getDrag()
+{
+    return new PointDrag();
 }
 
 void PointHandle::initGL()

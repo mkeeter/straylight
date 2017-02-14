@@ -19,6 +19,8 @@ public:
                Picker::DrawMode mode, QRgb color=0) override;
     bool updateFrom(Graph::ValuePtr p) override;
 
+    Drag* getDrag() override;
+
 protected:
     void initGL() override;
     void setVars(const QMatrix4x4& world, const QMatrix4x4& proj,

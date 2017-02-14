@@ -17,6 +17,8 @@
 namespace App {
 namespace Render {
 
+class Drag;
+
 class Canvas : public QObject, public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT
@@ -117,6 +119,7 @@ protected:
     enum { RELEASED, CLICK_LEFT, CLICK_RIGHT,
            DRAG_ROT, DRAG_PAN, DRAG_HANDLE } mouse_state;
     QPoint mouse_pos;
+    Drag* mouse_drag;
 
     friend class Canvas;
 };

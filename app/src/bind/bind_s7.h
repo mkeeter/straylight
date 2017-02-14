@@ -30,5 +30,11 @@ bool is_point_handle(s7_cell* obj);
  */
 const point_handle_t* get_point_handle(s7_cell* obj);
 
+/*
+ *  Returns the handle tag
+ *  obj must be a valid handle
+ */
+int get_handle_tag(s7_cell* obj);
+
 }   // namespace Bind
 }   // namespace App

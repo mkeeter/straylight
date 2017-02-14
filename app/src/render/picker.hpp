@@ -55,8 +55,8 @@ public:
      *  Installs this handle into the list of handles, marking that
      *  it has been visited (so it won't be erased)
      */
-    typedef std::pair<Graph::CellKey, Graph::ValuePtr> HandleKey;
-    bool installHandle(const HandleKey& k);
+    typedef std::pair<Graph::CellKey, int> HandleKey;
+    bool installHandle(const Graph::CellKey& k, Graph::ValuePtr p);
 
     /*
      *  Loads the picker image!

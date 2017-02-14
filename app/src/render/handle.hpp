@@ -11,6 +11,8 @@
 namespace App {
 namespace Render {
 
+class Drag;
+
 class Handle : public QOpenGLFunctions
 {
 public:
@@ -34,6 +36,12 @@ public:
      *  Returns true if things have changed
      */
     virtual bool updateFrom(Graph::ValuePtr p)=0;
+
+    /*
+     *  Returns a drag pointer
+     *  The drag pointer escapes from render thread
+     */
+    virtual Drag* getDrag()=0;
 
 protected:
     /*

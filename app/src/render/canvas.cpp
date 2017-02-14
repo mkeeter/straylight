@@ -1,6 +1,7 @@
 #include <QOpenGLFramebufferObject>
 
 #include "render/canvas.hpp"
+#include "render/handle.hpp"
 #include "core/bridge.hpp"
 
 #include "kernel/bind/bind_s7.h"
@@ -104,7 +105,7 @@ void Canvas::cell(int c, const QString& name, const QString& expr, int type,
         {
             installShape({key, Kernel::Bind::get_shape(v)});
         }
-        else if (picker.isHandle(v) && picker.installHandle({key, v}))
+        else if (picker.isHandle(v) && picker.installHandle(key, v))
         {
             update();
         }
@@ -160,10 +161,10 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     // Handle mouse state machine based on picker state
     if (c->mouse_state == c->CLICK_LEFT)
     {
-        if (picker.pickAt(mouse))
+        if (auto h = picker.pickAt(mouse))
         {
             c->mouse_state = c->DRAG_HANDLE;
-            // TODO: figure out how to drag handles here
+            c->mouse_drag = h->getDrag();
         }
         else
         {
@@ -261,6 +262,10 @@ void CanvasObject::mouseClick(int button)
 
 void CanvasObject::mouseRelease()
 {
+    if (mouse_state == DRAG_HANDLE)
+    {
+        mouse_drag = nullptr;
+    }
     mouse_state = RELEASED;
     update();
 }
