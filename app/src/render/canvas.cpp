@@ -41,7 +41,6 @@ void Canvas::render()
     blitter.draw(M);
     axes.draw(M);
     picker.draw(mouse);
-
 }
 
 void Canvas::push(int instance_index, const QString& instance_name,
@@ -212,6 +211,7 @@ void CanvasObject::zoomIncremental(float ds, float x, float y)
 void CanvasObject::mouseAt(float x, float y)
 {
     mouse = {int(x), int(y)};
+    update();
 }
 
 QMatrix4x4 CanvasObject::proj() const
