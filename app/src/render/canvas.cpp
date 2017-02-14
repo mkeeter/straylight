@@ -154,13 +154,30 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     const auto M_ = c->M();
     const QSize window_size_(c->width(), c->height());
 
-    auto p = picker.pickAt(mouse);
-    mouse = c->mouse * (picker.width() / c->width());
+    // Set mouse position, adjusting for high-DPI framebuffer
+    mouse = c->mouse_pos * (picker.width() / c->width());
 
-    const bool changed = (M != M_) || (window_size != window_size_) ||
-                         (p != picker.pickAt(mouse));
+    // Handle mouse state machine based on picker state
+    if (c->mouse_state == c->CLICK_LEFT)
+    {
+        if (picker.pickAt(mouse))
+        {
+            c->mouse_state = c->DRAG_HANDLE;
+            // TODO: figure out how to drag handles here
+        }
+        else
+        {
+            c->mouse_state = c->DRAG_ROT;
+        }
+    }
+    else if (c->mouse_state == c->CLICK_RIGHT)
+    {
+        c->mouse_state = c->DRAG_PAN;
+    }
 
-    if (changed)
+    const bool view_changed = (M != M_) || (window_size != window_size_);
+
+    if (view_changed)
     {
         M = M_;
         window_size = window_size_;
@@ -208,9 +225,43 @@ void CanvasObject::zoomIncremental(float ds, float x, float y)
     update();
 }
 
-void CanvasObject::mouseAt(float x, float y)
+void CanvasObject::mouseMove(float x, float y)
 {
-    mouse = {int(x), int(y)};
+    if (mouse_state == DRAG_ROT)
+    {
+        rotateIncremental(x - mouse_pos.x(), y - mouse_pos.y());
+    }
+    else if (mouse_state == DRAG_PAN)
+    {
+        panIncremental(x - mouse_pos.x(), y - mouse_pos.y());
+    }
+    else
+    {
+        update();
+    }
+    mouse_pos = {int(x), int(y)};
+}
+
+void CanvasObject::mouseClick(int button)
+{
+    if (mouse_state == RELEASED)
+    {
+        if (button == Qt::LeftButton)
+        {
+            mouse_state = CLICK_LEFT;
+            update();
+        }
+        else if (button == Qt::RightButton)
+        {
+            mouse_state = CLICK_RIGHT;
+            update();
+        }
+    }
+}
+
+void CanvasObject::mouseRelease()
+{
+    mouse_state = RELEASED;
     update();
 }
 

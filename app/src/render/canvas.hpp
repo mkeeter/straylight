@@ -89,8 +89,11 @@ public:
     Q_INVOKABLE void panIncremental(float dx, float dy);
     Q_INVOKABLE void zoomIncremental(float ds, float x, float y);
 
-    //  Save the mouse cursor position and redraw if picker changes
-    Q_INVOKABLE void mouseAt(float x, float y);
+    //  Manage mouse events here by setting mouse state and calling update
+    //  (which asks the canvas to synchronize)
+    Q_INVOKABLE void mouseMove(float x, float y);
+    Q_INVOKABLE void mouseClick(int button);
+    Q_INVOKABLE void mouseRelease();
 
 protected:
     /*
@@ -111,7 +114,9 @@ protected:
     float pitch=0;
     float yaw=0;
 
-    QPoint mouse;
+    enum { RELEASED, CLICK_LEFT, CLICK_RIGHT,
+           DRAG_ROT, DRAG_PAN, DRAG_HANDLE } mouse_state;
+    QPoint mouse_pos;
 
     friend class Canvas;
 };

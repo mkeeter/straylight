@@ -169,19 +169,17 @@ ApplicationWindow {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 hoverEnabled: true
                 onPositionChanged: function(event) {
-                    if (event.buttons & Qt.LeftButton) {
-                        viewport.rotateIncremental(event.x - prevX, event.y - prevY)
-                    }
-                    else if (event.buttons & Qt.RightButton) {
-                        viewport.panIncremental(event.x - prevX, event.y - prevY)
-                    }
+                    viewport.mouseMove(event.x, event.y)
                     prevX = event.x
                     prevY = event.y
-                    viewport.mouseAt(event.x, event.y)
                 }
                 onPressed: function(event) {
                     prevX = event.x
                     prevY = event.y
+                    viewport.mouseClick(event.buttons)
+                }
+                onReleased: function(event) {
+                    viewport.mouseRelease()
                 }
                 onWheel: function(event) {
                     viewport.zoomIncremental(event.angleDelta.y, event.x, event.y)
