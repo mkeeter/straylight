@@ -176,4 +176,10 @@ TEST_CASE("*cell-reader*")
         REQUIRE(*itr++ == 2);
         REQUIRE(*itr++ == 3);
     }
+
+    SECTION("Doing math on var expression")
+    {
+        auto a = s7_eval_c_string(sc, "(- (car (*cell-reader* '(12) '(1 2 3))))");
+        REQUIRE(true); // no crash
+    }
 }
