@@ -23,7 +23,7 @@ Handle* Picker::pickAt(QPoint p)
     }
     else
     {
-        auto rgb = img.pixel(p);
+        auto rgb = img.pixel(p) & 0xFFFFFF; // Mask alpha bits
 
         auto f = colors.left.find(rgb);
         return (f == colors.left.end()) ? nullptr : handles.at(f->second);

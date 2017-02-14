@@ -53,6 +53,7 @@ protected:
     // Properties used in drawing and rendering
     QMatrix4x4 M;
     QSize window_size;
+    QPoint mouse;
 
     /*  Here, we store the set of shapes to be drawn */
     std::map<ShapeKey, App::Render::Renderer*> shapes;
@@ -88,6 +89,9 @@ public:
     Q_INVOKABLE void panIncremental(float dx, float dy);
     Q_INVOKABLE void zoomIncremental(float ds, float x, float y);
 
+    //  Save the mouse cursor position and redraw if picker changes
+    Q_INVOKABLE void mouseAt(float x, float y);
+
 protected:
     /*
      *  Returns the projection matrix
@@ -106,6 +110,10 @@ protected:
     QVector3D center={0,0,0};
     float pitch=0;
     float yaw=0;
+
+    QPoint mouse;
+
+    friend class Canvas;
 };
 
 }   // namespace Render

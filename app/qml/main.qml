@@ -177,6 +177,7 @@ ApplicationWindow {
                     }
                     prevX = event.x
                     prevY = event.y
+                    viewport.mouseAt(event.x, event.y)
                 }
                 onPressed: function(event) {
                     prevX = event.x

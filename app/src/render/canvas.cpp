@@ -29,6 +29,7 @@ void Canvas::render()
     glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+    // Draw the picker layer (with a dummy mouse position)
     picker.draw({0,0}, Picker::DRAW_PICKER);
     picker.setImage(framebufferObject()->toImage());
 
@@ -36,10 +37,10 @@ void Canvas::render()
     framebufferObject()->bind();
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    const auto mat = M;
-    blitter.draw(mat);
-    axes.draw(mat);
-    picker.draw({0,0});
+    // Draw all of the scene objects
+    blitter.draw(M);
+    axes.draw(M);
+    picker.draw(mouse);
 
 }
 
@@ -153,7 +154,14 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 
     const auto M_ = c->M();
     const QSize window_size_(c->width(), c->height());
-    const bool changed = (M != M_) || (window_size != window_size_);
+
+    auto p = picker.pickAt(mouse);
+    mouse = c->mouse;
+
+    const bool changed = (M != M_) || (window_size != window_size_) ||
+                         (p != picker.pickAt(mouse));
+
+    qDebug() << mouse << p << picker.pickAt(mouse);
 
     if (changed)
     {
@@ -201,6 +209,11 @@ void CanvasObject::zoomIncremental(float ds, float x, float y)
     scale *= pow(1.1, ds / 120.);
     center += 2 * (M().inverted().map(pt) - a);
     update();
+}
+
+void CanvasObject::mouseAt(float x, float y)
+{
+    mouse = {int(x), int(y)};
 }
 
 QMatrix4x4 CanvasObject::proj() const
