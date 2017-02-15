@@ -384,13 +384,13 @@ Cache::Id Cache::rebuild(Id root, std::map<Id, Id> changed)
         // the operation to ensure correct pointers and weight
         if (changed.count(a) || changed.count(b))
         {
-            changed[c.second] = operation(c.first.opcode(),
-                changed.count(a) ? changed[a] : a,
-                changed.count(b) ? changed[b] : b);
+            changed.insert({c.second, operation(c.first.opcode(),
+                changed.count(a) ? changed.at(a) : a,
+                changed.count(b) ? changed.at(b) : b)});
         }
     }
 
-    return changed.count(root) ? changed[root] : root;
+    return changed.count(root) ? changed.at(root) : root;
 }
 
 Cache::Id Cache::collapse(Id root)
@@ -411,13 +411,13 @@ Cache::Id Cache::collapse(Id root)
             c.first.opcode() == Opcode::AFFINE_VEC)
         {
             auto v = getAffine(c.second);
-            changed[c.second] = operation(Opcode::ADD,
+            changed.insert({c.second, operation(Opcode::ADD,
                     operation(Opcode::ADD,
                         operation(Opcode::MUL, X(), constant(v.x)),
                         operation(Opcode::MUL, Y(), constant(v.y))),
                     operation(Opcode::ADD,
                         operation(Opcode::MUL, Z(), constant(v.z)),
-                        constant(v.w)));
+                        constant(v.w)))});
         }
     }
 
