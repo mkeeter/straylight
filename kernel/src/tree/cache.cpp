@@ -433,6 +433,7 @@ void Cache::setValue(Id id, float v)
 
     auto s = data.right.modify_data(it, [=](Key& k){ std::get<4>(k) = v; });
     assert(s);
+    (void)s;
 }
 
 }   // namespace Kernel
