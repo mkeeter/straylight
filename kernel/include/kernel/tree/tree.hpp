@@ -74,7 +74,11 @@ public:
     Tree rhs() const                { return Tree(parent, parent->rhs(id)); }
     size_t rank() const             { return parent->rank(id); }
     float value() const             { return parent->value(id); }
-    size_t var() const              { return parent->lhs(id); }
+    Cache::Id var() const
+    {
+        assert(opcode() == Opcode::VAR);
+        return parent->lhs(id);
+    }
 
     uint8_t flags() const           { return parent->flags(id); }
 

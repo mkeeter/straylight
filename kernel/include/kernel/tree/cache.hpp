@@ -21,6 +21,20 @@ class Cache
 {
 public:
     /*
+     *  Strongly-typed id for items in the cache
+     */
+    struct Id {
+        Id(unsigned i): i(i) { /* Nothing to do here */ }
+        bool operator<(const Id& other) const  { return i < other.i; }
+        bool operator==(const Id& other) const { return i == other.i; }
+        bool operator!=(const Id& other) const { return !(i == other.i); }
+
+        operator bool() const { return i != 0; }
+
+        unsigned i;
+    };
+
+    /*
      *  Look up the local Cache instance
      *  (which is on a per-thread basis)
      */
@@ -29,9 +43,6 @@ public:
      *  Forget about the cache for this thread
      */
     static void reset();
-
-    /* Values in the cache are identified by a single value */
-    typedef size_t Id;
 
     /*
      *  Returns a token for the given constant
@@ -102,7 +113,6 @@ public:
 
     /*
      *  Sets the value for a particular variable
-     *  id must point to a VAR node
      */
     void setValue(Id id, float v);
 
@@ -163,9 +173,14 @@ protected:
         size_t rank() const             { return std::get<0>(*this); }
         Opcode::Opcode opcode() const   { return std::get<1>(*this); }
         Id lhs() const                  { return std::get<2>(*this); }
-        Id var() const                  { return lhs(); }
         Id rhs() const                  { return std::get<3>(*this); }
         float value() const             { return std::get<4>(*this); }
+
+        Id var() const
+        {
+            assert(opcode() == Opcode::VAR);
+            return lhs();
+        }
     };
 
     /*
@@ -180,7 +195,7 @@ protected:
     Key token(Id id) const { return data.right.at(id); }
 
     boost::bimap<Key, Id> data;
-    Id next=1;
+    unsigned next=1;
 
     /*  Per-Id flags
      *  These could be deterministically calculated from the state
@@ -197,3 +212,18 @@ protected:
 };
 
 }   // namespace Kernel
+
+////////////////////////////////////////////////////////////////////////////////
+
+// #[derive(Hash)]
+namespace std
+{
+    template <>
+    struct hash<Kernel::Cache::Id>
+    {
+        size_t operator()(const Kernel::Cache::Id& k) const
+        {
+            return hash<unsigned>()(k.i);
+        }
+    };
+}

@@ -147,9 +147,9 @@ TEST_CASE("Tree::var")
     auto b = Tree::var(5.0);
     auto c = Tree::var(7.0);
 
-    REQUIRE(a.var() == 1);
-    REQUIRE(b.var() == 2);
-    REQUIRE(c.var() == 3);
+    REQUIRE(a.var() == Cache::Id(1));
+    REQUIRE(b.var() == Cache::Id(2));
+    REQUIRE(c.var() == Cache::Id(3));
 }
 
 TEST_CASE("Tree::flags")

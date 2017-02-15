@@ -11,7 +11,7 @@ TEST_CASE("Constructing a simple shape")
 
     Cache::Id out = t->operation(Opcode::ADD, t->X(),
             t->constant(1));
-    REQUIRE(out == 3);
+    REQUIRE(out == Cache::Id(3));
 }
 
 TEST_CASE("Deduplication of variables")
@@ -145,10 +145,10 @@ TEST_CASE("Collapsing affine trees")
      *
      *  (and all of the zeros should point to the same token)
      */
-    REQUIRE(a_affine == 12);
+    REQUIRE(a_affine == Cache::Id(12));
 
     auto collapsed = t->collapse(a_affine);
-    REQUIRE(collapsed == 13);
+    REQUIRE(collapsed == Cache::Id(13));
 }
 
 TEST_CASE("Cache::findConnected")
