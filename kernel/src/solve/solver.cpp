@@ -11,10 +11,15 @@ namespace Solver
 
 std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v)
 {
+    Evaluator e(t);
+    return findRoot(e, v);
+}
+
+std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v)
+{
     const float EPSILON = 1e-6;
 
     // Find our initial variables and residual
-    auto e = Evaluator(t);
     auto vars = e.varValues();
     float r = e.eval(v.x, v.y, v.z);
 
