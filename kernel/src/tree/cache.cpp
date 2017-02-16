@@ -54,14 +54,14 @@ Cache::Id Cache::constant(float v)
     return data.left.at(k);
 }
 
-Cache::Id Cache::var(float v)
+Cache::VarId Cache::var(float v)
 {
     auto k = Key(v, next);
     assert(data.left.find(k) == data.left.end());
     data.insert({k, next});
     flags_.insert({next++, Tree::FLAG_COLLAPSED|
                            Tree::FLAG_LOCATION_AGNOSTIC});
-    return data.left.at(k);
+    return VarId(data.left.at(k).i);
 }
 
 Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
@@ -77,18 +77,10 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
     // operation (e.g. X + 0) or a linear combination of affine forms
     if (simplify)
     {
-        if (auto t = checkIdentity(op, a, b))
-        {
-            return t;
-        }
-        else if (auto t = checkAffine(op, a, b))
-        {
-            return t;
-        }
-        else if (auto t = checkCommutative(op, a, b))
-        {
-           return t;
-        }
+#define CHECK_RETURN(func) { auto t = func(op, a, b); if (t != 0) { return t; }}
+        CHECK_RETURN(checkIdentity);
+        CHECK_RETURN(checkAffine);
+        CHECK_RETURN(checkCommutative);
     }
 
     // Otherwise, construct a new Id and add it to the ops set
@@ -98,12 +90,12 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
         data.insert({k, next});
         flags_.insert({next++,
 
-                (((!a || (flags(a) & Tree::FLAG_COLLAPSED)) &&
-                  (!b || (flags(b) & Tree::FLAG_COLLAPSED)) &&
+                (((a == 0 || (flags(a) & Tree::FLAG_COLLAPSED)) &&
+                  (b == 0 || (flags(b) & Tree::FLAG_COLLAPSED)) &&
                   op != Opcode::AFFINE_VEC) ? Tree::FLAG_COLLAPSED : 0) |
 
-                (((!a || (flags(a) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
-                  (!b || (flags(b) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+                (((a == 0 || (flags(a) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+                  (b == 0 || (flags(b) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
                   op != Opcode::VAR_X &&
                   op != Opcode::VAR_Y &&
                   op != Opcode::VAR_Z)
@@ -111,8 +103,8 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
     }
 
     // If both sides of the operation are constant, then return a constant
-    if ((a || b) && (!a || opcode(a) == Opcode::CONST) &&
-                    (!b || opcode(b) == Opcode::CONST))
+    if ((a != 0 || b != 0) && (a == 0 || opcode(a) == Opcode::CONST) &&
+                               (b == 0 || opcode(b) == Opcode::CONST))
     {
         // Here, we construct a Tree manually to avoid a recursive loop,
         // then pass it immediately into a dummy Evaluator
@@ -344,8 +336,8 @@ Cache::Key Cache::key(float v) const
 
 Cache::Key Cache::key(Opcode::Opcode op, Id a, Id b) const
 {
-    return Key(op, a, b, std::max(a ? rank(a) + 1 : 0,
-                                  b ? rank(b) + 1 : 0));
+    return Key(op, a, b, std::max(a != 0 ? rank(a) + 1 : 0,
+                                  b != 0 ? rank(b) + 1 : 0));
 }
 
 /******************************************************************************

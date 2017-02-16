@@ -23,7 +23,7 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
 
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
-    std::unordered_map<Cache::Id, Clause::Id> clauses = {{0, 0}};
+    std::unordered_map<Cache::Id, Clause::Id> clauses = {{Cache::Id(0), 0}};
     Clause::Id id = connected.size() - 1;
 
     std::list<Clause> rtape;
@@ -1006,14 +1006,14 @@ void EvaluatorBase::setMatrix(const glm::mat4& m)
     Mi = glm::inverse(m);
 }
 
-void EvaluatorBase::setVar(Cache::Id var, float value)
+void EvaluatorBase::setVar(Cache::VarId var, float value)
 {
     result.setValue(value, vars.right.at(var));
 }
 
-std::map<Cache::Id, float> EvaluatorBase::varValues() const
+std::map<Cache::VarId, float> EvaluatorBase::varValues() const
 {
-    std::map<Cache::Id, float> out;
+    std::map<Cache::VarId, float> out;
 
     for (auto v : vars.left)
     {

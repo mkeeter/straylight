@@ -30,8 +30,6 @@ protected:
         bool operator==(const Id_& other) const { return i == other.i; }
         bool operator!=(const Id_& other) const { return !(i == other.i); }
 
-        operator bool() const { return i != 0; }
-
         unsigned i;
     };
 
@@ -39,8 +37,14 @@ protected:
     struct Var_ {};
 
 public:
-    typedef Id_<Base_> Id;
     typedef Id_<Var_> VarId;
+    class Id : public Id_<Base_>
+    {
+    public:
+        // VarId can decay to Id implicitly
+        Id(const VarId& other) : Id_<Base_>(other.i) {}
+        Id(unsigned i) : Id_<Base_>(i) {}
+    };
 
     /*
      *  Look up the local Cache instance
@@ -71,7 +75,7 @@ public:
     /*
      *  Returns a new variable node with the given value
      */
-    Id var(float v);
+    VarId var(float v);
 
     Id X() { return operation(Opcode::VAR_X); }
     Id Y() { return operation(Opcode::VAR_Y); }
@@ -120,7 +124,10 @@ public:
     uint8_t flags(Id id) const { return flags_.at(id); }
 
     /*
-     *  Sets the value for a particular variable
+     *  Sets the value for a particular node
+     *
+     *  The node must be location-agnostic, but doesn't necessarily
+     *  need to be a variable node.
      */
     void setValue(Id id, float v);
 
@@ -184,10 +191,10 @@ protected:
         Id rhs() const                  { return std::get<3>(*this); }
         float value() const             { return std::get<4>(*this); }
 
-        Id var() const
+        VarId var() const
         {
             assert(opcode() == Opcode::VAR);
-            return lhs();
+            return VarId(lhs().i);
         }
     };
 

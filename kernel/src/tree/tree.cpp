@@ -16,11 +16,11 @@ Tree::Tree(float v)
 Tree::Tree(Opcode::Opcode op, Tree a, Tree b)
     : Tree(Cache::instance(), Cache::instance()->operation(op, a.id, b.id))
 {
-    assert(!a.id || a.parent == Cache::instance());
-    assert(!b.id || b.parent == Cache::instance());
-    assert((Opcode::args(op) == 0 && !a.id && !b.id) ||
-           (Opcode::args(op) == 1 &&  a.id && !b.id) ||
-           (Opcode::args(op) == 2 &&  a.id &&  b.id));
+    assert(a.id == 0 || a.parent == Cache::instance());
+    assert(b.id == 0 || b.parent == Cache::instance());
+    assert((Opcode::args(op) == 0 && a.id == 0 && b.id == 0) ||
+           (Opcode::args(op) == 1 && a.id != 0 && b.id == 0) ||
+           (Opcode::args(op) == 2 && a.id != 0 && b.id != 0));
 
     // POW only accepts integral values as its second argument
     if (op == Opcode::POW)

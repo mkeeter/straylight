@@ -10,7 +10,7 @@ class Tree;
 
 namespace Solver
 {
-    typedef std::map<Cache::Id, float> Solution;
+    typedef std::map<Cache::VarId, float> Solution;
     std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v={0,0,0});
 }   // namespace Solver
 

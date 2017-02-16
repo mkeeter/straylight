@@ -119,12 +119,12 @@ public:
     /*
      *  Changes a variable's value
      */
-    void setVar(Cache::Id var, float value);
+    void setVar(Cache::VarId var, float value);
 
     /*
      *  Returns the current values associated with all variables
      */
-    std::map<Cache::Id, float> varValues() const;
+    std::map<Cache::VarId, float> varValues() const;
 
     /*
      *  Updates variable values, returning true if changed
@@ -178,7 +178,7 @@ protected:
     /*  Map of variables (in terms of where they live in this Evaluator) to
      *  their ids in their respective Tree (e.g. what you get when calling
      *  Tree::var(3.0).var() */
-    boost::bimap<Clause::Id, Cache::Id> vars;
+    boost::bimap<Clause::Id, Cache::VarId> vars;
 
     /*  Tape containing our opcodes in reverse order */
     typedef std::vector<Clause> Tape;
