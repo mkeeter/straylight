@@ -19,20 +19,28 @@ namespace Kernel {
  */
 class Cache
 {
-public:
+protected:
     /*
      *  Strongly-typed id for items in the cache
      */
-    struct Id {
-        Id(unsigned i): i(i) { /* Nothing to do here */ }
-        bool operator<(const Id& other) const  { return i < other.i; }
-        bool operator==(const Id& other) const { return i == other.i; }
-        bool operator!=(const Id& other) const { return !(i == other.i); }
+    template<typename T>
+    struct Id_ {
+        Id_(unsigned i): i(i) { /* Nothing to do here */ }
+        bool operator<(const Id_& other) const  { return i < other.i; }
+        bool operator==(const Id_& other) const { return i == other.i; }
+        bool operator!=(const Id_& other) const { return !(i == other.i); }
 
         operator bool() const { return i != 0; }
 
         unsigned i;
     };
+
+    struct Base_ {};
+    struct Var_ {};
+
+public:
+    typedef Id_<Base_> Id;
+    typedef Id_<Var_> VarId;
 
     /*
      *  Look up the local Cache instance
