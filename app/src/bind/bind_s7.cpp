@@ -36,7 +36,7 @@ bool is_point_handle(s7_pointer s)
     return s7_is_object(s) && s7_object_type(s) == point_handle_t::tag;
 }
 
-const point_handle_t* get_point_handle(s7_cell* obj)
+point_handle_t* get_point_handle(s7_cell* obj)
 {
     return static_cast<point_handle_t*>(
             s7_object_value_checked(obj, point_handle_t::tag));

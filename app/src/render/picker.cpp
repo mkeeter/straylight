@@ -61,7 +61,7 @@ bool Picker::installHandle(const Graph::CellKey& k, Graph::ValuePtr p)
     HandleKey key = {k, tag};
     if (handles.count(key) == 0)
     {
-        handles[key] = new PointHandle();
+        handles[key] = new PointHandle(App::Bind::get_point_handle(p)->drag);
         auto rgb = colors.size() ? (colors.left.rbegin()->first + 1) : 1;
         colors.insert({rgb, key});
         changed = true;

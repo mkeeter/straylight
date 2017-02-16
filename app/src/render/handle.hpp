@@ -7,6 +7,7 @@
 #include "graph/ptr.hpp"
 
 #include "render/picker.hpp"
+#include "render/drag.hpp"
 
 namespace App {
 namespace Render {
@@ -16,6 +17,10 @@ class Drag;
 class Handle : public QOpenGLFunctions
 {
 public:
+    /*
+     *  Claims ownership of the given Drag object
+     */
+    Handle(std::unique_ptr<Drag>& drag);
     virtual ~Handle() { /* Nothing to do here */ }
 
     /*
@@ -41,7 +46,7 @@ public:
      *  Returns a drag pointer
      *  The drag pointer escapes from render thread
      */
-    virtual Drag* getDrag()=0;
+    Drag* getDrag() { return drag.get(); }
 
 protected:
     /*
@@ -51,6 +56,8 @@ protected:
 
     /*  Stores whether we've called initalizeOpenGLFunctions */
     bool gl_ready = false;
+
+    std::unique_ptr<Drag> drag;
 };
 
 }   // namespace Render

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <memory>
+
+#include "render/drag.hpp"
 
 struct s7_scheme;
 struct s7_cell;
@@ -10,6 +13,9 @@ namespace Bind {
 
 struct point_handle_t {
     float pos[3];
+
+    /*  Drag handle  */
+    std::unique_ptr<App::Render::Drag> drag;
 
     // Type tag for interpreter
     static int tag;
@@ -28,7 +34,7 @@ bool is_point_handle(s7_cell* obj);
 /*
  *  Extracts a point_handle_t, or nullptr
  */
-const point_handle_t* get_point_handle(s7_cell* obj);
+point_handle_t* get_point_handle(s7_cell* obj);
 
 /*
  *  Returns the handle tag

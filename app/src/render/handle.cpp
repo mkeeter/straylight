@@ -3,6 +3,12 @@
 namespace App {
 namespace Render {
 
+Handle::Handle(std::unique_ptr<Drag>& drag)
+    : drag(drag.release())
+{
+    // Nothing to do here
+}
+
 void Handle::draw(const QMatrix4x4& world, const QMatrix4x4& proj,
                   Picker::DrawMode mode, QRgb color)
 {

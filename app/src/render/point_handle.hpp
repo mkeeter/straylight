@@ -13,13 +13,11 @@ namespace Render {
 class PointHandle : public Handle
 {
 public:
-    PointHandle();
+    PointHandle(std::unique_ptr<Drag>& drag);
 
     void _draw(const QMatrix4x4& world, const QMatrix4x4& view,
                Picker::DrawMode mode, QRgb color=0) override;
     bool updateFrom(Graph::ValuePtr p) override;
-
-    Drag* getDrag() override;
 
 protected:
     void initGL() override;

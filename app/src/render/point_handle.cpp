@@ -1,7 +1,6 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "render/point_handle.hpp"
-#include "render/point_drag.hpp"
 #include "ui/material.hpp"
 
 using namespace boost::math::float_constants;
@@ -11,7 +10,8 @@ namespace Render {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle()
+PointHandle::PointHandle(std::unique_ptr<Drag>& drag)
+    : Handle(drag)
 {
     // Nothing to do here
 }
@@ -88,11 +88,6 @@ bool PointHandle::updateFrom(Graph::ValuePtr ptr)
     center = c;
 
     return changed;
-}
-
-Drag* PointHandle::getDrag()
-{
-    return new PointDrag();
 }
 
 void PointHandle::initGL()
