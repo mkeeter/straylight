@@ -939,7 +939,7 @@ EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
              &result.dy[0][0], &result.dz[0][0] };
 }
 
-std::map<Cache::Id, float> EvaluatorBase::gradient(float x, float y, float z)
+std::map<Cache::VarId, float> EvaluatorBase::gradient(float x, float y, float z)
 {
     set(x, y, z, 0);
 
@@ -954,7 +954,7 @@ std::map<Cache::Id, float> EvaluatorBase::gradient(float x, float y, float z)
             &result.f[itr->id][0], result.j[itr->id]);
     }
 
-    std::map<Cache::Id, float> out;
+    std::map<Cache::VarId, float> out;
     {   // Unpack from flat array into map
         // (to allow correlating back to VARs in Tree)
         size_t index = 0;

@@ -56,7 +56,7 @@ public:
     /*
      *  Returns the gradient with respect to all VARs
      */
-    std::map<Cache::Id, float> gradient(float x, float y, float z);
+    std::map<Cache::VarId, float> gradient(float x, float y, float z);
 
     /*
      *  Evaluates a single interval (stored with set)
