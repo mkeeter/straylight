@@ -12,7 +12,14 @@ namespace App {
 namespace Bind {
 
 struct point_handle_t {
+    point_handle_t(float x, float y, float z, const std::string& axes,
+                   App::Render::Drag* d)
+        : pos{x, y, z}, axes(axes), drag(d) {}
+
     float pos[3];
+
+    /*  'x', 'xy', 'yz', 'xyz', etc */
+    std::string axes;
 
     /*  Drag handle  */
     std::unique_ptr<App::Render::Drag> drag;
