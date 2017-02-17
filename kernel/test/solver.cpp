@@ -51,7 +51,7 @@ TEST_CASE("Solver::findRoot")
         auto a = Tree::var(1);
         auto b = Tree::var(1);
 
-        auto err = a*a + b*b - 1;
+        auto err = a + b - 1;
         {
             auto out = Solver::findRoot(err, {0,0,0}, {a.var()});
             auto res = out.first;
