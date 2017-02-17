@@ -9,18 +9,21 @@ namespace Kernel {
 namespace Solver
 {
 
-std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v)
+std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v,
+                                    const Mask& mask)
 {
     Evaluator e(t);
-    return findRoot(e, v);
+    return findRoot(e, v, mask);
 }
 
-std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v)
+std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
+                                    const Mask& mask)
 {
     const float EPSILON = 1e-6;
 
     // Find our initial variables and residual
     auto vars = e.varValues();
+
     float r = e.eval(v.x, v.y, v.z);
 
     bool converged = false;
@@ -48,7 +51,10 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v)
         {
             for (const auto& v : vars)
             {
-                e.setVar(v.first, v.second - step * ds.at(v.first));
+                if (mask.find(v.first) == mask.end())
+                {
+                    e.setVar(v.first, v.second - step * ds.at(v.first));
+                }
             }
 
             // Get new residual
@@ -71,6 +77,11 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v)
         vars = e.varValues();
     }
 
+    // Hide all masked variables
+    for (const auto& v : mask)
+    {
+        vars.erase(v);
+    }
     return {r, vars};
 }
 
