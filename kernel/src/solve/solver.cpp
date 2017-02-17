@@ -21,8 +21,15 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
 {
     const float EPSILON = 1e-6;
 
+    auto filter = [&](std::map<Cache::VarId, float>& vs){
+        for (const auto& v : mask)
+        {
+            vs.erase(v);
+        }
+    };
     // Find our initial variables and residual
     auto vars = e.varValues();
+    filter(vars);
 
     float r = e.eval(v.x, v.y, v.z);
 
@@ -31,7 +38,8 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
     while (!converged && fabs(r) >= EPSILON)
     {
         // Vars should be set from the most recent evaluation
-        const auto ds = e.gradient(v.x, v.y, v.z);
+        auto ds = e.gradient(v.x, v.y, v.z);
+        filter(ds);
 
         // Break if all of our gradients are nearly zero
         if (std::all_of(ds.begin(), ds.end(),
@@ -51,10 +59,7 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
         {
             for (const auto& v : vars)
             {
-                if (mask.find(v.first) == mask.end())
-                {
-                    e.setVar(v.first, v.second - step * ds.at(v.first));
-                }
+                e.setVar(v.first, v.second - step * ds.at(v.first));
             }
 
             // Get new residual
@@ -75,12 +80,7 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
 
         // Extract new variable table
         vars = e.varValues();
-    }
-
-    // Hide all masked variables
-    for (const auto& v : mask)
-    {
-        vars.erase(v);
+        filter(vars);
     }
     return {r, vars};
 }
