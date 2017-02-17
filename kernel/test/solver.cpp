@@ -46,6 +46,31 @@ TEST_CASE("Solver::findRoot")
         REQUIRE(vals.at(b.var()) == Approx(0.8575));
     }
 
+    SECTION("Mask")
+    {
+        auto a = Tree::var(1);
+        auto b = Tree::var(1);
+
+        auto err = a*a + b*b - 1;
+        {
+            auto out = Solver::findRoot(err, {0,0,0}, {a.var()});
+            auto res = out.first;
+            auto vals = out.second;
+            REQUIRE(res == Approx(0));
+            REQUIRE(vals.size() == 1);
+            REQUIRE(vals.at(b.var()) == Approx(0));
+        }
+
+        {
+            auto out = Solver::findRoot(err, {0,0,0}, {b.var()});
+            auto res = out.first;
+            auto vals = out.second;
+            REQUIRE(res == Approx(0));
+            REQUIRE(vals.size() == 1);
+            REQUIRE(vals.at(a.var()) == Approx(0));
+        }
+    }
+
     SECTION("Sum-of-squares performance")
     {
         // Constraint solving as sum-of-squares optimization
