@@ -10,14 +10,14 @@ class Drag
 {
 public:
     /*
-     *  Constructs a dragger object
+     *  Constructs a dragger object for a single point
      *
      *  This must be called in the same thread as the Kernel objects
      */
     Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z);
 
 protected:
-    Kernel::Evaluator err;
+    std::unique_ptr<Kernel::Evaluator> err;
 
     /*
      *  The mouse cursor line is represented by
