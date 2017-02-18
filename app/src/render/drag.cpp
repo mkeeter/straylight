@@ -21,11 +21,10 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     };
 
     Kernel::Tree _d = Kernel::Tree::var(0);
-    printf("d: %i\n", _d.var().i);
 
-    auto dx = x - (_cursor_pos[0]);// + _d*_cursor_ray[0]);
-    auto dy = y - (_cursor_pos[1]);// + _d*_cursor_ray[1]);
-    auto dz = z - (_cursor_pos[2]);// + _d*_cursor_ray[2]);
+    auto dx = x - (_cursor_pos[0] + _d*_cursor_ray[0]);
+    auto dy = y - (_cursor_pos[1] + _d*_cursor_ray[1]);
+    auto dz = z - (_cursor_pos[2] + _d*_cursor_ray[2]);
 
     err.reset(new Kernel::Evaluator(
                 square(dx) + square(dy) + square(dz)+ square(_d)));
@@ -33,8 +32,6 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     // Load variables IDs
     for (int i=0; i < 3; ++i)
     {
-        printf("cursor_pos %i: %i\n", i, _cursor_pos[i].var().i);
-        printf("cursor_ray %i: %i\n", i, _cursor_ray[i].var().i);
         cursor_pos[i] = _cursor_pos[i].var();
         cursor_ray[i] = _cursor_ray[i].var();
     }
@@ -57,16 +54,15 @@ Kernel::Solver::Solution Drag::dragTo(const QMatrix4x4& M,
     for (int i=0; i < 3; ++i)
     {
         err->setVar(cursor_pos[i], _cursor_pos[i]);
-        //err->setVar(cursor_ray[i], _cursor_ray[i]);
+        err->setVar(cursor_ray[i], _cursor_ray[i]);
         masked.insert(cursor_pos[i]);
-        //masked.insert(cursor_ray[i]);
+        masked.insert(cursor_ray[i]);
     }
-    //err->setVar(d, 0);
+    err->setVar(d, 0);
 
-    qDebug() << "Position:" << _cursor_pos;
-    qDebug() << "Ray:" << _cursor_ray;
-
-    return Kernel::Solver::findRoot(*err, {0,0,0}, masked).second;
+    auto sol = Kernel::Solver::findRoot(*err, {0,0,0}, masked);
+    sol.second.erase(d);
+    return sol.second;
 }
 
 }   // namespace Render

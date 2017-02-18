@@ -250,6 +250,7 @@ void Bridge::setVariables(const Kernel::Solver::Solution& sol)
     auto lock = r.Lock();
     for (const auto& s : sol)
     {
+        qDebug() << s.first.i << ":" << s.second;
         // Do something here
     }
 }
