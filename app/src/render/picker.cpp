@@ -17,6 +17,7 @@ Handle* Picker::pickAt(QPoint p)
 {
     if (p.x() >= img.size().width() ||
         p.y() >= img.size().height() ||
+        p.x() < 0 || p.y() < 0 ||
         img.isNull())
     {
         return nullptr;
