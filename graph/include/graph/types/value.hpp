@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "graph/ptr.hpp"
+#include "graph/types/ptr.hpp"
 
 namespace Graph {
 

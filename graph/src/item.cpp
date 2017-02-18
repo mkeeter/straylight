@@ -1,7 +1,7 @@
 #include "graph/item.hpp"
 
-#include "graph/cell.hpp"
-#include "graph/instance.hpp"
+#include "graph/types/cell.hpp"
+#include "graph/types/instance.hpp"
 
 namespace Graph {
 

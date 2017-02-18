@@ -3,8 +3,8 @@
 #include <string>
 #include <list>
 
-#include "graph/index.hpp"
-#include "graph/env.hpp"
+#include "graph/types/index.hpp"
+#include "graph/types/env.hpp"
 
 namespace Graph {
 

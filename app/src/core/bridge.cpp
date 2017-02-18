@@ -20,9 +20,6 @@ Bridge::Bridge()
     r.call(Kernel::Bind::init);
     r.call(App::Bind::init);
 
-    // Construct a default cell
-    r.insertCell(0, "s", "(make-shape (lambda (x y z) (max (- z 1) (- -1 z) (+ (* x x) (* y y) -1) (- (max x y)))))");
-
     // Connect async call to sync
     connect(this, &Bridge::syncLater,
             this, &Bridge::sync, Qt::QueuedConnection);

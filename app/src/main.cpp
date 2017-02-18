@@ -41,5 +41,9 @@ int main(int argc, char**argv)
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
 
+    // Construct a default cell
+    App::Core::Bridge::root()->insertCell(0, "x", "0");
+    App::Core::Bridge::root()->insertCell(0, "y", "(+ 1 0)");
+
     return app.exec();
 }

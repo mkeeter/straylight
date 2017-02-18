@@ -2,8 +2,8 @@
 
 #include <set>
 
-#include "graph/cell.hpp"
-#include "graph/keys.hpp"
+#include "graph/types/cell.hpp"
+#include "graph/types/keys.hpp"
 
 struct s7_cell;
 struct s7_scheme;

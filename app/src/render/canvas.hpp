@@ -2,8 +2,8 @@
 
 #include <QQuickFramebufferObject>
 
-#include "graph/index.hpp"
-#include "graph/keys.hpp"
+#include "graph/types/index.hpp"
+#include "graph/types/keys.hpp"
 #include "graph/root.hpp"
 
 #include "kernel/tree/tree.hpp"

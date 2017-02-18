@@ -1,10 +1,11 @@
 #pragma once
 
+#include "graph/types/index.hpp"
+#include "graph/types/env.hpp"
+#include "graph/types/keys.hpp"
+
 #include "graph/item.hpp"
-#include "graph/index.hpp"
 #include "graph/keynamestore.hpp"
-#include "graph/env.hpp"
-#include "graph/keys.hpp"
 
 #include "picojson/picojson.h"
 

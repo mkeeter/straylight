@@ -1,6 +1,7 @@
 #include "graph/tree.hpp"
-#include "graph/instance.hpp"
-#include "graph/serializer.hpp"
+
+#include "graph/types/instance.hpp"
+#include "graph/types/serializer.hpp"
 
 namespace Graph {
 

@@ -5,8 +5,8 @@
 
 #include "render/drag.hpp"
 
-#include "graph/keys.hpp"
-#include "graph/tag.hpp"
+#include "graph/types/keys.hpp"
+#include "graph/types/tag.hpp"
 #include "kernel/tree/tag.hpp"
 #include "kernel/tree/cache.hpp"
 

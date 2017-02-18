@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "graph/index.hpp"
-#include "graph/cell.hpp"
+#include "graph/types/index.hpp"
+#include "graph/types/cell.hpp"
 
 namespace Graph {
 

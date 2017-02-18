@@ -9,8 +9,8 @@
 
 #include <boost/bimap.hpp>
 
-#include "graph/keys.hpp"
-#include "graph/ptr.hpp"
+#include "graph/types/keys.hpp"
+#include "graph/types/ptr.hpp"
 
 namespace App {
 namespace Render {

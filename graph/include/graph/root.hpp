@@ -2,14 +2,15 @@
 
 #include <stack>
 
-#include "graph/cell.hpp"
 #include "graph/item.hpp"
 #include "graph/interpreter.hpp"
-#include "graph/instance.hpp"
 #include "graph/dependencies.hpp"
-#include "graph/keys.hpp"
 #include "graph/tree.hpp"
-#include "graph/tag.hpp"
+
+#include "graph/types/cell.hpp"
+#include "graph/types/instance.hpp"
+#include "graph/types/keys.hpp"
+#include "graph/types/tag.hpp"
 
 namespace Graph {
 

@@ -3,7 +3,7 @@
 #include <map>
 #include <set>
 
-#include "keys.hpp"
+#include "graph/types/keys.hpp"
 
 namespace Graph {
 

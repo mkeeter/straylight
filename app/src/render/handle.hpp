@@ -4,7 +4,7 @@
 #include <QOpenGLFunctions>
 #include <QColor>
 
-#include "graph/ptr.hpp"
+#include "graph/types/ptr.hpp"
 
 #include "render/picker.hpp"
 #include "render/drag.hpp"

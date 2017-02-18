@@ -4,7 +4,7 @@
 #include <QJSEngine>
 
 #include "graph/root.hpp"
-#include "graph/serializer.hpp"
+#include "graph/types/serializer.hpp"
 #include "kernel/solve/solver.hpp"
 
 namespace App {

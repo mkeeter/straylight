@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "index.hpp"
+#include "graph/types/index.hpp"
 
 namespace Graph {
 
