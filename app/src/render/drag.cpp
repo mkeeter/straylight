@@ -1,6 +1,7 @@
 #include <QVector2D>
 
 #include "render/drag.hpp"
+#include "kernel/solve/solver.hpp"
 
 namespace App {
 namespace Render {
@@ -40,21 +41,30 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     d0 = _d0.var();
 }
 
-void Drag::update(const QMatrix4x4& M, const QVector2D& cursor,
-                  const QVector3D& prev)
+void Drag::dragTo(const QMatrix4x4& M, const QVector2D& cursor)
 {
     QVector3D _cursor_pos = M * QVector3D(cursor.x(), cursor.y(), 0);
     QVector3D _cursor_ray = M * QVector3D(0, 0, -1) - M * QVector3D(0, 0, 0);
 
     // Set position and delta vector
+    std::set<Kernel::Cache::VarId> masked = {d0};
     for (int i=0; i < 3; ++i)
     {
         err->setVar(cursor_pos[i], _cursor_pos[i]);
         err->setVar(cursor_ray[i], _cursor_ray[i]);
+        masked.insert(cursor_pos[i]);
+        masked.insert(cursor_ray[i]);
     }
 
-    // Set base offset from prevoius position
-    err->setVar(d0, QVector3D::dotProduct(prev - _cursor_pos, _cursor_ray));
+    // Set base offset from starting position
+    err->setVar(d0, QVector3D::dotProduct(start - _cursor_pos, _cursor_ray));
+
+    auto sol = Kernel::Solver::findRoot(*err, {0,0,0}, masked);
+    qDebug() << sol.first;
+    for (auto s : sol.second)
+    {
+        qDebug() << s.first.i << ":" << s.second;
+    }
 }
 
 }   // namespace Render

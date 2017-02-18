@@ -21,13 +21,14 @@ public:
     Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z);
 
     /*
-     *  Loads v, p, and d0
-     *  given the given transform matrix, cursor position, and previous point
-     *
-     *  Cursor position is relative to OpenGL window space (±1 on both axes)
+     *  Loads a starting position for a drag operation
      */
-    void update(const QMatrix4x4& M, const QVector2D& cursor,
-                const QVector3D& prev);
+    void startDrag(const QVector3D& p) { start = p; }
+
+    /*
+     *  Drags to a particular position
+     */
+    void dragTo(const QMatrix4x4& M, const QVector2D& cursor);
 
 protected:
     std::unique_ptr<Kernel::Evaluator> err;
@@ -48,6 +49,12 @@ protected:
     Kernel::Cache::VarId cursor_ray[3];
     Kernel::Cache::VarId d;
     Kernel::Cache::VarId d0;
+
+    /*  We store the starting position for a drag here
+     *
+     *  This lets us minimize changes in the z plane (which can't be
+     *  controlled by the user)     */
+    QVector3D start;
 };
 
 }   // namespace Render
