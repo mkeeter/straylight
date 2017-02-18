@@ -40,17 +40,18 @@ protected:
      *  cursor_pos + d*cursor_ray
      *  where pos and ray are 3-vectors and d is a scalar
      *
-     *  d0 is the value of d at the start position
-     *  We want to minimize abs(d - d0), otherwise we could drift
+     *  d should be set to 0 at the point closest to the previous point,
+     *  to minimize drift into the screen.
+     *
+     *  We want to minimize abs(d), otherwise we could drift
      *  arbitrarily along the cursor pointing line.
      *
      *  The solver will find a solution in terms of the base variables
-     *  and d; we lock pos, ray, and d0.
+     *  and d; we lock pos and ray
      */
     Kernel::Cache::VarId cursor_pos[3];
     Kernel::Cache::VarId cursor_ray[3];
     Kernel::Cache::VarId d;
-    Kernel::Cache::VarId d0;
 
     /*  We store the starting position for a drag here
      *
