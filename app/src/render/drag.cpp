@@ -27,7 +27,7 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     auto dz = z - (_cursor_pos[2] + _d*_cursor_ray[2]);
 
     err.reset(new Kernel::Evaluator(
-                square(dx) + square(dy) + square(dz)+ square(_d)));
+                square(dx) + square(dy) + square(dz)));
 
     // Load variables IDs
     for (int i=0; i < 3; ++i)
@@ -41,12 +41,13 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
 Kernel::Solver::Solution Drag::dragTo(const QMatrix4x4& M,
                                       const QVector2D& cursor)
 {
-    QVector3D _cursor_ray = M * QVector3D(0, 0, -1) - M * QVector3D(0, 0, 0);
+    const QVector3D offset = M * QVector3D(0, 0, 0);
+    const QVector3D _cursor_ray = M * QVector3D(0, 0, -1) - offset;
 
     // Position _cursor_pos to minimize travel along the ray from start point
     // TODO: clean up this vector math
-    QVector3D base_pos = M * QVector3D(cursor.x(), cursor.y(), 0);
-    QVector3D _cursor_pos = base_pos + _cursor_ray *
+    const QVector3D base_pos = M * QVector3D(cursor.x(), cursor.y(), 0);
+    const QVector3D _cursor_pos = base_pos + _cursor_ray *
         QVector3D::dotProduct(start - base_pos, _cursor_ray);
 
     // Set position and delta vector

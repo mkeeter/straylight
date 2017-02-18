@@ -256,7 +256,6 @@ void Bridge::setVariables(const Kernel::Solver::Solution& sol)
 
             std::stringstream ss;
             ss << s.second;
-            qDebug() << k.second.i << QString::fromStdString(ss.str());
             r.setExprOrInput(k, ss.str());
         }
     }
