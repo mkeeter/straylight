@@ -115,6 +115,15 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
         }
     }
 
+    // Copy over tag data
+    for (auto c : connected)
+    {
+        if (auto t = cache->tag(c))
+        {
+            tags[c].reset(t->clone());
+        }
+    }
+
     assert(clauses.at(root.id) == 0);
 }
 
