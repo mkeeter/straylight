@@ -27,8 +27,8 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     auto dy = y - (_cursor_pos[1] + _d*_cursor_ray[1]);
     auto dz = z - (_cursor_pos[2] + _d*_cursor_ray[2]);
 
-    err.reset(new Kernel::Evaluator(max(max(abs(dx), abs(dy)),
-                    max(abs(_d - _d0), abs(dz)))));
+    err.reset(new Kernel::Evaluator(
+                abs(dx) + abs(dy) + abs(dz) + abs(_d - _d0)));
 
     // Load variables IDs
     for (int i=0; i < 3; ++i)
