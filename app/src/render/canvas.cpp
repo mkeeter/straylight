@@ -41,7 +41,7 @@ void Canvas::render()
     // Draw all of the scene objects
     blitter.draw(M);
     axes.draw(M);
-    picker.draw(mouse);
+    picker.draw(mouse.toPoint());
 }
 
 void Canvas::push(int instance_index, const QString& instance_name,
@@ -164,7 +164,7 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     // Handle mouse state machine based on picker state
     if (c->mouse_state == c->CLICK_LEFT)
     {
-        if (auto h = picker.pickAt(mouse))
+        if (auto h = picker.pickAt(mouse.toPoint()))
         {
             c->mouse_state = c->DRAG_HANDLE;
             c->mouse_drag = h->getDrag(M.inverted(), mouse_gl);
@@ -252,7 +252,7 @@ void CanvasObject::mouseMove(float x, float y)
     {
         update();
     }
-    mouse_pos = {int(x), int(y)};
+    mouse_pos = {x, y};
 }
 
 void CanvasObject::mouseClick(int button)

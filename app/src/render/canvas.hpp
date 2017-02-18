@@ -55,7 +55,7 @@ protected:
     // Properties used in drawing and rendering
     QMatrix4x4 M;
     QSize window_size;
-    QPoint mouse;
+    QVector2D mouse;
 
     /*  Here, we store the set of shapes to be drawn */
     std::map<ShapeKey, App::Render::Renderer*> shapes;
@@ -118,7 +118,7 @@ protected:
 
     enum { RELEASED, CLICK_LEFT, CLICK_RIGHT,
            DRAG_ROT, DRAG_PAN, DRAG_HANDLE } mouse_state;
-    QPoint mouse_pos;
+    QVector2D mouse_pos;
     Drag* mouse_drag;
 
     friend class Canvas;
