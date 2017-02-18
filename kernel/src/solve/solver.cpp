@@ -69,7 +69,9 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
             const auto diff = r - r_;
 
             // If we've satisfied the Armijo–Goldstein condition, then break
-            if (slope < EPSILON || r_ < EPSILON || diff / step >= slope * 0.5)
+            // (along with a bunch of other conditions to detect infinite loops)
+            if (diff / step >= slope * 0.5 || fabs(diff) < EPSILON ||
+                slope < EPSILON || r_ < EPSILON)
             {
                 // If residuals are converging, then exit outer loop too
                 converged = fabs(diff) < EPSILON;
