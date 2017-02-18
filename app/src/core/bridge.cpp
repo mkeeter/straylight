@@ -247,12 +247,20 @@ void Bridge::attachCanvas(App::Render::Canvas* c)
 
 void Bridge::setVariables(const Kernel::Solver::Solution& sol)
 {
-    auto lock = r.Lock();
-    for (const auto& s : sol)
-    {
-        qDebug() << s.first.i << ":" << s.second;
-        // Do something here
+    {   // Roll out a set of variable updates
+        auto lock = r.Lock();
+        for (const auto& s : sol)
+        {
+            auto k = static_cast<Bind::CellKeyTag*>(
+                    Kernel::Cache::instance()->tag(s.first))->key;
+
+            std::stringstream ss;
+            ss << s.second;
+            qDebug() << k.second.i << QString::fromStdString(ss.str());
+            r.setExprOrInput(k, ss.str());
+        }
     }
+    sync();
 }
 
 Graph::Root* Bridge::root()
