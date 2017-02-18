@@ -46,13 +46,19 @@ public:
      *  Returns a drag pointer
      *  The drag pointer escapes from render thread
      */
-    Drag* getDrag() { return drag.get(); }
+    Drag* getDrag(const QMatrix4x4& M, const QVector2D& cursor);
 
 protected:
     /*
      *  Overloaded by derived classes to build VBOs, etc
      */
     virtual void initGL() { }
+
+    /*
+     *  Returns the current position of the drag handle
+     *  (used when setting initial drag parameters in getDrag)
+     */
+    virtual QVector3D pos(const QMatrix4x4& M, const QVector2D& cursor) const=0;
 
     /*  Stores whether we've called initalizeOpenGLFunctions */
     bool gl_ready = false;

@@ -157,6 +157,9 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 
     // Set mouse position, adjusting for high-DPI framebuffer
     mouse = c->mouse_pos * (picker.width() / c->width());
+    QVector2D mouse_gl(
+        2 * c->mouse_pos.x() / c->width() - 1,
+        2 * c->mouse_pos.y() / c->height() - 1);
 
     // Handle mouse state machine based on picker state
     if (c->mouse_state == c->CLICK_LEFT)
@@ -164,7 +167,7 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
         if (auto h = picker.pickAt(mouse))
         {
             c->mouse_state = c->DRAG_HANDLE;
-            c->mouse_drag = h->getDrag();
+            c->mouse_drag = h->getDrag(M.inverted(), mouse_gl);
         }
         else
         {

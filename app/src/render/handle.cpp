@@ -21,5 +21,11 @@ void Handle::draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     _draw(world, proj, mode, color);
 }
 
+Drag* Handle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
+{
+    drag->update(M, cursor, pos(M, cursor));
+    return drag.get();
+}
+
 }   // namespace Render
 }   // namespace App

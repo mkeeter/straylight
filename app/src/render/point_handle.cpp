@@ -135,5 +135,12 @@ void PointHandle::initGL()
     }
 }
 
+QVector3D PointHandle::pos(const QMatrix4x4& M, const QVector2D& cursor) const
+{
+    (void)M;
+    (void)cursor;
+    return center;
+}
+
 }   // namespace Render
 }   // namespace App
