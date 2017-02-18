@@ -6,6 +6,7 @@
 
 #include "kernel/eval/evaluator.hpp"
 #include "kernel/tree/cache.hpp"
+#include "kernel/solve/solver.hpp"
 
 namespace App {
 namespace Render {
@@ -28,7 +29,8 @@ public:
     /*
      *  Drags to a particular position
      */
-    void dragTo(const QMatrix4x4& M, const QVector2D& cursor);
+    Kernel::Solver::Solution dragTo(const QMatrix4x4& M,
+                                    const QVector2D& cursor);
 
 protected:
     std::unique_ptr<Kernel::Evaluator> err;

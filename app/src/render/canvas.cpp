@@ -239,6 +239,15 @@ void CanvasObject::mouseMove(float x, float y)
     {
         panIncremental(x - mouse_pos.x(), y - mouse_pos.y());
     }
+    else if (mouse_state == DRAG_HANDLE)
+    {
+        QVector2D mouse_gl(
+            2 * mouse_pos.x() / width() - 1,
+            2 * mouse_pos.y() / height() - 1);
+        assert(mouse_drag != nullptr);
+        auto sol = mouse_drag->dragTo(M().inverted(), mouse_gl);
+        App::Core::Bridge::singleton()->setVariables(sol);
+    }
     else
     {
         update();

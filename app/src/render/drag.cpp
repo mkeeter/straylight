@@ -1,7 +1,6 @@
 #include <QVector2D>
 
 #include "render/drag.hpp"
-#include "kernel/solve/solver.hpp"
 
 namespace App {
 namespace Render {
@@ -41,7 +40,8 @@ Drag::Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z)
     d0 = _d0.var();
 }
 
-void Drag::dragTo(const QMatrix4x4& M, const QVector2D& cursor)
+Kernel::Solver::Solution Drag::dragTo(const QMatrix4x4& M,
+                                      const QVector2D& cursor)
 {
     QVector3D _cursor_pos = M * QVector3D(cursor.x(), cursor.y(), 0);
     QVector3D _cursor_ray = M * QVector3D(0, 0, -1) - M * QVector3D(0, 0, 0);
@@ -59,12 +59,7 @@ void Drag::dragTo(const QMatrix4x4& M, const QVector2D& cursor)
     // Set base offset from starting position
     err->setVar(d0, QVector3D::dotProduct(start - _cursor_pos, _cursor_ray));
 
-    auto sol = Kernel::Solver::findRoot(*err, {0,0,0}, masked);
-    qDebug() << sol.first;
-    for (auto s : sol.second)
-    {
-        qDebug() << s.first.i << ":" << s.second;
-    }
+    return Kernel::Solver::findRoot(*err, {0,0,0}, masked).second;
 }
 
 }   // namespace Render

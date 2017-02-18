@@ -245,6 +245,15 @@ void Bridge::attachCanvas(App::Render::Canvas* c)
     emit(syncLater());
 }
 
+void Bridge::setVariables(const Kernel::Solver::Solution& sol)
+{
+    auto lock = r.Lock();
+    for (const auto& s : sol)
+    {
+        // Do something here
+    }
+}
+
 Graph::Root* Bridge::root()
 {
     if (_instance == nullptr)

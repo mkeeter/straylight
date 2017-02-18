@@ -5,6 +5,7 @@
 
 #include "graph/root.hpp"
 #include "graph/serializer.hpp"
+#include "kernel/solve/solver.hpp"
 
 namespace App {
 
@@ -102,6 +103,13 @@ public:
      *  Installs the Canvas object
      */
     void attachCanvas(App::Render::Canvas* c);
+
+    /*
+     *  Applies a set of constraints to the graph
+     *
+     *  This should be called from the main UI thread
+     */
+    void setVariables(const Kernel::Solver::Solution& sol);
 
 signals:
     /*
