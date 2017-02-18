@@ -2,7 +2,9 @@
 
 #include "s7/s7.h"
 
+#include "core/bridge.hpp"
 #include "bind/bind_s7.h"
+
 #include "kernel/bind/bind_s7.h"
 #include "kernel/tree/tree.hpp"
 #include "graph/interpreter.hpp"
@@ -94,6 +96,51 @@ int get_handle_tag(s7_cell* obj)
     return s7_object_type(obj);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+s7_pointer reader(s7_scheme* sc, s7_pointer args)
+{
+    auto begin = s7_car(args);
+
+    if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
+    {
+        auto root = Core::Bridge::root();
+        auto cache = Kernel::Cache::instance();
+        auto& cell = *static_cast<Graph::CellKey*>(s7_c_pointer(s7_cadr(args)));
+
+        const auto v = s7_number_to_real(sc, s7_car(begin));
+
+        // If this variable is already in use, then update its value and
+        // return a Shape with the changed flag set if the value changed.
+        if (auto t = root->tag(cell))
+        {
+            assert(dynamic_cast<IdTag*>(t));
+
+            auto id = static_cast<IdTag*>(t)->id;
+            const bool changed = cache->value(id) != v;
+            cache->setValue(id, v);
+
+            auto var = Kernel::Tree::var(id);
+            return s7_list(sc, 1, Kernel::Bind::shape_new_(sc, var, changed));
+        }
+        // Otherwise, make a new variable and cross-link it into the cache
+        // and the graph root.
+        else
+        {
+            auto var = Kernel::Tree::var(v);
+            var.setTag(new CellKeyTag(cell));
+            root->setTag(cell, new IdTag(var.var()));
+            return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
+        }
+    }
+    else
+    {
+        return begin;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void init(s7_scheme* sc)
 {
     point_handle_t::tag = s7_new_type_x(sc, "point-handle",
@@ -110,6 +157,9 @@ void init(s7_scheme* sc)
 
     s7_define_function(sc, "ui-point", point_handle_new, 3, 0, false,
             "(ui-point x y z) makes a point handle in the 3D viewport");
+
+    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
+        "Reads a list of s-exprs, doing special things to floats");
 }
 
 }   // namespace Bind

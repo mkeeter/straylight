@@ -27,13 +27,21 @@ struct shape_t {
  */
 void init(s7_scheme* sc);
 
-/*
- *  Looks up the *env* variable associated with the given tree
- */
-std::list<int> envOf(s7_scheme* sc, Kernel::Tree t);
-
 extern "C" {
+    /*
+     *  Turns the given Tree into a shape
+     */
+    s7_cell* shape_new(s7_scheme* sc, Kernel::Tree t);
+    s7_cell* shape_new_(s7_scheme* sc, Kernel::Tree t, bool changed);
+
+    /*
+     *  Checks if the given Tree is a shape
+     */
     bool is_shape(s7_cell* obj);
+
+    /*
+     *  Converts a cell pointer into a shape pointer
+     */
     const shape_t* get_shape(s7_cell* obj);
 };
 

@@ -51,6 +51,12 @@ Tree Tree::var(float v)
     return Tree(s, s->var(v));
 }
 
+Tree Tree::var(Cache::VarId id)
+{
+    auto s = Cache::instance();
+    return Tree(s, id);
+}
+
 Tree Tree::collapse() const
 {
     return (flags() & FLAG_COLLAPSED) ? *this :

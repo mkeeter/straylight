@@ -19,4 +19,5 @@ add_executable(straylight-test main.cpp
     ../graph/test/root.cpp
     ../graph/test/tree.cpp
 )
+target_include_directories(straylight-test PRIVATE ../app/src)
 target_link_libraries(straylight-test straylight-kernel straylight-graph)

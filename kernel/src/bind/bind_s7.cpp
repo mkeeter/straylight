@@ -14,9 +14,16 @@ int shape_t::tag = -1;
 /*
  *  Converts a Tree into an allocated Scheme shape
  */
-static s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
+s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
     return s7_make_object(sc, shape_t::tag, new shape_t(t));
+}
+
+s7_pointer shape_new_(s7_scheme* sc, Kernel::Tree t, bool changed)
+{
+    auto s = new shape_t(t);
+    s->value_changed = changed;
+    return s7_make_object(sc, shape_t::tag, s);
 }
 
 /*
@@ -528,33 +535,6 @@ void init(s7_scheme* sc)
     install_overload(sc, "=", custom_equ);
     install_overload(sc, "eq?", custom_eq);
     install_overload(sc, "equal?", custom_equal);
-
-    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
-        "Reads a list of s-exprs, recording solo floats in *env-tree-map*");
-
-    s7_define_constant(sc, "*env-tree-map*", s7_make_hash_table(sc, 128));
-    s7_define_constant(sc, "*tree-env-map*", s7_make_hash_table(sc, 128));
-
-}
-
-std::list<int> envOf(s7_scheme* sc, Kernel::Tree t)
-{
-    auto tree_env_map = s7_name_to_value(sc, "*tree-env-map*");
-    auto env_ref = s7_hash_table_ref(sc, tree_env_map, shape_new(sc, t));
-
-    if (env_ref == s7_f(sc))
-    {
-        return {};
-    }
-    else
-    {
-        std::list<int> out;
-        for (auto a = env_ref; a != s7_nil(sc); a = s7_cdr(a))
-        {
-            out.push_back(s7_number_to_integer(sc, s7_car(a)));
-        }
-        return out;
-    }
 }
 
 }   // namespace Bind

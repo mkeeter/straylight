@@ -55,6 +55,12 @@ public:
     static Tree var(float v);
 
     /*
+     *  Returns a copy of the given variable
+     *  Requires that the variable exist in the cache
+     */
+    static Tree var(Cache::VarId id);
+
+    /*
      *  Returns a new Tree that is a flattened copy of this tree
      */
     Tree collapse() const;

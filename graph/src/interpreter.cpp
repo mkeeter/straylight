@@ -442,19 +442,11 @@ Value Interpreter::eval(const CellKey& key)
                     bindings));
         }
 
-        // Calculate cell-env, where cell-env is the full path to the
-        // cell (instance indices followed by a cell index)
-        auto env = s7_cons(sc, s7_make_integer(sc, key.second.i),
-                           s7_nil(sc));
-        for (auto itr=key.first.rbegin(); itr != key.first.rend(); ++itr)
-        {
-            env = s7_cons(sc, s7_make_integer(sc, itr->i), env);
-        }
-
         // Run the evaluation and get out a value
         auto args = s7_list(sc, 3,
                 s7_make_string(sc, expr.c_str()),
-                s7_inlet(sc, bindings), env);
+                s7_inlet(sc, bindings),
+                s7_make_c_pointer(sc, (void*)&key));
         value = s7_call(sc, eval_func, args);
     }
 

@@ -143,13 +143,29 @@ TEST_CASE("Tree::var")
 {
     Cache::reset();
 
-    auto a = Tree::var(3.0);
-    auto b = Tree::var(5.0);
-    auto c = Tree::var(7.0);
+    SECTION("Constructing from float")
+    {
+        auto a = Tree::var(3.0);
+        auto b = Tree::var(5.0);
+        auto c = Tree::var(7.0);
 
-    REQUIRE(a.var() == Cache::VarId(1));
-    REQUIRE(b.var() == Cache::VarId(2));
-    REQUIRE(c.var() == Cache::VarId(3));
+        REQUIRE(a.var() == Cache::VarId(1));
+        REQUIRE(b.var() == Cache::VarId(2));
+        REQUIRE(c.var() == Cache::VarId(3));
+    }
+
+    SECTION("Constructing from VarId")
+    {
+        auto a = Tree::var(3.0);
+        auto b = Tree::var(a.var());
+
+        REQUIRE(a.var() == Cache::VarId(1));
+        REQUIRE(b.var() == Cache::VarId(1));
+
+        Cache::instance()->setValue(a.var(), 5.0);
+        REQUIRE(a.value() == 5.0);
+        REQUIRE(b.value() == 5.0);
+    }
 }
 
 TEST_CASE("Tree::flags")
