@@ -303,6 +303,18 @@ bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
     }
 }
 
+bool Root::setExprOrInput(const CellKey& cell, const std::string& expr)
+{
+    if (tree.at(cell.second).cell()->type == Cell::INPUT)
+    {
+        return setInput(cell.first.back(), cell.second, expr);
+    }
+    else
+    {
+        return setExpr(cell.second, expr);
+    }
+}
+
 void Root::setValue(const CellKey& cell, const Value& v)
 {
     auto c = tree.at(cell.second).cell();

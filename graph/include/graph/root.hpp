@@ -71,6 +71,12 @@ public:
                   const std::string& expr);
 
     /*
+     *  If the given key points to an input cell, set its input value;
+     *  otherwise, set its normal value.
+     */
+    bool setExprOrInput(const CellKey& cell, const std::string& expr);
+
+    /*
      *  Assigns the given value to a cell
      *  TODO: this is only used in test harnesses
      */

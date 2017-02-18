@@ -495,6 +495,25 @@ TEST_CASE("Root::setInput")
     REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, out}).str == "14");
 }
 
+TEST_CASE("Root::setExprOrInput")
+{
+    Root r;
+
+    auto sum = r.insertSheet(Tree::ROOT_SHEET, "Sum");
+    auto a = r.insertCell(sum, "a", "(input 10)");
+    auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
+    auto c = r.insertCell(Tree::ROOT_SHEET, "c", "11");
+
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, c}).str == "11");
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, a}).str == "10");
+
+    r.setExprOrInput({{Tree::ROOT_INSTANCE}, c}, "20");
+    r.setExprOrInput({{Tree::ROOT_INSTANCE, i}, a}, "(+ 1 (c))");
+
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE}, c}).str == "20");
+    REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, a}).str == "21");
+}
+
 TEST_CASE("Root::eraseInstance")
 {
     Root r;
