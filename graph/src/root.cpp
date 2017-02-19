@@ -832,8 +832,10 @@ void Root::_run(shared_queue<Command>& input)
 {
     while (true)
     {
+        printf("Waiting...\n");
         input.wait();
         auto cmd = input.pop();
+        printf("got cmd\n");
 
         // Handle the STOP_LOOP meta-command
         if (cmd.op == Command::STOP_LOOP)
