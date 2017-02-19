@@ -15,7 +15,7 @@ public:
         cond.notify_one();
     }
 
-    void wait() const {
+    void wait() {
         std::unique_lock<std::mutex> lock(mut);
         cond.wait(lock, [this]{ return !queue.empty(); });
     }

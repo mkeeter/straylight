@@ -39,6 +39,8 @@ struct Command
         PUSH_MACRO,
         POP_MACRO,
 
+        STOP_LOOP,
+
         INVALID,
     } op;
 
@@ -53,7 +55,6 @@ struct Command
     Env env;
 
     void operator()(Graph::Root& root);
-
 };
 
 }   // namespace Graph

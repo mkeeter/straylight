@@ -1,9 +1,11 @@
 #pragma once
 
 #include <stack>
+#include <future>
 
 #include "graph/item.hpp"
 #include "graph/response.hpp"
+#include "graph/command.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/dependencies.hpp"
 #include "graph/tree.hpp"
@@ -15,6 +17,8 @@
 #include "graph/types/tag.hpp"
 
 namespace Graph {
+
+class Translator;
 
 class Root
 {
@@ -203,6 +207,18 @@ public:
     void setTag(const CellKey& id, Graph::Tag* t)
         { tags[id].reset(t); }
 
+    /*
+     *  Start an async evaluation thread running.
+     *
+     *  The thread takes commands from input and puts responses out on the
+     *  returned queue.
+     *
+     *  This moves the graph into the async thread; all operations must
+     *  be done by injecting commands into the input queue after this
+     *  point.
+     */
+    shared_queue<Response>& run(shared_queue<Command>& input);
+
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -224,6 +240,12 @@ protected:
      *  position in the list to minimize re-evaluation.
      */
     void pushDirty(const CellKey& k);
+
+    /*
+     *  Async run function
+     *  run() calls this in another thread!
+     */
+    void _run(shared_queue<Command>& input);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -248,6 +270,13 @@ protected:
 
     /*  Queue of changes  */
     shared_queue<Response> changes;
+
+    /*  The translator allows the graph to translate ValuePtr objects
+     *  into types that can safely be moved out of the interpreter thread */
+    Translator* translator=nullptr;
+
+    /*  Future for async running  */
+    std::future<void> future;
 };
 
 }   // namespace Graph

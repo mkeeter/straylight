@@ -4,7 +4,6 @@
 #include <QJSEngine>
 
 #include "graph/root.hpp"
-#include "graph/types/serializer.hpp"
 #include "kernel/solve/solver.hpp"
 
 namespace App {
@@ -62,14 +61,6 @@ public:
     Q_INVOKABLE QPoint matchedParen(QQuickTextDocument* doc, int pos);
 
     /*
-     *  Sets the pinged variable to true
-     *
-     *  This is used when the Bridge tells the UI about an instance, and the
-     *  UI tells the Bridge whether that instance is being drawn.
-     */
-    Q_INVOKABLE void ping() { pinged = true; }
-
-    /*
      *  Saves to the given file, returning an error string on failure
      */
     Q_INVOKABLE QString saveFile(QUrl filename);
@@ -84,20 +75,13 @@ public:
     /*
      *  Constructor for the QML singleton
      */
-    static QObject* singleton(QQmlEngine *engine, QJSEngine *scriptEngine);
-    static Bridge* singleton();
+    static QObject* instance(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static Bridge* instance();
 
     /*
      *  Extract the graph root from the singleton
      */
     static Graph::Root* root();
-
-    /*
-     *  Requests that the UI be synchronized to the graph
-     *
-     *  This should be called from the UI thread when things change
-     */
-    Q_INVOKABLE void sync();
 
     /*
      *  Installs the Canvas object
@@ -111,35 +95,6 @@ public:
      */
     void setVariables(const Kernel::Solver::Solution& sol);
 
-signals:
-    /*
-     *  Set of signals for deserialization of the graph
-     *  (interpreted as a tree)
-     *
-     *  These signals are connected directly to the UI, which is responsible
-     *  for maintaining serializer state and updating its models
-     */
-    void push(const int instance_index, const QString& instance_name,
-              const QString& sheet_name);
-    void pop();
-
-    void instance(int i, const QString& name, const QString& sheet);
-    void input(int c, const QString& name, const QString& expr, bool valid,
-               const QString& val);
-    void output(int c, const QString& name, bool valid, const QString& val);
-
-    // ptr is actually of type Graph::ValuePtr, but we use void* here due to
-    // Qt limitations (since it doesn't let you pass ValuePtrs through slots)
-    void cell(int c, const QString& name, const QString& expr, int type,
-              bool valid, const QString& val, void* ptr);
-
-    void sheet(int s, const QString& name, bool editable, bool insertable);
-
-    /*
-     *  Used to queue a sync from a non-UI thread
-     */
-    void syncLater();
-
 public slots:
     /*
      *  Returns interpreter keywords
@@ -149,61 +104,6 @@ public slots:
 
 protected:
     Graph::Root r;
-
-    /*
-     *  RAII checkpoint system
-     *
-     *  On creation, records the graph state
-     *  On destruction, stores an undo command
-     */
-    class Checkpoint
-    {
-    public:
-        Checkpoint(const QString& desc);
-        ~Checkpoint();
-
-    protected:
-        const QString desc;
-        const std::string before;
-    };
-
-    /*
-     *  Lightweight TreeSerializer class
-     *  (passes everything back to its parent signals)
-     */
-    class BridgeTreeSerializer : public Graph::TreeSerializer
-    {
-    public:
-        BridgeTreeSerializer(Bridge* b) : parent(b) {}
-
-        void cell(Graph::CellIndex c, const std::string& name,
-                  const std::string& expr, Graph::Cell::Type type,
-                  bool valid, const std::string& val,
-                  Graph::ValuePtr ptr) override;
-
-        void instance(Graph::InstanceIndex i, const std::string& name,
-                      const std::string& sheet) override;
-        void input(Graph::CellIndex c, const std::string& name,
-                   const std::string& expr, bool valid,
-                   const std::string& val) override;
-        void output(Graph::CellIndex c, const std::string& name,
-                    bool valid, const std::string& val) override;
-
-        bool push(Graph::InstanceIndex i, const std::string& instance_name,
-                  const std::string& sheet_name) override;
-        void pop() override;
-
-        void sheet(Graph::SheetIndex s, const std::string& sheet_name,
-                   bool editable, bool insertable) override;
-    private:
-        Bridge* parent;
-    };
-
-    /*  Permanent serializer that's connected to the right places  */
-    BridgeTreeSerializer bts;
-
-    UndoStack* undo_stack;
-    bool pinged=false;
 
     static Bridge* _instance;
 };

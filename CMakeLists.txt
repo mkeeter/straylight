@@ -25,4 +25,4 @@ add_subdirectory(graph)
 # Build the test suite
 add_subdirectory(test)
 
-add_subdirectory(app)
+#add_subdirectory(app)

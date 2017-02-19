@@ -822,4 +822,29 @@ void Root::pushDirty(const CellKey& c)
     }
 }
 
+shared_queue<Response>& Root::run(shared_queue<Command>& input)
+{
+    future = std::async(std::launch::async, [&]{ _run(input); });
+    return changes;
+}
+
+void Root::_run(shared_queue<Command>& input)
+{
+    while (true)
+    {
+        input.wait();
+        auto cmd = input.pop();
+
+        // Handle the STOP_LOOP meta-command
+        if (cmd.op == Command::STOP_LOOP)
+        {
+            break;
+        }
+        else
+        {
+            cmd(*this);
+        }
+    }
+}
+
 }   // namespace Graph
