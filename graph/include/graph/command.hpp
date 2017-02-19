@@ -12,8 +12,6 @@ class Root; // Forward declaration
 
 struct Command
 {
-    Command() : op(INVALID), parent(0), target(0), self(0) {}
-
     enum {
         RENAME_SHEET,
         INSERT_SHEET,
@@ -55,6 +53,8 @@ struct Command
     Env env;
 
     void operator()(Graph::Root& root);
+
+    static Command StopLoop();
 };
 
 }   // namespace Graph

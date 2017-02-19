@@ -624,3 +624,19 @@ TEST_CASE("Root::loadString")
     }
 }
 
+TEST_CASE("Root::run")
+{
+    Root r;
+
+    shared_queue<Command> in;
+    auto& out = r.run(in);
+
+    SECTION("Inserting cell")
+    {
+
+    }
+
+    in.push(Command::StopLoop());
+    sleep(1);
+}
+

@@ -92,4 +92,9 @@ void Command::operator()(Graph::Root& root)
     };
 }
 
+Command Command::StopLoop()
+{
+    return { STOP_LOOP, "", "", 0, 0, 0, {}};
+}
+
 }   // namespace Graph
