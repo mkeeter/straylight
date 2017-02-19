@@ -11,8 +11,6 @@
 
 namespace Graph {
 
-class TreeSerializer;
-
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
 public:
@@ -85,12 +83,6 @@ public:
     std::list<CellKey> cellsOf(const SheetIndex& s) const;
 
     /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     *  This is commonly used to render into a UI in a immediate style
-     */
-    void serialize(TreeSerializer* s) const;
-
-    /*
      *  Encode the entire graph in JSON
      *
      *  This is used to save files to disk with an appropriate encoder
@@ -124,11 +116,6 @@ public:
     const static InstanceIndex ROOT_INSTANCE;
 
 protected:
-    /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     */
-    void serialize(TreeSerializer* s, const Env& env) const;
-
     /*
      *  Export the given sheet to JSON (recursively)
      */

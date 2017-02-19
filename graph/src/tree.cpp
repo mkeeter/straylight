@@ -1,7 +1,7 @@
 #include "graph/tree.hpp"
 
 #include "graph/types/instance.hpp"
-#include "graph/types/serializer.hpp"
+#include "graph/types/cell.hpp"
 
 namespace Graph {
 
@@ -163,72 +163,6 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
         }
     }
     return out;
-}
-
-void Tree::serialize(TreeSerializer* s) const
-{
-    s->instance(Tree::ROOT_INSTANCE, "", "");
-    serialize(s, {Tree::ROOT_INSTANCE});
-}
-
-void Tree::serialize(TreeSerializer* s, const Env& env) const
-{
-    auto instance = env.back();
-    auto sheet = at(instance).instance()->sheet;
-
-    if (s->push(instance.i,
-                instance == Tree::ROOT_INSTANCE ? "" : nameOf(instance),
-                sheet == Tree::ROOT_SHEET ? "" : nameOf(sheet)))
-    {
-        for (auto i : iterItems(sheet))
-        {
-            const auto& name = nameOf(i);
-            const auto& item = at(i);
-
-            if (auto c = item.cell())
-            {
-                const auto& value = c->values.at(env);
-                s->cell(CellIndex(i), name, c->expr, c->type,
-                        value.valid, value.str, value.value);
-            }
-            else if (auto n = item.instance())
-            {
-                InstanceIndex index(i.i);
-                s->instance(index, name, nameOf(n->sheet));
-
-                auto env_ = env;
-                env_.push_back(index);
-
-                for (auto item : iterItems(n->sheet))
-                {
-                    if (auto c = at(item).cell())
-                    {
-                        const auto& v = c->values.at(env_);
-                        if (c->type == Cell::INPUT)
-                        {
-                            s->input(CellIndex(item), nameOf(item),
-                                     n->inputs.at(CellIndex(item)),
-                                     v.valid, v.str);
-                        }
-                        else if (c->type == Cell::OUTPUT)
-                        {
-                            s->output(CellIndex(item), nameOf(item),
-                                      v.valid, v.str);
-                        }
-                    }
-                }
-                serialize(s, env_);
-            }
-        }
-
-        // Pass all sheets through to the serializer
-        for (const auto& e : sheetsAbove(env))
-        {
-            s->sheet(e, nameOf(e), parentOf(e) == sheet,
-                     canInsertInstance(sheet, e));
-        }
-    }
-    s->pop();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
