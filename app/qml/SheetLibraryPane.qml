@@ -37,26 +37,6 @@ ColumnLayout {
     // Used when deserializing from bridge
     property int itemIndex: 0
 
-    function push() {
-        itemIndex = 0;
-    }
-
-    function pop() {
-        ModelUtil.pop(libraryModel, itemIndex)
-    }
-
-    function sheet(sheet_index, sheet_name, editable, insertable)
-    {
-        var found = ModelUtil.findItem('sheet', sheet_index,
-                                       itemIndex, libraryModel)
-
-        libraryModel.setProperty(itemIndex, "name", sheet_name)
-        libraryModel.setProperty(itemIndex, "editable", editable)
-        libraryModel.setProperty(itemIndex, "insertable", insertable)
-
-        itemIndex++
-    }
-
     // Library title
     Rectangle {
         id: titleRect

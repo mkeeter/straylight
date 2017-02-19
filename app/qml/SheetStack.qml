@@ -78,13 +78,11 @@ SplitView {
         {
             env.push(e[env.length])
             items.push(sheetViewComponent.createObject(sheetStack,
-                {sheetEnv: env.slice(),
-                 sheetIndex: Bridge.sheetOf(env[env.length - 1])}))
+                {sheetEnv: env.slice()}))
             addItem(items[items.length - 1])
             new_width += 250
         }
         envChanged()
-        Bridge.sync()
 
         widthAnim.to = new_width
         widthAnim.start()
@@ -105,10 +103,6 @@ SplitView {
                 var t = toOpen.slice()
                 toOpen = []
                 openTo(t)
-            }
-            else
-            {
-                Bridge.sync()
             }
         }
     }
