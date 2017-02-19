@@ -57,11 +57,9 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
         }
 
         // Then, mark input / output changes
-        auto R = (type == Cell::INPUT) ? Response::InputErased
-                                       : Response::OutputErased;
         for (const auto& e : tree.envsOf(sheet))
         {
-            changes.push(R({e, cell}));
+            changes.push(Response::IOErased({e, cell}));
         }
     }
 
@@ -158,7 +156,7 @@ void Root::eraseCell(const CellIndex& cell)
 
     for (const auto& e : tree.envsOf(sheet))
     {
-        changes.push(Response::CellErased({e, cell}));
+        changes.push(Response::ItemErased(e, cell));
         deps.clear({e, cell});
         markDirty({e, name});
     }
@@ -175,11 +173,9 @@ void Root::eraseCell(const CellIndex& cell)
     // Mark I/O changes
     if (type == Cell::INPUT || type == Cell::OUTPUT)
     {
-        auto R = (type == Cell::INPUT) ? Response::InputErased
-                                       : Response::OutputErased;
         for (const auto& e : tree.envsOf(sheet))
         {
-            changes.push(R({e, cell}));
+            changes.push(Response::IOErased({e, cell}));
         }
     }
 
@@ -217,7 +213,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
     {
         // Mark the instance itself as dirty
         markDirty({env, name});
-        changes.push(Response::InstanceErased(env, instance));
+        changes.push(Response::ItemErased(env, instance));
 
         // Then mark all outputs as dirty, so that anything watching
         // then will also be triggered to re-evaluate itself
@@ -290,7 +286,7 @@ bool Root::setExpr(const CellIndex& c, const std::string& expr)
 
         for (const auto& e : tree.envsOf(tree.parentOf(c)))
         {
-            changes.push(Response::InputErased({e, c}));
+            changes.push(Response::IOErased({e, c}));
         }
     }
 
@@ -299,7 +295,7 @@ bool Root::setExpr(const CellIndex& c, const std::string& expr)
     {
         for (const auto& e : tree.envsOf(tree.parentOf(c)))
         {
-            changes.push(Response::OutputErased({e, c}));
+            changes.push(Response::IOErased({e, c}));
         }
     }
     else if (prev_type != Cell::OUTPUT && cell->type == Cell::OUTPUT)

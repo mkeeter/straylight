@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QAbstractItemModel>
+#include <QAbstractListModel>
 
 #include "graph/response.hpp"
 
@@ -14,10 +14,10 @@ struct Sheet
     bool insertable;
 };
 
-class SheetsModel : public QAbstractItemModel
+class SheetsModel : public QAbstractListModel
 {
 public:
-    SheetsModel(QObject* parent=0);
+    SheetsModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
     void addSheet(const Sheet& sheet);
     int rowCount(const QModelIndex& parent=QModelIndex()) const;

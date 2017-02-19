@@ -17,18 +17,16 @@ struct Response
 
         ITEM_RENAMED,
         CELL_INSERTED,
-        CELL_ERASED,
         EXPR_CHANGED,
         INPUT_CHANGED,
         INSTANCE_INSERTED,
-        INSTANCE_ERASED,
+        ITEM_ERASED,
 
         VALUE_CHANGED,
         RESULT_CHANGED,
         INPUT_CREATED,
         OUTPUT_CREATED,
-        INPUT_DELETED,
-        OUTPUT_DELETED,
+        IO_DELETED,
 
         ITEM_NAME_REGEX,
         SHEET_NAME_REGEX,
@@ -54,10 +52,8 @@ struct Response
     bool valid;
 
     //  Helper constructors
-    static Response CellErased(const CellKey& k);
-    static Response InputErased(const CellKey& k);
-    static Response OutputErased(const CellKey& k);
-    static Response InstanceErased(const Env& env, const InstanceIndex& i);
+    static Response ItemErased(const Env& env, const ItemIndex& i);
+    static Response IOErased(const CellKey& k);
     static Response CellInserted(
             const CellKey& k, const std::string& name,
             const std::string& expr);
