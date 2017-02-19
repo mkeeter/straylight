@@ -42,6 +42,9 @@ struct Response
         CLEAR,
     } op;
 
+    // Environment for this change to be executed
+    Env env;
+
     // Enough variables to handle all the possible operations
     std::string name;
     std::string expr;
@@ -49,7 +52,6 @@ struct Response
     ItemIndex target;
 
     bool valid;
-    Env env;
 
     //  Helper constructors
     static Response CellErased(const CellKey& k);
