@@ -55,6 +55,8 @@ struct Command
     void operator()(Graph::Root& root);
 
     static Command StopLoop();
+    static Command InsertCell(
+            SheetIndex s, const std::string& name, const std::string& expr);
 };
 
 }   // namespace Graph

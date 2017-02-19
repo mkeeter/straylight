@@ -633,10 +633,14 @@ TEST_CASE("Root::run")
 
     SECTION("Inserting cell")
     {
-
+        in.push(Command::InsertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)"));
+        in.push(Command::StopLoop());
+        sleep(1);
+        REQUIRE(out.size() == 2);
+        auto a = out.pop();
+        REQUIRE(a.op == Response::CELL_INSERTED);
+        auto b = out.pop();
+        REQUIRE(b.op == Response::VALUE_CHANGED);
     }
-
-    in.push(Command::StopLoop());
-    sleep(1);
 }
 

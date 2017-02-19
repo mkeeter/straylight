@@ -97,4 +97,10 @@ Command Command::StopLoop()
     return { STOP_LOOP, "", "", 0, 0, 0, {}};
 }
 
+Command Command::InsertCell(
+        SheetIndex s, const std::string& name, const std::string& expr)
+{
+    return { INSERT_CELL, name, expr, 0, s, 0, {}};
+}
+
 }   // namespace Graph
