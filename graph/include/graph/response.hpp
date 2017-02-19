@@ -77,6 +77,12 @@ struct Response
             const Env& env, const SheetIndex& i);
     static Response ValueChanged(
             const CellKey& k, const std::string& value, bool valid);
+
+    /* TODO
+     *  InstanceSheetRenamed
+     *  InputRenamed
+     *  OutputRenamed
+     */
 };
 
 }   // namespace Graph
