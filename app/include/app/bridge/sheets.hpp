@@ -19,15 +19,13 @@ class SheetsModel : public QAbstractListModel
 public:
     SheetsModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
-    void addSheet(const Sheet& sheet);
-    int rowCount(const QModelIndex& parent=QModelIndex()) const;
-
     /*
      *  Update the model state from the given response
      */
     void operator()(const Graph::Response& r);
 
-    QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const;
+    QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex& parent=QModelIndex()) const override;
 
 protected:
     enum SheetRole {
@@ -35,6 +33,8 @@ protected:
         EditableRole,
         InsertableRole,
     };
+
+    QHash<int, QByteArray> roleNames() const override;
 
     QList<Sheet> sheets;
 };

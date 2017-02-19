@@ -5,10 +5,9 @@
 
 #include <QQuickItem>
 
-#include "core/bridge.hpp"
-#include "core/undo.hpp"
-#include "ui/material.hpp"
-#include "render/canvas.hpp"
+#include "app/bridge/bridge.hpp"
+#include "app/bridge/material.hpp"
+#include "app/bridge/canvas.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 

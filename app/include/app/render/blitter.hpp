@@ -8,7 +8,7 @@
 #include <QOpenGLTexture>
 #include <QQuickWindow>
 
-#include "render/renderer.hpp"
+#include "app/render/renderer.hpp"
 
 namespace App {
 namespace Render {

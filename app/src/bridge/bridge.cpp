@@ -1,12 +1,8 @@
 #include <QThread>
 
-#include "core/bridge.hpp"
-#include "core/undo.hpp"
-#include "render/canvas.hpp"
-#include "ui/syntax.hpp"
-
-#include "bind/bind_s7.h"
-#include "kernel/bind/bind_s7.h"
+#include "app/bridge/bridge.hpp"
+#include "app/render/canvas.hpp"
+#include "app/ui/syntax.hpp"
 
 namespace App {
 namespace Core {
@@ -14,15 +10,8 @@ namespace Core {
 Bridge* Bridge::_instance = nullptr;
 
 Bridge::Bridge()
-    : bts(this), undo_stack(UndoStack::singleton())
 {
-    // Inject the kernel bindings into the interpreter
-    r.call(Kernel::Bind::init);
-    r.call(App::Bind::init);
-
-    // Connect async call to sync
-    connect(this, &Bridge::syncLater,
-            this, &Bridge::sync, Qt::QueuedConnection);
+    // Nothing to do here
 }
 
 QString Bridge::checkItemName(int sheet_index, QString name) const
@@ -231,15 +220,6 @@ Bridge* Bridge::singleton()
         _instance = new Bridge();
     }
     return _instance;
-}
-
-void Bridge::attachCanvas(App::Render::Canvas* c)
-{
-    connect(this, &Bridge::push, c, &App::Render::Canvas::push);
-    connect(this, &Bridge::pop, c, &App::Render::Canvas::pop);
-    connect(this, &Bridge::cell, c, &App::Render::Canvas::cell);
-
-    emit(syncLater());
 }
 
 void Bridge::setVariables(const Kernel::Solver::Solution& sol)

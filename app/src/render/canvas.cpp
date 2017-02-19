@@ -1,8 +1,8 @@
 #include <QOpenGLFramebufferObject>
 
-#include "render/canvas.hpp"
-#include "render/handle.hpp"
-#include "core/bridge.hpp"
+#include "app/render/canvas.hpp"
+#include "app/render/handle.hpp"
+#include "app/bridge/bridge.hpp"
 
 #include "kernel/bind/bind_s7.h"
 

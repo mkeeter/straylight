@@ -1,7 +1,7 @@
 #include <boost/math/constants/constants.hpp>
 
-#include "render/point_handle.hpp"
-#include "ui/material.hpp"
+#include "app/render/point_handle.hpp"
+#include "app/ui/material.hpp"
 
 using namespace boost::math::float_constants;
 

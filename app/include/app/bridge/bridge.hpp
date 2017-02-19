@@ -3,8 +3,8 @@
 #include <QQuickTextDocument>
 #include <QJSEngine>
 
+#include "app/bridge/graph.hpp"
 #include "kernel/solve/solver.hpp"
-#include "bridge/graph.hpp"
 
 namespace App {
 
@@ -79,11 +79,6 @@ public:
     static Bridge* instance();
 
     /*
-     *  Installs the Canvas object
-     */
-    void attachCanvas(App::Render::Canvas* c);
-
-    /*
      *  Applies a set of constraints to the graph
      *
      *  This should be called from the main UI thread
@@ -98,7 +93,7 @@ public slots:
     std::set<std::string> keywords() const { return std::set<std::string>(); }
 
 protected:
-    GraphModel graph;
+    App::Bridge::GraphModel graph;
 
     static Bridge* _instance;
 };

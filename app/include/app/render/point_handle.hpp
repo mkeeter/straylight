@@ -1,11 +1,11 @@
 #pragma once
 
-#include "render/handle.hpp"
-#include "bind/bind_s7.h"
-
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+
+#include "app/render/handle.hpp"
+#include "app/bind/bind_s7.h"
 
 namespace App {
 namespace Render {

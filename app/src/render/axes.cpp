@@ -1,5 +1,5 @@
-#include "render/axes.hpp"
-#include "ui/material.hpp"
+#include "app/render/axes.hpp"
+#include "app/ui/material.hpp"
 
 namespace App {
 namespace Render {

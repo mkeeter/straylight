@@ -1,6 +1,8 @@
 #include <cassert>
 
 #include "app/bridge/graph.hpp"
+#include "app/bind/bind_s7.h"
+#include "kernel/bind/bind_s7.h"
 
 namespace App {
 namespace Bridge {
@@ -8,6 +10,11 @@ namespace Bridge {
 GraphModel::GraphModel(QObject* parent)
     : QObject(parent), responses(root.run(commands)), watcher(responses)
 {
+    // Inject the kernel bindings into the interpreter
+    // TODO: this is unsafe, as the root is already running
+    root.call(Kernel::Bind::init);
+    root.call(App::Bind::init);
+
     connect(&watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
 }

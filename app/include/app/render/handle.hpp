@@ -6,8 +6,8 @@
 
 #include "graph/types/ptr.hpp"
 
-#include "render/picker.hpp"
-#include "render/drag.hpp"
+#include "app/render/picker.hpp"
+#include "app/render/drag.hpp"
 
 namespace App {
 namespace Render {

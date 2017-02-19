@@ -1,9 +1,9 @@
 #include <cassert>
 
-#include "ui/syntax.hpp"
-#include "ui/material.hpp"
+#include "app/ui/syntax.hpp"
+#include "app/ui/material.hpp"
 
-#include "core/bridge.hpp"
+#include "app/bridge/bridge.hpp"
 
 namespace App {
 namespace UI {
@@ -171,7 +171,7 @@ void SyntaxHighlighter::buildRules()
     {
         QTextCharFormat keyword_format;
         keyword_format.setForeground(Material::blue_500);
-        for (const auto& k : App::Core::Bridge::singleton()->keywords())
+        for (const auto& k : App::Core::Bridge::instance()->keywords())
         {
             auto esc = QRegularExpression::escape(QString::fromStdString(k));
             rules << Rule("\\b" + esc + "\\b", keyword_format);

@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QThread>
 
-#include "render/blitter.hpp"
+#include "app/render/blitter.hpp"
 
 namespace App {
 namespace Render {

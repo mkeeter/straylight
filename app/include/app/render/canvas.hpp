@@ -9,10 +9,10 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/bind/bind_s7.h"
 
-#include "render/axes.hpp"
-#include "render/renderer.hpp"
-#include "render/blitter.hpp"
-#include "render/picker.hpp"
+#include "app/render/axes.hpp"
+#include "app/render/renderer.hpp"
+#include "app/render/blitter.hpp"
+#include "app/render/picker.hpp"
 
 namespace App {
 namespace Render {
