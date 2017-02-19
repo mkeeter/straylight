@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stack>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include "graph/item.hpp"
+#include "graph/command.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/dependencies.hpp"
 #include "graph/tree.hpp"
@@ -243,6 +245,9 @@ protected:
 
     /*  Tags are associated with cell keys  */
     std::map<CellKey, std::unique_ptr<Tag>> tags;
+
+    /*  Queue of changes  */
+    boost::lockfree::spsc_queue<Command> changes;
 };
 
 }   // namespace Graph

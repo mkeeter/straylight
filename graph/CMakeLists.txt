@@ -4,6 +4,7 @@ add_library(straylight-graph STATIC
     src/item.cpp
     src/root.cpp
     src/tree.cpp
+    src/command.cpp
 
     ../vendor/s7/s7.c)
 target_include_directories(straylight-graph SYSTEM PRIVATE)
