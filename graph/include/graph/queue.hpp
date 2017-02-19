@@ -28,6 +28,12 @@ public:
         return popped;
     }
 
+    const T& peek() {
+        std::lock_guard<std::mutex> lock(mut);
+        assert(!queue.empty());
+        return queue.front();
+    }
+
     bool empty() const{
         std::lock_guard<std::mutex> lock(mut);
         return queue.empty();

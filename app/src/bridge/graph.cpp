@@ -5,6 +5,13 @@
 namespace App {
 namespace Bridge {
 
+GraphModel::GraphModel(QObject* parent)
+    : QObject(parent), responses(root.run(commands)), watcher(responses)
+{
+    connect(&watcher, &QueueWatcher::gotResponse,
+            this, &GraphModel::gotResponse);
+}
+
 void GraphModel::operator()(const Graph::Response& r)
 {
     switch (r.op)
@@ -50,6 +57,9 @@ void GraphModel::operator()(const Graph::Response& r)
             // TODO
 
         case Graph::Response::CLEAR:
+            assert(false);
+
+        case Graph::Response::HALT:
             assert(false);
     }
 }

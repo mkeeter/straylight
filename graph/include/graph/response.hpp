@@ -38,6 +38,7 @@ struct Response
         REDO_NOT_READY,
 
         CLEAR,
+        HALT,
     } op;
 
     // Environment for this change to be executed

@@ -3,8 +3,8 @@
 #include <QQuickTextDocument>
 #include <QJSEngine>
 
-#include "graph/root.hpp"
 #include "kernel/solve/solver.hpp"
+#include "bridge/graph.hpp"
 
 namespace App {
 
@@ -79,11 +79,6 @@ public:
     static Bridge* instance();
 
     /*
-     *  Extract the graph root from the singleton
-     */
-    static Graph::Root* root();
-
-    /*
      *  Installs the Canvas object
      */
     void attachCanvas(App::Render::Canvas* c);
@@ -100,10 +95,10 @@ public slots:
      *  Returns interpreter keywords
      *  (for syntax highlighting)
      */
-    std::set<std::string> keywords() const { return r.keywords(); }
+    std::set<std::string> keywords() const { return std::set<std::string>(); }
 
 protected:
-    Graph::Root r;
+    GraphModel graph;
 
     static Bridge* _instance;
 };
