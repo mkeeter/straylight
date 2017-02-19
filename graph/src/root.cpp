@@ -3,7 +3,7 @@
 namespace Graph {
 
 Root::Root()
-    : deps(*this), interpreter(*this, &deps), changes(128)
+    : deps(*this), interpreter(*this, &deps)
 {
     dirty.push({});
 }
@@ -42,17 +42,26 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
     for (const auto& e : tree.envsOf(sheet))
     {
         markDirty({e, name});
+        changes.push(Response::CellInserted({e, cell}, name, expr));
     }
 
-    // If this could influence sheets that are invoked as functions, then
-    // mark all of them for re-evaluation
     if ((type == Cell::INPUT || type == Cell::OUTPUT) &&
         sheet != Tree::ROOT_SHEET)
     {
+        // If this could influence sheets that are invoked as functions, then
+        // mark all of them for re-evaluation
         auto sheetName = tree.nameOf(sheet);
         for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
         {
             markDirty({e, sheetName});
+        }
+
+        // Then, mark input / output changes
+        auto R = (type == Cell::INPUT) ? Response::InputErased
+                                       : Response::OutputErased;
+        for (const auto& e : tree.envsOf(sheet))
+        {
+            changes.push(R({e, cell}));
         }
     }
 
@@ -82,6 +91,8 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
     for (const auto& e : tree.envsOf(parent))
     {
         markDirty({e, name});
+        changes.push(Response::InstanceInserted(
+                    e, i, name, tree.nameOf(target)));
 
         // Then, mark all cells as dirty
         for (const auto& c : tree.cellsOf(target))
@@ -89,19 +100,39 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
             auto env = e; // copy
             env.push_back(i);
             env.insert(env.end(), c.first.begin(), c.first.end());
-            markDirty({env, tree.nameOf(c.second)});
+
+            const auto name = tree.nameOf(c.second);
+            const auto expr = tree.at(c.second).cell()->expr;
+            markDirty({env, name});
+            changes.push(Response::CellInserted({env, c.second}, name, expr));
         }
     }
 
-    // Assign default expressions for inputs
+    // Assign default expressions for inputs, and mark input / output changes
     for (const auto& t : tree.iterItems(target))
     {
         if (auto c = tree.at(t).cell())
         {
             if (c->type == Cell::INPUT)
             {
-                tree.at(i).instance()->inputs[CellIndex(t.i)] =
-                    interpreter.defaultExpr(c->expr);
+                const auto expr = interpreter.defaultExpr(c->expr);
+                tree.at(i).instance()->inputs[CellIndex(t.i)] = expr;
+
+                for (auto e : tree.envsOf(parent))
+                {
+                    e.push_back(i);
+                    changes.push(Response::InputCreated(
+                                {e, CellIndex(t)}, tree.nameOf(t), expr));
+                }
+            }
+            else if (c->type == Cell::OUTPUT)
+            {
+                for (auto e : tree.envsOf(parent))
+                {
+                    e.push_back(i);
+                    changes.push(Response::OutputCreated(
+                                {e, CellIndex(t)}, tree.nameOf(t)));
+                }
             }
         }
     }
@@ -113,7 +144,7 @@ void Root::eraseCell(const CellIndex& cell)
 {
     auto sheet = tree.parentOf(cell);
     auto name = tree.nameOf(cell);
-    bool was_input = tree.at(cell).cell()->type == Cell::INPUT;
+    auto type = tree.at(cell).cell()->type;
 
     // Release all interpreter-allocated values
     for (const auto& v : tree.at(cell).cell()->values)
@@ -124,18 +155,31 @@ void Root::eraseCell(const CellIndex& cell)
     // Mark this cell as dirty in all its environments, and clear
     // anything that has it marked as downstream
     tree.erase(cell);
+
     for (const auto& e : tree.envsOf(sheet))
     {
+        changes.push(Response::CellErased({e, cell}));
         deps.clear({e, cell});
         markDirty({e, name});
     }
 
     // Erase all input data associated with this cell
-    if (was_input)
+    if (type == Cell::INPUT)
     {
         for (const auto& i : tree.instancesOf(sheet))
         {
             tree.at(i).instance()->inputs.erase(cell);
+        }
+    }
+
+    // Mark I/O changes
+    if (type == Cell::INPUT || type == Cell::OUTPUT)
+    {
+        auto R = (type == Cell::INPUT) ? Response::InputErased
+                                       : Response::OutputErased;
+        for (const auto& e : tree.envsOf(sheet))
+        {
+            changes.push(R({e, cell}));
         }
     }
 
@@ -173,6 +217,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
     {
         // Mark the instance itself as dirty
         markDirty({env, name});
+        changes.push(Response::InstanceErased(env, instance));
 
         // Then mark all outputs as dirty, so that anything watching
         // then will also be triggered to re-evaluate itself
@@ -205,9 +250,9 @@ void Root::eraseInstance(const InstanceIndex& instance)
     sync();
 }
 
-bool Root::setExpr(const CellIndex& i, const std::string& expr)
+bool Root::setExpr(const CellIndex& c, const std::string& expr)
 {
-    auto cell = tree.at(i).cell();
+    auto cell = tree.at(c).cell();
     assert(cell);
 
     // Early exit if this is a no-op
@@ -226,16 +271,42 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
     {
         auto d = interpreter.defaultExpr(expr);
-        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        for (auto i : tree.instancesOf(tree.parentOf(c)))
         {
-            tree.at(instance).instance()->inputs[i] = d;
+            tree.at(i).instance()->inputs[c] = d;
+        }
+
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
+        {
+            changes.push(Response::InputCreated({e, c}, tree.nameOf(c), d));
         }
     }
     else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
     {
-        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        for (auto i : tree.instancesOf(tree.parentOf(c)))
         {
-            tree.at(instance).instance()->inputs.erase(i);
+            tree.at(i).instance()->inputs.erase(c);
+        }
+
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
+        {
+            changes.push(Response::InputErased({e, c}));
+        }
+    }
+
+    // Transmit output status changes
+    if (prev_type == Cell::OUTPUT && cell->type != Cell::OUTPUT)
+    {
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
+        {
+            changes.push(Response::OutputErased({e, c}));
+        }
+    }
+    else if (prev_type != Cell::OUTPUT && cell->type == Cell::OUTPUT)
+    {
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
+        {
+            changes.push(Response::OutputCreated({e, c}, tree.nameOf(c)));
         }
     }
 
@@ -247,9 +318,9 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     // look at its value.
     if ((prev_type == Cell::OUTPUT) ^ (cell->type == Cell::OUTPUT))
     {
-        for (const auto& e : tree.envsOf(tree.parentOf(i)))
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
         {
-            for (const auto& d : deps.inverseDeps(toNameKey({e, i})))
+            for (const auto& d : deps.inverseDeps(toNameKey({e, c})))
             {
                 pushDirty(d);
             }
@@ -257,16 +328,17 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     }
 
     // Mark all envs containing this cell as dirty
-    for (const auto& e : tree.envsOf(tree.parentOf(i)))
+    for (const auto& e : tree.envsOf(tree.parentOf(c)))
     {
-        markDirty({e, tree.nameOf(i)});
+        markDirty({e, tree.nameOf(c)});
+        changes.push(Response::ExprChanged({e, c}, expr));
     }
 
     {   // Mark anything that looked for the cell's dummy NameKey as dirty
         // This is how we properly re-evaluate things that call a sheet when
         // a cell internal to that sheet changes.
         std::stringstream ss;
-        ss << i.i;
+        ss << c.i;
         markDirty({{}, ss.str()});
     }
 
@@ -292,6 +364,7 @@ bool Root::setInput(const InstanceIndex& instance, const CellIndex& cell,
         {
             env.push_back(instance);
             markDirty(toNameKey({env, cell}));
+            changes.push(Response::InputChanged({env, cell}, expr));
         }
 
         sync();
@@ -436,6 +509,7 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
         // Mark the old name as dirty
         // (which propagates to anything that looked it up)
         markDirty({env, prev_name});
+        changes.push(Response::ItemRenamed(env, i, name));
 
         // Then, mark anything that looked up the new name as dirty
         for (const auto& d : deps.inverseDeps({env, name}))
@@ -618,14 +692,8 @@ bool Root::checkSheetName(const SheetIndex& parent,
 
 SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
-    assert(canInsertSheet(parent, name));
-    auto s = SheetIndex(tree.insert(parent, name, Item()));
-
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-    }
-    sync();
+    auto s = SheetIndex(tree.nextIndex());
+    insertSheet(parent, s, name);
     return s;
 }
 
@@ -638,6 +706,7 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     for (const auto& e : tree.envsOf(parent))
     {
         markDirty({e, name});
+        changes.push(Response::SheetCreated(e, sheet, name));
     }
     sync();
 }
@@ -649,6 +718,7 @@ void Root::renameSheet(const SheetIndex& i, const std::string& name)
     for (const auto& e : tree.envsOf(tree.parentOf(i)))
     {
         markDirty({e, name});
+        changes.push(Response::SheetRenamed(e, i, name));
     }
 }
 
@@ -694,6 +764,7 @@ void Root::eraseSheet(const SheetIndex& s)
     for (const auto& e : envs)
     {
         markDirty({e, name});
+        changes.push(Response::SheetErased(e, s));
     }
     // Sync is called on lock destruction
 }
@@ -731,6 +802,7 @@ void Root::sync()
         if (result.value)
         {
             setValue(k, result);
+            changes.push(Response::ValueChanged(k, result.str, result.valid));
             for (const auto& d : deps.inverseDeps(toNameKey(k)))
             {
                 pushDirty(d);

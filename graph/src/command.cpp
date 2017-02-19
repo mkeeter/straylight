@@ -78,21 +78,14 @@ void Command::operator()(Graph::Root& root)
             root.clear();
             break;
 
+        case UNDO:
+        case REDO:
+            // TODO
+            assert(false);
+
         // All the other operations have a special, non-executable meaning.
         case PUSH_MACRO:
         case POP_MACRO:
-        case UNDO:
-        case REDO:
-        case RESET_UNDO_QUEUE:
-        case UNDO_READY:
-        case REDO_READY:
-        case UNDO_NOT_READY:
-        case REDO_NOT_READY:
-        case VALUE_CHANGED:
-        case RESULT_CHANGED:
-        case ITEM_NAME_REGEX:
-        case SHEET_NAME_REGEX:
-        case RESERVED_WORD:
         case INVALID:
             assert(false);
     };

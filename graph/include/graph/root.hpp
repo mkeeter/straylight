@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stack>
-#include <boost/lockfree/spsc_queue.hpp>
 
 #include "graph/item.hpp"
-#include "graph/command.hpp"
+#include "graph/response.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/dependencies.hpp"
 #include "graph/tree.hpp"
+#include "graph/queue.hpp"
 
 #include "graph/types/cell.hpp"
 #include "graph/types/instance.hpp"
@@ -247,7 +247,7 @@ protected:
     std::map<CellKey, std::unique_ptr<Tag>> tags;
 
     /*  Queue of changes  */
-    boost::lockfree::spsc_queue<Command> changes;
+    shared_queue<Response> changes;
 };
 
 }   // namespace Graph
