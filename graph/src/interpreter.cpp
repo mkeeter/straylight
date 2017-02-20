@@ -253,7 +253,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                 (lambda args #f))))
       )")),
       eval_func(s7_eval_c_string(sc, R"(
-        (lambda (str eval-env cell-env)
+        (lambda (str eval-env graph-root cell-env)
           (define (read-all port)
             (let recurse ()
               (let ((r (read port)))
@@ -273,7 +273,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
             (lambda ()
               (let* ((i (read-all (open-input-string str)))
                      (j (strip-output i))
-                     (r (cons 'begin (*cell-reader* j cell-env))))
+                     (r (cons 'begin (*cell-reader* j graph-root cell-env))))
                 (cons 'value (eval r eval-env))))
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
@@ -283,7 +283,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
       )"))
 {
     // Install default *cell-reader*
-    setReader(s7_eval_c_string(sc, "(lambda (s c) s)"));
+    setReader(s7_eval_c_string(sc, "(lambda (s r c) s)"));
 
     for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
                           eval_func})
@@ -443,9 +443,10 @@ Value Interpreter::eval(const CellKey& key)
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(sc, 3,
+        auto args = s7_list(sc, 4,
                 s7_make_string(sc, expr.c_str()),
                 s7_inlet(sc, bindings),
+                s7_make_c_pointer(sc, (void*)&root),
                 s7_make_c_pointer(sc, (void*)&key));
         value = s7_call(sc, eval_func, args);
     }

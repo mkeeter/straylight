@@ -1,25 +1,11 @@
 #include <cassert>
 
-#include "app/bridge/graph.hpp"
-#include "app/bind/bind_s7.h"
-#include "kernel/bind/bind_s7.h"
+#include "app/bridge/instance.hpp"
 
 namespace App {
 namespace Bridge {
 
-GraphModel::GraphModel(QObject* parent)
-    : QObject(parent), responses(root.run(commands)), watcher(responses)
-{
-    // Inject the kernel bindings into the interpreter
-    // TODO: this is unsafe, as the root is already running
-    root.call(Kernel::Bind::init);
-    root.call(App::Bind::init);
-
-    connect(&watcher, &QueueWatcher::gotResponse,
-            this, &GraphModel::gotResponse);
-}
-
-void GraphModel::updateFrom(const Graph::Response& r)
+void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {
@@ -27,6 +13,9 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::SHEET_RENAMED:
         case Graph::Response::SHEET_ERASED:
         case Graph::Response::SHEET_INSERTED:
+            library.updateFrom(r);
+            break;
+
         // Item-level operations
         case Graph::Response::ITEM_RENAMED:
         case Graph::Response::CELL_INSERTED:
@@ -35,20 +24,12 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_INSERTED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
-            instances.at(r.env)->updateFrom(r);
-            break;
-
-        // Instance-level operations, which are execute on parent ItemModel
         case Graph::Response::INPUT_CHANGED:
         case Graph::Response::INPUT_CREATED:
         case Graph::Response::OUTPUT_CREATED:
         case Graph::Response::IO_DELETED:
-        {
-            auto env_ = r.env;
-            env_.pop_back();
-            instances.at(env_)->updateFrom(r);
+            items.updateFrom(r);
             break;
-        }
 
         case Graph::Response::ITEM_NAME_REGEX:
         case Graph::Response::SHEET_NAME_REGEX:

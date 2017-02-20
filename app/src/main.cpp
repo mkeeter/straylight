@@ -6,8 +6,8 @@
 #include <QQuickItem>
 
 #include "app/bridge/bridge.hpp"
-#include "app/bridge/material.hpp"
-#include "app/bridge/canvas.hpp"
+#include "app/ui/material.hpp"
+#include "app/render/canvas.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,11 +24,7 @@ int main(int argc, char**argv)
     // Register canvas class for drawing
     qmlRegisterType<App::Render::CanvasObject>("Canvas", 1, 0, "Canvas");
 
-    // Install Bridge singleton
-    qmlRegisterSingletonType<App::Core::Bridge>(
-            "Bridge", 1, 0, "Bridge", App::Core::Bridge::singleton);
-    qmlRegisterSingletonType<App::Core::UndoStack>(
-            "UndoStack", 1, 0, "UndoStack", App::Core::UndoStack::singleton);
+    // Install Material singleton (available from both C++ / QML)
     qmlRegisterSingletonType<App::UI::Material>(
             "Material", 1, 0, "Material", App::UI::Material::singleton);
 
@@ -39,10 +35,6 @@ int main(int argc, char**argv)
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
-
-    // Construct a default cell
-    App::Core::Bridge::root()->insertCell(0, "x", "0");
-    App::Core::Bridge::root()->insertCell(0, "y", "(+ 1 0)");
 
     return app.exec();
 }

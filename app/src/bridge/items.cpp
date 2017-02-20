@@ -39,7 +39,7 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {ValueRole, "valid"}};
 }
 
-void ItemsModel::operator()(const Graph::Response& r)
+void ItemsModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {

@@ -22,7 +22,7 @@ public:
     /*
      *  Update the model state from the given response
      */
-    void operator()(const Graph::Response& r);
+    void updateFrom(const Graph::Response& r);
 
     QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
     int rowCount(const QModelIndex& parent=QModelIndex()) const override;

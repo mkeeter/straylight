@@ -35,7 +35,7 @@ QHash<int, QByteArray> SheetsModel::roleNames() const
         {InsertableRole, "insertable"}};
 }
 
-void SheetsModel::operator()(const Graph::Response& r)
+void SheetsModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {

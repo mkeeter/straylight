@@ -21,7 +21,7 @@ public:
     /*
      *  Update the model from the given response
      */
-    void operator()(const Graph::Response& r);
+    void updateFrom(const Graph::Response& r);
 
 protected:
     /*

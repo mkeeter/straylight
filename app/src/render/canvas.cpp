@@ -194,7 +194,6 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 QQuickFramebufferObject::Renderer* CanvasObject::createRenderer() const
 {
     auto c = new Canvas();
-    App::Core::Bridge::singleton()->attachCanvas(c);
     return c;
 }
 
@@ -246,7 +245,7 @@ void CanvasObject::mouseMove(float x, float y)
             2 * mouse_pos.y() / height() - 1);
         assert(mouse_drag != nullptr);
         auto sol = mouse_drag->dragTo(M().inverted(), mouse_gl);
-        App::Core::Bridge::singleton()->setVariables(sol);
+        App::Core::Bridge::instance()->setVariables(sol);
     }
     else
     {

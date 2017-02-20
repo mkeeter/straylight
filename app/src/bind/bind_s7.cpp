@@ -104,15 +104,15 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
 
     if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
-        auto root = Core::Bridge::root();
+        auto& root = *static_cast<Graph::Root*>(s7_c_pointer(s7_cadr(args)));
         auto cache = Kernel::Cache::instance();
-        auto& cell = *static_cast<Graph::CellKey*>(s7_c_pointer(s7_cadr(args)));
+        auto& cell = *static_cast<Graph::CellKey*>(s7_c_pointer(s7_caddr(args)));
 
         const auto v = s7_number_to_real(sc, s7_car(begin));
 
         // If this variable is already in use, then update its value and
         // return a Shape with the changed flag set if the value changed.
-        if (auto t = root->tag(cell))
+        if (auto t = root.tag(cell))
         {
             assert(dynamic_cast<IdTag*>(t));
 
@@ -129,7 +129,7 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
         {
             auto var = Kernel::Tree::var(v);
             var.setTag(new CellKeyTag(cell));
-            root->setTag(cell, new IdTag(var.var()));
+            root.setTag(cell, new IdTag(var.var()));
             return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
         }
     }

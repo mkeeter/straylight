@@ -4,6 +4,7 @@
 #include "app/render/canvas.hpp"
 #include "app/ui/syntax.hpp"
 
+#if 0 // TODO
 namespace App {
 namespace Core {
 
@@ -331,3 +332,4 @@ void Bridge::BridgeTreeSerializer::sheet(
 
 }   // namespace Core
 }   // namespace App
+#endif

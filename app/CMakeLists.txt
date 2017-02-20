@@ -21,6 +21,7 @@ add_executable(Straylight MACOSX_BUNDLE
     src/bridge/graph.cpp
     src/bridge/items.cpp
     src/bridge/sheets.cpp
+    src/bridge/instance.cpp
     src/ui/material.cpp
     src/ui/syntax.cpp
     src/render/canvas.cpp

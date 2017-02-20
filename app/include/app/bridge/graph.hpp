@@ -2,9 +2,8 @@
 
 #include <map>
 
-#include "app/bridge/items.hpp"
-#include "app/bridge/sheets.hpp"
 #include "app/bridge/watcher.hpp"
+#include "app/bridge/instance.hpp"
 
 #include "graph/types/env.hpp"
 #include "graph/response.hpp"
@@ -24,14 +23,13 @@ public:
     /*
      *  Update the model state with the given response
      */
-    void operator()(const Graph::Response& r);
+    void updateFrom(const Graph::Response& r);
 
 protected slots:
     void gotResponse();
 
 protected:
-    std::map<Graph::Env, std::unique_ptr<ItemsModel>> items;
-    std::map<Graph::Env, std::unique_ptr<SheetsModel>> sheets;
+    std::map<Graph::Env, std::unique_ptr<SheetInstanceModel>> instances;
 
     Graph::Root root;
     shared_queue<Graph::Command> commands;
