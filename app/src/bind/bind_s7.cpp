@@ -3,7 +3,7 @@
 #include "s7/s7.h"
 
 #include "app/bridge/bridge.hpp"
-#include "app/bind/bind_s7.h"
+#include "app/bind/bind_s7.hpp"
 
 #include "kernel/bind/bind_s7.h"
 #include "kernel/tree/tree.hpp"

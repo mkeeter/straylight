@@ -179,7 +179,7 @@ TEST_CASE("Interpreter::nameValid")
 
 static s7_cell* customReader(s7_scheme* sc)
 {
-    return s7_eval_c_string(sc, "(lambda (sexp c) '(123))");
+    return s7_eval_c_string(sc, "(lambda (sexp r c) '(123))");
 }
 
 TEST_CASE("Interpreter::setReader")

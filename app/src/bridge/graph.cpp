@@ -1,7 +1,7 @@
 #include <cassert>
 
 #include "app/bridge/graph.hpp"
-#include "app/bind/bind_s7.h"
+#include "app/bind/bind_s7.hpp"
 #include "kernel/bind/bind_s7.h"
 
 namespace App {
@@ -66,6 +66,11 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::HALT:
             assert(false);
     }
+}
+
+void GraphModel::gotResponse()
+{
+    updateFrom(responses.pop());
 }
 
 }   // namespace Bridge

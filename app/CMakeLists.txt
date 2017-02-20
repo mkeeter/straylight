@@ -15,13 +15,13 @@ find_package(Qt5Quick REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 
-add_executable(Straylight MACOSX_BUNDLE
-    src/main.cpp
+set(SRCS
     src/bridge/bridge.cpp
     src/bridge/graph.cpp
     src/bridge/items.cpp
     src/bridge/sheets.cpp
     src/bridge/instance.cpp
+    src/bridge/watcher.cpp
     src/ui/material.cpp
     src/ui/syntax.cpp
     src/render/canvas.cpp
@@ -32,7 +32,16 @@ add_executable(Straylight MACOSX_BUNDLE
     src/render/point_handle.cpp
     src/render/renderer.cpp
     src/render/blitter.cpp
-    src/bind/bind_s7.cpp
+    src/bind/bind_s7.cpp)
+
+string(REPLACE "src/" ";include/app/" _INCS ${SRCS})
+string(REPLACE ".cpp" ".hpp;" INCS ${_INCS})
+message("SRCS: ${SRCS}")
+message("INCS: ${INCS}")
+add_executable(Straylight MACOSX_BUNDLE
+    src/main.cpp
+    ${SRCS}
+    ${INCS}
     resources.qrc)
 
 target_link_libraries(Straylight

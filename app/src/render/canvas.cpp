@@ -245,7 +245,9 @@ void CanvasObject::mouseMove(float x, float y)
             2 * mouse_pos.y() / height() - 1);
         assert(mouse_drag != nullptr);
         auto sol = mouse_drag->dragTo(M().inverted(), mouse_gl);
+#if 0   // TODO
         App::Core::Bridge::instance()->setVariables(sol);
+#endif
     }
     else
     {

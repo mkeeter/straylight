@@ -5,7 +5,7 @@
 #include <QOpenGLShaderProgram>
 
 #include "app/render/handle.hpp"
-#include "app/bind/bind_s7.h"
+#include "app/bind/bind_s7.hpp"
 
 namespace App {
 namespace Render {

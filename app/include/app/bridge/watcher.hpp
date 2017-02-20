@@ -19,6 +19,7 @@ signals:
 protected slots:
     void run();
 
+protected:
     shared_queue<Graph::Response>& queue;
     QThread thread;
 };

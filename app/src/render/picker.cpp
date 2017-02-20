@@ -1,7 +1,7 @@
 #include "app/render/picker.hpp"
 #include "app/render/point_handle.hpp"
 
-#include "app/bind/bind_s7.h"
+#include "app/bind/bind_s7.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 

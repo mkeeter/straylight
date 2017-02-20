@@ -11,8 +11,7 @@ namespace App {
 namespace Render { class Canvas; }
 namespace Core {
 
-class UndoStack;
-
+#if 0
 ////////////////////////////////////////////////////////////////////////////////
 
 class Bridge : public QObject
@@ -97,6 +96,6 @@ protected:
 
     static Bridge* _instance;
 };
-
+#endif
 }   // namespace Core
 }   // namespace App

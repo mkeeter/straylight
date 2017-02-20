@@ -171,11 +171,13 @@ void SyntaxHighlighter::buildRules()
     {
         QTextCharFormat keyword_format;
         keyword_format.setForeground(Material::blue_500);
+#if 0 // TODO
         for (const auto& k : App::Core::Bridge::instance()->keywords())
         {
             auto esc = QRegularExpression::escape(QString::fromStdString(k));
             rules << Rule("\\b" + esc + "\\b", keyword_format);
         }
+#endif
     }
 
     // Special regex to catch parentheses
