@@ -48,6 +48,11 @@ public:
     static QObject* instance(QQmlEngine *engine, QJSEngine *scriptEngine);
     static Bridge* instance();
 
+    /*
+     *  Look up the graph instances
+     */
+    App::Bridge::GraphModel* graph() { return &_graph; }
+
 public slots:
     /*
      *  Returns interpreter keywords
@@ -56,7 +61,7 @@ public slots:
     std::set<std::string> keywords() const { return std::set<std::string>(); }
 
 protected:
-    App::Bridge::GraphModel graph;
+    App::Bridge::GraphModel _graph;
 
     static Bridge* _instance;
 };

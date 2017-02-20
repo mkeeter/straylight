@@ -8,12 +8,24 @@
 namespace App {
 namespace Bridge {
 
+class GraphModel;   // forward declaration
+
 class SheetInstanceModel : public QObject
 {
+    Q_OBJECT
 public:
-    SheetInstanceModel(QObject* parent=nullptr) : QObject(parent) {}
+    SheetInstanceModel(const Graph::Env& env, Graph::SheetIndex sheet,
+                       GraphModel* parent);
+
+    /*
+     *  Called to execute a reply from the graph thread
+     */
     void updateFrom(const Graph::Response& r);
 
+    Q_INVOKABLE QObject* itemsModel() { return &items; }
+    Q_INVOKABLE void insertCell();
+
+#if 0
     /*
      *  Checks whether a name is valid
      *  Returns an empty string on success and an error message otherwise
@@ -39,8 +51,15 @@ public:
     Q_INVOKABLE void insertInstance(QString name,
                                     int target_sheet_index);
     Q_INVOKABLE void eraseInstance(int instance_index);
+#endif
 
 protected:
+    GraphModel* graph;
+
+    // Identity of this SheetInstanceModel
+    const Graph::Env env;
+    const Graph::SheetIndex sheet;
+
     ItemsModel items;
     SheetsModel library;
 };

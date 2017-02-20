@@ -5,9 +5,11 @@ import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
 import Bridge 1.0
+import Graph 1.0
 import Awesome 4.7
 
 SplitView {
+    id: sview
     orientation: Qt.Vertical
 
     property var sheetEnv
@@ -16,10 +18,19 @@ SplitView {
     property string instanceName: ""
     property string sheetName: ""
 
+    property var _sheetInstanceModel
+    function sheetInstanceModel() {
+        if (!_sheetInstanceModel) {
+            _sheetInstanceModel = Graph.modelOf(sheetEnv)
+        }
+        return _sheetInstanceModel
+    }
+
     // Forwards a call to fix item layout
     function fixLayout() { items.fixLayout() }
 
     Component.onCompleted: {
+        items.itemsModel = sheetInstanceModel().itemsModel()
         lib.slideOpen()
     }
 
@@ -47,10 +58,10 @@ SplitView {
             SheetTitle {
                 Layout.fillWidth: true
                 onInsertCell: {
-                    var instance = sheetEnv[sheetEnv.length - 1]
-                    var sheet = Bridge.sheetOf(instance)
-                    var name = Bridge.nextItemName(sheet)
-                    Bridge.insertCell(sheet, name)
+                    //var instance = sheetEnv[sheetEnv.length - 1]
+                    //var sheet = Bridge.sheetOf(instance)
+                    //var name = Bridge.nextItemName(sheet)
+                    sheetInstanceModel().insertCell()
                     renameLastItemTimer.restart()
                 }
             }

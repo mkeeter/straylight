@@ -8,7 +8,7 @@ import Awesome 4.7
 
 ColumnLayout {
     id: lib
-    property ListModel libraryModel: ListModel { }
+    property var libraryModel
 
     signal addInstance(int targetSheetIndex)
     signal eraseSheet(int targetSheetIndex)

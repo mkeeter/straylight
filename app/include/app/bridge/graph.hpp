@@ -2,6 +2,9 @@
 
 #include <map>
 
+#include <QQmlEngine>
+#include <QJSEngine>
+
 #include "app/bridge/watcher.hpp"
 #include "app/bridge/instance.hpp"
 
@@ -24,11 +27,34 @@ public:
     ~GraphModel();
 
     /*
+     *  Returns a SheetInstanceModel pointer
+     */
+    Q_INVOKABLE QObject* modelOf(QList<int> env);
+
+    /*
      *  Applies a set of constraints to the graph
      *
      *  This should be called from the main UI thread
      */
     void setVariables(const Kernel::Solver::Solution& sol);
+
+    /*
+     *  Constructor for the QML singleton
+     */
+    static QObject* instance(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static GraphModel* instance();
+
+    /*
+     *  Starts a root running with kernel and app bindings injected
+     */
+    static shared_queue<Graph::Response>& runRoot(
+            Graph::Root& root,
+            shared_queue<Graph::Command>& commands);
+
+    /*
+     *  Send a command to the graph thread
+     */
+    void enqueue(const Graph::Command& c) { commands.push(c); }
 
 protected slots:
     void gotResponse();

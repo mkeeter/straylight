@@ -6,7 +6,7 @@ import QtQuick.Controls.Styles 1.4
 import Bridge 1.0
 
 ScrollView {
-    property ListModel itemsModel: ListModel { }
+    property alias itemsModel: listView.model
 
     function renameLast() {
         // XXX This is slightly evil, as we're poking members of the ListView
@@ -47,8 +47,8 @@ ScrollView {
         id: listView
 
         anchors.fill: parent
-        model: itemsModel
         spacing: 5
+
         delegate: SheetItemDelegate {
             anchors.left: parent.left
             anchors.right: parent.right

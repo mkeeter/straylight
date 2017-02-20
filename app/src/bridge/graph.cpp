@@ -1,6 +1,8 @@
 #include <cassert>
 
 #include "app/bridge/graph.hpp"
+#include "app/bridge/bridge.hpp"
+
 #include "app/bind/bind_s7.hpp"
 #include "kernel/bind/bind_s7.h"
 
@@ -8,18 +10,24 @@ namespace App {
 namespace Bridge {
 
 GraphModel::GraphModel(QObject* parent)
-    : QObject(parent), responses(root.run(commands)), watcher(responses)
+    : QObject(parent), responses(runRoot(root, commands)), watcher(responses)
 {
     // Add a model for the root instance
-    instances[{}].reset(new SheetInstanceModel());
+    instances[{}].reset(new SheetInstanceModel({}, 0, this));
 
-    // Inject the kernel bindings into the interpreter
-    // TODO: this is unsafe, as the root is already running
-    root.call(Kernel::Bind::init);
-    root.call(App::Bind::init);
+    // The first response pushed should create the root instance
+    while (responses.empty())
+    {
+        responses.wait();
+    }
+    auto r = responses.pop();
+    assert(r.op == Graph::Response::INSTANCE_INSERTED);
+    assert(r.env.size() == 0);
+    updateFrom(r);
 
     connect(&watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
+    watcher.start();
 }
 
 GraphModel::~GraphModel()
@@ -27,11 +35,31 @@ GraphModel::~GraphModel()
     responses.push(Graph::Response::Halt());
 }
 
+shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
+        shared_queue<Graph::Command>& commands)
+{
+    root.call(Kernel::Bind::init);
+    root.call(App::Bind::init);
+
+    return root.run(commands);
+}
+
 void GraphModel::updateFrom(const Graph::Response& r)
 {
     qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
+        // Instance creation both manipulates the instance map
+        // and falls through to modify the parent sheet
+        case Graph::Response::INSTANCE_INSERTED:
+        {
+            auto e = r.env;
+            e.push_back(Graph::InstanceIndex(r.target));
+            // TODO this is wrong
+            instances[e].reset(new SheetInstanceModel(e, 0, this));
+            // Fallthrough!
+        }
+
         // Sheet library level operations
         case Graph::Response::SHEET_RENAMED:
         case Graph::Response::SHEET_ERASED:
@@ -41,7 +69,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::CELL_INSERTED:
         case Graph::Response::ITEM_ERASED:
         case Graph::Response::EXPR_CHANGED:
-        case Graph::Response::INSTANCE_INSERTED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
             instances.at(r.env)->updateFrom(r);
@@ -81,8 +108,19 @@ void GraphModel::gotResponse()
 {
     if (!responses.empty())
     {
-        updateFrom(responses.pop());
+        auto r = responses.pop();
+        updateFrom(r);
     }
+}
+
+QObject* GraphModel::modelOf(QList<int> env)
+{
+    Graph::Env env_;
+    for (auto e : env)
+    {
+        env_.push_back(e);
+    }
+    return instances.at(env_).get();
 }
 
 void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
@@ -104,6 +142,19 @@ void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+QObject* GraphModel::instance(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    (void)engine;
+    (void)scriptEngine;
+    return instance();
+}
+
+GraphModel* GraphModel::instance()
+{
+    return Bridge::instance()->graph();
+}
 
 }   // namespace Bridge
 }   // namespace App

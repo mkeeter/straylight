@@ -1,9 +1,24 @@
 #include <cassert>
 
 #include "app/bridge/instance.hpp"
+#include "app/bridge/graph.hpp"
 
 namespace App {
 namespace Bridge {
+
+SheetInstanceModel::SheetInstanceModel(
+        const Graph::Env& env, Graph::SheetIndex sheet,
+        GraphModel* parent)
+    : QObject(parent), graph(parent), env(env), sheet(sheet)
+{
+    // Nothing to do here
+}
+
+void SheetInstanceModel::insertCell()
+{
+    // TODO: make this better
+    graph->enqueue(Graph::Command::InsertCell(sheet, "x", "(+ 1 2)"));
+}
 
 void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {

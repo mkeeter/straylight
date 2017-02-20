@@ -14,6 +14,8 @@ class QueueWatcher : public QObject
     Q_OBJECT
 public:
     QueueWatcher(shared_queue<Graph::Response>& responses);
+    void start();
+    void wait();
 signals:
     void gotResponse();
 protected slots:

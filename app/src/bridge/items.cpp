@@ -90,6 +90,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
             items.push_back(Item::Cell(r.name, r.expr));
+            order.insert({r.target, index});
             endInsertRows();
             break;
         }
@@ -99,6 +100,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
             items.push_back(Item::Instance(r.name, r.expr));
+            order.insert({r.target, index});
             endInsertRows();
             break;
         }
@@ -111,7 +113,6 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             order.erase(r.target);
             break;
         }
-
 
         case Graph::Response::INPUT_CHANGED:
         case Graph::Response::INPUT_CREATED:

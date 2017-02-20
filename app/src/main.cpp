@@ -6,6 +6,7 @@
 #include <QQuickItem>
 
 #include "app/bridge/bridge.hpp"
+#include "app/bridge/graph.hpp"
 #include "app/ui/material.hpp"
 #include "app/render/canvas.hpp"
 
@@ -27,6 +28,8 @@ int main(int argc, char**argv)
     //  Install Bridge singleton to make it available in QML
     qmlRegisterSingletonType<App::Bridge::Bridge>(
             "Bridge", 1, 0, "Bridge", App::Bridge::Bridge::instance);
+    qmlRegisterSingletonType<App::Bridge::GraphModel>(
+            "Graph", 1, 0, "Graph", App::Bridge::GraphModel::instance);
 
     // Construct bridge singleton
     App::Bridge::Bridge::instance();
