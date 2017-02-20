@@ -79,7 +79,10 @@ void GraphModel::updateFrom(const Graph::Response& r)
 
 void GraphModel::gotResponse()
 {
-    updateFrom(responses.pop());
+    if (!responses.empty())
+    {
+        updateFrom(responses.pop());
+    }
 }
 
 void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
