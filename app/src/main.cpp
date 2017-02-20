@@ -28,6 +28,9 @@ int main(int argc, char**argv)
     qmlRegisterSingletonType<App::Bridge::Bridge>(
             "Bridge", 1, 0, "Bridge", App::Bridge::Bridge::instance);
 
+    // Construct bridge singleton
+    App::Bridge::Bridge::instance();
+
     // Install Material singleton (available from both C++ / QML)
     qmlRegisterSingletonType<App::UI::Material>(
             "Material", 1, 0, "Material", App::UI::Material::singleton);
