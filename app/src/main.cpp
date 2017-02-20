@@ -24,6 +24,10 @@ int main(int argc, char**argv)
     // Register canvas class for drawing
     qmlRegisterType<App::Render::CanvasObject>("Canvas", 1, 0, "Canvas");
 
+    //  Install Bridge singleton to make it available in QML
+    qmlRegisterSingletonType<App::Bridge::Bridge>(
+            "Bridge", 1, 0, "Bridge", App::Bridge::Bridge::instance);
+
     // Install Material singleton (available from both C++ / QML)
     qmlRegisterSingletonType<App::UI::Material>(
             "Material", 1, 0, "Material", App::UI::Material::singleton);

@@ -636,11 +636,21 @@ TEST_CASE("Root::run")
         in.push(Command::InsertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)"));
         in.push(Command::StopLoop());
         sleep(1);
-        REQUIRE(out.size() == 2);
-        auto a = out.pop();
-        REQUIRE(a.op == Response::CELL_INSERTED);
-        auto b = out.pop();
-        REQUIRE(b.op == Response::VALUE_CHANGED);
+        REQUIRE(out.size() == 3);
+        {
+            auto a = out.pop();
+            REQUIRE(a.op == Response::INSTANCE_INSERTED); // root instance
+        }
+        {
+            auto a = out.pop();
+            REQUIRE(a.op == Response::CELL_INSERTED);
+            REQUIRE(a.name == "a");
+        }
+        {
+            auto a = out.pop();
+            REQUIRE(a.op == Response::VALUE_CHANGED);
+            REQUIRE(a.expr == "3");
+        }
     }
 }
 

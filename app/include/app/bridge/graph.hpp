@@ -11,6 +11,8 @@
 #include "graph/queue.hpp"
 #include "graph/root.hpp"
 
+#include "kernel/solve/solver.hpp"
+
 namespace App {
 namespace Bridge {
 
@@ -21,12 +23,19 @@ public:
     GraphModel(QObject* parent=nullptr);
 
     /*
-     *  Update the model state with the given response
+     *  Applies a set of constraints to the graph
+     *
+     *  This should be called from the main UI thread
      */
-    void updateFrom(const Graph::Response& r);
+    void setVariables(const Kernel::Solver::Solution& sol);
 
 protected slots:
     void gotResponse();
+
+    /*
+     *  Update the model state with the given response
+     */
+    void updateFrom(const Graph::Response& r);
 
 protected:
     std::map<Graph::Env, std::unique_ptr<SheetInstanceModel>> instances;

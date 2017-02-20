@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
 import Awesome 4.7
-import "/js/model_util.js" as ModelUtil
 
 ColumnLayout {
     id: lib

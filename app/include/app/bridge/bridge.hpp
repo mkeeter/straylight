@@ -9,44 +9,15 @@
 namespace App {
 
 namespace Render { class Canvas; }
-namespace Core {
+namespace Bridge {
 
-#if 0
 ////////////////////////////////////////////////////////////////////////////////
 
 class Bridge : public QObject
 {
     Q_OBJECT
 public:
-    Bridge();
-
-    /*
-     *  Checks whether a name is valid
-     *  Returns an empty string on success and an error message otherwise
-     */
-    Q_INVOKABLE QString checkItemName(int sheet_index, QString name) const;
-    Q_INVOKABLE QString checkItemRename(int item_index, QString name) const;
-    Q_INVOKABLE void renameItem(int item_index, QString name);
-    Q_INVOKABLE QString nextItemName(int sheet_index) const;
-
-    Q_INVOKABLE QString checkSheetName(int parent_sheet, QString name) const;
-    Q_INVOKABLE QString checkSheetRename(int sheet_index, QString name) const;
-    Q_INVOKABLE void renameSheet(int sheet_index, QString name);
-    Q_INVOKABLE void insertSheet(int sheet_index, QString name);
-    Q_INVOKABLE QString nextSheetName(int sheet_index) const;
-    Q_INVOKABLE void eraseSheet(int sheet_index);
-
-    Q_INVOKABLE void insertCell(int sheet_index, const QString& name);
-    Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
-    Q_INVOKABLE void setInput(int instance_index, int cell_index,
-                              const QString& expr);
-    Q_INVOKABLE void eraseCell(int cell_index);
-
-    Q_INVOKABLE void insertInstance(int parent_sheet_index, QString name,
-                                    int target_sheet_index);
-    Q_INVOKABLE void eraseInstance(int instance_index);
-
-    Q_INVOKABLE int sheetOf(int instance_index) const;
+    Bridge() { /* Nothing to do here */ }
 
     /*
      *  Install a syntax highlighter to the given doc
@@ -77,13 +48,6 @@ public:
     static QObject* instance(QQmlEngine *engine, QJSEngine *scriptEngine);
     static Bridge* instance();
 
-    /*
-     *  Applies a set of constraints to the graph
-     *
-     *  This should be called from the main UI thread
-     */
-    void setVariables(const Kernel::Solver::Solution& sol);
-
 public slots:
     /*
      *  Returns interpreter keywords
@@ -96,6 +60,6 @@ protected:
 
     static Bridge* _instance;
 };
-#endif
-}   // namespace Core
+
+}   // namespace Bridge
 }   // namespace App

@@ -6,6 +6,8 @@ Root::Root()
     : deps(*this), interpreter(*this, &deps)
 {
     dirty.push({});
+    changes.push(Response::InstanceInserted(
+                {}, Tree::ROOT_INSTANCE, "Root", ""));
 }
 
 CellKey Root::toCellKey(const NameKey& k) const

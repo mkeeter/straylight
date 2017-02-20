@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import Bridge 1.0
-import "/js/model_util.js" as ModelUtil
 
 ScrollView {
     property ListModel itemsModel: ListModel { }

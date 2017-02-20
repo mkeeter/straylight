@@ -21,6 +21,7 @@ GraphModel::GraphModel(QObject* parent)
 
 void GraphModel::updateFrom(const Graph::Response& r)
 {
+    qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
         // Sheet library level operations
@@ -72,6 +73,26 @@ void GraphModel::gotResponse()
 {
     updateFrom(responses.pop());
 }
+
+void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
+{
+#if 0   // TODO
+    {   // Roll out a set of variable updates
+        auto lock = r.Lock();
+        for (const auto& s : sol)
+        {
+            auto k = static_cast<Bind::CellKeyTag*>(
+                    Kernel::Cache::instance()->tag(s.first))->key;
+
+            std::stringstream ss;
+            ss << s.second;
+            r.setExprOrInput(k, ss.str());
+        }
+    }
+    sync();
+#endif
+}
+
 
 }   // namespace Bridge
 }   // namespace App

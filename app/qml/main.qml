@@ -8,7 +8,6 @@ import Canvas 1.0
 import Style 1.0
 import Material 1.0
 import Bridge 1.0
-import UndoStack 1.0
 
 import "/js/vendor/underscore.js" as Underscore
 
