@@ -10,6 +10,9 @@ namespace Bridge {
 GraphModel::GraphModel(QObject* parent)
     : QObject(parent), responses(root.run(commands)), watcher(responses)
 {
+    // Add a model for the root instance
+    instances[{}].reset(new SheetInstanceModel());
+
     // Inject the kernel bindings into the interpreter
     // TODO: this is unsafe, as the root is already running
     root.call(Kernel::Bind::init);
