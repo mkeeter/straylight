@@ -36,8 +36,6 @@ set(SRCS
 
 string(REPLACE "src/" ";include/app/" _INCS ${SRCS})
 string(REPLACE ".cpp" ".hpp;" INCS ${_INCS})
-message("SRCS: ${SRCS}")
-message("INCS: ${INCS}")
 add_executable(Straylight MACOSX_BUNDLE
     src/main.cpp
     ${SRCS}
