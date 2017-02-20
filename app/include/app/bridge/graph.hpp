@@ -21,6 +21,7 @@ class GraphModel : public QObject
     Q_OBJECT
 public:
     GraphModel(QObject* parent=nullptr);
+    ~GraphModel();
 
     /*
      *  Applies a set of constraints to the graph

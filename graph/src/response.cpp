@@ -79,4 +79,9 @@ Response Response::ValueChanged(
     return { VALUE_CHANGED, k.first, "", value, k.second, valid };
 }
 
+Response Response::Halt()
+{
+    return { HALT, {}, "", "", 0, false };
+}
+
 }   // namespace Graph

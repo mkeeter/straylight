@@ -19,6 +19,11 @@ GraphModel::GraphModel(QObject* parent)
             this, &GraphModel::gotResponse);
 }
 
+GraphModel::~GraphModel()
+{
+    responses.push(Graph::Response::Halt());
+}
+
 void GraphModel::updateFrom(const Graph::Response& r)
 {
     qDebug() << "Dispatching" << r.op;
