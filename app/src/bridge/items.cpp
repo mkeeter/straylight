@@ -54,7 +54,7 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {NameRole, "name"},
         {ValidRole, "valid"},
         {ExprRole, "expr"},
-        {ValueRole, "valid"}};
+        {ValueRole, "value"}};
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -92,11 +92,13 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = order.at(r.target);
             auto new_value = QString::fromStdString(r.expr);
-            if (items[index].cell_value != new_value)
+            auto& item = items[index];
+            if (item.cell_value != new_value || item.cell_valid != r.valid)
             {
                 items[index].cell_value = new_value;
+                items[index].cell_valid = r.valid;
                 auto i = createIndex(index, 0);
-                dataChanged(i, i, {ValueRole});
+                dataChanged(i, i, {ValueRole, ValidRole});
             }
             break;
         }
