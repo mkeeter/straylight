@@ -31,7 +31,7 @@ public:
      *  Returns an empty string on success and an error message otherwise
      */
     Q_INVOKABLE QString checkItemName(QString name) const;
-    Q_INVOKABLE QString checkItemRename(QString name) const;
+    Q_INVOKABLE QString checkItemRename(int item_index, QString name) const;
     Q_INVOKABLE void renameItem(int item_index, QString name);
     Q_INVOKABLE QString nextItemName(int sheet_index) const;
 

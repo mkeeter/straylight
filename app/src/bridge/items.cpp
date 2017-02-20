@@ -29,6 +29,24 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
     }
 }
 
+QString ItemsModel::nextItemName(QString prefix) const
+{
+    std::string base = prefix.toStdString();
+    for (int i=0; true; ++i)
+    {
+        std::stringstream ss;
+        ss << base;
+        ss << i;
+
+        auto str = ss.str();
+
+        if (names.right.find(str) == names.right.end())
+        {
+            return QString::fromStdString(str);
+        }
+    }
+}
+
 QHash<int, QByteArray> ItemsModel::roleNames() const
 {
     return {
@@ -51,6 +69,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             {
                 items[index].name = new_name;
                 auto i = createIndex(index, 0);
+                names.left.replace_data(names.left.find(r.target), r.name);
                 dataChanged(i, i, {NameRole});
             }
             break;
@@ -89,8 +108,9 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
-            items.push_back(Item::Cell(r.name, r.expr));
-            order.insert({r.target, index});
+                items.push_back(Item::Cell(r.name, r.expr));
+                order.insert({r.target, index});
+                names.left.insert({index, r.name});
             endInsertRows();
             break;
         }
@@ -99,8 +119,9 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
-            items.push_back(Item::Instance(r.name, r.expr));
-            order.insert({r.target, index});
+                items.push_back(Item::Instance(r.name, r.expr));
+                order.insert({r.target, index});
+                names.left.insert({index, r.name});
             endInsertRows();
             break;
         }
@@ -108,9 +129,10 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = order.at(r.target);
             beginRemoveRows(QModelIndex(), index, index);
-            items.removeAt(index);
+                items.removeAt(index);
+                order.erase(r.target);
+                names.left.erase(r.target);
             endRemoveRows();
-            order.erase(r.target);
             break;
         }
 

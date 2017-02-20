@@ -17,7 +17,8 @@ SheetInstanceModel::SheetInstanceModel(
 void SheetInstanceModel::insertCell()
 {
     // TODO: make this better
-    graph->enqueue(Graph::Command::InsertCell(sheet, "x", "(+ 1 2)"));
+    graph->enqueue(Graph::Command::InsertCell(
+                sheet, items.nextItemName().toStdString(), ""));
 }
 
 void SheetInstanceModel::updateFrom(const Graph::Response& r)

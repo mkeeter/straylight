@@ -2,6 +2,9 @@
 
 #include <QAbstractListModel>
 #include <QString>
+#include <QSet>
+
+#include <boost/bimap.hpp>
 
 #include "graph/types/cell.hpp"
 #include "graph/response.hpp"
@@ -17,6 +20,11 @@ public:
 
     int rowCount(const QModelIndex& parent=QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
+
+    /*
+     *  Returns the next valid item name for the given prefix
+     */
+    QString nextItemName(QString prefix="i") const;
 
     /*
      *  Update the model from the given response
@@ -66,7 +74,10 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QList<Item> items;
+
+    // Meta-data for fast lookups
     std::map<Graph::ItemIndex, int> order;
+    boost::bimap<Graph::ItemIndex, std::string> names;
 };
 
 }   // namespace Bridge
