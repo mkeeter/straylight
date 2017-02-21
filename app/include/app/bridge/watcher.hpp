@@ -9,21 +9,19 @@
 namespace App {
 namespace Bridge {
 
-class QueueWatcher : public QObject
+class QueueWatcher : public QThread
 {
     Q_OBJECT
 public:
     QueueWatcher(shared_queue<Graph::Response>& responses);
-    void start();
-    void wait();
+
 signals:
     void gotResponse();
-protected slots:
-    void run();
 
 protected:
+    void run() override;
+
     shared_queue<Graph::Response>& queue;
-    QThread thread;
 };
 
 }   // namespace Bridge

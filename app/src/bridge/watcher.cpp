@@ -6,14 +6,9 @@ namespace Bridge {
 QueueWatcher::QueueWatcher(shared_queue<Graph::Response>& responses)
     : queue(responses)
 {
-    connect(&thread, &QThread::started, this, &QueueWatcher::run);
+    // Nothing to do here
 }
 
-void QueueWatcher::start()
-{
-    moveToThread(&thread);
-    thread.start();
-}
 
 void QueueWatcher::run()
 {
