@@ -109,4 +109,9 @@ Command Command::RenameItem(
     return { RENAME_ITEM, name, "", 0, i, 0, {}};
 }
 
+Command Command::SetExpr(CellIndex i, const std::string& expr)
+{
+    return { SET_EXPR, "", expr, 0, i, 0, {}};
+}
+
 }   // namespace Graph

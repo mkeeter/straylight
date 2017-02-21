@@ -40,6 +40,11 @@ public:
      */
     Q_INVOKABLE void renameItem(unsigned i, const QString& str);
 
+    /*
+     *  Sets the target cell's expression
+     */
+    Q_INVOKABLE void setExpr(unsigned cell_index, const QString& expr);
+
 #if 0
     /*
      *  Checks whether a name is valid

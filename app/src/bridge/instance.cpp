@@ -37,6 +37,11 @@ void SheetInstanceModel::renameItem(unsigned i, const QString& str)
     graph->enqueue(Graph::Command::RenameItem(i, str.toStdString()));
 }
 
+void SheetInstanceModel::setExpr(unsigned i, const QString& str)
+{
+    graph->enqueue(Graph::Command::SetExpr(i, str.toStdString()));
+}
+
 void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
