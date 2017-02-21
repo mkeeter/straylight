@@ -45,6 +45,12 @@ public:
      */
     Q_INVOKABLE void setExpr(unsigned cell_index, const QString& expr);
 
+    /*
+     *  Erases the target item
+     */
+    Q_INVOKABLE void eraseCell(unsigned cell_index);
+    Q_INVOKABLE void eraseInstance(unsigned cell_index);
+
 #if 0
     /*
      *  Checks whether a name is valid

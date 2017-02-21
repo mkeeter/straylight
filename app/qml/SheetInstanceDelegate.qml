@@ -30,7 +30,7 @@ Column {
         anchors.margins: 5
 
         onEraseMe: {
-            Bridge.eraseInstance(uniqueIndex)
+            sheetInstanceModel().eraseInstance(uniqueIndex)
         }
 
         onOpenSheet: {

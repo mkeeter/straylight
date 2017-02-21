@@ -12,7 +12,7 @@ Column {
         anchors.margins: 5
 
         onEraseMe: {
-            Bridge.eraseCell(uniqueIndex)
+            sheetInstanceModel().eraseCell(uniqueIndex)
         }
 
         Component.onCompleted: {

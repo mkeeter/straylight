@@ -42,6 +42,16 @@ void SheetInstanceModel::setExpr(unsigned i, const QString& str)
     graph->enqueue(Graph::Command::SetExpr(i, str.toStdString()));
 }
 
+void SheetInstanceModel::eraseCell(unsigned i)
+{
+    graph->enqueue(Graph::Command::EraseCell(i));
+}
+
+void SheetInstanceModel::eraseInstance(unsigned i)
+{
+    graph->enqueue(Graph::Command::EraseInstance(i));
+}
+
 void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)

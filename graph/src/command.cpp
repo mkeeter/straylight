@@ -108,4 +108,14 @@ Command Command::SetExpr(CellIndex i, const std::string& expr)
     return { SET_EXPR, "", expr, 0, i, 0, {}};
 }
 
+Command Command::EraseCell(CellIndex i)
+{
+    return { ERASE_CELL, "", "", 0, i, 0, {}};
+}
+
+Command Command::EraseInstance(InstanceIndex i)
+{
+    return { ERASE_INSTANCE, "", "", 0, i, 0, {}};
+}
+
 }   // namespace Graph
