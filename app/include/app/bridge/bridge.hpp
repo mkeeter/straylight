@@ -17,7 +17,7 @@ class Bridge : public QObject
 {
     Q_OBJECT
 public:
-    Bridge() { /* Nothing to do here */ }
+    Bridge();
 
     /*
      *  Install a syntax highlighter to the given doc
@@ -51,7 +51,7 @@ public:
     /*
      *  Look up the graph instances
      */
-    App::Bridge::GraphModel* graph() { return &_graph; }
+    App::Bridge::GraphModel* graph() { return _graph; }
 
 public slots:
     /*
@@ -61,7 +61,9 @@ public slots:
     std::set<std::string> keywords() const { return std::set<std::string>(); }
 
 protected:
-    App::Bridge::GraphModel _graph;
+    /*  This is owned by Qt as a QML singleton, so we heap-allocate it
+     *  and don't delete it ourselves  */
+    App::Bridge::GraphModel* _graph;
 
     static Bridge* _instance;
 };

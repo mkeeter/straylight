@@ -9,6 +9,12 @@ namespace Bridge {
 
 Bridge* Bridge::_instance = nullptr;
 
+Bridge::Bridge()
+    : _graph(new GraphModel())
+{
+    // Nothing to do here
+}
+
 void Bridge::installHighlighter(QQuickTextDocument* doc)
 {
     new App::UI::SyntaxHighlighter(doc->textDocument());
