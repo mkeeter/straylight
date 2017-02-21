@@ -25,6 +25,8 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
         case ValidRole: return i.type == Item::CELL ? i.cell_valid : QVariant();
         case ExprRole:  return i.type == Item::CELL ? i.cell_expr : QVariant();
         case ValueRole:  return i.type == Item::CELL ? i.cell_value : QVariant();
+        case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
+        case UniqueIndexRole: return i.unique_index;
         default: return QVariant();
     }
 }
@@ -55,7 +57,8 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {ValidRole, "valid"},
         {ExprRole, "expr"},
         {ValueRole, "value"},
-        {IOTypeRole, "ioType"}};
+        {IOTypeRole, "ioType"},
+        {UniqueIndexRole, "uniqueIndex"}};
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -112,7 +115,8 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
-                items.push_back(Item::Cell(r.name, r.expr));
+                items.push_back(Item::Cell(
+                            Graph::CellIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
                 names.left.insert({index, r.name});
             endInsertRows();
@@ -123,7 +127,8 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = items.size();
             beginInsertRows(QModelIndex(), index, index);
-                items.push_back(Item::Instance(r.name, r.expr));
+                items.push_back(Item::Instance(
+                            Graph::InstanceIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
                 names.left.insert({index, r.name});
             endInsertRows();

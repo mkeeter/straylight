@@ -37,22 +37,25 @@ protected:
      */
     struct Item
     {
-        static Item Cell(const std::string& name, const std::string& expr)
+        static Item Cell(Graph::CellIndex i, const std::string& name,
+                         const std::string& expr)
         {
             return Item {
-                CELL, QString::fromStdString(name), false, QString::fromStdString(expr),
-                "", "", ""};
+                CELL, QString::fromStdString(name), i.i, false,
+                QString::fromStdString(expr), "", "", ""};
         }
 
-        static Item Instance(const std::string& name, const std::string& sheet)
+        static Item Instance(Graph::InstanceIndex i, const std::string& name,
+                             const std::string& sheet)
         {
             return Item {
-                INSTANCE, QString::fromStdString(name), false, "", "", "",
+                INSTANCE, QString::fromStdString(name), i.i, false, "", "", "",
                 QString::fromStdString(sheet) };
         }
 
         enum { CELL, INSTANCE } type;
         QString name;
+        unsigned unique_index;
 
         bool cell_valid;
         QString cell_expr;
@@ -71,6 +74,7 @@ protected:
         ExprRole,
         ValueRole,
         IOTypeRole,
+        UniqueIndexRole,
     };
 
     QHash<int, QByteArray> roleNames() const override;
