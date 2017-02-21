@@ -100,7 +100,13 @@ Command Command::StopLoop()
 Command Command::InsertCell(
         SheetIndex s, const std::string& name, const std::string& expr)
 {
-    return { INSERT_CELL, name, expr, 0, s, 0, {}};
+    return { INSERT_CELL, name, expr, s, 0, 0, {}};
+}
+
+Command Command::RenameItem(
+        ItemIndex i, const std::string& name)
+{
+    return { RENAME_ITEM, name, "", 0, i, 0, {}};
 }
 
 }   // namespace Graph

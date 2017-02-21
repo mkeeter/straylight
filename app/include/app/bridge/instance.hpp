@@ -35,6 +35,11 @@ public:
      */
     Q_INVOKABLE QString checkItemRename(unsigned i, const QString& str);
 
+    /*
+     *  Renames the target item
+     */
+    Q_INVOKABLE void renameItem(unsigned i, const QString& str);
+
 #if 0
     /*
      *  Checks whether a name is valid

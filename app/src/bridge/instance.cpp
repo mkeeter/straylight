@@ -32,6 +32,11 @@ QString SheetInstanceModel::checkItemRename(unsigned i, const QString& str)
     return items.checkItemRename(i, str);
 }
 
+void SheetInstanceModel::renameItem(unsigned i, const QString& str)
+{
+    graph->enqueue(Graph::Command::RenameItem(i, str.toStdString()));
+}
+
 void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)

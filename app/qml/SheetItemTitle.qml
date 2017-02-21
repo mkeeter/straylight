@@ -84,7 +84,7 @@ GridLayout {
             return sheetInstanceModel().checkItemRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
-            Bridge.renameItem(uniqueIndex, t)
+            sheetInstanceModel().renameItem(uniqueIndex, t)
         }
         onActiveChanged: { focusCell() }
     }

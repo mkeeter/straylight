@@ -57,6 +57,8 @@ struct Command
     static Command StopLoop();
     static Command InsertCell(
             SheetIndex s, const std::string& name, const std::string& expr);
+    static Command RenameItem(
+            ItemIndex i, const std::string& name);
 };
 
 }   // namespace Graph
