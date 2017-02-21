@@ -27,6 +27,12 @@ public:
     QString nextItemName(QString prefix="i") const;
 
     /*
+     *  Checks to see if the given rename is valid
+     *  Returns "" on success; otherwise returns an error string
+     */
+    QString checkItemRename(int i, const QString& str) const;
+
+    /*
      *  Update the model from the given response
      */
     void updateFrom(const Graph::Response& r);

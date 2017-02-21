@@ -49,6 +49,16 @@ QString ItemsModel::nextItemName(QString prefix) const
     }
 }
 
+QString ItemsModel::checkItemRename(int i, const QString& str) const
+{
+    auto s = str.toStdString();
+
+    auto f = names.right.find(s);
+    return (f != names.right.end() && f->second != i)
+        ? "Name already in use"
+        : "";
+}
+
 QHash<int, QByteArray> ItemsModel::roleNames() const
 {
     return {
@@ -118,7 +128,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 items.push_back(Item::Cell(
                             Graph::CellIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
-                names.left.insert({index, r.name});
+                names.left.insert({r.target, r.name});
             endInsertRows();
             break;
         }
@@ -130,7 +140,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 items.push_back(Item::Instance(
                             Graph::InstanceIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
-                names.left.insert({index, r.name});
+                names.left.insert({r.target, r.name});
             endInsertRows();
             break;
         }

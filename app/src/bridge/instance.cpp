@@ -21,9 +21,15 @@ void SheetInstanceModel::insertCell()
                 sheet, items.nextItemName().toStdString(), ""));
 }
 
-QString SheetInstanceModel::checkItemRename(unsigned i, QString str)
+QString SheetInstanceModel::checkItemRename(unsigned i, const QString& str)
 {
-    return str.startsWith("x") ? "" : "X GONNA GIVE IT TO YA";
+    auto e = graph->isValidItemName(str);
+    if (e.size())
+    {
+        return e;
+    }
+
+    return items.checkItemRename(i, str);
 }
 
 void SheetInstanceModel::updateFrom(const Graph::Response& r)

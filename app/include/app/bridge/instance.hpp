@@ -23,8 +23,17 @@ public:
     void updateFrom(const Graph::Response& r);
 
     Q_INVOKABLE QObject* itemsModel() { return &items; }
+
+    /*
+     *  Inserts a cell with the next available valid name
+     */
     Q_INVOKABLE void insertCell();
-    Q_INVOKABLE QString checkItemRename(unsigned i, QString str);
+
+    /*
+     *  Checks whether we can rename the given item, returning
+     *  an error string if we cannot.
+     */
+    Q_INVOKABLE QString checkItemRename(unsigned i, const QString& str);
 
 #if 0
     /*

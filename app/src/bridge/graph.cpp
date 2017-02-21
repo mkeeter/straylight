@@ -44,6 +44,11 @@ shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
     return root.run(commands);
 }
 
+QString GraphModel::isValidItemName(QString s) const
+{
+    return keywords.contains(s) ? "Interpreter keyword" : "";
+}
+
 void GraphModel::updateFrom(const Graph::Response& r)
 {
     qDebug() << "Dispatching" << r.op;

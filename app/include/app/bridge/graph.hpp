@@ -56,6 +56,11 @@ public:
      */
     void enqueue(const Graph::Command& c) { commands.push(c); }
 
+    /*
+     *  Checks that the given string isn't a reserved word or invalid
+     */
+    QString isValidItemName(QString s) const;
+
 protected slots:
     void gotResponse();
 
@@ -71,6 +76,9 @@ protected:
     shared_queue<Graph::Command> commands;
     shared_queue<Graph::Response>& responses;
     QueueWatcher watcher;
+
+    /*  Reserved words from the interpreter  */
+    QSet<QString> keywords;
 };
 
 }   // namespace Bridge
