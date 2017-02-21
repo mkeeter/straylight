@@ -81,6 +81,7 @@ struct Response
             const CellKey& k, const std::string& value, bool valid);
     static Response CellTypeChanged(const CellKey& k, Cell::Type type);
     static Response Halt();
+    static Response ReservedWord(const std::string& value);
 
     /* TODO
      *  InstanceSheetRenamed

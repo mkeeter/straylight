@@ -92,9 +92,12 @@ void GraphModel::updateFrom(const Graph::Response& r)
             break;
         }
 
+        case Graph::Response::RESERVED_WORD:
+            keywords.insert(QString::fromStdString(r.expr));
+            break;
+
         case Graph::Response::ITEM_NAME_REGEX:
         case Graph::Response::SHEET_NAME_REGEX:
-        case Graph::Response::RESERVED_WORD:
         case Graph::Response::RESET_UNDO_QUEUE:
         case Graph::Response::UNDO_READY:
         case Graph::Response::REDO_READY:

@@ -6,8 +6,16 @@ Root::Root()
     : deps(*this), interpreter(*this, &deps)
 {
     dirty.push({});
+
+    // Announce the creation of the root instance
     changes.push(Response::InstanceInserted(
                 {}, Tree::ROOT_INSTANCE, "Root", ""));
+
+    // Announce all of the interpreter's keywords
+    for (const auto& k : interpreter.keywords())
+    {
+        changes.push(Response::ReservedWord(k));
+    }
 }
 
 CellKey Root::toCellKey(const NameKey& k) const

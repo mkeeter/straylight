@@ -91,4 +91,9 @@ Response Response::Halt()
     return { HALT, {}, "", "", 0, false, Cell::UNKNOWN };
 }
 
+Response Response::ReservedWord(const std::string& value)
+{
+    return { RESERVED_WORD, {}, "", value, 0, false, Cell::UNKNOWN };
+}
+
 }   // namespace Graph
