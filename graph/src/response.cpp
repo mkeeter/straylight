@@ -5,89 +5,98 @@ namespace Graph {
 //  Helper constructors
 Response Response::ItemErased(const Env& e, const ItemIndex& i)
 {
-    return { ITEM_ERASED, e, "", "", i, false, Cell::UNKNOWN };
+    return { ITEM_ERASED, e, "", "", i, 0 };
 }
 
 Response Response::IOErased(const CellKey& k)
 {
-    return { IO_DELETED, k.first, "", "", k.second, false, Cell::UNKNOWN };
+    return { IO_DELETED, k.first, "", "", k.second, 0 };
 }
 
 Response Response::CellInserted(
         const CellKey& k, const std::string& name,
         const std::string& expr)
 {
-    return { CELL_INSERTED, k.first, name, expr, k.second, false, Cell::UNKNOWN };
+    return { CELL_INSERTED, k.first, name, expr, k.second, 0 };
 }
 
 Response Response::InstanceInserted(
         const Env& env, const InstanceIndex& i,
         const std::string& name, const std::string& sheet_name)
 {
-    return { INSTANCE_INSERTED, env, name, sheet_name, i, false, Cell::UNKNOWN };
+    return { INSTANCE_INSERTED, env, name, sheet_name, i, 0 };
 }
 
 Response Response::InputCreated(
         const CellKey& k, const std::string& name, const std::string& expr)
 {
-    return { INPUT_CREATED, k.first, name, expr, k.second, false, Cell::UNKNOWN };
+    return { INPUT_CREATED, k.first, name, expr, k.second, 0 };
 }
 
 Response Response::OutputCreated(const CellKey& k, const std::string& name)
 {
-    return { OUTPUT_CREATED, k.first, name, "", k.second, false, Cell::UNKNOWN };
+    return { OUTPUT_CREATED, k.first, name, "", k.second, 0 };
 }
 
 Response Response::ExprChanged(const CellKey& c, const std::string& expr)
 {
-    return { EXPR_CHANGED, c.first, "", expr, c.second, false, Cell::UNKNOWN };
+    return { EXPR_CHANGED, c.first, "", expr, c.second, 0 };
 }
 
 Response Response::InputChanged(const CellKey& c, const std::string& expr)
 {
-    return { INPUT_CHANGED, c.first, "", expr, c.second, false, Cell::UNKNOWN };
+    return { INPUT_CHANGED, c.first, "", expr, c.second, 0 };
 }
 
 Response Response::ItemRenamed(
         const Env& env, const ItemIndex& i, const std::string& name)
 {
-    return { ITEM_RENAMED, env, name, "", i, false, Cell::UNKNOWN };
+    return { ITEM_RENAMED, env, name, "", i, 0 };
 }
 
 Response Response::SheetCreated(
         const Env& env, const SheetIndex& i, const std::string& name)
 {
-    return { SHEET_INSERTED, env, name, "", i, false, Cell::UNKNOWN };
+    return { SHEET_INSERTED, env, name, "", i, 0 };
 }
 
 Response Response::SheetRenamed(
         const Env& env, const SheetIndex& i, const std::string& name)
 {
-    return { SHEET_RENAMED, env, name, "", i, false, Cell::UNKNOWN };
+    return { SHEET_RENAMED, env, name, "", i, 0 };
 }
 
 Response Response::SheetErased(
         const Env& env, const SheetIndex& i)
 {
-    return { SHEET_ERASED, env, "", "", i, false, Cell::UNKNOWN };
+    return { SHEET_ERASED, env, "", "", i, 0 };
 }
 
 
 Response Response::ValueChanged(
         const CellKey& k, const std::string& value, bool valid)
 {
-    return { VALUE_CHANGED, k.first, "", value, k.second, valid, Cell::UNKNOWN };
+    return { VALUE_CHANGED, k.first, "", value, k.second, (uint8_t)(valid ? RESPONSE_FLAG_VALID : 0) };
 }
 
 Response Response::CellTypeChanged(
         const CellKey& k, Cell::Type type)
 {
-    return { CELL_TYPE_CHANGED, k.first, "", "", k.second, false, type };
+    uint8_t f;
+    switch (type)
+    {
+        case Cell::INPUT:   f = RESPONSE_FLAG_TYPE_INPUT; break;
+        case Cell::OUTPUT:  f = RESPONSE_FLAG_TYPE_OUTPUT; break;
+        case Cell::BASIC:   f = RESPONSE_FLAG_TYPE_BASE; break;
+        case Cell::UNKNOWN: f = RESPONSE_FLAG_TYPE_UNKNOWN; break;
+    };
+
+    return { CELL_TYPE_CHANGED, k.first, "", "", k.second, f };
 }
 
 Response Response::ReservedWord(const std::string& value)
 {
-    return { RESERVED_WORD, {}, "", value, 0, false, Cell::UNKNOWN };
+    return { RESERVED_WORD, {}, "", value, 0, 0};
 }
 
 }   // namespace Graph

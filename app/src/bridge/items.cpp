@@ -108,10 +108,11 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto index = order.at(r.target);
             auto new_value = QString::fromStdString(r.expr);
             auto& item = items[index];
-            if (item.cell_value != new_value || item.cell_valid != r.valid)
+            bool new_valid = r.flags & Graph::Response::RESPONSE_FLAG_VALID;
+            if (item.cell_value != new_value || item.cell_valid != new_valid)
             {
                 items[index].cell_value = new_value;
-                items[index].cell_valid = r.valid;
+                items[index].cell_valid = new_valid;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ValueRole, ValidRole});
             }
@@ -167,14 +168,16 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         case Graph::Response::CELL_TYPE_CHANGED:
         {
             auto index = order.at(r.target);
+
             QString t;
-            switch (r.type)
-            {
-                case Graph::Cell::BASIC: t = "basic"; break;
-                case Graph::Cell::INPUT: t = "input"; break;
-                case Graph::Cell::OUTPUT: t = "output"; break;
-                case Graph::Cell::UNKNOWN: t = "unknown"; break;
-            }
+            if      (r.flags & Graph::Response::RESPONSE_FLAG_TYPE_BASE)
+                {t = "basic";}
+            else if (r.flags & Graph::Response::RESPONSE_FLAG_TYPE_INPUT)
+                {t = "input";}
+            else if (r.flags & Graph::Response::RESPONSE_FLAG_TYPE_OUTPUT)
+                {t = "output";}
+            else if (r.flags & Graph::Response::RESPONSE_FLAG_TYPE_UNKNOWN)
+                {t = "unknown";}
 
             auto& item = items[index];
             if (item.cell_type != t)

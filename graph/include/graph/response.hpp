@@ -51,8 +51,16 @@ struct Response
 
     ItemIndex target;
 
-    bool valid;
-    Cell::Type type;
+    enum ResponseFlag {
+        RESPONSE_FLAG_VALID         = (1 << 0),
+        RESPONSE_FLAG_EDITABLE      = (1 << 1),
+        RESPONSE_FLAG_INSERTABLE    = (1 << 2),
+        RESPONSE_FLAG_TYPE_INPUT    = (1 << 3),
+        RESPONSE_FLAG_TYPE_OUTPUT   = (1 << 4),
+        RESPONSE_FLAG_TYPE_BASE     = (1 << 5),
+        RESPONSE_FLAG_TYPE_UNKNOWN  = (1 << 6),
+    };
+    uint8_t flags;
 
     //  Helper constructors
     static Response ItemErased(const Env& env, const ItemIndex& i);
