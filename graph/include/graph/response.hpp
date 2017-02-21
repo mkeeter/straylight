@@ -40,7 +40,6 @@ struct Response
         REDO_NOT_READY,
 
         CLEAR,
-        HALT,
     } op;
 
     // Environment for this change to be executed
@@ -80,7 +79,6 @@ struct Response
     static Response ValueChanged(
             const CellKey& k, const std::string& value, bool valid);
     static Response CellTypeChanged(const CellKey& k, Cell::Type type);
-    static Response Halt();
     static Response ReservedWord(const std::string& value);
 
     /* TODO

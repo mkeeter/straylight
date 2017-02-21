@@ -634,7 +634,7 @@ TEST_CASE("Root::run")
     SECTION("Inserting cell")
     {
         in.push(Command::InsertCell(Tree::ROOT_SHEET, "a", "(+ 1 2)"));
-        in.push(Command::StopLoop());
+        in.halt();
         sleep(1);
         REQUIRE(out.size() == 3);
         {

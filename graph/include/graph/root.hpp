@@ -222,7 +222,7 @@ public:
     /*
      *  Waits for run to complete
      *
-     *  The async master should push a StopLoop command before
+     *  The async master should halt the queue before
      *  calling this, otherwise the _run loop won't stop.
      */
     void wait();

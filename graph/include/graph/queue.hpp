@@ -17,7 +17,18 @@ public:
 
     void wait() {
         std::unique_lock<std::mutex> lock(mut);
-        cond.wait(lock, [this]{ return !queue.empty(); });
+        cond.wait(lock, [this]{ return !queue.empty() || _halt; });
+    }
+
+    void halt() {
+        std::lock_guard<std::mutex> lock(mut);
+        _halt = true;
+        cond.notify_one();
+    }
+
+    bool done() {
+        std::lock_guard<std::mutex> lock(mut);
+        return _halt;
     }
 
     T pop() {
@@ -34,12 +45,6 @@ public:
         return queue.front();
     }
 
-    const T& last() {
-        std::lock_guard<std::mutex> lock(mut);
-        assert(!queue.empty());
-        return queue.back();
-    }
-
     bool empty() const{
         std::lock_guard<std::mutex> lock(mut);
         return queue.empty();
@@ -52,6 +57,7 @@ public:
 
 protected:
     std::queue<T> queue;
+    bool _halt=false;
     mutable std::mutex mut;
     std::condition_variable cond;
 };

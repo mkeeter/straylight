@@ -81,9 +81,6 @@ void SheetInstanceModel::updateFrom(const Graph::Response& r)
 
         case Graph::Response::CLEAR:
             assert(false);
-
-        case Graph::Response::HALT:
-            assert(false);
     }
 }
 

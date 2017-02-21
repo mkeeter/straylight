@@ -33,10 +33,8 @@ GraphModel::GraphModel(QObject* parent)
 
 GraphModel::~GraphModel()
 {
-    printf("Waiting for root\n");
-    commands.push(Graph::Command::StopLoop());
+    commands.halt();
     root.wait();
-    printf("Done\n");
 }
 
 shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
@@ -110,9 +108,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
             // TODO
 
         case Graph::Response::CLEAR:
-            assert(false);
-
-        case Graph::Response::HALT:
             assert(false);
     }
 }

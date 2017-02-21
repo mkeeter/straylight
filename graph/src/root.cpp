@@ -851,16 +851,14 @@ void Root::_run(shared_queue<Command>& input)
     while (true)
     {
         input.wait();
-        auto cmd = input.pop();
-
-        // Handle the STOP_LOOP meta-command
-        if (cmd.op == Command::STOP_LOOP)
+        if (input.done())
         {
-            changes.push(Response::Halt());
+            changes.halt();
             break;
         }
         else
         {
+            auto cmd = input.pop();
             cmd(*this);
         }
     }

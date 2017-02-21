@@ -17,17 +17,10 @@ void QueueWatcher::start()
 
 void QueueWatcher::run()
 {
-    while (true)
+    while (!queue.done())
     {
         queue.wait();
-        if (queue.last().op == Graph::Response::HALT)
-        {
-            break;
-        }
-        else
-        {
-            emit(gotResponse());
-        }
+        emit(gotResponse());
     }
 }
 

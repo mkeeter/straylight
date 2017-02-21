@@ -85,12 +85,6 @@ Response Response::CellTypeChanged(
     return { CELL_TYPE_CHANGED, k.first, "", "", k.second, false, type };
 }
 
-
-Response Response::Halt()
-{
-    return { HALT, {}, "", "", 0, false, Cell::UNKNOWN };
-}
-
 Response Response::ReservedWord(const std::string& value)
 {
     return { RESERVED_WORD, {}, "", value, 0, false, Cell::UNKNOWN };

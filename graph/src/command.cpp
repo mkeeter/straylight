@@ -87,14 +87,8 @@ void Command::operator()(Graph::Root& root)
         case PUSH_MACRO:
         case POP_MACRO:
         case INVALID:
-        case STOP_LOOP:
             assert(false);
     };
-}
-
-Command Command::StopLoop()
-{
-    return { STOP_LOOP, "", "", 0, 0, 0, {}};
 }
 
 Command Command::InsertCell(
