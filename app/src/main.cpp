@@ -43,8 +43,10 @@ int main(int argc, char**argv)
     qmlRegisterSingletonType(QUrl("qrc:/qml/Awesome.qml"), "Awesome", 4, 7, "Awesome");
 
     QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
-    engine.load(QUrl("qrc:/qml/main.qml"));
+
+    // TODO: why does this need to be heap-allocated?
+    auto engine = new QQmlApplicationEngine;
+    engine->load(QUrl("qrc:/qml/main.qml"));
 
     return app.exec();
 }

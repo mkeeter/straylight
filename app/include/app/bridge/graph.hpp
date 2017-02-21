@@ -75,7 +75,7 @@ protected:
     Graph::Root root;
     shared_queue<Graph::Command> commands;
     shared_queue<Graph::Response>& responses;
-    QueueWatcher watcher;
+    QueueWatcher* watcher;
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;

@@ -34,6 +34,12 @@ public:
         return queue.front();
     }
 
+    const T& last() {
+        std::lock_guard<std::mutex> lock(mut);
+        assert(!queue.empty());
+        return queue.back();
+    }
+
     bool empty() const{
         std::lock_guard<std::mutex> lock(mut);
         return queue.empty();

@@ -20,7 +20,7 @@ void QueueWatcher::run()
     while (true)
     {
         queue.wait();
-        if (queue.peek().op == Graph::Response::HALT)
+        if (queue.last().op == Graph::Response::HALT)
         {
             break;
         }

@@ -10,7 +10,7 @@ namespace App {
 namespace Bridge {
 
 GraphModel::GraphModel(QObject* parent)
-    : QObject(parent), responses(runRoot(root, commands)), watcher(responses)
+    : QObject(parent), responses(runRoot(root, commands)), watcher(new QueueWatcher(responses))
 {
     // Add a model for the root instance
     instances[{}].reset(new SheetInstanceModel({}, 0, this));
@@ -25,17 +25,18 @@ GraphModel::GraphModel(QObject* parent)
     assert(r.env.size() == 0);
     updateFrom(r);
 
-    connect(&watcher, &QueueWatcher::gotResponse,
+    // TODO: why does watcher need to be heap-allocated?
+    connect(watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
-    watcher.start();
+    watcher->start();
 }
 
 GraphModel::~GraphModel()
 {
-    responses.push(Graph::Response::Halt());
-
+    printf("Waiting for root\n");
     commands.push(Graph::Command::StopLoop());
     root.wait();
+    printf("Done\n");
 }
 
 shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
