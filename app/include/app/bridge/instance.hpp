@@ -23,6 +23,7 @@ public:
     void updateFrom(const Graph::Response& r);
 
     Q_INVOKABLE QObject* itemsModel() { return &items; }
+    Q_INVOKABLE QObject* libraryModel() { return &library; }
 
     /*
      *  Inserts a cell with the next available valid name
@@ -51,13 +52,38 @@ public:
     Q_INVOKABLE void eraseCell(unsigned cell_index);
     Q_INVOKABLE void eraseInstance(unsigned cell_index);
 
+    /*
+     *  Inserts an instance of a particular sheet
+     */
+    Q_INVOKABLE void insertInstance(unsigned target_sheet_index);
+
+    /*
+     *  Erase a sheet from this sheet instance's library
+     */
+    Q_INVOKABLE void eraseSheet(unsigned sheet_index);
+
+    /*
+     *  Renames the target sheet
+     */
+    Q_INVOKABLE void renameSheet(unsigned sheet_index, const QString& name);
+
+    /*
+     *  Inserts a new sheet with a default-constructed name
+     */
+    Q_INVOKABLE void insertSheet();
+
+    /*
+     *  Checks whether the given sheet can be renamed,
+     *  returning an error string
+     */
+    Q_INVOKABLE QString checkSheetRename(unsigned i, const QString& name) const;
+
 #if 0
     /*
      *  Checks whether a name is valid
      *  Returns an empty string on success and an error message otherwise
      */
     Q_INVOKABLE QString checkItemName(QString name) const;
-    Q_INVOKABLE QString checkItemRename(int item_index, QString name) const;
     Q_INVOKABLE void renameItem(int item_index, QString name);
     Q_INVOKABLE QString nextItemName(int sheet_index) const;
 
@@ -66,7 +92,6 @@ public:
     Q_INVOKABLE void renameSheet(int sheet_index, QString name);
     Q_INVOKABLE void insertSheet(QString name);
     Q_INVOKABLE QString nextSheetName() const;
-    Q_INVOKABLE void eraseSheet(int sheet_index);
 
     Q_INVOKABLE void insertCell(const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
@@ -74,9 +99,7 @@ public:
                               const QString& expr);
     Q_INVOKABLE void eraseCell(int cell_index);
 
-    Q_INVOKABLE void insertInstance(QString name,
-                                    int target_sheet_index);
-    Q_INVOKABLE void eraseInstance(int instance_index);
+    Q_INVOKABLE void eraseInstance(unsigned instance_index);
 #endif
 
 protected:

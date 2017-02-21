@@ -8,7 +8,7 @@ import Awesome 4.7
 
 ColumnLayout {
     id: lib
-    property var libraryModel
+    property alias libraryModel: sheetList.model
 
     signal addInstance(int targetSheetIndex)
     signal eraseSheet(int targetSheetIndex)
@@ -91,8 +91,6 @@ ColumnLayout {
 
         ListView {
             id: sheetList
-
-            model: libraryModel
 
             delegate: SheetLibraryDelegate {
                 anchors.left: parent.left

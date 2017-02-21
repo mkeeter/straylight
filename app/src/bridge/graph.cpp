@@ -48,6 +48,13 @@ shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
 
 QString GraphModel::isValidItemName(QString s) const
 {
+    // TODO: check regex
+    return keywords.contains(s) ? "Interpreter keyword" : "";
+}
+
+QString GraphModel::isValidSheetName(QString s) const
+{
+    // TODO: check regex
     return keywords.contains(s) ? "Interpreter keyword" : "";
 }
 
@@ -62,7 +69,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         {
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
-            // TODO this is wrong
+            // TODO this is wrong sheet index
             instances[e].reset(new SheetInstanceModel(e, 0, this));
             // Fallthrough!
         }

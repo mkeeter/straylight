@@ -7,8 +7,6 @@ import Bridge 1.0
 
 GridLayout {
     objectName: "SheetLibraryDelegate"
-    signal addInstance(int targetSheetIndex)
-    signal eraseSheet(int targetSheetIndex)
 
     Text {
         Layout.row: 0
@@ -39,7 +37,7 @@ GridLayout {
         IconButton {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
-            onClicked: { addInstance(uniqueIndex) }
+            onClicked: { sheetInstanceModel().addInstance(sheetIndex) }
             visible: insertable
         }
         IconButton {
@@ -55,7 +53,7 @@ GridLayout {
             text: Awesome.fa_trash
             toolTip: "Delete"
             visible: editable
-            onClicked: { eraseSheet(uniqueIndex) }
+            onClicked: { sheetInstanceModel().eraseSheet(sheetIndex) }
         }
     }
 
@@ -75,10 +73,10 @@ GridLayout {
         width: parent.width
         label: "Rename to"
         getError: function(name) {
-            return Bridge.checkSheetRename(uniqueIndex, name)
+            return sheetInstanceModel().checkSheetRename(sheetIndex, name)
         }
         onAccepted: function(t) {
-            Bridge.renameSheet(uniqueIndex, t)
+            sheetInstanceModel().renameSheet(sheetIndex, t)
         }
     }
 

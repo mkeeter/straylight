@@ -31,6 +31,7 @@ SplitView {
 
     Component.onCompleted: {
         items.itemsModel = sheetInstanceModel().itemsModel()
+        lib.libraryModel = sheetInstanceModel().libraryModel()
         lib.slideOpen()
     }
 
@@ -125,23 +126,17 @@ SplitView {
         visible: false
 
         onAddInstance: {
-            var instance = sheetEnv[sheetEnv.length - 1]
-            var sheet = Bridge.sheetOf(instance)
-            var name = Bridge.nextItemName(sheet)
-            Bridge.insertInstance(sheet, name, targetSheetIndex)
+            sheetInstanceModel().insertInstance(targetSheetIndex)
             renameLastItemTimer.restart()
         }
 
         onAddSheet: {
-            var instance = sheetEnv[sheetEnv.length - 1]
-            var sheet = Bridge.sheetOf(instance)
-            var name = Bridge.nextSheetName(sheet)
-            Bridge.insertSheet(sheet, name)
+            sheetInstanceModel().insertSheet()
             renameLastSheetTimer.restart()
         }
 
         onEraseSheet: {
-            Bridge.eraseSheet(targetSheetIndex)
+            sheetInstanceModel().eraseSheet(targetSheetIndex)
         }
 
         onClosePane: { slideClose() }

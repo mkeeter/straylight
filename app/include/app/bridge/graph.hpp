@@ -60,6 +60,7 @@ public:
      *  Checks that the given string isn't a reserved word or invalid
      */
     QString isValidItemName(QString s) const;
+    QString isValidSheetName(QString s) const;
 
 protected slots:
     void gotResponse();

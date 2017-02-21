@@ -58,6 +58,12 @@ struct Command
     static Command SetExpr(CellIndex i, const std::string& expr);
     static Command EraseCell(CellIndex i);
     static Command EraseInstance(InstanceIndex i);
+    static Command InsertSheet(SheetIndex parent, const std::string& name);
+    static Command InsertInstance(
+            SheetIndex parent, SheetIndex target, const std::string& name);
+    static Command EraseSheet(SheetIndex i);
+    static Command RenameSheet(SheetIndex i, const std::string& name);
+
 };
 
 }   // namespace Graph

@@ -118,4 +118,25 @@ Command Command::EraseInstance(InstanceIndex i)
     return { ERASE_INSTANCE, "", "", 0, i, 0, {}};
 }
 
+Command Command::EraseSheet(SheetIndex i)
+{
+    return { ERASE_SHEET, "", "", 0, i, 0, {}};
+}
+
+Command Command::InsertInstance(SheetIndex parent, SheetIndex target,
+                                const std::string& name)
+{
+    return { INSERT_INSTANCE, name, "", parent, target, 0, {} };
+}
+
+Command Command::InsertSheet(SheetIndex parent, const std::string& name)
+{
+    return { INSERT_SHEET, name, "", parent, 0, 0, {} };
+}
+
+Command Command::RenameSheet(SheetIndex i, const std::string& name)
+{
+    return { RENAME_SHEET, name, "", 0, i, 0, {} };
+}
+
 }   // namespace Graph

@@ -52,6 +52,40 @@ void SheetInstanceModel::eraseInstance(unsigned i)
     graph->enqueue(Graph::Command::EraseInstance(i));
 }
 
+void SheetInstanceModel::insertSheet()
+{
+    graph->enqueue(Graph::Command::InsertSheet(
+                sheet, library.nextSheetName().toStdString()));
+}
+
+void SheetInstanceModel::insertInstance(unsigned t)
+{
+    graph->enqueue(Graph::Command::InsertInstance(
+                sheet, t, items.nextItemName().toStdString()));
+}
+
+void SheetInstanceModel::eraseSheet(unsigned t)
+{
+    graph->enqueue(Graph::Command::EraseSheet(t));
+}
+
+void SheetInstanceModel::renameSheet(unsigned sheet_index, const QString& str)
+{
+    graph->enqueue(Graph::Command::RenameSheet(
+                sheet_index, str.toStdString()));
+}
+
+QString SheetInstanceModel::checkSheetRename(unsigned i, const QString& str) const
+{
+    auto e = graph->isValidSheetName(str);
+    if (e.size())
+    {
+        return e;
+    }
+
+    return library.checkSheetRename(i, str);
+}
+
 void SheetInstanceModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)

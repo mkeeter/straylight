@@ -2,22 +2,39 @@
 
 #include <QAbstractListModel>
 
+#include <boost/bimap.hpp>
 #include "graph/response.hpp"
 
 namespace App {
 namespace Bridge {
+
+////////////////////////////////////////////////////////////////////////////////
 
 struct Sheet
 {
     QString name;
     bool editable;
     bool insertable;
+    Graph::SheetIndex sheet_index;
 };
+
+////////////////////////////////////////////////////////////////////////////////
 
 class SheetsModel : public QAbstractListModel
 {
 public:
     SheetsModel(QObject* parent=0) : QAbstractListModel(parent) {}
+
+    /*
+     *  Returns the next valid item name for the given prefix
+     */
+    QString nextSheetName(QString prefix="I") const;
+
+    /*
+     *  Checks to see if the given rename is valid
+     *  Returns "" on success; otherwise returns an error string
+     */
+    QString checkSheetRename(int i, const QString& str) const;
 
     /*
      *  Update the model state from the given response
@@ -32,11 +49,16 @@ protected:
         NameRole = Qt::UserRole + 1,
         EditableRole,
         InsertableRole,
+        SheetIndexRole,
     };
 
     QHash<int, QByteArray> roleNames() const override;
 
     QList<Sheet> sheets;
+
+    // Meta-data for fast lookups
+    std::map<Graph::SheetIndex, int> order;
+    boost::bimap<Graph::SheetIndex, std::string> names;
 };
 
 }   // namespace Bridge

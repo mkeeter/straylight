@@ -49,6 +49,8 @@ ScrollView {
         anchors.fill: parent
         spacing: 5
 
+        onModelChanged: { console.log(model) }
+
         delegate: SheetItemDelegate {
             anchors.left: parent.left
             anchors.right: parent.right
