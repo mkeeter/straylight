@@ -81,10 +81,10 @@ GridLayout {
         id: renamer
         label: "Rename to"
         getError: function(name) {
-            return sheetInstanceModel().checkItemRename(uniqueIndex, name)
+            return sheetInstanceModel.checkItemRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
-            sheetInstanceModel().renameItem(uniqueIndex, t)
+            sheetInstanceModel.renameItem(uniqueIndex, t)
         }
         onActiveChanged: { focusCell() }
     }

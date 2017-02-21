@@ -85,9 +85,9 @@ Column {
                 sequence: StandardKey.Delete
                 onActivated: {
                     if (type == 'cell') {
-                        sheetInstanceModel().eraseCell(uniqueIndex)
+                        sheetInstanceModel.eraseCell(uniqueIndex)
                     } else if (type == 'instance') {
-                        sheetInstanceModel().eraseInstance(uniqueIndex)
+                        sheetInstanceModel.eraseInstance(uniqueIndex)
                     } else {
                         console.log("Unknown type " + type)
                     }

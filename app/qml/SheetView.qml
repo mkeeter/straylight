@@ -18,20 +18,14 @@ SplitView {
     property string instanceName: ""
     property string sheetName: ""
 
-    property var _sheetInstanceModel
-    function sheetInstanceModel() {
-        if (!_sheetInstanceModel) {
-            _sheetInstanceModel = Graph.modelOf(sheetEnv)
-        }
-        return _sheetInstanceModel
-    }
+    property var sheetInstanceModel: Graph.modelOf(sheetEnv)
 
     // Forwards a call to fix item layout
     function fixLayout() { items.fixLayout() }
 
     Component.onCompleted: {
-        items.itemsModel = sheetInstanceModel().itemsModel()
-        lib.libraryModel = sheetInstanceModel().libraryModel()
+        items.itemsModel = sheetInstanceModel.itemsModel()
+        lib.libraryModel = sheetInstanceModel.libraryModel()
         lib.slideOpen()
     }
 
@@ -62,7 +56,7 @@ SplitView {
                     //var instance = sheetEnv[sheetEnv.length - 1]
                     //var sheet = Bridge.sheetOf(instance)
                     //var name = Bridge.nextItemName(sheet)
-                    sheetInstanceModel().insertCell()
+                    sheetInstanceModel.insertCell()
                     renameLastItemTimer.restart()
                 }
             }
@@ -126,17 +120,17 @@ SplitView {
         visible: false
 
         onAddInstance: {
-            sheetInstanceModel().insertInstance(targetSheetIndex)
+            sheetInstanceModel.insertInstance(targetSheetIndex)
             renameLastItemTimer.restart()
         }
 
         onAddSheet: {
-            sheetInstanceModel().insertSheet()
+            sheetInstanceModel.insertSheet()
             renameLastSheetTimer.restart()
         }
 
         onEraseSheet: {
-            sheetInstanceModel().eraseSheet(targetSheetIndex)
+            sheetInstanceModel.eraseSheet(targetSheetIndex)
         }
 
         onClosePane: { slideClose() }

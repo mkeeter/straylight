@@ -39,7 +39,7 @@ GridLayout {
 
         function setExpr(text) {
             if (text != expr) {
-                sheetInstanceModel().setExpr(uniqueIndex, text)
+                sheetInstanceModel.setExpr(uniqueIndex, text)
             }
         }
     }
