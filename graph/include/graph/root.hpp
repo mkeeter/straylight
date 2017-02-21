@@ -219,6 +219,15 @@ public:
      */
     shared_queue<Response>& run(shared_queue<Command>& input);
 
+    /*
+     *  Waits for run to complete
+     *
+     *  The async master should push a StopLoop command before
+     *  calling this, otherwise the _run loop won't stop.
+     */
+    void wait();
+
+
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date

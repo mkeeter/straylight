@@ -33,6 +33,9 @@ GraphModel::GraphModel(QObject* parent)
 GraphModel::~GraphModel()
 {
     responses.push(Graph::Response::Halt());
+
+    commands.push(Graph::Command::StopLoop());
+    root.wait();
 }
 
 shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,

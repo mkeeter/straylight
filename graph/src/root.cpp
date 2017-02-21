@@ -841,6 +841,11 @@ shared_queue<Response>& Root::run(shared_queue<Command>& input)
     return changes;
 }
 
+void Root::wait()
+{
+    future.wait();
+}
+
 void Root::_run(shared_queue<Command>& input)
 {
     while (true)
