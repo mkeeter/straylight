@@ -5,6 +5,7 @@
 #include "graph/types/index.hpp"
 #include "graph/types/keys.hpp"
 #include "graph/types/env.hpp"
+#include "graph/types/cell.hpp"
 
 namespace Graph {
 
@@ -17,6 +18,7 @@ struct Response
 
         ITEM_RENAMED,
         CELL_INSERTED,
+        CELL_TYPE_CHANGED,
         EXPR_CHANGED,
         INPUT_CHANGED,
         INSTANCE_INSERTED,
@@ -51,6 +53,7 @@ struct Response
     ItemIndex target;
 
     bool valid;
+    Cell::Type type;
 
     //  Helper constructors
     static Response ItemErased(const Env& env, const ItemIndex& i);
@@ -76,6 +79,7 @@ struct Response
             const Env& env, const SheetIndex& i);
     static Response ValueChanged(
             const CellKey& k, const std::string& value, bool valid);
+    static Response CellTypeChanged(const CellKey& k, Cell::Type type);
     static Response Halt();
 
     /* TODO

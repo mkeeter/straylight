@@ -44,6 +44,7 @@ void SheetInstanceModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INPUT_CREATED:
         case Graph::Response::OUTPUT_CREATED:
         case Graph::Response::IO_DELETED:
+        case Graph::Response::CELL_TYPE_CHANGED:
             items.updateFrom(r);
             break;
 

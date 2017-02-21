@@ -54,7 +54,8 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {NameRole, "name"},
         {ValidRole, "valid"},
         {ExprRole, "expr"},
-        {ValueRole, "value"}};
+        {ValueRole, "value"},
+        {IOTypeRole, "ioType"}};
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -79,9 +80,10 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         {
             auto index = order.at(r.target);
             auto new_expr = QString::fromStdString(r.expr);
-            if (items[index].cell_expr != new_expr)
+            auto& item = items[index];
+            if (item.cell_expr != new_expr)
             {
-                items[index].cell_expr = new_expr;
+                item.cell_expr = new_expr;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ExprRole});
             }
@@ -135,6 +137,28 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 order.erase(r.target);
                 names.left.erase(r.target);
             endRemoveRows();
+            break;
+        }
+
+        case Graph::Response::CELL_TYPE_CHANGED:
+        {
+            auto index = order.at(r.target);
+            QString t;
+            switch (r.type)
+            {
+                case Graph::Cell::BASIC: t = "basic"; break;
+                case Graph::Cell::INPUT: t = "input"; break;
+                case Graph::Cell::OUTPUT: t = "output"; break;
+                case Graph::Cell::UNKNOWN: t = "unknown"; break;
+            }
+
+            auto& item = items[index];
+            if (item.cell_type != t)
+            {
+                item.cell_type = t;
+                auto i = createIndex(index, 0);
+                dataChanged(i, i, {IOTypeRole});
+            }
             break;
         }
 

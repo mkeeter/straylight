@@ -71,6 +71,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::EXPR_CHANGED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
+        case Graph::Response::CELL_TYPE_CHANGED:
             instances.at(r.env)->updateFrom(r);
             break;
 

@@ -45,6 +45,7 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
     {
         markDirty({e, name});
         changes.push(Response::CellInserted({e, cell}, name, expr));
+        changes.push(Response::CellTypeChanged({e, cell}, type));
     }
 
     if ((type == Cell::INPUT || type == Cell::OUTPUT) &&
@@ -330,6 +331,12 @@ bool Root::setExpr(const CellIndex& c, const std::string& expr)
     {
         markDirty({e, tree.nameOf(c)});
         changes.push(Response::ExprChanged({e, c}, expr));
+
+        // If the type changed then pass that info along to the changelog
+        if (prev_type != cell->type)
+        {
+            changes.push(Response::CellTypeChanged({e, c}, cell->type));
+        }
     }
 
     {   // Mark anything that looked for the cell's dummy NameKey as dirty

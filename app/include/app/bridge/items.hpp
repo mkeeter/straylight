@@ -41,13 +41,13 @@ protected:
         {
             return Item {
                 CELL, QString::fromStdString(name), false, QString::fromStdString(expr),
-                "", ""};
+                "", "", ""};
         }
 
         static Item Instance(const std::string& name, const std::string& sheet)
         {
             return Item {
-                INSTANCE, QString::fromStdString(name), false, "", "",
+                INSTANCE, QString::fromStdString(name), false, "", "", "",
                 QString::fromStdString(sheet) };
         }
 
@@ -57,6 +57,7 @@ protected:
         bool cell_valid;
         QString cell_expr;
         QString cell_value;
+        QString cell_type;
 
         QString instance_sheet;
 
@@ -69,6 +70,7 @@ protected:
         ValidRole,
         ExprRole,
         ValueRole,
+        IOTypeRole,
     };
 
     QHash<int, QByteArray> roleNames() const override;
