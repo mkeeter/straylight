@@ -151,6 +151,15 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 items.removeAt(index);
                 order.erase(r.target);
                 names.left.erase(r.target);
+                // Shift later items down by one
+                // TODO: replace this with an ORDER_CHANGED Response
+                for (const auto& i : items)
+                {
+                    if (order.at(i.unique_index) >= index)
+                    {
+                        order.at(i.unique_index)--;
+                    }
+                }
             endRemoveRows();
             break;
         }
