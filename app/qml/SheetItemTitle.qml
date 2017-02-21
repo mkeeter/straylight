@@ -3,7 +3,6 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 import Style 1.0
-import Bridge 1.0
 import Awesome 4.7
 
 GridLayout {
@@ -82,7 +81,7 @@ GridLayout {
         id: renamer
         label: "Rename to"
         getError: function(name) {
-            return Bridge.checkItemRename(uniqueIndex, name)
+            return sheetInstanceModel().checkItemRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
             Bridge.renameItem(uniqueIndex, t)

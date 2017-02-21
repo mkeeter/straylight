@@ -24,6 +24,7 @@ public:
 
     Q_INVOKABLE QObject* itemsModel() { return &items; }
     Q_INVOKABLE void insertCell();
+    Q_INVOKABLE QString checkItemRename(unsigned i, QString str);
 
 #if 0
     /*
