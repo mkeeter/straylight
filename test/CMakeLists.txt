@@ -13,6 +13,7 @@ add_executable(straylight-test main.cpp
     ../kernel/test/tree.cpp
     ../kernel/test/util/shapes.cpp
 
+    ../graph/test/async.cpp
     ../graph/test/dependencies.cpp
     ../graph/test/interpreter.cpp
     ../graph/test/item.cpp

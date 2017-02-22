@@ -13,7 +13,7 @@
 #include "graph/response.hpp"
 #include "graph/command.hpp"
 #include "graph/queue.hpp"
-#include "graph/root.hpp"
+#include "graph/async.hpp"
 
 #include "kernel/solve/solver.hpp"
 
@@ -49,7 +49,7 @@ public:
      *  Starts a root running with kernel and app bindings injected
      */
     static shared_queue<Graph::Response>& runRoot(
-            Graph::Root& root,
+            Graph::AsyncRoot& root,
             shared_queue<Graph::Command>& commands);
 
     /*
@@ -74,7 +74,7 @@ protected slots:
 protected:
     std::map<Graph::Env, std::unique_ptr<SheetInstanceModel>> instances;
 
-    Graph::Root root;
+    Graph::AsyncRoot root;
     shared_queue<Graph::Command> commands;
     shared_queue<Graph::Response>& responses;
     QueueWatcher watcher;

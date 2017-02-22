@@ -1,4 +1,5 @@
 add_library(straylight-graph STATIC
+    src/async.cpp
     src/dependencies.cpp
     src/interpreter.cpp
     src/item.cpp

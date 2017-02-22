@@ -43,8 +43,8 @@ public:
      */
     CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr="");
-    void insertCell(const SheetIndex& parent, const CellIndex& cell,
-                    const std::string& name, const std::string& expr);
+    virtual void insertCell(const SheetIndex& parent, const CellIndex& cell,
+                            const std::string& name, const std::string& expr);
 
     /*
      *  Inserts a new instance into the graph
@@ -52,31 +52,31 @@ public:
     InstanceIndex insertInstance(const SheetIndex& parent,
                                  const std::string& name,
                                  const SheetIndex& target);
-    void insertInstance(const SheetIndex& parent,
-                        const InstanceIndex& instance,
-                        const std::string& name,
-                        const SheetIndex& target);
+    virtual void insertInstance(const SheetIndex& parent,
+                                const InstanceIndex& instance,
+                                const std::string& name,
+                                const SheetIndex& target);
 
     /*
      *  Erases a cell, triggering re-evaluation
      */
-    void eraseCell(const CellIndex& cell);
+    virtual void eraseCell(const CellIndex& cell);
 
     /*
      *  Erases an instance, triggering re-evaluation
      */
-    void eraseInstance(const InstanceIndex& instance);
+    virtual void eraseInstance(const InstanceIndex& instance);
 
     /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
-    bool setExpr(const CellIndex& cell, const std::string& expr);
+    virtual bool setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
      *  Changes the input expression for a particular instance
      */
-    bool setInput(const InstanceIndex& instance, const CellIndex& cell,
-                  const std::string& expr);
+    virtual bool setInput(const InstanceIndex& instance, const CellIndex& cell,
+                          const std::string& expr);
 
     /*
      *  If the given key points to an input cell, set its input value;
@@ -111,7 +111,7 @@ public:
     /*
      *  Renames an item, resynching anything that looked for it
      */
-    void renameItem(const ItemIndex& i, const std::string& name);
+    virtual bool renameItem(const ItemIndex& i, const std::string& name);
 
     /*
      *  Removes all items from the graph
@@ -136,18 +136,18 @@ public:
         { return checkSheetName(parent, name); }
 
     SheetIndex insertSheet(const SheetIndex& parent, const std::string& name);
-    void insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
-                     const std::string& name);
+    virtual void insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
+                             const std::string& name);
 
     /*
      *  Renames a sheet
      */
-    void renameSheet(const SheetIndex& i, const std::string& name);
+    virtual void renameSheet(const SheetIndex& i, const std::string& name);
 
     /*
      *  Erases a sheet and any instances thereof
      */
-    void eraseSheet(const SheetIndex& s);
+    virtual void eraseSheet(const SheetIndex& s);
 
     /*
      *  Temporarily builds up the given sheet, setting the given inputs
@@ -208,27 +208,6 @@ public:
     void setTag(const CellKey& id, Graph::Tag* t)
         { tags[id].reset(t); }
 
-    /*
-     *  Start an async evaluation thread running.
-     *
-     *  The thread takes commands from input and puts responses out on the
-     *  returned queue.
-     *
-     *  This moves the graph into the async thread; all operations must
-     *  be done by injecting commands into the input queue after this
-     *  point.
-     */
-    shared_queue<Response>& run(shared_queue<Command>& input);
-
-    /*
-     *  Waits for run to complete
-     *
-     *  The async master should halt the queue before
-     *  calling this, otherwise the _run loop won't stop.
-     */
-    void wait();
-
-
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -252,10 +231,9 @@ protected:
     void pushDirty(const CellKey& k);
 
     /*
-     *  Async run function
-     *  run() calls this in another thread!
+     *  Called when a value changes
      */
-    void _run(shared_queue<Command>& input);
+    virtual void gotResult(const CellKey& k, const Value& v);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -277,16 +255,6 @@ protected:
 
     /*  Tags are associated with cell keys  */
     std::map<CellKey, std::unique_ptr<Tag>> tags;
-
-    /*  Queue of changes  */
-    shared_queue<Response> changes;
-
-    /*  The translator allows the graph to translate ValuePtr objects
-     *  into types that can safely be moved out of the interpreter thread */
-    Translator* translator=nullptr;
-
-    /*  Future for async running  */
-    std::future<void> future;
 
     // Regex strings aren't stored, so we store them statically heree
     static const std::list<std::pair<std::string, std::string>> _bad_item_names;

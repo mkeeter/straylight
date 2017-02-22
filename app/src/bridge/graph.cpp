@@ -37,7 +37,7 @@ GraphModel::~GraphModel()
     watcher.wait();
 }
 
-shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
+shared_queue<Graph::Response>& GraphModel::runRoot(Graph::AsyncRoot& root,
         shared_queue<Graph::Command>& commands)
 {
     root.call(Kernel::Bind::init);
