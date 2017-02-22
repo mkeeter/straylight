@@ -90,7 +90,10 @@ void GraphModel::updateFrom(const Graph::Response& r)
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
             // TODO should set sheet instance name here
-            instances[e].reset(new SheetInstanceModel(e, r.sheet, this));
+            auto i = new SheetInstanceModel(e, r.sheet, this);
+            instances[e].reset(i);
+            i->setInstanceName(QString::fromStdString(r.name));
+            i->setSheetName(QString::fromStdString(r.expr));
             // Fallthrough!
         }
 

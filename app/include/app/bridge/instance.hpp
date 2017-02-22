@@ -101,6 +101,10 @@ public:
     Q_INVOKABLE void eraseInstance(unsigned instance_index);
 #endif
 
+signals:
+    void instanceNameChanged();
+    void sheetNameChanged();
+
 protected:
     GraphModel* graph;
 
@@ -108,6 +112,21 @@ protected:
     const Graph::Env env;
     const Graph::SheetIndex sheet;
 
+    QString _instance_name;
+    QString _sheet_name;
+public:
+    void setInstanceName(const QString& s) {
+        _instance_name = s;
+        emit(instanceNameChanged());
+    }
+    void setSheetName(const QString& s) {
+        _sheet_name = s;
+        emit(sheetNameChanged());
+    }
+    Q_PROPERTY(QString instanceName MEMBER _instance_name NOTIFY instanceNameChanged)
+    Q_PROPERTY(QString sheetName MEMBER _sheet_name NOTIFY sheetNameChanged)
+
+protected:
     ItemsModel items;
     SheetsModel library;
 };
