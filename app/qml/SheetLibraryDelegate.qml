@@ -37,7 +37,7 @@ GridLayout {
         IconButton {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
-            onClicked: { sheetInstanceModel.addInstance(sheetIndex) }
+            onClicked: { sheetInstanceModel.insertInstance(sheetIndex) }
             visible: insertable
         }
         IconButton {
