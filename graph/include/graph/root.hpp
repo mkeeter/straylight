@@ -2,6 +2,7 @@
 
 #include <stack>
 #include <future>
+#include <regex>
 
 #include "graph/item.hpp"
 #include "graph/response.hpp"
@@ -286,6 +287,17 @@ protected:
 
     /*  Future for async running  */
     std::future<void> future;
+
+    // Regex strings aren't stored, so we store them statically heree
+    static const std::list<std::pair<std::string, std::string>> _bad_item_names;
+    static const std::list<std::pair<std::string, std::string>> _bad_sheet_names;
+    static const std::string _good_item_name;
+    static const std::string _good_sheet_name;
+
+    std::list<std::pair<std::regex, std::string>> bad_item_names;
+    std::list<std::pair<std::regex, std::string>> bad_sheet_names;
+    std::regex good_item_name;
+    std::regex good_sheet_name;
 };
 
 }   // namespace Graph

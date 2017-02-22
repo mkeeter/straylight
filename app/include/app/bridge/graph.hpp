@@ -4,6 +4,7 @@
 
 #include <QQmlEngine>
 #include <QJSEngine>
+#include <QRegularExpression>
 
 #include "app/bridge/watcher.hpp"
 #include "app/bridge/instance.hpp"
@@ -80,6 +81,10 @@ protected:
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;
+    QList<QPair<QRegularExpression, QString>> bad_item_names;
+    QList<QPair<QRegularExpression, QString>> bad_sheet_names;
+    QRegularExpression good_item_name;
+    QRegularExpression good_sheet_name;
 };
 
 }   // namespace Bridge

@@ -113,17 +113,7 @@ void SheetInstanceModel::updateFrom(const Graph::Response& r)
             items.updateFrom(r);
             break;
 
-        case Graph::Response::ITEM_NAME_REGEX:
-        case Graph::Response::SHEET_NAME_REGEX:
-        case Graph::Response::RESERVED_WORD:
-        case Graph::Response::RESET_UNDO_QUEUE:
-        case Graph::Response::UNDO_READY:
-        case Graph::Response::REDO_READY:
-        case Graph::Response::UNDO_NOT_READY:
-        case Graph::Response::REDO_NOT_READY:
-            // TODO
-
-        case Graph::Response::CLEAR:
+        default:
             assert(false);
     }
 }

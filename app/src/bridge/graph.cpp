@@ -48,13 +48,33 @@ shared_queue<Graph::Response>& GraphModel::runRoot(Graph::Root& root,
 
 QString GraphModel::isValidItemName(QString s) const
 {
-    // TODO: check regex
+    for (auto& r : bad_item_names)
+    {
+        if (r.first.match(s).hasMatch())
+        {
+            return r.second;
+        }
+    }
+    if (!good_item_name.match(s).hasMatch())
+    {
+        return "Invalid name";
+    }
     return keywords.contains(s) ? "Interpreter keyword" : "";
 }
 
 QString GraphModel::isValidSheetName(QString s) const
 {
-    // TODO: check regex
+    for (auto& r : bad_sheet_names)
+    {
+        if (r.first.match(s).hasMatch())
+        {
+            return r.second;
+        }
+    }
+    if (!good_sheet_name.match(s).hasMatch())
+    {
+        return "Invalid name";
+    }
     return keywords.contains(s) ? "Interpreter keyword" : "";
 }
 
@@ -101,12 +121,33 @@ void GraphModel::updateFrom(const Graph::Response& r)
             break;
         }
 
+////////////////////////////////////////////////////////////////////////////////
+
+        // Load reserved words from interpreter
         case Graph::Response::RESERVED_WORD:
             keywords.insert(QString::fromStdString(r.expr));
             break;
 
-        case Graph::Response::ITEM_NAME_REGEX:
-        case Graph::Response::SHEET_NAME_REGEX:
+        // Load regular expressions in regex matchers
+        case Graph::Response::ITEM_NAME_REGEX_BAD:
+            bad_item_names.push_back({
+                    QRegularExpression(QString::fromStdString(r.expr)),
+                    QString::fromStdString(r.name)});
+            break;
+        case Graph::Response::SHEET_NAME_REGEX_BAD:
+            bad_sheet_names.push_back({
+                    QRegularExpression(QString::fromStdString(r.expr)),
+                    QString::fromStdString(r.name)});
+            break;
+        case Graph::Response::ITEM_NAME_REGEX_GOOD:
+            good_item_name = QRegularExpression(QString::fromStdString(r.expr));
+            break;
+        case Graph::Response::SHEET_NAME_REGEX_GOOD:
+            good_sheet_name = QRegularExpression(QString::fromStdString(r.expr));
+            break;
+
+////////////////////////////////////////////////////////////////////////////////
+
         case Graph::Response::RESET_UNDO_QUEUE:
         case Graph::Response::UNDO_READY:
         case Graph::Response::REDO_READY:

@@ -30,11 +30,6 @@ public:
     Cell::Type cellType(const std::string& expr) const;
 
     /*
-     *  Checks to see whether the given name is valid
-     */
-    bool nameValid(const std::string& name) const;
-
-    /*
      *  Evaluates a in the given environment
      *  If the result is unchanged, returns a Value with value = nullptr
      */
@@ -113,7 +108,6 @@ private:
     s7_cell* const is_input;
     s7_cell* const is_output;
     s7_cell* const default_expr;
-    s7_cell* const name_valid;
 
     s7_cell* const eval_func;
 };

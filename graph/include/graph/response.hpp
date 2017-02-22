@@ -30,8 +30,10 @@ struct Response
         OUTPUT_CREATED,
         IO_DELETED,
 
-        ITEM_NAME_REGEX,
-        SHEET_NAME_REGEX,
+        ITEM_NAME_REGEX_BAD,
+        SHEET_NAME_REGEX_BAD,
+        ITEM_NAME_REGEX_GOOD,
+        SHEET_NAME_REGEX_GOOD,
         RESERVED_WORD,
         RESET_UNDO_QUEUE,
         UNDO_READY,
@@ -88,6 +90,11 @@ struct Response
             const CellKey& k, const std::string& value, bool valid);
     static Response CellTypeChanged(const CellKey& k, Cell::Type type);
     static Response ReservedWord(const std::string& value);
+
+    static Response ItemNameRegexBad(const std::string& r, const std::string& err);
+    static Response SheetNameRegexBad(const std::string& r, const std::string& err);
+    static Response ItemNameRegex(const std::string& r);
+    static Response SheetNameRegex(const std::string& r);
 
     /* TODO
      *  InstanceSheetRenamed

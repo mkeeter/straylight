@@ -239,19 +239,6 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                     "")))
             (lambda args "")))
       )")),
-      name_valid(s7_eval_c_string(sc, R"(
-        (lambda (str)
-          (and (not (char-position #\( str))
-               (not (char-position #\) str))
-               (not (char-position #\  str))
-              (catch #t
-                (lambda ()
-                  (let* ((s (format #f "(define ~a #t) " str))
-                         (r (read (open-input-string s))))
-                    (eval r)
-                    #t))
-                (lambda args #f))))
-      )")),
       eval_func(s7_eval_c_string(sc, R"(
         (lambda (str eval-env graph-root cell-env)
           (define (read-all port)
@@ -285,8 +272,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
     // Install default *cell-reader*
     setReader(s7_eval_c_string(sc, "(lambda (s r c) s)"));
 
-    for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          eval_func})
+    for (s7_pointer ptr: {is_input, is_output, default_expr, eval_func})
     {
         s7_gc_protect(sc, ptr);
     }
@@ -380,15 +366,6 @@ Cell::Type Interpreter::cellType(const std::string& expr) const
     return isInput(expr)  ? Cell::INPUT :
            isOutput(expr) ? Cell::OUTPUT :
                             Cell::BASIC;
-}
-
-bool Interpreter::nameValid(const std::string& str) const
-{
-    return
-        s7_is_eq(s7_t(sc),
-            s7_call(sc, name_valid,
-                s7_list(sc, 1,
-                    s7_make_string(sc, str.c_str()))));
 }
 
 Value Interpreter::eval(const CellKey& key)

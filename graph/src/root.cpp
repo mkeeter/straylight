@@ -2,8 +2,19 @@
 
 namespace Graph {
 
+const std::list<std::pair<std::string, std::string>> Root::_bad_item_names = {
+        {"^$", "Name cannot be empty"},
+        {"^[A-Z].*$", "First character must be lowercase"}};
+const std::list<std::pair<std::string, std::string>> Root::_bad_sheet_names = {
+        {"^$", "Name cannot be empty"},
+        {"^[a-z].*$", "First character must be uppercase"}};
+
+const std::string Root::_good_item_name = "^[a-z][A-Za-z0-9\\-_]*$";
+const std::string Root::_good_sheet_name = "^[A-Z][A-Za-z0-9\\-_]*$";
+
 Root::Root()
-    : deps(*this), interpreter(*this, &deps)
+    : deps(*this), interpreter(*this, &deps),
+    good_item_name(_good_item_name), good_sheet_name(_good_sheet_name)
 {
     dirty.push({});
 
@@ -16,6 +27,20 @@ Root::Root()
     {
         changes.push(Response::ReservedWord(k));
     }
+
+    for (const auto& i : _bad_item_names)
+    {
+        changes.push(Response::ItemNameRegexBad(i.first, i.second));
+        bad_item_names.push_back({std::regex(i.first), i.second});
+    }
+
+    for (const auto& i : _bad_sheet_names)
+    {
+        changes.push(Response::SheetNameRegexBad(i.first, i.second));
+        bad_sheet_names.push_back({std::regex(i.first), i.second});
+    }
+    changes.push(Response::ItemNameRegex(_good_item_name));
+    changes.push(Response::SheetNameRegex(_good_sheet_name));
 }
 
 CellKey Root::toCellKey(const NameKey& k) const
@@ -453,35 +478,23 @@ std::string Root::loadString(const std::string& s)
 
 bool Root::isItemName(const std::string& name, std::string* err) const
 {
-    if (name.size() == 0)
+    for (auto& b : bad_item_names)
     {
-        if (err)
+        if (std::regex_search(name, b.first))
         {
-            *err = "Name cannot be empty";
+            if (err)
+            {
+                *err = b.second;
+            }
+            return false;
         }
-        return false;
     }
-    else if (!islower(name[0]))
-    {
-        if (err)
-        {
-            *err = "Name must begin with a lowercase letter";
-        }
-        return false;
-    }
-    else if (!interpreter.nameValid(name))
+
+    if (!std::regex_search(name, good_item_name))
     {
         if (err)
         {
             *err = "Invalid name";
-        }
-        return false;
-    }
-    else if (interpreter.isReserved(name))
-    {
-        if (err)
-        {
-            *err = "Name is reserved by interpreter";
         }
         return false;
     }
@@ -668,22 +681,27 @@ std::map<std::string, Value> Root::callSheet(
 
 bool Root::isSheetName(const std::string& name, std::string* err) const
 {
-    if (name.size() == 0)
+    for (auto& b : bad_sheet_names)
+    {
+        if (std::regex_search(name, b.first))
+        {
+            if (err)
+            {
+                *err = b.second;
+            }
+            return false;
+        }
+    }
+
+    if (!std::regex_search(name, good_sheet_name))
     {
         if (err)
         {
-            *err = "Name cannot be empty";
+            *err = "Invalid name";
         }
         return false;
     }
-    else if (!isupper(name[0]))
-    {
-        if (err)
-        {
-            *err = "Name must begin with a uppercase letter";
-        }
-        return false;
-    }
+
     return true;
 }
 

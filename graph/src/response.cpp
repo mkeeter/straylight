@@ -99,4 +99,24 @@ Response Response::ReservedWord(const std::string& value)
     return { RESERVED_WORD, {}, "", value, 0, 0};
 }
 
+Response Response::ItemNameRegex(const std::string& r)
+{
+    return { ITEM_NAME_REGEX_GOOD, {}, "", r, 0, 0 };
+}
+
+Response Response::SheetNameRegex(const std::string& r)
+{
+    return { SHEET_NAME_REGEX_GOOD, {}, "", r, 0, 0 };
+}
+
+Response Response::ItemNameRegexBad(const std::string& r, const std::string& e)
+{
+    return { ITEM_NAME_REGEX_BAD, {}, e, r, 0, 0 };
+}
+
+Response Response::SheetNameRegexBad(const std::string& r, const std::string& e)
+{
+    return { SHEET_NAME_REGEX_BAD, {}, e, r, 0, 0 };
+}
+
 }   // namespace Graph
