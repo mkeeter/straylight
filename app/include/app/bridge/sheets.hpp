@@ -22,6 +22,7 @@ struct Sheet
 
 class SheetsModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     SheetsModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
@@ -44,6 +45,9 @@ public:
     QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
     int rowCount(const QModelIndex& parent=QModelIndex()) const override;
 
+signals:
+    void countChanged();
+
 protected:
     enum SheetRole {
         NameRole = Qt::UserRole + 1,
@@ -55,6 +59,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QList<Sheet> sheets;
+    int getCount() const { return sheets.size(); }
+    Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
     // Meta-data for fast lookups
     std::map<Graph::SheetIndex, int> order;

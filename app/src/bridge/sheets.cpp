@@ -100,6 +100,7 @@ void SheetsModel::updateFrom(const Graph::Response& r)
                         order.at(i.sheet_index)--;
                     }
                 }
+                emit(countChanged());
             endRemoveRows();
             break;
         }
@@ -114,6 +115,7 @@ void SheetsModel::updateFrom(const Graph::Response& r)
                         target });
                 order.insert({target, index});
                 names.left.insert({target, r.name});
+                emit(countChanged());
             endInsertRows();
             break;
         }
