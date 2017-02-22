@@ -81,6 +81,7 @@ protected:
         ValueRole,
         IOTypeRole,
         UniqueIndexRole,
+        SheetNameRole,
     };
 
     QHash<int, QByteArray> roleNames() const override;

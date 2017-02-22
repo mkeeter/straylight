@@ -27,6 +27,7 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
         case ValueRole:  return i.type == Item::CELL ? i.cell_value : QVariant();
         case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
         case UniqueIndexRole: return i.unique_index;
+        case SheetNameRole: return i.type == Item::INSTANCE ? i.instance_sheet : QVariant();
         default: return QVariant();
     }
 }
@@ -68,7 +69,8 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {ExprRole, "expr"},
         {ValueRole, "value"},
         {IOTypeRole, "ioType"},
-        {UniqueIndexRole, "uniqueIndex"}};
+        {UniqueIndexRole, "uniqueIndex"},
+        {SheetNameRole, "sheetName"}};
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -145,6 +147,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             endInsertRows();
             break;
         }
+
         case Graph::Response::ITEM_ERASED:
         {
             auto index = order.at(r.target);

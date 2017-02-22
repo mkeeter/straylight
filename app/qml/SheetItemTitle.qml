@@ -33,7 +33,7 @@ GridLayout {
         Layout.column: 1
 
         Text {
-            text: type == 'cell' ? '' : sheet
+            text: type == 'cell' ? '' : sheetName
             font.pointSize: 14
             color: Style.textDarkSecondary
             rightPadding: 8
