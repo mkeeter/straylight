@@ -84,17 +84,19 @@ void GraphModel::updateFrom(const Graph::Response& r)
     switch (r.op)
     {
         // Instance creation both manipulates the instance map
-        // and falls through to modify the parent sheet
+        // and modifies the parent sheet
         case Graph::Response::INSTANCE_INSERTED:
         {
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
-            // TODO should set sheet instance name here
+
             auto i = new SheetInstanceModel(e, r.sheet, this);
             instances[e].reset(i);
             i->setInstanceName(QString::fromStdString(r.name));
             i->setSheetName(QString::fromStdString(r.expr));
-            // Fallthrough!
+
+            instances.at(r.env)->updateFrom(r);
+            break;
         }
 
         // Sheet library level operations
@@ -102,7 +104,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::SHEET_ERASED:
         case Graph::Response::SHEET_INSERTED:
         // Item-level operations
-        case Graph::Response::ITEM_RENAMED:
         case Graph::Response::CELL_INSERTED:
         case Graph::Response::ITEM_ERASED:
         case Graph::Response::EXPR_CHANGED:
@@ -111,6 +112,18 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::CELL_TYPE_CHANGED:
             instances.at(r.env)->updateFrom(r);
             break;
+
+        case Graph::Response::ITEM_RENAMED:
+        {
+            auto e = r.env;
+            e.push_back(Graph::InstanceIndex(r.target));
+
+            auto i = instances.at(e).get();
+            i->setInstanceName(QString::fromStdString(r.name));
+
+            instances.at(r.env)->updateFrom(r);
+            break;
+        }
 
         // Instance-level operations, which are execute on parent ItemModel
         case Graph::Response::INPUT_CHANGED:
