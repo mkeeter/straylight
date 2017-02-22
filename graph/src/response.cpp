@@ -27,6 +27,12 @@ Response Response::InstanceInserted(
     return { INSTANCE_INSERTED, env, name, sheet_name, i, sheet, 0 };
 }
 
+Response Response::InstanceSheetRenamed(
+        const Env& env, const InstanceIndex& i, const std::string& sheet_name)
+{
+    return { INSTANCE_SHEET_RENAMED, env, "", sheet_name, i, 0, 0 };
+}
+
 Response Response::InputCreated(
         const CellKey& k, const std::string& name, const std::string& expr)
 {

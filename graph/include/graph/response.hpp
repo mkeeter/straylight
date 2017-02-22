@@ -17,6 +17,7 @@ struct Response
         SHEET_ERASED,
 
         ITEM_RENAMED,
+        INSTANCE_SHEET_RENAMED,
         CELL_INSERTED,
         CELL_TYPE_CHANGED,
         EXPR_CHANGED,
@@ -96,6 +97,8 @@ struct Response
     static Response SheetNameRegexBad(const std::string& r, const std::string& err);
     static Response ItemNameRegex(const std::string& r);
     static Response SheetNameRegex(const std::string& r);
+    static Response InstanceSheetRenamed(
+        const Env& env, const InstanceIndex& i, const std::string& sheet_name);
 
     /* TODO
      *  InstanceSheetRenamed

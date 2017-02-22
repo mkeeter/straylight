@@ -262,6 +262,16 @@ void AsyncRoot::renameSheet(const SheetIndex& sheet, const std::string& name)
     for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
     {
         changes.push(Response::SheetRenamed(e, sheet, name));
+        // TODO: also rename in children libraries
+    }
+
+    // Inform all instances of this sheet that it has been renamed
+    for (const auto& i : tree.instancesOf(sheet))
+    {
+        for (const auto& e : tree.envsOf(tree.parentOf(i)))
+        {
+            changes.push(Response::InstanceSheetRenamed(e, i, name));
+        }
     }
 }
 

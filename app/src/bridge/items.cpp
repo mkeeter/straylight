@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <cassert>
 
 #include "app/bridge/items.hpp"
@@ -87,6 +88,19 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 auto i = createIndex(index, 0);
                 names.left.replace_data(names.left.find(r.target), r.name);
                 dataChanged(i, i, {NameRole});
+            }
+            break;
+        }
+
+        case Graph::Response::INSTANCE_SHEET_RENAMED:
+        {
+            auto index = order.at(r.target);
+            auto new_name = QString::fromStdString(r.expr);
+            if (items[index].instance_sheet != new_name)
+            {
+                items[index].instance_sheet = new_name;
+                auto i = createIndex(index, 0);
+                dataChanged(i, i, {SheetNameRole});
             }
             break;
         }

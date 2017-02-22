@@ -87,6 +87,10 @@ void GraphModel::updateFrom(const Graph::Response& r)
         // and modifies the parent sheet
         case Graph::Response::INSTANCE_INSERTED:
         {
+            // Update the parent sheet containing this particular instance
+            instances.at(r.env)->updateFrom(r);
+
+            // Then update the map to add a new SheetInstanceModel
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
 
@@ -95,7 +99,18 @@ void GraphModel::updateFrom(const Graph::Response& r)
             i->setInstanceName(QString::fromStdString(r.name));
             i->setSheetName(QString::fromStdString(r.expr));
 
+            break;
+        }
+
+        case Graph::Response::INSTANCE_SHEET_RENAMED:
+        {
             instances.at(r.env)->updateFrom(r);
+
+            auto e = r.env;
+            e.push_back(Graph::InstanceIndex(r.target));
+            auto i = instances.at(e).get();
+            i->setSheetName(QString::fromStdString(r.expr));
+
             break;
         }
 

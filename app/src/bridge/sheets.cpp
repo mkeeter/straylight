@@ -111,7 +111,7 @@ void SheetsModel::updateFrom(const Graph::Response& r)
             beginInsertRows(QModelIndex(), index, index);
                 // TODO: make editable and insertable correct
                 sheets.push_back(Sheet {
-                        QString::fromStdString(r.name), false, true,
+                        QString::fromStdString(r.name), true, true,
                         target });
                 order.insert({target, index});
                 names.left.insert({target, r.name});
