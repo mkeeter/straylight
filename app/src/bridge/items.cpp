@@ -145,6 +145,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                             Graph::InstanceIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
                 names.left.insert({r.target, r.name});
+                emit(countChanged());
             endInsertRows();
             break;
         }
