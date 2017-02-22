@@ -93,7 +93,6 @@ public:
     Q_INVOKABLE void insertSheet(QString name);
     Q_INVOKABLE QString nextSheetName() const;
 
-    Q_INVOKABLE void insertCell(const QString& name);
     Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
     Q_INVOKABLE void setInput(int instance_index, int cell_index,
                               const QString& expr);

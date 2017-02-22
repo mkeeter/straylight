@@ -7,7 +7,8 @@ AsyncRoot::AsyncRoot()
 {
     // Announce the creation of the root instance
     changes.push(Response::InstanceInserted(
-                {}, Tree::ROOT_INSTANCE, "Root", ""));
+                {}, Tree::ROOT_INSTANCE, Tree::ROOT_SHEET,
+                "Root", ""));
 
     // Announce all of the interpreter's keywords
     for (const auto& k : interpreter.keywords())
@@ -78,7 +79,7 @@ void AsyncRoot::insertInstance(
     for (const auto& e : tree.envsOf(parent))
     {
         changes.push(Response::InstanceInserted(
-                    e, i, name, tree.nameOf(target)));
+                    e, i, target, name, tree.nameOf(target)));
 
         for (const auto& c : tree.cellsOf(target))
         {

@@ -52,6 +52,7 @@ struct Response
     std::string expr;
 
     ItemIndex target;
+    SheetIndex sheet;
 
     enum ResponseFlag {
         RESPONSE_FLAG_VALID         = (1 << 0),
@@ -71,7 +72,7 @@ struct Response
             const CellKey& k, const std::string& name,
             const std::string& expr);
     static Response InstanceInserted(
-            const Env& env, const InstanceIndex& i,
+            const Env& env, const InstanceIndex& i, const SheetIndex& target,
             const std::string& name, const std::string& sheet_name);
     static Response InputCreated(
             const CellKey& k, const std::string& name, const std::string& expr);

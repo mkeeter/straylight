@@ -89,8 +89,8 @@ void GraphModel::updateFrom(const Graph::Response& r)
         {
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
-            // TODO this is wrong sheet index
-            instances[e].reset(new SheetInstanceModel(e, 0, this));
+            // TODO should set sheet instance name here
+            instances[e].reset(new SheetInstanceModel(e, r.sheet, this));
             // Fallthrough!
         }
 
