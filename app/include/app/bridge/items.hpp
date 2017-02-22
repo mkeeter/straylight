@@ -15,6 +15,7 @@ namespace Bridge {
 
 class ItemsModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     ItemsModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
@@ -36,6 +37,9 @@ public:
      *  Update the model from the given response
      */
     void updateFrom(const Graph::Response& r);
+
+signals:
+    void countChanged();
 
 protected:
     /*
@@ -87,6 +91,9 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QList<Item> items;
+
+    int getCount() const { return items.size(); }
+    Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
     // Meta-data for fast lookups
     std::map<Graph::ItemIndex, int> order;

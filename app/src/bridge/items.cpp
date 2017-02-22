@@ -132,6 +132,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                             Graph::CellIndex(r.target), r.name, r.expr));
                 order.insert({r.target, index});
                 names.left.insert({r.target, r.name});
+                emit(countChanged());
             endInsertRows();
             break;
         }
@@ -164,6 +165,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                         order.at(i.unique_index)--;
                     }
                 }
+                emit(countChanged());
             endRemoveRows();
             break;
         }
