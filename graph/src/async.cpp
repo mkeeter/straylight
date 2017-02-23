@@ -93,6 +93,7 @@ void AsyncRoot::insertInstance(
         }
     }
 
+    // Send information about every instance's IO
     for (const auto& t : tree.iterItems(target))
     {
         if (auto c = tree.at(t).cell())
