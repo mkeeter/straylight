@@ -22,8 +22,8 @@ public:
      */
     void updateFrom(const Graph::Response& r);
 
-    Q_INVOKABLE QObject* itemsModel() { return &items; }
-    Q_INVOKABLE QObject* libraryModel() { return &library; }
+    Q_INVOKABLE QObject* itemsModel();
+    Q_INVOKABLE QObject* libraryModel();
 
     /*
      *  Inserts a cell with the next available valid name

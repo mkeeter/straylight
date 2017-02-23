@@ -207,7 +207,9 @@ QObject* GraphModel::modelOf(QList<int> env)
     {
         env_.push_back(e);
     }
-    return instances.at(env_).get();
+    auto i = instances.at(env_).get();
+    QQmlEngine::setObjectOwnership(i, QQmlEngine::CppOwnership);
+    return i;
 }
 
 void GraphModel::setVariables(const Kernel::Solver::Solution& sol)

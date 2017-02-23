@@ -14,6 +14,18 @@ SheetInstanceModel::SheetInstanceModel(
     // Nothing to do here
 }
 
+QObject* SheetInstanceModel::itemsModel()
+{
+    QQmlEngine::setObjectOwnership(&items, QQmlEngine::CppOwnership);
+    return &items;
+}
+
+QObject* SheetInstanceModel::libraryModel()
+{
+    QQmlEngine::setObjectOwnership(&library, QQmlEngine::CppOwnership);
+    return &library;
+}
+
 void SheetInstanceModel::insertCell()
 {
     graph->enqueue(Graph::Command::InsertCell(
