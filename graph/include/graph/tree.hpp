@@ -58,12 +58,13 @@ public:
                            const SheetIndex& target) const;
 
     /*
-     *  Iterate over items for a given parent
+     *  Iterate over items for a given parent (non-recursive)
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const;
 
     /*
-     *  Returns all the environments that the given sheet is instanced into
+     *  Returns all the environments that the given sheet is instanced into,
+     *  relative to the root of the graph
      */
     std::list<Env> envsOf(const SheetIndex& s) const;
 
@@ -80,7 +81,12 @@ public:
     /*
      *  Returns a list of cell keys relative to the given sheet
      */
-    std::list<CellKey> cellsOf(const SheetIndex& s) const;
+    std::list<CellKey> iterCellsRecursive(const SheetIndex& s) const;
+
+    /*
+     *  Returns a list of cell and instance keys relative to the given sheet
+     */
+    std::list<std::pair<Env, ItemIndex>> iterItemsRecursive(const SheetIndex& s) const;
 
     /*
      *  Encode the entire graph in JSON

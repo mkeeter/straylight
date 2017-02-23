@@ -144,7 +144,7 @@ void Tree::erase(const ItemIndex& i)
     order[sheet].remove(i);
 }
 
-std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
+std::list<CellKey> Tree::iterCellsRecursive(const SheetIndex& s) const
 {
     std::list<CellKey> out;
     for (auto i : iterItems(s))
@@ -155,7 +155,25 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
         }
         else if (auto n = at(i).instance())
         {
-            for (auto k : cellsOf(n->sheet))
+            for (auto k : iterCellsRecursive(n->sheet))
+            {
+                k.first.push_front(InstanceIndex(i));
+                out.push_back(k);
+            }
+        }
+    }
+    return out;
+}
+
+std::list<std::pair<Env, ItemIndex>> Tree::iterItemsRecursive(const SheetIndex& s) const
+{
+    std::list<std::pair<Env, ItemIndex>> out;
+    for (auto i : iterItems(s))
+    {
+        out.push_back({{}, i});
+        if (auto n = at(i).instance())
+        {
+            for (auto k : iterItemsRecursive(n->sheet))
             {
                 k.first.push_front(InstanceIndex(i));
                 out.push_back(k);

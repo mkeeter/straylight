@@ -95,7 +95,7 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
         markDirty({e, name});
 
         // Then, mark all cells as dirty
-        for (const auto& c : tree.cellsOf(target))
+        for (const auto& c : tree.iterCellsRecursive(target))
         {
             auto env = e; // copy
             env.push_back(i);
@@ -169,7 +169,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
     std::set<std::string> outputs;
 
     auto sheet = tree.at(instance).instance()->sheet;
-    auto cells = tree.cellsOf(sheet);
+    auto cells = tree.iterCellsRecursive(sheet);
     for (auto i : tree.iterItems(sheet))
     {
         if (auto cell = tree.at(i).cell())
@@ -361,7 +361,7 @@ std::string Root::loadString(const std::string& s)
     {
         std::set<Cell*> cells;
 
-        for (auto& c : tree.cellsOf(Tree::ROOT_SHEET))
+        for (auto& c : tree.iterCellsRecursive(Tree::ROOT_SHEET))
         {
             c.first.push_front(Tree::ROOT_INSTANCE);
             cells.insert(tree.at(c.second).cell());
@@ -505,7 +505,7 @@ std::map<std::string, Value> Root::callSheet(
     dirty.push({});
     auto itr = inputs.begin();
 
-    for (const auto& c : tree.cellsOf(sheet))
+    for (const auto& c : tree.iterCellsRecursive(sheet))
     {
         // If this is a top-level cell and is an input cell, then inject an
         // value from the input list into the cell for the dummy env
@@ -549,7 +549,7 @@ std::map<std::string, Value> Root::callSheet(
 
     {   // Grab all inputs and outputs and put them in the output map
         std::set<CellIndex> cells;
-        for (const auto& c : tree.cellsOf(sheet))
+        for (const auto& c : tree.iterCellsRecursive(sheet))
         {
             cells.insert(c.second);
             if (c.first.empty())

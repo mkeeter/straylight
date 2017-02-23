@@ -347,7 +347,7 @@ TEST_CASE("Tree::toString")
     }
 }
 
-TEST_CASE("Tree::cellsOf")
+TEST_CASE("Tree::iterCellsRecursive")
 {
     SECTION("Nested instances")
     {
@@ -360,7 +360,7 @@ TEST_CASE("Tree::cellsOf")
         auto c = r.insertCell(z, "a", "15");
 
         {   // Check with respect to root
-            auto cs = r.getTree().cellsOf(Tree::ROOT_SHEET);
+            auto cs = r.getTree().iterCellsRecursive(Tree::ROOT_SHEET);
             REQUIRE(cs.size() == 1);
 
             auto cell = cs.front();
@@ -369,7 +369,7 @@ TEST_CASE("Tree::cellsOf")
         }
 
         {   // Check with respect to inner sheet
-            auto cs = r.getTree().cellsOf(sum);
+            auto cs = r.getTree().iterCellsRecursive(sum);
             REQUIRE(cs.size() == 1);
 
             auto cell = cs.front();

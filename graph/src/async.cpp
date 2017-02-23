@@ -81,7 +81,7 @@ void AsyncRoot::insertInstance(
         changes.push(Response::InstanceInserted(
                     e, i, target, name, tree.nameOf(target)));
 
-        for (const auto& c : tree.cellsOf(target))
+        for (const auto& c : tree.iterCellsRecursive(target))
         {
             auto env = e; // copy
             env.push_back(i);
