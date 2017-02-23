@@ -15,7 +15,17 @@ namespace Graph {
  *  instances of the cell, so we use the environment (which is a list of
  *  ItemIndex) to localize the cell.
  */
-typedef std::pair<Env, std::string> NameKey;
+struct NameKey : public std::pair<Env, std::string>
+{
+    NameKey() {}
+    NameKey(const Env& e, const std::string& s)
+        : std::pair<Env, std::string>(e, s) {}
+    NameKey(SheetIndex i, const std::string& s)
+        : std::pair<Env, std::string>({InstanceIndex(i)}, s) {}
+    NameKey(CellIndex i)
+        : std::pair<Env, std::string>({InstanceIndex(i)}, "") {}
+    // TODO: better way to identify these different variations?
+};
 typedef std::pair<Env, CellIndex> CellKey;
 
 }   // namespace Graph

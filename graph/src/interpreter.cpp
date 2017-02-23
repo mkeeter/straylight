@@ -398,11 +398,11 @@ Value Interpreter::eval(const CellKey& key)
     }
 
     // If we didn't get an error, then make bindings for all symbols
+    const auto parent = root.getTree().at(env.back()).instance()->sheet;
     if (value == nullptr)
     {
         auto bindings = s7_nil(sc); // empty list
-        const auto& sheet = root.getTree().at(env.back()).instance()->sheet;
-        for (auto& i : root.getTree().iterItems(sheet))
+        for (auto& i : root.getTree().iterItems(parent))
         {
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(sc,
@@ -411,7 +411,7 @@ Value Interpreter::eval(const CellKey& key)
                     bindings));
         }
 
-        for (auto& i : root.getTree().sheetsAbove(env))
+        for (auto& i : root.getTree().sheetsAbove(parent))
         {
             bindings = s7_cons(sc,
                     s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
@@ -449,12 +449,20 @@ Value Interpreter::eval(const CellKey& key)
             else if (root.isSheetName(target))
             {
                 // The target sheet could be inserted in any of the parent
-                // environments, so we'll insert a dependency on all of them
-                Env env_;
-                for (const auto& e : env)
+                // sheets, so we'll insert a dependency on all of them
+                auto sheet = parent;
+                while (true)
                 {
-                    env_.push_back(e);
-                    deps->insert(key, {env_, std::string(target)});
+                    deps->insert(key, NameKey(sheet, target));
+
+                    if (sheet == Tree::ROOT_SHEET)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        sheet = root.getTree().parentOf(sheet);
+                    }
                 }
             }
         }

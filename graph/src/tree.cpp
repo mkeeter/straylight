@@ -345,20 +345,28 @@ std::string Tree::fromJson(SheetIndex sheet, const picojson::value& value)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<SheetIndex> Tree::sheetsAbove(const Env& env) const
+std::list<SheetIndex> Tree::sheetsAbove(const SheetIndex& sheet) const
 {
     std::list<SheetIndex> out;
 
-    // Walk through parents, accumulating sheets
-    for (const auto& v : env)
+    auto p = sheet;
+    while (true)
     {
-        auto es = childrenOf(at(v).instance()->sheet);
-        for (const auto& e : es)
+        for (const auto& e : childrenOf(p))
         {
             if (at(e).sheet())
             {
                 out.push_back(SheetIndex(e));
             }
+        }
+
+        if (p == ROOT_SHEET)
+        {
+            break;
+        }
+        else
+        {
+            p = parentOf(p);
         }
     }
 

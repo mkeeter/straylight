@@ -60,18 +60,12 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
     {
         // If this could influence sheets that are invoked as functions, then
         // mark all of them for re-evaluation
-        auto sheetName = tree.nameOf(sheet);
-        for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
-        {
-            markDirty({e, sheetName});
-        }
+        markDirty({{InstanceIndex(sheet)}, tree.nameOf(sheet)});
     }
 
-    {   // Mark everything that looked at the cell's dummy key as dirty
-        std::stringstream ss;
-        ss << cell.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark everything that looked at the cell's dummy key as dirty
+    // TODO: hide the exact nature of the dummy key
+    markDirty({{InstanceIndex(cell)}, ""});
 
     sync();
 }
@@ -154,11 +148,9 @@ void Root::eraseCell(const CellIndex& cell)
         }
     }
 
-    {   // Mark everything that looked at the cell's dummy key as dirty
-        std::stringstream ss;
-        ss << cell.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark everything that looked at the cell's dummy key as dirty
+    // TODO: hide the exact nature of the dummy key
+    markDirty({{InstanceIndex(cell)}, ""});
 
     sync();
 }
@@ -277,13 +269,10 @@ bool Root::setExpr(const CellIndex& c, const std::string& expr)
         markDirty({e, tree.nameOf(c)});
     }
 
-    {   // Mark anything that looked for the cell's dummy NameKey as dirty
-        // This is how we properly re-evaluate things that call a sheet when
-        // a cell internal to that sheet changes.
-        std::stringstream ss;
-        ss << c.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark anything that looked for the cell's dummy NameKey as dirty
+    // This is how we properly re-evaluate things that call a sheet when
+    // a cell internal to that sheet changes.
+    markDirty(c);
 
     sync();
 
@@ -571,9 +560,7 @@ std::map<std::string, Value> Root::callSheet(
         // upstream deps of output cells in the temporary instance
         for (const auto& c : cells)
         {
-            std::stringstream ss;
-            ss << c.i;
-            deps.insert(caller, {{}, ss.str()});
+            deps.insert(caller, c);
         }
     }
 
@@ -638,23 +625,19 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     assert(canInsertSheet(parent, name));
     tree.insert(parent, sheet, name, Item());
 
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-        // TODO: Does this properly catch nested sheet calling?
-    }
+    markDirty(NameKey(parent, name));
     sync();
 }
 
 void Root::renameSheet(const SheetIndex& i, const std::string& name)
 {
+    auto prev_name = tree.nameOf(i);
     tree.rename(i, name);
 
-    for (const auto& e : tree.envsOf(tree.parentOf(i)))
-    {
-        markDirty({e, name});
-        // TODO: Does this properly catch nested sheet calling?
-    }
+    auto parent = tree.parentOf(i);
+    markDirty(NameKey(parent, prev_name));
+    markDirty(NameKey(parent, name));
+
     sync();
 }
 
@@ -666,7 +649,7 @@ void Root::eraseSheet(const SheetIndex& s)
 
     // Store parent envs and sheet name so that we can trigger re-evaluation
     // of everything watching the sheet by name
-    const auto envs = tree.envsOf(tree.parentOf(s));
+    const auto parent = tree.parentOf(s);
     const auto name = tree.nameOf(s);
 
     for (const auto& i : instances)
@@ -697,11 +680,7 @@ void Root::eraseSheet(const SheetIndex& s)
     tree.erase(s);
 
     //  Re-evaluate anything that was watching the sheet (by name)
-    for (const auto& e : envs)
-    {
-        markDirty({e, name});
-    }
-    // Sync is called on lock destruction
+    markDirty({{InstanceIndex(parent)}, name});
 }
 
 void Root::markDirty(const NameKey& k)

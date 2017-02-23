@@ -104,13 +104,13 @@ public:
     std::string fromString(const std::string& str);
 
     /*
-     *  Returns all of the sheets above (contained within) the given env
+     *  Returns all of the sheets above the given sheet
      *
      *  Note that this doesn't tell us whether we can insert an instance
      *  of these sheets, as this could create a recursive loop; use
      *  tree.canInsertInstance to check.
      */
-    std::list<SheetIndex> sheetsAbove(const Env& e) const;
+    std::list<SheetIndex> sheetsAbove(const SheetIndex& s) const;
 
     /*
      *  Returns all of the sheets below a particular parent
