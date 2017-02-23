@@ -365,6 +365,27 @@ std::list<SheetIndex> Tree::sheetsAbove(const Env& env) const
     return out;
 }
 
+std::list<SheetIndex> Tree::sheetsBelow(const SheetIndex& parent) const
+{
+    std::list<SheetIndex> todo = {parent};
+    std::list<SheetIndex> done;
+
+    while(todo.size())
+    {
+        auto s = todo.front();
+        for (auto i : childrenOf(s))
+        {
+            if (at(i).sheet())
+            {
+                todo.push_back(SheetIndex(i));
+            }
+        }
+        done.push_back(s);
+        todo.pop_front();
+    }
+    return done;
+}
+
 bool Tree::checkEnv(const Env& env) const
 {
     return std::all_of(env.begin(), env.end(),

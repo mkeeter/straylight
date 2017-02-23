@@ -270,10 +270,13 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     auto lock = Lock();
     Root::insertSheet(parent, sheet, name);
 
-    for (const auto& e : tree.envsOf(parent))
+    for (auto s : tree.sheetsBelow(parent))
     {
-        changes.push(Response::SheetCreated(e, sheet, name));
-        // TODO: also insert sheet into children libraries
+        for (const auto& e : tree.envsOf(s))
+        {
+            changes.push(Response::SheetCreated(e, sheet, name,
+                        s == parent, s != sheet));
+        }
     }
 }
 

@@ -72,9 +72,12 @@ Response Response::InstanceRenamed(
 }
 
 Response Response::SheetCreated(
-        const Env& env, const SheetIndex& i, const std::string& name)
+        const Env& env, const SheetIndex& i, const std::string& name,
+        bool editable, bool insertable)
 {
-    return { SHEET_INSERTED, env, name, "", i, 0, 0 };
+    return { SHEET_INSERTED, env, name, "", i, 0,
+        (uint8_t)((editable ? RESPONSE_FLAG_EDITABLE : 0) |
+                  (insertable ? RESPONSE_FLAG_INSERTABLE : 0)) };
 }
 
 Response Response::SheetRenamed(

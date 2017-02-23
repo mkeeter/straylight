@@ -113,6 +113,12 @@ public:
     std::list<SheetIndex> sheetsAbove(const Env& e) const;
 
     /*
+     *  Returns all of the sheets below a particular parent
+     *  (including the parent)
+     */
+    std::list<SheetIndex> sheetsBelow(const SheetIndex& parent) const;
+
+    /*
      *  Checks to see whether the given env is valid
      *  (i.e. that every item in it exists and is an instance)
      */

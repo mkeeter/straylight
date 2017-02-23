@@ -88,7 +88,8 @@ struct Response
     static Response InstanceRenamed(
             const Env& env, const InstanceIndex& i, const std::string& name);
     static Response SheetCreated(
-            const Env& env, const SheetIndex& i, const std::string& name);
+            const Env& env, const SheetIndex& i, const std::string& name,
+            bool editable, bool insertable);
     static Response SheetRenamed(
             const Env& env, const SheetIndex& i, const std::string& name);
     static Response SheetErased(
