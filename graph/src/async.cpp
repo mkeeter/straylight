@@ -76,16 +76,20 @@ void AsyncRoot::insertInstance(
 
     Root::insertInstance(parent, i, name, target);
 
+    // Find all items relative to the new instance
+    auto items = tree.iterItemsRecursive(target);
+    for (auto& item : items)
+    {
+        item.first.push_front(i);
+    }
+    items.push_front({{}, i});
+
+    // Recursively construct all the children in all the environments
     for (const auto& e : tree.envsOf(parent))
     {
-        changes.push(Response::InstanceInserted(
-                    e, i, target, name, tree.nameOf(target)));
-
-        // Recursively insert cells and instances for all children
-        for (const auto& item : tree.iterItemsRecursive(target))
+        for (const auto& item : items)
         {
             auto env = e; // copy
-            env.push_back(i);
             env.insert(env.end(), item.first.begin(), item.first.end());
 
             const auto name = tree.nameOf(item.second);
@@ -95,6 +99,26 @@ void AsyncRoot::insertInstance(
                 const auto expr = c->expr;
                 changes.push(Response::CellInserted(
                             {env, CellIndex(item.second)}, name, expr));
+
+                if (c->type == Cell::INPUT)
+                {
+                    const auto expr = interpreter.defaultExpr(c->expr);
+                    for (auto e : tree.envsOf(parent))
+                    {
+                        e.push_back(i);
+                        changes.push(Response::InputCreated(
+                                    {e, CellIndex(item.second)}, name, expr));
+                    }
+                }
+                else if (c->type == Cell::OUTPUT)
+                {
+                    for (auto e : tree.envsOf(parent))
+                    {
+                        e.push_back(i);
+                        changes.push(Response::OutputCreated(
+                                    {e, CellIndex(item.second)}, name));
+                    }
+                }
             }
             else if (auto instance = tree.at(item.second).instance())
             {
@@ -105,32 +129,6 @@ void AsyncRoot::insertInstance(
         }
     }
 
-    // Send information about every instance's IO
-    for (const auto& t : tree.iterItems(target))
-    {
-        if (auto c = tree.at(t).cell())
-        {
-            if (c->type == Cell::INPUT)
-            {
-                const auto expr = interpreter.defaultExpr(c->expr);
-                for (auto e : tree.envsOf(parent))
-                {
-                    e.push_back(i);
-                    changes.push(Response::InputCreated(
-                                {e, CellIndex(t)}, tree.nameOf(t), expr));
-                }
-            }
-            else if (c->type == Cell::OUTPUT)
-            {
-                for (auto e : tree.envsOf(parent))
-                {
-                    e.push_back(i);
-                    changes.push(Response::OutputCreated(
-                                {e, CellIndex(t)}, tree.nameOf(t)));
-                }
-            }
-        }
-    }
     // sync occurs on Lock destruction
 }
 
@@ -305,12 +303,15 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
 {
     auto lock = Lock();
 
-    const auto envs = tree.envsOf(tree.parentOf(s));
+    auto p = tree.parentOf(s);
     Root::eraseSheet(s);
 
-    for (const auto& e : envs)
+    for (auto s : tree.sheetsBelow(p))
     {
-        changes.push(Response::SheetErased(e, s));
+        for (const auto& e : tree.envsOf(s))
+        {
+            changes.push(Response::SheetErased(e, s));
+        }
     }
 }
 
