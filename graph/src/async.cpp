@@ -81,15 +81,27 @@ void AsyncRoot::insertInstance(
         changes.push(Response::InstanceInserted(
                     e, i, target, name, tree.nameOf(target)));
 
-        for (const auto& c : tree.iterCellsRecursive(target))
+        // Recursively insert cells and instances for all children
+        for (const auto& item : tree.iterItemsRecursive(target))
         {
             auto env = e; // copy
             env.push_back(i);
-            env.insert(env.end(), c.first.begin(), c.first.end());
+            env.insert(env.end(), item.first.begin(), item.first.end());
 
-            const auto name = tree.nameOf(c.second);
-            const auto expr = tree.at(c.second).cell()->expr;
-            changes.push(Response::CellInserted({env, c.second}, name, expr));
+            const auto name = tree.nameOf(item.second);
+
+            if (auto c = tree.at(item.second).cell())
+            {
+                const auto expr = c->expr;
+                changes.push(Response::CellInserted(
+                            {env, CellIndex(item.second)}, name, expr));
+            }
+            else if (auto instance = tree.at(item.second).instance())
+            {
+                changes.push(Response::InstanceInserted(
+                            env, InstanceIndex(item.second), instance->sheet,
+                            name, tree.nameOf(instance->sheet)));
+            }
         }
     }
 
