@@ -16,14 +16,16 @@ struct Response
         SHEET_INSERTED,
         SHEET_ERASED,
 
-        ITEM_RENAMED,
+        CELL_RENAMED,
+        INSTANCE_RENAMED,
         INSTANCE_SHEET_RENAMED,
         CELL_INSERTED,
         CELL_TYPE_CHANGED,
         EXPR_CHANGED,
         INPUT_CHANGED,
         INSTANCE_INSERTED,
-        ITEM_ERASED,
+        CELL_ERASED,
+        INSTANCE_ERASED,
 
         VALUE_CHANGED,
         RESULT_CHANGED,
@@ -67,7 +69,8 @@ struct Response
     uint8_t flags;
 
     //  Helper constructors
-    static Response ItemErased(const Env& env, const ItemIndex& i);
+    static Response CellErased(const Env& env, const CellIndex& i);
+    static Response InstanceErased(const Env& env, const InstanceIndex& i);
     static Response IOErased(const CellKey& k);
     static Response CellInserted(
             const CellKey& k, const std::string& name,
@@ -80,8 +83,10 @@ struct Response
     static Response OutputCreated(const CellKey& k, const std::string& name);
     static Response ExprChanged(const CellKey& c, const std::string& expr);
     static Response InputChanged(const CellKey& c, const std::string& expr);
-    static Response ItemRenamed(
-            const Env& env, const ItemIndex& i, const std::string& name);
+    static Response CellRenamed(
+            const Env& env, const CellIndex& i, const std::string& name);
+    static Response InstanceRenamed(
+            const Env& env, const InstanceIndex& i, const std::string& name);
     static Response SheetCreated(
             const Env& env, const SheetIndex& i, const std::string& name);
     static Response SheetRenamed(

@@ -93,7 +93,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
             // Then update the map to add a new SheetInstanceModel
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
-
             auto i = new SheetInstanceModel(e, r.sheet, this);
             instances[e].reset(i);
             i->setInstanceName(QString::fromStdString(r.name));
@@ -120,7 +119,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::SHEET_INSERTED:
         // Item-level operations
         case Graph::Response::CELL_INSERTED:
-        case Graph::Response::ITEM_ERASED:
+        case Graph::Response::CELL_ERASED:
         case Graph::Response::EXPR_CHANGED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
@@ -128,14 +127,31 @@ void GraphModel::updateFrom(const Graph::Response& r)
             instances.at(r.env)->updateFrom(r);
             break;
 
-        case Graph::Response::ITEM_RENAMED:
+        case Graph::Response::INSTANCE_ERASED:
         {
+            instances.at(r.env)->updateFrom(r);
+
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
+            instances.erase(e);
 
+            break;
+        }
+
+        case Graph::Response::INSTANCE_RENAMED:
+        {
+            instances.at(r.env)->updateFrom(r);
+
+            auto e = r.env;
+            e.push_back(Graph::InstanceIndex(r.target));
             auto i = instances.at(e).get();
             i->setInstanceName(QString::fromStdString(r.name));
 
+            break;
+        }
+
+        case Graph::Response::CELL_RENAMED:
+        {
             instances.at(r.env)->updateFrom(r);
             break;
         }

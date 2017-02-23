@@ -78,7 +78,8 @@ void ItemsModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {
-        case Graph::Response::ITEM_RENAMED:
+        case Graph::Response::CELL_RENAMED: // FALLTHROUGH
+        case Graph::Response::INSTANCE_RENAMED:
         {
             auto index = order.at(r.target);
             auto new_name = QString::fromStdString(r.name);
@@ -164,7 +165,8 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             break;
         }
 
-        case Graph::Response::ITEM_ERASED:
+        case Graph::Response::CELL_ERASED: // FALLTHROUGH
+        case Graph::Response::INSTANCE_ERASED:
         {
             auto index = order.at(r.target);
             beginRemoveRows(QModelIndex(), index, index);

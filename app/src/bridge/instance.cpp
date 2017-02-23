@@ -109,9 +109,11 @@ void SheetInstanceModel::updateFrom(const Graph::Response& r)
             break;
 
         // Item-level operations
-        case Graph::Response::ITEM_RENAMED:
+        case Graph::Response::INSTANCE_RENAMED:
+        case Graph::Response::CELL_RENAMED:
         case Graph::Response::CELL_INSERTED:
-        case Graph::Response::ITEM_ERASED:
+        case Graph::Response::CELL_ERASED:
+        case Graph::Response::INSTANCE_ERASED:
         case Graph::Response::EXPR_CHANGED:
         case Graph::Response::INSTANCE_INSERTED:
         case Graph::Response::INSTANCE_SHEET_RENAMED:

@@ -3,9 +3,14 @@
 namespace Graph {
 
 //  Helper constructors
-Response Response::ItemErased(const Env& e, const ItemIndex& i)
+Response Response::CellErased(const Env& e, const CellIndex& i)
 {
-    return { ITEM_ERASED, e, "", "", i, 0, 0 };
+    return { CELL_ERASED, e, "", "", i, 0, 0 };
+}
+
+Response Response::InstanceErased(const Env& e, const InstanceIndex& i)
+{
+    return { INSTANCE_ERASED, e, "", "", i, 0, 0 };
 }
 
 Response Response::IOErased(const CellKey& k)
@@ -54,10 +59,16 @@ Response Response::InputChanged(const CellKey& c, const std::string& expr)
     return { INPUT_CHANGED, c.first, "", expr, c.second, 0, 0 };
 }
 
-Response Response::ItemRenamed(
-        const Env& env, const ItemIndex& i, const std::string& name)
+Response Response::CellRenamed(
+        const Env& env, const CellIndex& i, const std::string& name)
 {
-    return { ITEM_RENAMED, env, name, "", i, 0, 0 };
+    return { CELL_RENAMED, env, name, "", i, 0, 0 };
+}
+
+Response Response::InstanceRenamed(
+        const Env& env, const InstanceIndex& i, const std::string& name)
+{
+    return { INSTANCE_RENAMED, env, name, "", i, 0, 0 };
 }
 
 Response Response::SheetCreated(

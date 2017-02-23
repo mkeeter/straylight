@@ -144,7 +144,7 @@ void AsyncRoot::eraseCell(const CellIndex& cell)
 
     for (const auto& e : tree.envsOf(sheet))
     {
-        changes.push(Response::ItemErased(e, cell));
+        changes.push(Response::CellErased(e, cell));
 
         // Mark I/O changes
         if (type == Cell::INPUT || type == Cell::OUTPUT)
@@ -166,7 +166,7 @@ void AsyncRoot::eraseInstance(const InstanceIndex& instance)
 
     for (auto env : tree.envsOf(parent))
     {
-        changes.push(Response::ItemErased(env, instance));
+        changes.push(Response::InstanceErased(env, instance));
     }
 }
 
@@ -246,9 +246,19 @@ bool AsyncRoot::renameItem(const ItemIndex& i, const std::string& name)
     }
     else
     {
+        bool is_cell = tree.at(i).cell();
         for (const auto& env : tree.envsOf(tree.parentOf(i)))
         {
-            changes.push(Response::ItemRenamed(env, i, name));
+            if (is_cell)
+            {
+                changes.push(
+                        Response::CellRenamed(env, CellIndex(i), name));
+            }
+            else
+            {
+                changes.push(
+                        Response::InstanceRenamed(env, InstanceIndex(i), name));
+            }
         }
         return true;
     }
