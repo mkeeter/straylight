@@ -12,8 +12,9 @@ namespace Bridge {
 GraphModel::GraphModel(QObject* parent)
     : QObject(parent), responses(runRoot(root, commands)), watcher(responses)
 {
-    // Add a model for the root instance
-    instances[{}].reset(new SheetInstanceModel({}, 0, this));
+    // Add a model for the root sheet
+    instances[Graph::Tree::ROOT_SHEET].reset(
+            new SheetModel(Graph::Tree::ROOT_SHEET, this));
 
     // The first response pushed should create the root instance
     while (responses.empty())
@@ -216,15 +217,16 @@ void GraphModel::gotResponse()
     }
 }
 
-QObject* GraphModel::modelOf(QList<int> env)
+QObject* GraphModel::modelOf(unsigned sheet, QList<int> env)
 {
     Graph::Env env_;
     for (auto e : env)
     {
         env_.push_back(e);
     }
-    auto i = instances.at(env_).get();
+    auto i = instances.at(sheet).get();
     QQmlEngine::setObjectOwnership(i, QQmlEngine::CppOwnership);
+    i->setEnv(env);
     return i;
 }
 

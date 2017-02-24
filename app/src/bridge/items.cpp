@@ -23,7 +23,7 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
     switch (role) {
         case TypeRole:  return i.type == Item::CELL ? "cell" : "instance";
         case NameRole:  return i.name;
-        case ValidRole: return i.type == Item::CELL ? i.cell_valid : QVariant();
+        case ValidRole: return i.type == Item::CELL ? i.cell_valid.at(env) : QVariant();
         case ExprRole:  return i.type == Item::CELL ? i.cell_expr : QVariant();
         case ValueRole:  return i.type == Item::CELL ? i.cell_value.at(env) : QVariant();
         case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
@@ -126,10 +126,11 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto new_value = QString::fromStdString(r.expr);
             auto& item = items[index];
             bool new_valid = r.flags & Graph::Response::RESPONSE_FLAG_VALID;
-            if (item.cell_value != new_value || item.cell_valid != new_valid)
+            if (item.cell_value.at(env) != new_value ||
+                item.cell_valid.at(env) != new_valid)
             {
-                items[index].cell_value = new_value;
-                items[index].cell_valid = new_valid;
+                items[index].cell_value[env] = new_value;
+                items[index].cell_valid[env] = new_valid;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ValueRole, ValidRole});
             }

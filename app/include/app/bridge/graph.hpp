@@ -73,7 +73,7 @@ protected slots:
     void updateFrom(const Graph::Response& r);
 
 protected:
-    std::map<Graph::Env, std::unique_ptr<SheetModel>> instances;
+    std::map<Graph::SheetIndex, std::unique_ptr<SheetModel>> instances;
 
     Graph::AsyncRoot root;
     shared_queue<Graph::Command> commands;

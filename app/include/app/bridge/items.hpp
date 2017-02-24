@@ -56,7 +56,8 @@ protected:
                          const std::string& expr)
         {
             return Item {
-                CELL, QString::fromStdString(name), i.i, false,
+                CELL, QString::fromStdString(name), i.i,
+                std::map<Graph::Env, bool>(),
                 QString::fromStdString(expr), std::map<Graph::Env, QString>(),
                 "", ""};
         }
@@ -65,7 +66,8 @@ protected:
                              const std::string& sheet)
         {
             return Item {
-                INSTANCE, QString::fromStdString(name), i.i, false, "",
+                INSTANCE, QString::fromStdString(name), i.i,
+                std::map<Graph::Env, bool>(), "",
                 std::map<Graph::Env, QString>(), "",
                 QString::fromStdString(sheet) };
         }
@@ -74,7 +76,7 @@ protected:
         QString name;
         unsigned unique_index;
 
-        bool cell_valid;
+        std::map<Graph::Env, bool> cell_valid;
         QString cell_expr;
         std::map<Graph::Env, QString> cell_value;
         QString cell_type;
