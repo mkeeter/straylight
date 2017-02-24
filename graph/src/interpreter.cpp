@@ -542,13 +542,13 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
                 {
                     if (cell->type >= Cell::INPUT)
                     {
-                        values[root.getTree().nameOf(c)] = ValueThunk {
+                        values.insert({root.getTree().nameOf(c), ValueThunk {
                             root.toNameKey({env_, CellIndex(c)}),
                             cell->values.count(env_)
                                 ? cell->values.at(env_).value
                                 : s7_nil(sc),
                             looker, deps,
-                        };
+                        }});
                     }
                 }
             }

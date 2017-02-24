@@ -60,12 +60,12 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
     {
         // If this could influence sheets that are invoked as functions, then
         // mark all of them for re-evaluation
-        markDirty({{InstanceIndex(sheet)}, tree.nameOf(sheet)});
+        markDirty(NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
     }
 
     // Mark everything that looked at the cell's dummy key as dirty
     // TODO: hide the exact nature of the dummy key
-    markDirty({{InstanceIndex(cell)}, ""});
+    markDirty(NameKey(cell));
 
     sync();
 }
@@ -454,22 +454,11 @@ std::map<std::string, Value> Root::callSheet(
     auto p = tree.parentOf(caller.second);
     std::map<std::string, Value> out;
 
-    {   // Find and push a dependency on the sheet in its parent environment
-        //
-        // The sheet will notify this dependency network when I/O changes or
-        // when it is erased, triggering re-evaluation of this cell
-        auto sheet_parent = tree.parentOf(sheet);
-        Env sheet_env = {};
-        for (auto& e : caller.first)
-        {
-            sheet_env.push_back(e);
-            if (tree.at(e).instance()->sheet == sheet_parent)
-            {
-                break;
-            }
-        }
-        deps.insert(caller, {sheet_env, tree.nameOf(sheet)});
-    }
+    // Find and push a dependency on the sheet in its parent environment
+    //
+    // The sheet will notify this dependency network when I/O changes or
+    // when it is erased, triggering re-evaluation of this cell
+    deps.insert(caller, NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
 
     if (!tree.canInsertInstance(p, sheet))
     {
