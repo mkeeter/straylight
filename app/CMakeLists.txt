@@ -19,8 +19,8 @@ set(SRCS
     src/bridge/bridge.cpp
     src/bridge/graph.cpp
     src/bridge/items.cpp
-    src/bridge/sheets.cpp
-    src/bridge/instance.cpp
+    src/bridge/sheet.cpp
+    src/bridge/library.cpp
     src/bridge/watcher.cpp
     src/ui/material.cpp
     src/ui/syntax.cpp

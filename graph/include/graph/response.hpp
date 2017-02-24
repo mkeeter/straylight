@@ -82,7 +82,7 @@ struct Response
             SheetIndex s, CellIndex c,
             const std::string& name, const std::string& expr);
     static Response InstanceInserted(
-            SheetIndex s, CellIndex c, SheetIndex t,
+            SheetIndex s, InstanceIndex i, SheetIndex t,
             const std::string& name, const std::string& sheet_name);
     static Response InputCreated(
             SheetIndex s, InstanceIndex i, CellIndex c,
@@ -106,7 +106,8 @@ struct Response
     static Response SheetErased(
             SheetIndex parent, SheetIndex i);
     static Response ValueChanged(
-            const CellKey& k, const std::string& value, bool valid);
+            SheetIndex i, const CellKey& k,
+            const std::string& value, bool valid);
     static Response CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type);
     static Response InstanceSheetRenamed(
             SheetIndex s, InstanceIndex i, const std::string& sheet_name);
