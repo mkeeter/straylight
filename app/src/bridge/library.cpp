@@ -1,17 +1,17 @@
 #include <cassert>
 
-#include "app/bridge/sheets.hpp"
+#include "app/bridge/library.hpp"
 
 namespace App {
 namespace Bridge {
 
-int SheetsModel::rowCount(const QModelIndex& parent) const
+int LibraryModel::rowCount(const QModelIndex& parent) const
 {
     (void)parent;
     return sheets.size();
 }
 
-QVariant SheetsModel::data(const QModelIndex& index, int role) const
+QVariant LibraryModel::data(const QModelIndex& index, int role) const
 {
     if (index.row() < 0 || index.row() >= sheets.count())
     {
@@ -28,7 +28,7 @@ QVariant SheetsModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QHash<int, QByteArray> SheetsModel::roleNames() const
+QHash<int, QByteArray> LibraryModel::roleNames() const
 {
     return {
         {NameRole, "name"},
@@ -37,7 +37,7 @@ QHash<int, QByteArray> SheetsModel::roleNames() const
         {SheetIndexRole, "sheetIndex"}};
 }
 
-QString SheetsModel::nextSheetName(QString prefix) const
+QString LibraryModel::nextSheetName(QString prefix) const
 {
     std::string base = prefix.toStdString();
     for (int i=0; true; ++i)
@@ -55,7 +55,7 @@ QString SheetsModel::nextSheetName(QString prefix) const
     }
 }
 
-QString SheetsModel::checkSheetRename(int i, const QString& str) const
+QString LibraryModel::checkSheetRename(int i, const QString& str) const
 {
     auto s = str.toStdString();
 
@@ -65,7 +65,7 @@ QString SheetsModel::checkSheetRename(int i, const QString& str) const
         : "";
 }
 
-void SheetsModel::updateFrom(const Graph::Response& r)
+void LibraryModel::updateFrom(const Graph::Response& r)
 {
     auto target = Graph::SheetIndex(r.target);
     switch (r.op)

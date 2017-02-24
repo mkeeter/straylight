@@ -38,6 +38,11 @@ public:
      */
     void updateFrom(const Graph::Response& r);
 
+    /*
+     *  Updates the target env, which determines which values are returned
+     */
+    void setEnv(const Graph::Env& env);
+
 signals:
     void countChanged();
 
@@ -52,14 +57,16 @@ protected:
         {
             return Item {
                 CELL, QString::fromStdString(name), i.i, false,
-                QString::fromStdString(expr), "", "", ""};
+                QString::fromStdString(expr), std::map<Graph::Env, QString>(),
+                "", ""};
         }
 
         static Item Instance(Graph::InstanceIndex i, const std::string& name,
                              const std::string& sheet)
         {
             return Item {
-                INSTANCE, QString::fromStdString(name), i.i, false, "", "", "",
+                INSTANCE, QString::fromStdString(name), i.i, false, "",
+                std::map<Graph::Env, QString>(), "",
                 QString::fromStdString(sheet) };
         }
 
@@ -69,7 +76,7 @@ protected:
 
         bool cell_valid;
         QString cell_expr;
-        QString cell_value;
+        std::map<Graph::Env, QString> cell_value;
         QString cell_type;
 
         QString instance_sheet;
@@ -94,6 +101,9 @@ protected:
 
     int getCount() const { return items.size(); }
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
+
+    // Target env
+    Graph::Env env;
 
     // Meta-data for fast lookups
     std::map<Graph::ItemIndex, int> order;

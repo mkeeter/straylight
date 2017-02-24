@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app/bridge/items.hpp"
-#include "app/bridge/sheets.hpp"
+#include "app/bridge/library.hpp"
 
 #include "graph/response.hpp"
 
@@ -10,17 +10,22 @@ namespace Bridge {
 
 class GraphModel;   // forward declaration
 
-class SheetInstanceModel : public QObject
+class SheetModel : public QObject
 {
     Q_OBJECT
 public:
-    SheetInstanceModel(const Graph::Env& env, Graph::SheetIndex sheet,
-                       GraphModel* parent);
+    SheetModel(Graph::SheetIndex sheet, GraphModel* parent);
 
     /*
      *  Called to execute a reply from the graph thread
      */
     void updateFrom(const Graph::Response& r);
+
+    /*
+     *  Sets the sheet's target environment, which modifies
+     *  which values are returned and the instance name property
+     */
+    void setEnv(const Graph::Env& env);
 
     Q_INVOKABLE QObject* itemsModel();
     Q_INVOKABLE QObject* libraryModel();
@@ -108,12 +113,19 @@ signals:
 protected:
     GraphModel* graph;
 
-    // Identity of this SheetInstanceModel
-    const Graph::Env env;
+    // Identity of this SheetModel
     const Graph::SheetIndex sheet;
 
+    //  Env that we're looking at right now
+    Graph::Env current_env;
+
+    // Names of instances of this sheet
+    std::map<Graph::Env, std::string> instance_names;
+
+    // Properties
     QString _instance_name;
     QString _sheet_name;
+
 public:
     void setInstanceName(const QString& s) {
         _instance_name = s;
@@ -128,7 +140,7 @@ public:
 
 protected:
     ItemsModel items;
-    SheetsModel library;
+    LibraryModel library;
 };
 
 }   // namespace Bridge

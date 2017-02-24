@@ -5,9 +5,10 @@
 #include <QQmlEngine>
 #include <QJSEngine>
 #include <QRegularExpression>
+#include <QSet>
 
 #include "app/bridge/watcher.hpp"
-#include "app/bridge/instance.hpp"
+#include "app/bridge/sheet.hpp"
 
 #include "graph/types/env.hpp"
 #include "graph/response.hpp"
@@ -30,7 +31,7 @@ public:
     /*
      *  Returns a SheetInstanceModel pointer
      */
-    Q_INVOKABLE QObject* modelOf(QList<int> env);
+    Q_INVOKABLE QObject* modelOf(unsigned sheet, QList<int> env);
 
     /*
      *  Applies a set of constraints to the graph
@@ -72,7 +73,7 @@ protected slots:
     void updateFrom(const Graph::Response& r);
 
 protected:
-    std::map<Graph::Env, std::unique_ptr<SheetInstanceModel>> instances;
+    std::map<Graph::Env, std::unique_ptr<SheetModel>> instances;
 
     Graph::AsyncRoot root;
     shared_queue<Graph::Command> commands;

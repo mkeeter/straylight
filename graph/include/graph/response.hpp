@@ -47,15 +47,21 @@ struct Response
         CLEAR,
     } op;
 
-    // Environment for this change to be executed
+    // What sheet does this response modify?
+    SheetIndex sheet;
+
+    // What is the target item?
+    ItemIndex target;
+
+    // What's the secondary target, e.g. when inserting instances?
+    ItemIndex other;
+
+    // Used in value change operations
     Env env;
 
     // Enough variables to handle all the possible operations
     std::string name;
     std::string expr;
-
-    ItemIndex target;
-    SheetIndex sheet;
 
     enum ResponseFlag {
         RESPONSE_FLAG_VALID         = (1 << 0),
@@ -69,45 +75,51 @@ struct Response
     uint8_t flags;
 
     //  Helper constructors
-    static Response CellErased(const Env& env, const CellIndex& i);
-    static Response InstanceErased(const Env& env, const InstanceIndex& i);
-    static Response IOErased(const CellKey& k);
+    static Response CellErased(SheetIndex s, CellIndex i);
+    static Response InstanceErased(SheetIndex s, InstanceIndex i);
+    static Response IOErased(SheetIndex s, InstanceIndex i, CellIndex c);
     static Response CellInserted(
-            const CellKey& k, const std::string& name,
-            const std::string& expr);
+            SheetIndex s, CellIndex c,
+            const std::string& name, const std::string& expr);
     static Response InstanceInserted(
-            const Env& env, const InstanceIndex& i, const SheetIndex& target,
+            SheetIndex s, CellIndex c, SheetIndex t,
             const std::string& name, const std::string& sheet_name);
     static Response InputCreated(
-            const CellKey& k, const std::string& name, const std::string& expr);
-    static Response OutputCreated(const CellKey& k, const std::string& name);
-    static Response ExprChanged(const CellKey& c, const std::string& expr);
-    static Response InputChanged(const CellKey& c, const std::string& expr);
+            SheetIndex s, InstanceIndex i, CellIndex c,
+            const std::string& name, const std::string& expr);
+    static Response OutputCreated(
+            SheetIndex s, InstanceIndex i, CellIndex c,
+            const std::string& name);
+    static Response ExprChanged(
+            SheetIndex s, CellIndex c, const std::string& expr);
+    static Response InputChanged(
+            SheetIndex s, InstanceIndex i, CellIndex c, const std::string& expr);
     static Response CellRenamed(
-            const Env& env, const CellIndex& i, const std::string& name);
+            SheetIndex s, CellIndex c, const std::string& name);
     static Response InstanceRenamed(
-            const Env& env, const InstanceIndex& i, const std::string& name);
+            SheetIndex s, InstanceIndex i, const std::string& name);
     static Response SheetCreated(
-            const Env& env, const SheetIndex& i, const std::string& name,
+            SheetIndex parent, SheetIndex s , const std::string& name,
             bool editable, bool insertable);
     static Response SheetRenamed(
-            const Env& env, const SheetIndex& i, const std::string& name);
+            SheetIndex parent, SheetIndex i, const std::string& name);
     static Response SheetErased(
-            const Env& env, const SheetIndex& i);
+            SheetIndex parent, SheetIndex i);
     static Response ValueChanged(
             const CellKey& k, const std::string& value, bool valid);
-    static Response CellTypeChanged(const CellKey& k, Cell::Type type);
+    static Response CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type);
+    static Response InstanceSheetRenamed(
+            SheetIndex s, InstanceIndex i, const std::string& sheet_name);
+
+    // Other
     static Response ReservedWord(const std::string& value);
 
     static Response ItemNameRegexBad(const std::string& r, const std::string& err);
     static Response SheetNameRegexBad(const std::string& r, const std::string& err);
     static Response ItemNameRegex(const std::string& r);
     static Response SheetNameRegex(const std::string& r);
-    static Response InstanceSheetRenamed(
-        const Env& env, const InstanceIndex& i, const std::string& sheet_name);
 
     /* TODO
-     *  InstanceSheetRenamed
      *  InputRenamed
      *  OutputRenamed
      */

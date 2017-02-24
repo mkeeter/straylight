@@ -25,7 +25,7 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
         case NameRole:  return i.name;
         case ValidRole: return i.type == Item::CELL ? i.cell_valid : QVariant();
         case ExprRole:  return i.type == Item::CELL ? i.cell_expr : QVariant();
-        case ValueRole:  return i.type == Item::CELL ? i.cell_value : QVariant();
+        case ValueRole:  return i.type == Item::CELL ? i.cell_value.at(env) : QVariant();
         case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
         case UniqueIndexRole: return i.unique_index;
         case SheetNameRole: return i.type == Item::INSTANCE ? i.instance_sheet : QVariant();

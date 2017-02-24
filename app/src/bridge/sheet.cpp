@@ -1,38 +1,39 @@
 #include <cassert>
 
-#include "app/bridge/instance.hpp"
+#include "app/bridge/sheet.hpp"
 #include "app/bridge/graph.hpp"
 
 namespace App {
 namespace Bridge {
 
-SheetInstanceModel::SheetInstanceModel(
-        const Graph::Env& env, Graph::SheetIndex sheet,
-        GraphModel* parent)
-    : QObject(parent), graph(parent), env(env), sheet(sheet)
+SheetModel::SheetModel(
+        Graph::SheetIndex sheet, GraphModel* parent)
+    : QObject(parent), graph(parent), sheet(sheet)
 {
     // Nothing to do here
 }
 
-QObject* SheetInstanceModel::itemsModel()
+QObject* SheetModel::itemsModel()
 {
+    assert(current_env.size());
+    items.setEnv(current_env);
     QQmlEngine::setObjectOwnership(&items, QQmlEngine::CppOwnership);
     return &items;
 }
 
-QObject* SheetInstanceModel::libraryModel()
+QObject* SheetModel::libraryModel()
 {
     QQmlEngine::setObjectOwnership(&library, QQmlEngine::CppOwnership);
     return &library;
 }
 
-void SheetInstanceModel::insertCell()
+void SheetModel::insertCell()
 {
     graph->enqueue(Graph::Command::InsertCell(
                 sheet, items.nextItemName().toStdString(), ""));
 }
 
-QString SheetInstanceModel::checkItemRename(unsigned i, const QString& str)
+QString SheetModel::checkItemRename(unsigned i, const QString& str)
 {
     auto e = graph->isValidItemName(str);
     if (e.size())
@@ -43,50 +44,59 @@ QString SheetInstanceModel::checkItemRename(unsigned i, const QString& str)
     return items.checkItemRename(i, str);
 }
 
-void SheetInstanceModel::renameItem(unsigned i, const QString& str)
+void SheetModel::setEnv(const Graph::Env& env)
+{
+    if (current_env != env)
+    {
+        current_env = env;
+        setInstanceName(QString::fromStdString(instance_names.at(env)));
+    }
+}
+
+void SheetModel::renameItem(unsigned i, const QString& str)
 {
     graph->enqueue(Graph::Command::RenameItem(i, str.toStdString()));
 }
 
-void SheetInstanceModel::setExpr(unsigned i, const QString& str)
+void SheetModel::setExpr(unsigned i, const QString& str)
 {
     graph->enqueue(Graph::Command::SetExpr(i, str.toStdString()));
 }
 
-void SheetInstanceModel::eraseCell(unsigned i)
+void SheetModel::eraseCell(unsigned i)
 {
     graph->enqueue(Graph::Command::EraseCell(i));
 }
 
-void SheetInstanceModel::eraseInstance(unsigned i)
+void SheetModel::eraseInstance(unsigned i)
 {
     graph->enqueue(Graph::Command::EraseInstance(i));
 }
 
-void SheetInstanceModel::insertSheet()
+void SheetModel::insertSheet()
 {
     graph->enqueue(Graph::Command::InsertSheet(
                 sheet, library.nextSheetName().toStdString()));
 }
 
-void SheetInstanceModel::insertInstance(unsigned t)
+void SheetModel::insertInstance(unsigned t)
 {
     graph->enqueue(Graph::Command::InsertInstance(
                 sheet, t, items.nextItemName().toStdString()));
 }
 
-void SheetInstanceModel::eraseSheet(unsigned t)
+void SheetModel::eraseSheet(unsigned t)
 {
     graph->enqueue(Graph::Command::EraseSheet(t));
 }
 
-void SheetInstanceModel::renameSheet(unsigned sheet_index, const QString& str)
+void SheetModel::renameSheet(unsigned sheet_index, const QString& str)
 {
     graph->enqueue(Graph::Command::RenameSheet(
                 sheet_index, str.toStdString()));
 }
 
-QString SheetInstanceModel::checkSheetRename(unsigned i, const QString& str) const
+QString SheetModel::checkSheetRename(unsigned i, const QString& str) const
 {
     auto e = graph->isValidSheetName(str);
     if (e.size())
@@ -97,7 +107,7 @@ QString SheetInstanceModel::checkSheetRename(unsigned i, const QString& str) con
     return library.checkSheetRename(i, str);
 }
 
-void SheetInstanceModel::updateFrom(const Graph::Response& r)
+void SheetModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {

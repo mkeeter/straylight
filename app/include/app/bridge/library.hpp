@@ -20,11 +20,11 @@ struct Sheet
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class SheetsModel : public QAbstractListModel
+class LibraryModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    SheetsModel(QObject* parent=0) : QAbstractListModel(parent) {}
+    LibraryModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
     /*
      *  Returns the next valid item name for the given prefix
