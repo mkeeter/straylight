@@ -342,7 +342,7 @@ TEST_CASE("Root::callSheet (dependencies)")
         auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
         auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
         REQUIRE(val.valid == true);
-        r.insertSheet(s, "NotSheet");
+        r.renameSheet(s, "NotSheet");
         REQUIRE(val.valid == false);
     }
 
