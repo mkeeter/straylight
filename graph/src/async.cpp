@@ -103,21 +103,13 @@ void AsyncRoot::insertInstance(
                 if (c->type == Cell::INPUT)
                 {
                     const auto expr = interpreter.defaultExpr(c->expr);
-                    for (auto e : tree.envsOf(parent))
-                    {
-                        e.push_back(i);
-                        changes.push(Response::InputCreated(
-                                    {e, CellIndex(item.second)}, name, expr));
-                    }
+                    changes.push(Response::InputCreated(
+                                {env, CellIndex(item.second)}, name, expr));
                 }
                 else if (c->type == Cell::OUTPUT)
                 {
-                    for (auto e : tree.envsOf(parent))
-                    {
-                        e.push_back(i);
-                        changes.push(Response::OutputCreated(
-                                    {e, CellIndex(item.second)}, name));
-                    }
+                    changes.push(Response::OutputCreated(
+                                {env, CellIndex(item.second)}, name));
                 }
             }
             else if (auto instance = tree.at(item.second).instance())
@@ -125,6 +117,14 @@ void AsyncRoot::insertInstance(
                 changes.push(Response::InstanceInserted(
                             env, InstanceIndex(item.second), instance->sheet,
                             name, tree.nameOf(instance->sheet)));
+
+                for (auto s : tree.sheetsAbove(instance->sheet))
+                {
+                    auto env_ = env;
+                    env_.push_back(InstanceIndex(item.second));
+                    changes.push(Response::SheetCreated(env_, s, tree.nameOf(s),
+                        s == parent, true)); // TODO: insertable is wrong here
+                }
             }
         }
     }
@@ -283,10 +283,12 @@ void AsyncRoot::renameSheet(const SheetIndex& sheet, const std::string& name)
     auto lock = Lock();
     Root::renameSheet(sheet, name);
 
-    for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
+    for (auto s : tree.sheetsBelow(tree.parentOf(sheet)))
     {
-        changes.push(Response::SheetRenamed(e, sheet, name));
-        // TODO: also rename in children libraries
+        for (const auto& e : tree.envsOf(s))
+        {
+            changes.push(Response::SheetRenamed(e, sheet, name));
+        }
     }
 
     // Inform all instances of this sheet that it has been renamed
