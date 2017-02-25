@@ -53,13 +53,6 @@ public:
      */
     App::Bridge::GraphModel* graph() { return _graph; }
 
-public slots:
-    /*
-     *  Returns interpreter keywords
-     *  (for syntax highlighting)
-     */
-    std::set<std::string> keywords() const { return std::set<std::string>(); }
-
 protected:
     /*  This is owned by Qt as a QML singleton, so we heap-allocate it
      *  and don't delete it ourselves  */

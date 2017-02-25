@@ -83,29 +83,6 @@ public:
      */
     Q_INVOKABLE QString checkSheetRename(unsigned i, const QString& name) const;
 
-#if 0
-    /*
-     *  Checks whether a name is valid
-     *  Returns an empty string on success and an error message otherwise
-     */
-    Q_INVOKABLE QString checkItemName(QString name) const;
-    Q_INVOKABLE void renameItem(int item_index, QString name);
-    Q_INVOKABLE QString nextItemName(int sheet_index) const;
-
-    Q_INVOKABLE QString checkSheetName(QString name) const;
-    Q_INVOKABLE QString checkSheetRename(QString name) const;
-    Q_INVOKABLE void renameSheet(int sheet_index, QString name);
-    Q_INVOKABLE void insertSheet(QString name);
-    Q_INVOKABLE QString nextSheetName() const;
-
-    Q_INVOKABLE void setExpr(int cell_index, const QString& expr);
-    Q_INVOKABLE void setInput(int instance_index, int cell_index,
-                              const QString& expr);
-    Q_INVOKABLE void eraseCell(int cell_index);
-
-    Q_INVOKABLE void eraseInstance(unsigned instance_index);
-#endif
-
 signals:
     void instanceNameChanged();
     void sheetNameChanged();
@@ -123,7 +100,6 @@ protected:
     std::map<Graph::InstanceIndex, QString> instance_names;
 
     // Properties
-    QString _instance_name;
     QString _sheet_name;
 
 public:

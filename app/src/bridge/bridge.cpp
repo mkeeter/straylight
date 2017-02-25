@@ -17,7 +17,7 @@ Bridge::Bridge()
 
 void Bridge::installHighlighter(QQuickTextDocument* doc)
 {
-    new App::UI::SyntaxHighlighter(doc->textDocument());
+    new App::UI::SyntaxHighlighter(doc->textDocument(), _graph->getKeywords());
 }
 
 QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)

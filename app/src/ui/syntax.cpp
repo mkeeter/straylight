@@ -1,9 +1,9 @@
 #include <cassert>
 
+#include <QTextDocument>
+
 #include "app/ui/syntax.hpp"
 #include "app/ui/material.hpp"
-
-#include "app/bridge/bridge.hpp"
 
 namespace App {
 namespace UI {
@@ -118,16 +118,17 @@ QPoint SyntaxHighlighter::matchedParen(QTextDocument* doc, int pos)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc)
+SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
+                                     const QSet<QString>& keywords)
     : QSyntaxHighlighter(doc)
 {
     if (rules.empty())
     {
-        buildRules();
+        buildRules(keywords);
     }
 }
 
-void SyntaxHighlighter::buildRules()
+void SyntaxHighlighter::buildRules(const QSet<QString>& keywords)
 {
     {   // Strings (single and multi-line)
         QTextCharFormat string_format;
@@ -171,13 +172,11 @@ void SyntaxHighlighter::buildRules()
     {
         QTextCharFormat keyword_format;
         keyword_format.setForeground(Material::blue_500);
-#if 0 // TODO
-        for (const auto& k : App::Core::Bridge::instance()->keywords())
+        for (const auto& k : keywords)
         {
-            auto esc = QRegularExpression::escape(QString::fromStdString(k));
+            auto esc = QRegularExpression::escape(k);
             rules << Rule("\\b" + esc + "\\b", keyword_format);
         }
-#endif
     }
 
     // Special regex to catch parentheses

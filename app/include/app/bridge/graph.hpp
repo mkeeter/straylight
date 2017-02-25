@@ -64,6 +64,11 @@ public:
     QString isValidItemName(QString s) const;
     QString isValidSheetName(QString s) const;
 
+    /*
+     *  Returns the reported set of keywords
+     */
+    const QSet<QString>& getKeywords() const { return keywords; }
+
 signals:
     /*
      *  Announces that a particular instance has been erased
