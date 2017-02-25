@@ -72,7 +72,6 @@ QString GraphModel::isValidSheetName(QString s) const
 
 void GraphModel::updateFrom(const Graph::Response& r)
 {
-    qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
         ////////////////////////////////////////////////////////////////////////
@@ -210,7 +209,6 @@ void GraphModel::gotResponse()
 
 QObject* GraphModel::modelOf(QList<int> env)
 {
-    qDebug() << "boop" << env;
     Graph::Env env_;
     for (auto e : env)
     {
