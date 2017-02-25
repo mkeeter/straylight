@@ -63,6 +63,7 @@ struct Command
             SheetIndex parent, SheetIndex target, const std::string& name);
     static Command EraseSheet(SheetIndex i);
     static Command RenameSheet(SheetIndex i, const std::string& name);
+    static Command Clear();
 
 };
 

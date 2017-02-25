@@ -139,4 +139,9 @@ Command Command::RenameSheet(SheetIndex i, const std::string& name)
     return { RENAME_SHEET, name, "", 0, i, 0, {} };
 }
 
+Command Command::Clear()
+{
+    return { CLEAR, "", "", 0, 0, 0, {} };
+}
+
 }   // namespace Graph

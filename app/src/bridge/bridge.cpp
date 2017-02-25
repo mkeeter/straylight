@@ -61,11 +61,7 @@ QString Bridge::loadFile(QUrl filename)
 
 void Bridge::clearFile()
 {
-#if 0
-    r.clear();
-    undo_stack->clear();
-    sync();
-#endif
+    _graph->clear();
 }
 
 QString Bridge::filePath(QUrl filename) const

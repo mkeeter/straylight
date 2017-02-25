@@ -70,6 +70,11 @@ QString GraphModel::isValidSheetName(QString s) const
     return keywords.contains(s) ? "Interpreter keyword" : "";
 }
 
+void GraphModel::clear()
+{
+    commands.push(Graph::Command::Clear());
+}
+
 void GraphModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)

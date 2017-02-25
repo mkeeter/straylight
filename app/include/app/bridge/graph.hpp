@@ -69,6 +69,11 @@ public:
      */
     const QSet<QString>& getKeywords() const { return keywords; }
 
+    /*
+     *  Clears the graph
+     */
+    void clear();
+
 signals:
     /*
      *  Announces that a particular instance has been erased
