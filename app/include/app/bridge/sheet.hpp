@@ -120,22 +120,20 @@ protected:
     Graph::Env current_env;
 
     // Names of instances of this sheet
-    std::map<Graph::Env, std::string> instance_names;
+    std::map<Graph::InstanceIndex, QString> instance_names;
 
     // Properties
     QString _instance_name;
     QString _sheet_name;
 
 public:
-    void setInstanceName(const QString& s) {
-        _instance_name = s;
-        emit(instanceNameChanged());
-    }
+    void setInstanceName(const Graph::InstanceIndex& env, const std::string& n);
+    QString getInstanceName() const;
     void setSheetName(const QString& s) {
         _sheet_name = s;
         emit(sheetNameChanged());
     }
-    Q_PROPERTY(QString instanceName MEMBER _instance_name NOTIFY instanceNameChanged)
+    Q_PROPERTY(QString instanceName READ getInstanceName NOTIFY instanceNameChanged)
     Q_PROPERTY(QString sheetName MEMBER _sheet_name NOTIFY sheetNameChanged)
 
 protected:

@@ -108,6 +108,20 @@ QString SheetModel::checkSheetRename(unsigned i, const QString& str) const
     return library.checkSheetRename(i, str);
 }
 
+void SheetModel::setInstanceName(const Graph::InstanceIndex& i, const std::string& n)
+{
+    instance_names[i] = QString::fromStdString(n);
+    if (i == current_env.back())
+    {
+        emit(instanceNameChanged());
+    }
+}
+
+QString SheetModel::getInstanceName() const
+{
+    return instance_names.at(current_env.back());
+}
+
 void SheetModel::updateFrom(const Graph::Response& r)
 {
     switch (r.op)

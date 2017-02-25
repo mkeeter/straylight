@@ -129,9 +129,9 @@ void GraphModel::updateFrom(const Graph::Response& r)
             Graph::InstanceIndex instance(r.target);
             Graph::SheetIndex sheet(r.other);
 
-            auto i = sheets.at(sheet).get();
-            i->setInstanceName(QString::fromStdString(r.name));
-            i->setSheetName(QString::fromStdString(r.expr));
+            auto s = sheets.at(sheet).get();
+            s->setInstanceName(instance, r.name);
+            s->setSheetName(QString::fromStdString(r.expr));
 
             instances.insert({instance, sheet});
             break;
@@ -140,15 +140,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_SHEET_RENAMED:
         {
             sheets.at(r.sheet)->updateFrom(r);
-
-            /*
-             *  TODO (needs env?)
-            auto e = r.env;
-            e.push_back(Graph::InstanceIndex(r.target));
-            auto i = sheets.at(e).get();
-            i->setSheetName(QString::fromStdString(r.expr));
-            */
-
             break;
         }
         case Graph::Response::INSTANCE_ERASED:
@@ -160,13 +151,9 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_RENAMED:
         {
             sheets.at(r.sheet)->updateFrom(r);
-
-            /*  TODO: something with env?
-            auto e = r.env;
-            e.push_back(Graph::InstanceIndex(r.target));
-            auto i = sheets.at(e).get();
-            i->setInstanceName(QString::fromStdString(r.name));
-            */
+            auto i = Graph::InstanceIndex(r.target);
+            auto s = instances.at(i);
+            sheets.at(s)->setInstanceName(i, r.name);
 
             break;
         }
