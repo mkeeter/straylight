@@ -106,10 +106,29 @@ void GraphModel::updateFrom(const Graph::Response& r)
             break;
         }
 
-        // Sheet library level operations
+        // Sheet operations also manipulate the graph sheet list
         case Graph::Response::SHEET_RENAMED:
+        {
+            sheets.at(Graph::SheetIndex(r.target))->setSheetName(
+                    QString::fromStdString(r.name));
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+        }
         case Graph::Response::SHEET_ERASED:
+        {
+            sheets.at(r.sheet)->updateFrom(r);
+            sheets.erase(Graph::SheetIndex(r.target));
+            break;
+        }
         case Graph::Response::SHEET_INSERTED:
+        {
+            // Add a new sheet to the sheets list
+            auto s = Graph::SheetIndex(r.target);
+            sheets[s].reset(new SheetModel(s, this));
+            sheets[s]->setSheetName(QString::fromStdString(r.name));
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+        }
         // Item-level operations
         case Graph::Response::CELL_INSERTED:
         case Graph::Response::CELL_ERASED:
