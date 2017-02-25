@@ -145,6 +145,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         }
         case Graph::Response::INSTANCE_ERASED:
         {
+            emit(instanceErased(r.target.i));
             instances.erase(Graph::InstanceIndex(r.target));
             sheets.at(r.sheet)->updateFrom(r);
             break;

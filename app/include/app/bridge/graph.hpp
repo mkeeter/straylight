@@ -64,6 +64,15 @@ public:
     QString isValidItemName(QString s) const;
     QString isValidSheetName(QString s) const;
 
+signals:
+    /*
+     *  Announces that a particular instance has been erased
+     *
+     *  The SheetStack should listen to this signal and close to before that
+     *  instance if it's currently open
+     */
+    void instanceErased(unsigned i);
+
 protected slots:
     void gotResponse();
 
