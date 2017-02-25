@@ -441,8 +441,29 @@ bool Root::renameItem(const ItemIndex& i, const std::string& name)
 
 void Root::clear()
 {
-    tree.reset();
-    deps.reset();
+    auto lock = Lock();
+
+    for (const auto& c : tree.childrenOf(Tree::ROOT_SHEET))
+    {
+        if (!tree.isValid(c))
+        {
+            // Already got erased, e.g. an instance whose sheet was erased
+        }
+        else if (tree.at(c).cell())
+        {
+            eraseCell(CellIndex(c));
+        }
+        else if (tree.at(c).instance())
+        {
+            eraseInstance(InstanceIndex(c));
+        }
+        else if (tree.at(c).sheet())
+        {
+            eraseSheet(SheetIndex(c));
+        }
+    }
+
+    assert(dirty.top().size() == 0);
 }
 
 std::map<std::string, Value> Root::callSheet(
