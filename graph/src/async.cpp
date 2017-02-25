@@ -208,6 +208,14 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
             changes.push(Response::SheetAvailable(b, sheet, name, b != sheet));
         }
     }
+
+    for (auto a : tree.sheetsAbove(parent))
+    {
+        if (a != sheet)
+        {
+            changes.push(Response::SheetAvailable(sheet, a, tree.nameOf(a), true));
+        }
+    }
 }
 
 void AsyncRoot::renameSheet(const SheetIndex& sheet, const std::string& name)
