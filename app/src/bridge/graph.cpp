@@ -129,8 +129,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
             Graph::InstanceIndex instance(r.target);
             Graph::SheetIndex sheet(r.other);
 
-            auto i = new SheetModel(sheet, this);
-            sheets[sheet].reset(i);
+            auto i = sheets.at(sheet).get();
             i->setInstanceName(QString::fromStdString(r.name));
             i->setSheetName(QString::fromStdString(r.expr));
 
