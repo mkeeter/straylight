@@ -234,8 +234,6 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
     auto p = tree.parentOf(s);
     Root::eraseSheet(s);
 
-    changes.push(Response::SheetErased(p, s));
-
     for (auto b : tree.sheetsBelow(p))
     {
         if (b != p)
@@ -243,6 +241,8 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
             changes.push(Response::SheetUnavailable(b, s));
         }
     }
+
+    changes.push(Response::SheetErased(p, s));
 }
 
 void AsyncRoot::gotResult(const CellKey& k, const Value& result)
