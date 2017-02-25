@@ -24,6 +24,7 @@ QVariant LibraryModel::data(const QModelIndex& index, int role) const
         case EditableRole:  return s.editable;
         case InsertableRole:  return s.insertable;
         case SheetIndexRole:    return s.sheet_index.i;
+        case IsLastRole:    return index.row() == sheets.size() - 1;
         default: return QVariant();
     }
 }
@@ -34,7 +35,8 @@ QHash<int, QByteArray> LibraryModel::roleNames() const
         {NameRole, "name"},
         {EditableRole, "editable"},
         {InsertableRole, "insertable"},
-        {SheetIndexRole, "sheetIndex"}};
+        {SheetIndexRole, "sheetIndex"},
+        {IsLastRole, "last"}};
 }
 
 QString LibraryModel::nextSheetName(QString prefix) const
@@ -103,6 +105,11 @@ void LibraryModel::updateFrom(const Graph::Response& r)
                 }
                 emit(countChanged());
             endRemoveRows();
+
+            {
+                auto i = createIndex(sheets.size() - 1, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
             break;
         }
 
@@ -120,6 +127,18 @@ void LibraryModel::updateFrom(const Graph::Response& r)
                 names.left.insert({target, r.name});
                 emit(countChanged());
             endInsertRows();
+
+            // Modify the last and second-to-last items
+            if (sheets.size() > 1)
+            {
+                auto i = createIndex(sheets.size() - 2, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
+            {
+                auto i = createIndex(sheets.size() - 1, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
+
             break;
         }
 

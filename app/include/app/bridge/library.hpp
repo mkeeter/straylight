@@ -54,6 +54,7 @@ protected:
         EditableRole,
         InsertableRole,
         SheetIndexRole,
+        IsLastRole,
     };
 
     QHash<int, QByteArray> roleNames() const override;
