@@ -64,7 +64,7 @@ Response Response::InputExprChanged(
     return Response { IO_EXPR_CHANGED, s, i, c, {}, "", expr, 0 };
 }
 
-Response Response::InputValueChanged(
+Response Response::IOValueChanged(
             SheetIndex s, InstanceIndex i, CellIndex c,
             const Env& env, const std::string& val, bool valid)
 {

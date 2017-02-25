@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QQmlEngine>
 #include <QSharedPointer>
 #include <QString>
 #include <QSet>
@@ -42,7 +43,7 @@ public:
     /*
      *  Updates the target env, which determines which values are returned
      */
-    void setEnv(const Graph::Env& e) { env = e; }
+    void setEnv(const Graph::Env& e);
 
 signals:
     void countChanged();
@@ -66,13 +67,16 @@ protected:
         static Item Instance(Graph::InstanceIndex i, const std::string& name,
                              const std::string& sheet)
         {
-            return Item {
+            auto item = Item {
                 INSTANCE, QString::fromStdString(name), i.i,
                 std::map<Graph::Env, bool>(), "",
                 std::map<Graph::Env, QString>(), "",
                 QString::fromStdString(sheet),
                 QSharedPointer<IOModel>(new IOModel())
             };
+            QQmlEngine::setObjectOwnership(
+                    item.instance_io.data(), QQmlEngine::CppOwnership);
+            return item;
         }
 
         enum { CELL, INSTANCE } type;
@@ -97,6 +101,7 @@ protected:
         IOTypeRole,
         UniqueIndexRole,
         SheetNameRole,
+        IOCellsRole,
         IsLastRole,
     };
 

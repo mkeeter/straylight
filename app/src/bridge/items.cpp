@@ -28,6 +28,7 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
         case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
         case UniqueIndexRole: return i.unique_index;
         case SheetNameRole: return i.type == Item::INSTANCE ? i.instance_sheet : QVariant();
+        case IOCellsRole:   return i.type == Item::INSTANCE ? QVariant::fromValue(i.instance_io.data()) : QVariant();
         case IsLastRole:    return index.row() == items.size() - 1;
         default: return QVariant();
     }
@@ -72,7 +73,20 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {IOTypeRole, "ioType"},
         {UniqueIndexRole, "uniqueIndex"},
         {SheetNameRole, "sheetName"},
-        {IsLastRole, "last"}};
+        {IsLastRole, "last"},
+        {IOCellsRole, "ioCells"}};
+}
+
+void ItemsModel::setEnv(const Graph::Env& e)
+{
+    env = e;
+    for (auto& i : items)
+    {
+        if (i.type == Item::INSTANCE)
+        {
+            i.instance_io->setEnv(e);
+        }
+    }
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -173,6 +187,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             beginInsertRows(QModelIndex(), index, index);
                 items.push_back(Item::Instance(
                             Graph::InstanceIndex(r.target), r.name, r.expr));
+                items.back().instance_io->setEnv(env);
                 order.insert({r.target, index});
                 names.left.insert({r.target, r.name});
                 emit(countChanged());

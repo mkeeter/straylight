@@ -102,7 +102,7 @@ struct Response
             SheetIndex s, CellIndex c, const std::string& expr);
     static Response InputExprChanged(
             SheetIndex s, InstanceIndex i, CellIndex c, const std::string& expr);
-    static Response InputValueChanged(
+    static Response IOValueChanged(
             SheetIndex s, InstanceIndex i, CellIndex c,
             const Graph::Env& env, const std::string& value, bool valid);
     static Response CellRenamed(

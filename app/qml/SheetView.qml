@@ -24,8 +24,6 @@ SplitView {
     function fixLayout() { items.fixLayout() }
 
     Component.onCompleted: {
-        console.log(sheetModel)
-        sheetModel = Graph.modelOf(sheetEnv)
         items.itemsModel = sheetModel.itemsModel()
         lib.libraryModel = sheetModel.libraryModel()
         lib.slideOpen()

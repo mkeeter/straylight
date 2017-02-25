@@ -90,7 +90,10 @@ void AsyncRoot::eraseCell(const CellIndex& cell)
     // Mark I/O changes (TODO)
     if (type == Cell::INPUT || type == Cell::OUTPUT)
     {
-        //changes.push(Response::IOErased({e, cell}));
+        for (auto i : tree.instancesOf(sheet))
+        {
+            changes.push(Response::IOErased(tree.parentOf(i), i, cell));
+        }
     }
 
     // sync occurs on Lock destruction
@@ -285,6 +288,19 @@ void AsyncRoot::gotResult(const CellKey& k, const Value& result)
     Root::gotResult(k, result);
     changes.push(Response::ValueChanged(
                 tree.parentOf(k.second), k, result.str, result.valid));
+
+    auto c = tree.at(k.second).cell();
+
+    // Announce new values if this is an IO cell
+    if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
+    {
+        for (auto i : tree.instancesOf(tree.parentOf(k.second)))
+        {
+            changes.push(Response::IOValueChanged(
+                tree.parentOf(i), i, CellIndex(k.second), k.first,
+                result.str, result.valid));
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

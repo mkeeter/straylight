@@ -17,7 +17,6 @@ class IOModel : public QAbstractListModel
 public:
     IOModel(QObject* parent=0) : QAbstractListModel(parent) {}
 
-
     int rowCount(const QModelIndex& parent=QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
 
