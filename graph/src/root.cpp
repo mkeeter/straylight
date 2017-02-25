@@ -64,7 +64,6 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
     }
 
     // Mark everything that looked at the cell's dummy key as dirty
-    // TODO: hide the exact nature of the dummy key
     markDirty(NameKey(cell));
 
     sync();
@@ -149,8 +148,7 @@ void Root::eraseCell(const CellIndex& cell)
     }
 
     // Mark everything that looked at the cell's dummy key as dirty
-    // TODO: hide the exact nature of the dummy key
-    markDirty({{InstanceIndex(cell)}, ""});
+    markDirty(NameKey(cell));
 
     sync();
 }
@@ -272,7 +270,7 @@ bool Root::setExpr(const CellIndex& c, const std::string& expr)
     // Mark anything that looked for the cell's dummy NameKey as dirty
     // This is how we properly re-evaluate things that call a sheet when
     // a cell internal to that sheet changes.
-    markDirty(c);
+    markDirty(NameKey(c));
 
     sync();
 
@@ -549,7 +547,7 @@ std::map<std::string, Value> Root::callSheet(
         // upstream deps of output cells in the temporary instance
         for (const auto& c : cells)
         {
-            deps.insert(caller, c);
+            deps.insert(caller, NameKey(c));
         }
     }
 
