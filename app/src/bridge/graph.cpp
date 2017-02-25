@@ -75,6 +75,49 @@ void GraphModel::updateFrom(const Graph::Response& r)
     qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
+        ////////////////////////////////////////////////////////////////////////
+        // Sheet operations also manipulate the graph sheet list
+        case Graph::Response::SHEET_RENAMED:
+        {
+            sheets.at(Graph::SheetIndex(r.target))->setSheetName(
+                    QString::fromStdString(r.name));
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+        }
+        case Graph::Response::SHEET_ERASED:
+        {
+            sheets.at(r.sheet)->updateFrom(r);
+            sheets.erase(Graph::SheetIndex(r.target));
+            break;
+        }
+        case Graph::Response::SHEET_INSERTED:
+        {
+            // Add a new sheet to the sheets list
+            auto s = Graph::SheetIndex(r.target);
+            sheets[s].reset(new SheetModel(s, this));
+            sheets[s]->setSheetName(QString::fromStdString(r.name));
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        // Item-level operations
+        case Graph::Response::CELL_INSERTED:
+        case Graph::Response::CELL_ERASED:
+        case Graph::Response::EXPR_CHANGED:
+        case Graph::Response::VALUE_CHANGED:
+        case Graph::Response::RESULT_CHANGED:
+        case Graph::Response::CELL_TYPE_CHANGED:
+        case Graph::Response::CELL_RENAMED:
+        case Graph::Response::INPUT_CHANGED:
+        case Graph::Response::INPUT_CREATED:
+        case Graph::Response::OUTPUT_CREATED:
+        case Graph::Response::IO_DELETED:
+        case Graph::Response::SHEET_AVAILABLE:
+        case Graph::Response::SHEET_UNAVAILABLE:
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+
+        ////////////////////////////////////////////////////////////////////////
         // Instance creation both manipulates the instance map
         // and modifies the parent sheet
         case Graph::Response::INSTANCE_INSERTED:
@@ -109,46 +152,12 @@ void GraphModel::updateFrom(const Graph::Response& r)
 
             break;
         }
-
-        // Sheet operations also manipulate the graph sheet list
-        case Graph::Response::SHEET_RENAMED:
-        {
-            sheets.at(Graph::SheetIndex(r.target))->setSheetName(
-                    QString::fromStdString(r.name));
-            sheets.at(r.sheet)->updateFrom(r);
-            break;
-        }
-        case Graph::Response::SHEET_ERASED:
-        {
-            sheets.at(r.sheet)->updateFrom(r);
-            sheets.erase(Graph::SheetIndex(r.target));
-            break;
-        }
-        case Graph::Response::SHEET_INSERTED:
-        {
-            // Add a new sheet to the sheets list
-            auto s = Graph::SheetIndex(r.target);
-            sheets[s].reset(new SheetModel(s, this));
-            sheets[s]->setSheetName(QString::fromStdString(r.name));
-            sheets.at(r.sheet)->updateFrom(r);
-            break;
-        }
-        // Item-level operations
-        case Graph::Response::CELL_INSERTED:
-        case Graph::Response::CELL_ERASED:
-        case Graph::Response::EXPR_CHANGED:
-        case Graph::Response::VALUE_CHANGED:
-        case Graph::Response::RESULT_CHANGED:
-        case Graph::Response::CELL_TYPE_CHANGED:
         case Graph::Response::INSTANCE_ERASED:
-        case Graph::Response::CELL_RENAMED:
-        case Graph::Response::INPUT_CHANGED:
-        case Graph::Response::INPUT_CREATED:
-        case Graph::Response::OUTPUT_CREATED:
-        case Graph::Response::IO_DELETED:
+        {
+            instances.erase(Graph::InstanceIndex(r.target));
             sheets.at(r.sheet)->updateFrom(r);
             break;
-
+        }
         case Graph::Response::INSTANCE_RENAMED:
         {
             sheets.at(r.sheet)->updateFrom(r);

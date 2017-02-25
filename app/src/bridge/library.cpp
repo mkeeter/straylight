@@ -85,6 +85,7 @@ void LibraryModel::updateFrom(const Graph::Response& r)
         }
 
         case Graph::Response::SHEET_ERASED:
+        case Graph::Response::SHEET_UNAVAILABLE:
         {
             auto index = order.at(target);
             beginRemoveRows(QModelIndex(), index, index);
@@ -106,6 +107,7 @@ void LibraryModel::updateFrom(const Graph::Response& r)
         }
 
         case Graph::Response::SHEET_INSERTED:
+        case Graph::Response::SHEET_AVAILABLE:
         {
             auto index = sheets.size();
             beginInsertRows(QModelIndex(), index, index);

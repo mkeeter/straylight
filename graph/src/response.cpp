@@ -71,12 +71,21 @@ Response Response::InstanceRenamed(
 }
 
 Response Response::SheetCreated(
-            SheetIndex parent, SheetIndex s , const std::string& name,
-            bool editable, bool insertable)
+            SheetIndex parent, SheetIndex s, const std::string& name)
 {
-    return Response { SHEET_INSERTED, parent, s, 0, {}, name, "",
-        (uint8_t)((editable ? RESPONSE_FLAG_EDITABLE : 0) |
-                  (insertable ? RESPONSE_FLAG_INSERTABLE : 0)) };
+    return Response { SHEET_INSERTED, parent, s, 0, {}, name, "", RESPONSE_FLAG_EDITABLE | RESPONSE_FLAG_INSERTABLE };
+}
+
+Response Response::SheetAvailable(
+            SheetIndex parent, SheetIndex s, const std::string& name, bool insertable)
+{
+    return Response { SHEET_AVAILABLE, parent, s, 0, {}, name, "", (uint8_t)(insertable ? RESPONSE_FLAG_INSERTABLE : 0) };
+}
+
+Response Response::SheetUnavailable(
+            SheetIndex parent, SheetIndex s)
+{
+    return Response { SHEET_UNAVAILABLE, parent, s, 0, {}, "", "", 0 };
 }
 
 Response Response::SheetRenamed(

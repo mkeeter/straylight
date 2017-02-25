@@ -116,6 +116,8 @@ void SheetModel::updateFrom(const Graph::Response& r)
         case Graph::Response::SHEET_RENAMED:
         case Graph::Response::SHEET_ERASED:
         case Graph::Response::SHEET_INSERTED:
+        case Graph::Response::SHEET_AVAILABLE:
+        case Graph::Response::SHEET_UNAVAILABLE:
             library.updateFrom(r);
             break;
 

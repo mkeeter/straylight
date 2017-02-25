@@ -199,11 +199,14 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     auto lock = Lock();
     Root::insertSheet(parent, sheet, name);
 
-    for (auto s : tree.sheetsBelow(parent))
+    changes.push(Response::SheetCreated(parent, sheet, name));
+
+    for (auto b : tree.sheetsBelow(parent))
     {
-        printf("inserting %i\n", s.i);
-        changes.push(Response::SheetCreated(
-                    s, sheet, name, s == parent, s != sheet));
+        if (b != parent)
+        {
+            changes.push(Response::SheetAvailable(b, sheet, name, b != sheet));
+        }
     }
 }
 
@@ -231,9 +234,14 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
     auto p = tree.parentOf(s);
     Root::eraseSheet(s);
 
+    changes.push(Response::SheetErased(p, s));
+
     for (auto b : tree.sheetsBelow(p))
     {
-        changes.push(Response::SheetErased(b, s));
+        if (b != p)
+        {
+            changes.push(Response::SheetUnavailable(b, s));
+        }
     }
 }
 

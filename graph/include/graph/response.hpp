@@ -14,6 +14,8 @@ struct Response
     enum {
         SHEET_RENAMED,
         SHEET_INSERTED,
+        SHEET_AVAILABLE,
+        SHEET_UNAVAILABLE,
         SHEET_ERASED,
 
         CELL_RENAMED,
@@ -99,8 +101,12 @@ struct Response
     static Response InstanceRenamed(
             SheetIndex s, InstanceIndex i, const std::string& name);
     static Response SheetCreated(
-            SheetIndex parent, SheetIndex s , const std::string& name,
-            bool editable, bool insertable);
+            SheetIndex parent, SheetIndex s , const std::string& name);
+    static Response SheetAvailable(
+            SheetIndex parent, SheetIndex s,
+            const std::string& name, bool insertable);
+    static Response SheetUnavailable(
+            SheetIndex parent, SheetIndex s);
     static Response SheetRenamed(
             SheetIndex parent, SheetIndex i, const std::string& name);
     static Response SheetErased(
