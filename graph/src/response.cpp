@@ -18,6 +18,12 @@ Response Response::IOErased(SheetIndex s, InstanceIndex i, CellIndex c)
     return Response { IO_DELETED, s, i, c, {}, "", "", 0 };
 }
 
+Response Response::IORenamed(SheetIndex s, InstanceIndex i, CellIndex c,
+        const std::string& name)
+{
+    return Response { IO_RENAMED, s, i, c, {}, name, "", 0 };
+}
+
 Response Response::CellInserted(
             SheetIndex s, CellIndex c,
             const std::string& name, const std::string& expr)
@@ -36,14 +42,14 @@ Response Response::InputCreated(
             SheetIndex s, InstanceIndex i, CellIndex c,
             const std::string& name, const std::string& expr)
 {
-    return Response { INPUT_CREATED, s, i, c, {}, name, expr, 0 };
+    return Response { IO_INPUT_CREATED, s, i, c, {}, name, expr, 0 };
 }
 
 Response Response::OutputCreated(
             SheetIndex s, InstanceIndex i, CellIndex c,
             const std::string& name)
 {
-    return Response { OUTPUT_CREATED, s, i, c, {}, name, "", 0 };
+    return Response { IO_OUTPUT_CREATED, s, i, c, {}, name, "", 0 };
 }
 
 Response Response::ExprChanged(
@@ -52,10 +58,18 @@ Response Response::ExprChanged(
     return Response { EXPR_CHANGED, s, c, 0, {}, "", expr, 0 };
 }
 
-Response Response::InputChanged(
+Response Response::InputExprChanged(
             SheetIndex s, InstanceIndex i, CellIndex c, const std::string& expr)
 {
-    return Response { INPUT_CHANGED, s, i, c, {}, "", expr, 0 };
+    return Response { IO_EXPR_CHANGED, s, i, c, {}, "", expr, 0 };
+}
+
+Response Response::InputValueChanged(
+            SheetIndex s, InstanceIndex i, CellIndex c,
+            const Env& env, const std::string& val, bool valid)
+{
+    return Response { IO_VALUE_CHANGED, s, i, c, env, "", val,
+        (uint8_t)(valid ? RESPONSE_FLAG_VALID : 0)};
 }
 
 Response Response::CellRenamed(
@@ -124,7 +138,6 @@ Response Response::CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type)
 Response Response::InstanceSheetRenamed(
             SheetIndex s, InstanceIndex i, const std::string& sheet_name)
 {
-    // TODO: send env as well?
     return Response { INSTANCE_SHEET_RENAMED, s, i, 0, {}, sheet_name, "", 0 };
 }
 

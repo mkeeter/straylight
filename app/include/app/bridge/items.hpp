@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QSharedPointer>
 #include <QString>
 #include <QSet>
 
@@ -8,7 +9,7 @@
 
 #include "graph/types/cell.hpp"
 #include "graph/response.hpp"
-//#include "app/bridge/iomodel.hpp"
+#include "app/bridge/io.hpp"
 
 namespace App {
 namespace Bridge {
@@ -59,7 +60,7 @@ protected:
                 CELL, QString::fromStdString(name), i.i,
                 std::map<Graph::Env, bool>(),
                 QString::fromStdString(expr), std::map<Graph::Env, QString>(),
-                "", ""};
+                "", "", QSharedPointer<IOModel>()};
         }
 
         static Item Instance(Graph::InstanceIndex i, const std::string& name,
@@ -69,7 +70,9 @@ protected:
                 INSTANCE, QString::fromStdString(name), i.i,
                 std::map<Graph::Env, bool>(), "",
                 std::map<Graph::Env, QString>(), "",
-                QString::fromStdString(sheet) };
+                QString::fromStdString(sheet),
+                QSharedPointer<IOModel>(new IOModel())
+            };
         }
 
         enum { CELL, INSTANCE } type;
@@ -82,8 +85,7 @@ protected:
         QString cell_type;
 
         QString instance_sheet;
-
-        //IOModel instance_io; TODO
+        QSharedPointer<IOModel> instance_io;
     };
 
     enum ItemRole {

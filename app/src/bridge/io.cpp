@@ -79,6 +79,19 @@ void IOModel::updateFrom(const Graph::Response& r)
             break;
         }
 
+        case Graph::Response::IO_RENAMED:
+        {
+            auto index = order.at(Graph::CellIndex(r.other));
+            auto new_name = QString::fromStdString(r.name);
+            if (cells[index].name != new_name)
+            {
+                cells[index].name = new_name;
+                auto i = createIndex(index, 0);
+                dataChanged(i, i, {NameRole});
+            }
+            break;
+        }
+
         case Graph::Response::IO_DELETED:
         {
             auto index = order.at(Graph::CellIndex(r.other));

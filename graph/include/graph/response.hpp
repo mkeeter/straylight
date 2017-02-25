@@ -24,16 +24,19 @@ struct Response
         CELL_INSERTED,
         CELL_TYPE_CHANGED,
         EXPR_CHANGED,
-        INPUT_CHANGED,
         INSTANCE_INSERTED,
         CELL_ERASED,
         INSTANCE_ERASED,
 
         VALUE_CHANGED,
         RESULT_CHANGED,
-        INPUT_CREATED,
-        OUTPUT_CREATED,
+
+        IO_INPUT_CREATED,
+        IO_OUTPUT_CREATED,
         IO_DELETED,
+        IO_EXPR_CHANGED,
+        IO_VALUE_CHANGED,
+        IO_RENAMED,
 
         ITEM_NAME_REGEX_BAD,
         SHEET_NAME_REGEX_BAD,
@@ -80,6 +83,9 @@ struct Response
     static Response CellErased(SheetIndex s, CellIndex i);
     static Response InstanceErased(SheetIndex s, InstanceIndex i);
     static Response IOErased(SheetIndex s, InstanceIndex i, CellIndex c);
+    static Response IORenamed(
+            SheetIndex s, InstanceIndex i, CellIndex c,
+            const std::string& name);
     static Response CellInserted(
             SheetIndex s, CellIndex c,
             const std::string& name, const std::string& expr);
@@ -94,8 +100,11 @@ struct Response
             const std::string& name);
     static Response ExprChanged(
             SheetIndex s, CellIndex c, const std::string& expr);
-    static Response InputChanged(
+    static Response InputExprChanged(
             SheetIndex s, InstanceIndex i, CellIndex c, const std::string& expr);
+    static Response InputValueChanged(
+            SheetIndex s, InstanceIndex i, CellIndex c,
+            const Graph::Env& env, const std::string& value, bool valid);
     static Response CellRenamed(
             SheetIndex s, CellIndex c, const std::string& name);
     static Response InstanceRenamed(

@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <cassert>
 
 #include "app/bridge/items.hpp"
@@ -133,8 +132,8 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 item.cell_valid.count(env) == 0 ||
                 item.cell_valid.at(env) != new_valid)
             {
-                items[index].cell_value[env] = new_value;
-                items[index].cell_valid[env] = new_valid;
+                item.cell_value[env] = new_value;
+                item.cell_valid[env] = new_valid;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ValueRole, ValidRole});
             }
@@ -243,11 +242,18 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             break;
         }
 
-        case Graph::Response::INPUT_CHANGED:
-        case Graph::Response::INPUT_CREATED:
-        case Graph::Response::OUTPUT_CREATED:
+        case Graph::Response::IO_EXPR_CHANGED:
+        case Graph::Response::IO_VALUE_CHANGED:
+        case Graph::Response::IO_INPUT_CREATED:
+        case Graph::Response::IO_OUTPUT_CREATED:
+        case Graph::Response::IO_RENAMED:
         case Graph::Response::IO_DELETED:
-            assert(false); // TODO
+        {
+            auto index = order.at(r.target);
+            assert(items[index].type == Item::INSTANCE);
+            items[index].instance_io->updateFrom(r);
+            break;
+        }
 
         default:
             assert(false);

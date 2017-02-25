@@ -38,24 +38,26 @@ void AsyncRoot::insertCell(
     changes.push(Response::CellInserted(sheet, cell, name, expr));
     changes.push(Response::CellTypeChanged(sheet, cell, type));
 
-    /*
-     * TODO
+    // Then, mark input / output changes
     if (sheet != Tree::ROOT_SHEET)
     {
-        // Then, mark input / output changes
         if (type == Cell::INPUT)
         {
             // TODO: this is wrong, as it's the default expr not the input expr
-            // Does this matter?
-            changes.push(Response::InputCreated({e, cell}, name,
-                         interpreter.defaultExpr(expr)));
+            for (auto i : tree.instancesOf(sheet))
+            {
+                changes.push(Response::InputCreated(tree.parentOf(i), i, cell,
+                            name, interpreter.defaultExpr(expr)));
+            }
         }
         else if (type == Cell::OUTPUT)
         {
-            changes.push(Response::OutputCreated({e, cell}, name));
+            for (auto i : tree.instancesOf(sheet))
+            {
+                changes.push(Response::OutputCreated(tree.parentOf(i), i, cell, name));
+            }
         }
     }
-    */
 
     // Evaluation happens on lock destruction
 }
@@ -116,8 +118,6 @@ bool AsyncRoot::setExpr(const CellIndex& c, const std::string& expr)
         return false;
     }
 
-    auto d = (cell->type == Cell::INPUT) ? interpreter.defaultExpr(expr) : "";
-
     // Mark that the expression itself has changed
     changes.push(Response::ExprChanged(parent, c, expr));
 
@@ -127,26 +127,32 @@ bool AsyncRoot::setExpr(const CellIndex& c, const std::string& expr)
         changes.push(Response::CellTypeChanged(parent, c, cell->type));
     }
 
-    /*
-     *  TODO
-    // Handle IO state changes
-    if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
+    auto d = (cell->type == Cell::INPUT) ? interpreter.defaultExpr(expr) : "";
+    if (parent != Tree::ROOT_SHEET)
     {
-        changes.push(Response::InputCreated({e, c}, tree.nameOf(c), d));
+        for (auto i : tree.instancesOf(parent))
+        {
+            auto p = tree.parentOf(i);
+
+            if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
+            {
+                changes.push(Response::InputCreated(p, i, c, tree.nameOf(c), d));
+            }
+            else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
+            {
+                changes.push(Response::IOErased(p, i, c));
+            }
+
+            if (prev_type != Cell::OUTPUT && cell->type == Cell::OUTPUT)
+            {
+                changes.push(Response::OutputCreated(p, i, c, tree.nameOf(c)));
+            }
+            else if (prev_type == Cell::OUTPUT && cell->type != Cell::OUTPUT)
+            {
+                changes.push(Response::IOErased(p, i, c));
+            }
+        }
     }
-    else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
-    {
-        changes.push(Response::IOErased({e, c}));
-    }
-    if (prev_type != Cell::OUTPUT && cell->type == Cell::OUTPUT)
-    {
-        changes.push(Response::OutputCreated({e, c}, tree.nameOf(c)));
-    }
-    else if (prev_type == Cell::OUTPUT && cell->type != Cell::OUTPUT)
-    {
-        changes.push(Response::IOErased({e, c}));
-    }
-    */
 
     return true;
 }
@@ -163,14 +169,11 @@ bool AsyncRoot::setInput(const InstanceIndex& instance, const CellIndex& cell,
     }
     else
     {
-        (void)parent;
-        /*
-         * TODO
-        for (auto env : tree.envsOf(parent))
+        for (auto i : tree.instancesOf(parent))
         {
-            changes.push(Response::InputChanged({env, cell}, expr));
+            changes.push(Response::InputExprChanged(tree.parentOf(i), i, cell,
+                        expr));
         }
-        */
         return true;
     }
 }
@@ -184,11 +187,27 @@ bool AsyncRoot::renameItem(const ItemIndex& i, const std::string& name)
     }
     else
     {
-        changes.push(tree.at(i).cell()
-                ? Response::CellRenamed(
-                    tree.parentOf(i), CellIndex(i), name)
-                : Response::InstanceRenamed(
-                    tree.parentOf(i), InstanceIndex(i), name));
+        auto parent = tree.parentOf(i);
+
+        if (auto c = tree.at(i).cell())
+        {
+            changes.push(Response::CellRenamed(
+                        parent, CellIndex(i), name));
+
+            if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
+            {
+                for (auto i : tree.instancesOf(parent))
+                {
+                    changes.push(Response::IORenamed(
+                        tree.parentOf(i), i, CellIndex(i), name));
+                }
+            }
+        }
+        else
+        {
+            changes.push(Response::InstanceRenamed(
+                    parent, InstanceIndex(i), name));
+        }
         return true;
     }
 }

@@ -22,6 +22,7 @@ set(SRCS
     src/bridge/sheet.cpp
     src/bridge/library.cpp
     src/bridge/watcher.cpp
+    src/bridge/io.cpp
     src/ui/material.cpp
     src/ui/syntax.cpp
     src/render/canvas.cpp

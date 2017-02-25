@@ -146,10 +146,12 @@ void SheetModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_SHEET_RENAMED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
-        case Graph::Response::INPUT_CHANGED:
-        case Graph::Response::INPUT_CREATED:
-        case Graph::Response::OUTPUT_CREATED:
+        case Graph::Response::IO_EXPR_CHANGED:
+        case Graph::Response::IO_VALUE_CHANGED:
+        case Graph::Response::IO_INPUT_CREATED:
+        case Graph::Response::IO_OUTPUT_CREATED:
         case Graph::Response::IO_DELETED:
+        case Graph::Response::IO_RENAMED:
         case Graph::Response::CELL_TYPE_CHANGED:
             items.updateFrom(r);
             break;
