@@ -72,56 +72,59 @@ ColumnLayout {
         }
     }
 
-    Text {
-        visible: libraryModel.count == 0
-        text: "No sheets in library"
-        color: Style.textDarkHint
-        padding: 10
-    }
-
-    ScrollView {
+    Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        id: libraryView
-
-        style: ScrollViewStyle {
-            transientScrollBars: true
+        Text {
+            visible: libraryModel.count == 0
+            text: "No sheets in library"
+            color: Style.textDarkHint
+            padding: 10
         }
 
-        ListView {
-            id: sheetList
+        ScrollView {
+            id: libraryView
+            anchors.fill: parent
 
-            delegate: SheetLibraryDelegate {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 15
-                anchors.leftMargin: 10
+            style: ScrollViewStyle {
+                transientScrollBars: true
+            }
 
-                Component.onCompleted: {
-                    addInstance.connect(lib.addInstance)
-                    eraseSheet.connect(lib.eraseSheet)
+            ListView {
+                id: sheetList
+
+                delegate: SheetLibraryDelegate {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.rightMargin: 15
+                    anchors.leftMargin: 10
+
+                    Component.onCompleted: {
+                        addInstance.connect(lib.addInstance)
+                        eraseSheet.connect(lib.eraseSheet)
+                    }
                 }
-            }
 
-            displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 100 }
-            }
-            move: Transition {
-                NumberAnimation { properties: "x,y"; duration: 100 }
-            }
-            remove: Transition {
-                NumberAnimation { property: "opacity"; to: 0; duration: 100 }
-            }
-            add: Transition {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
-            }
+                displaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 100 }
+                }
+                move: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 100 }
+                }
+                remove: Transition {
+                    NumberAnimation { property: "opacity"; to: 0; duration: 100 }
+                }
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
+                }
 
-            NumberAnimation {
-                id: scrollTo
-                target: libraryView.flickableItem
-                property: 'contentY'
-                duration: 100
+                NumberAnimation {
+                    id: scrollTo
+                    target: libraryView.flickableItem
+                    property: 'contentY'
+                    duration: 100
+                }
             }
         }
     }
