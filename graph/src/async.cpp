@@ -250,6 +250,14 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
         }
     }
 
+    for (auto a : tree.sheetsAbove(p))
+    {
+        if (a != s)
+        {
+            changes.push(Response::SheetUnavailable(s, a));
+        }
+    }
+
     changes.push(Response::SheetErased(p, s));
 }
 
