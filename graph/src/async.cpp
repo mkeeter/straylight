@@ -181,35 +181,35 @@ bool AsyncRoot::setInput(const InstanceIndex& instance, const CellIndex& cell,
     }
 }
 
-bool AsyncRoot::renameItem(const ItemIndex& i, const std::string& name)
+bool AsyncRoot::renameItem(const ItemIndex& item, const std::string& name)
 {
     auto lock = Lock();
-    if (!Root::renameItem(i, name))
+    if (!Root::renameItem(item, name))
     {
         return false;
     }
     else
     {
-        auto parent = tree.parentOf(i);
+        auto parent = tree.parentOf(item);
 
-        if (auto c = tree.at(i).cell())
+        if (auto c = tree.at(item).cell())
         {
             changes.push(Response::CellRenamed(
-                        parent, CellIndex(i), name));
+                        parent, CellIndex(item), name));
 
             if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
             {
                 for (auto i : tree.instancesOf(parent))
                 {
                     changes.push(Response::IORenamed(
-                        tree.parentOf(i), i, CellIndex(i), name));
+                        tree.parentOf(i), i, CellIndex(item), name));
                 }
             }
         }
         else
         {
             changes.push(Response::InstanceRenamed(
-                    parent, InstanceIndex(i), name));
+                    parent, InstanceIndex(item), name));
         }
         return true;
     }
