@@ -29,6 +29,7 @@ QVariant ItemsModel::data(const QModelIndex& index, int role) const
         case IOTypeRole: return i.type == Item::CELL ? i.cell_type : QVariant();
         case UniqueIndexRole: return i.unique_index;
         case SheetNameRole: return i.type == Item::INSTANCE ? i.instance_sheet : QVariant();
+        case IsLastRole:    return index.row() == items.size() - 1;
         default: return QVariant();
     }
 }
@@ -71,7 +72,8 @@ QHash<int, QByteArray> ItemsModel::roleNames() const
         {ValueRole, "value"},
         {IOTypeRole, "ioType"},
         {UniqueIndexRole, "uniqueIndex"},
-        {SheetNameRole, "sheetName"}};
+        {SheetNameRole, "sheetName"},
+        {IsLastRole, "last"}};
 }
 
 void ItemsModel::updateFrom(const Graph::Response& r)
@@ -152,6 +154,17 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 names.left.insert({r.target, r.name});
                 emit(countChanged());
             endInsertRows();
+
+            // Modify the last and second-to-last items
+            if (items.size() > 1)
+            {
+                auto i = createIndex(items.size() - 2, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
+            {
+                auto i = createIndex(items.size() - 1, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
             break;
         }
 
@@ -165,6 +178,17 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 names.left.insert({r.target, r.name});
                 emit(countChanged());
             endInsertRows();
+
+            // Modify the last and second-to-last items
+            if (items.size() > 1)
+            {
+                auto i = createIndex(items.size() - 2, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
+            {
+                auto i = createIndex(items.size() - 1, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
             break;
         }
 
@@ -187,6 +211,11 @@ void ItemsModel::updateFrom(const Graph::Response& r)
                 }
                 emit(countChanged());
             endRemoveRows();
+
+            {
+                auto i = createIndex(items.size() - 1, 0);
+                dataChanged(i, i, {IsLastRole});
+            }
             break;
         }
 
