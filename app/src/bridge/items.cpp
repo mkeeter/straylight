@@ -96,7 +96,7 @@ void ItemsModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_SHEET_RENAMED:
         {
             auto index = order.at(r.target);
-            auto new_name = QString::fromStdString(r.expr);
+            auto new_name = QString::fromStdString(r.name);
             if (items[index].instance_sheet != new_name)
             {
                 items[index].instance_sheet = new_name;
