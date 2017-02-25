@@ -72,6 +72,7 @@ QString GraphModel::isValidSheetName(QString s) const
 
 void GraphModel::updateFrom(const Graph::Response& r)
 {
+    qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
         // Instance creation both manipulates the instance map
@@ -82,12 +83,15 @@ void GraphModel::updateFrom(const Graph::Response& r)
             sheets.at(r.sheet)->updateFrom(r);
 
             // Then update the map to add a new SheetInstanceModel
-            Graph::SheetIndex s(r.target);
-            auto i = new SheetModel(s, this);
-            sheets[s].reset(i);
+            Graph::InstanceIndex instance(r.target);
+            Graph::SheetIndex sheet(r.other);
+
+            auto i = new SheetModel(sheet, this);
+            sheets[sheet].reset(i);
             i->setInstanceName(QString::fromStdString(r.name));
             i->setSheetName(QString::fromStdString(r.expr));
 
+            instances.insert({instance, sheet});
             break;
         }
 

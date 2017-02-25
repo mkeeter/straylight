@@ -201,6 +201,7 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
 
     for (auto s : tree.sheetsBelow(parent))
     {
+        printf("inserting %i\n", s.i);
         changes.push(Response::SheetCreated(
                     s, sheet, name, s == parent, s != sheet));
     }
