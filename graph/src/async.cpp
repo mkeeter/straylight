@@ -5,11 +5,6 @@ namespace Graph {
 AsyncRoot::AsyncRoot()
     : Root()
 {
-    // Announce the creation of the root instance
-    changes.push(Response::InstanceInserted(
-                {}, Tree::ROOT_INSTANCE, Tree::ROOT_SHEET,
-                "Root", ""));
-
     // Announce all of the interpreter's keywords
     for (const auto& k : interpreter.keywords())
     {

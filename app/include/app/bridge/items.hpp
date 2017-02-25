@@ -41,7 +41,7 @@ public:
     /*
      *  Updates the target env, which determines which values are returned
      */
-    void setEnv(const Graph::Env& env);
+    void setEnv(const Graph::Env& e) { env = e; }
 
 signals:
     void countChanged();

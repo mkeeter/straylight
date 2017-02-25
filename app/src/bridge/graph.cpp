@@ -13,18 +13,8 @@ GraphModel::GraphModel(QObject* parent)
     : QObject(parent), responses(runRoot(root, commands)), watcher(responses)
 {
     // Add a model for the root sheet
-    instances[Graph::Tree::ROOT_SHEET].reset(
+    sheets[Graph::Tree::ROOT_SHEET].reset(
             new SheetModel(Graph::Tree::ROOT_SHEET, this));
-
-    // The first response pushed should create the root instance
-    while (responses.empty())
-    {
-        responses.wait();
-    }
-    auto r = responses.pop();
-    assert(r.op == Graph::Response::INSTANCE_INSERTED);
-    assert(r.env.size() == 0);
-    updateFrom(r);
 
     connect(&watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
@@ -81,7 +71,6 @@ QString GraphModel::isValidSheetName(QString s) const
 
 void GraphModel::updateFrom(const Graph::Response& r)
 {
-    qDebug() << "Dispatching" << r.op;
     switch (r.op)
     {
         // Instance creation both manipulates the instance map
@@ -89,13 +78,12 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_INSERTED:
         {
             // Update the parent sheet containing this particular instance
-            instances.at(r.env)->updateFrom(r);
+            sheets.at(r.sheet)->updateFrom(r);
 
             // Then update the map to add a new SheetInstanceModel
-            auto e = r.env;
-            e.push_back(Graph::InstanceIndex(r.target));
-            auto i = new SheetInstanceModel(e, r.sheet, this);
-            instances[e].reset(i);
+            Graph::SheetIndex s(r.target);
+            auto i = new SheetModel(s, this);
+            sheets[s].reset(i);
             i->setInstanceName(QString::fromStdString(r.name));
             i->setSheetName(QString::fromStdString(r.expr));
 
@@ -104,12 +92,15 @@ void GraphModel::updateFrom(const Graph::Response& r)
 
         case Graph::Response::INSTANCE_SHEET_RENAMED:
         {
-            instances.at(r.env)->updateFrom(r);
+            sheets.at(r.sheet)->updateFrom(r);
 
+            /*
+             *  TODO (needs env?)
             auto e = r.env;
             e.push_back(Graph::InstanceIndex(r.target));
-            auto i = instances.at(e).get();
+            auto i = sheets.at(e).get();
             i->setSheetName(QString::fromStdString(r.expr));
+            */
 
             break;
         }
@@ -125,47 +116,26 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::RESULT_CHANGED:
         case Graph::Response::CELL_TYPE_CHANGED:
-            instances.at(r.env)->updateFrom(r);
-            break;
-
         case Graph::Response::INSTANCE_ERASED:
-        {
-            instances.at(r.env)->updateFrom(r);
-
-            auto e = r.env;
-            e.push_back(Graph::InstanceIndex(r.target));
-            instances.erase(e);
-
-            break;
-        }
-
-        case Graph::Response::INSTANCE_RENAMED:
-        {
-            instances.at(r.env)->updateFrom(r);
-
-            auto e = r.env;
-            e.push_back(Graph::InstanceIndex(r.target));
-            auto i = instances.at(e).get();
-            i->setInstanceName(QString::fromStdString(r.name));
-
-            break;
-        }
-
         case Graph::Response::CELL_RENAMED:
-        {
-            instances.at(r.env)->updateFrom(r);
-            break;
-        }
-
-        // Instance-level operations, which are execute on parent ItemModel
         case Graph::Response::INPUT_CHANGED:
         case Graph::Response::INPUT_CREATED:
         case Graph::Response::OUTPUT_CREATED:
         case Graph::Response::IO_DELETED:
+            sheets.at(r.sheet)->updateFrom(r);
+            break;
+
+        case Graph::Response::INSTANCE_RENAMED:
         {
-            auto env_ = r.env;
-            env_.pop_back();
-            instances.at(env_)->updateFrom(r);
+            sheets.at(r.sheet)->updateFrom(r);
+
+            /*  TODO: something with env?
+            auto e = r.env;
+            e.push_back(Graph::InstanceIndex(r.target));
+            auto i = sheets.at(e).get();
+            i->setInstanceName(QString::fromStdString(r.name));
+            */
+
             break;
         }
 
@@ -224,9 +194,9 @@ QObject* GraphModel::modelOf(unsigned sheet, QList<int> env)
     {
         env_.push_back(e);
     }
-    auto i = instances.at(sheet).get();
+    auto i = sheets.at(sheet).get();
     QQmlEngine::setObjectOwnership(i, QQmlEngine::CppOwnership);
-    i->setEnv(env);
+    i->setEnv(env_);
     return i;
 }
 

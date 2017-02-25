@@ -115,6 +115,7 @@ Response Response::CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type)
 Response Response::InstanceSheetRenamed(
             SheetIndex s, InstanceIndex i, const std::string& sheet_name)
 {
+    // TODO: send env as well?
     return Response { INSTANCE_SHEET_RENAMED, s, i, 0, {}, sheet_name, "", 0 };
 }
 
