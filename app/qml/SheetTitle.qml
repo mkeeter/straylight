@@ -22,7 +22,7 @@ Item {
             Text {
                 id: sheetTitleText
 
-                text: sheetInstanceModel.sheetName ? sheetInstanceModel.instanceName : "Root"
+                text: sheetModel.sheetName ? sheetModel.instanceName : "Root"
                 color: Style.textLightPrimary
                 font.family: fixedWidth.name
                 font.pointSize: 18
@@ -51,7 +51,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             Text {
-                text: sheetInstanceModel.sheetName
+                text: sheetModel.sheetName
                 font.pointSize: 14
                 color: Style.textLightSecondary
                 rightPadding: 14

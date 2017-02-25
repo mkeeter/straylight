@@ -18,14 +18,16 @@ SplitView {
     property string instanceName: ""
     property string sheetName: ""
 
-    property var sheetInstanceModel: Graph.modelOf(sheetEnv)
+    property var sheetModel: Graph.modelOf(sheetEnv)
 
     // Forwards a call to fix item layout
     function fixLayout() { items.fixLayout() }
 
     Component.onCompleted: {
-        items.itemsModel = sheetInstanceModel.itemsModel()
-        lib.libraryModel = sheetInstanceModel.libraryModel()
+        console.log(sheetModel)
+        sheetModel = Graph.modelOf(sheetEnv)
+        items.itemsModel = sheetModel.itemsModel()
+        lib.libraryModel = sheetModel.libraryModel()
         lib.slideOpen()
     }
 
@@ -56,7 +58,7 @@ SplitView {
                     //var instance = sheetEnv[sheetEnv.length - 1]
                     //var sheet = Bridge.sheetOf(instance)
                     //var name = Bridge.nextItemName(sheet)
-                    sheetInstanceModel.insertCell()
+                    sheetModel.insertCell()
                     renameLastItemTimer.restart()
                 }
             }
@@ -120,17 +122,17 @@ SplitView {
         visible: false
 
         onAddInstance: {
-            sheetInstanceModel.insertInstance(targetSheetIndex)
+            sheetModel.insertInstance(targetSheetIndex)
             renameLastItemTimer.restart()
         }
 
         onAddSheet: {
-            sheetInstanceModel.insertSheet()
+            sheetModel.insertSheet()
             renameLastSheetTimer.restart()
         }
 
         onEraseSheet: {
-            sheetInstanceModel.eraseSheet(targetSheetIndex)
+            sheetModel.eraseSheet(targetSheetIndex)
         }
 
         onClosePane: { slideClose() }

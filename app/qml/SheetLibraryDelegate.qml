@@ -37,7 +37,7 @@ GridLayout {
         IconButton {
             text: Awesome.fa_plus_square_o
             toolTip: "Insert instance"
-            onClicked: { sheetInstanceModel.insertInstance(sheetIndex) }
+            onClicked: { sheetModel.insertInstance(sheetIndex) }
             visible: insertable
         }
         IconButton {
@@ -53,7 +53,7 @@ GridLayout {
             text: Awesome.fa_trash
             toolTip: "Delete"
             visible: editable
-            onClicked: { sheetInstanceModel.eraseSheet(sheetIndex) }
+            onClicked: { sheetModel.eraseSheet(sheetIndex) }
         }
     }
 
@@ -73,10 +73,10 @@ GridLayout {
         width: parent.width
         label: "Rename to"
         getError: function(name) {
-            return sheetInstanceModel.checkSheetRename(sheetIndex, name)
+            return sheetModel.checkSheetRename(sheetIndex, name)
         }
         onAccepted: function(t) {
-            sheetInstanceModel.renameSheet(sheetIndex, t)
+            sheetModel.renameSheet(sheetIndex, t)
         }
     }
 

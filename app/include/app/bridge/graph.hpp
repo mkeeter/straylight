@@ -31,7 +31,7 @@ public:
     /*
      *  Returns a SheetInstanceModel pointer
      */
-    Q_INVOKABLE QObject* modelOf(unsigned sheet, QList<int> env);
+    Q_INVOKABLE QObject* modelOf(QList<int> env);
 
     /*
      *  Applies a set of constraints to the graph
@@ -74,6 +74,7 @@ protected slots:
 
 protected:
     std::map<Graph::SheetIndex, std::unique_ptr<SheetModel>> sheets;
+    std::map<Graph::InstanceIndex, Graph::SheetIndex> instances;
 
     Graph::AsyncRoot root;
     shared_queue<Graph::Command> commands;

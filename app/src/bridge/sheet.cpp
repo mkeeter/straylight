@@ -49,7 +49,8 @@ void SheetModel::setEnv(const Graph::Env& env)
     if (current_env != env)
     {
         current_env = env;
-        setInstanceName(QString::fromStdString(instance_names.at(env)));
+        // TODO
+        //setInstanceName(QString::fromStdString(instance_names.at(env)));
     }
 }
 

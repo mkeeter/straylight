@@ -12,7 +12,7 @@ Column {
         anchors.margins: 5
 
         onEraseMe: {
-            sheetInstanceModel.eraseCell(uniqueIndex)
+            sheetModel.eraseCell(uniqueIndex)
         }
 
         Component.onCompleted: {

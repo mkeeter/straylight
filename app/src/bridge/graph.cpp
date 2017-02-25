@@ -15,6 +15,7 @@ GraphModel::GraphModel(QObject* parent)
     // Add a model for the root sheet
     sheets[Graph::Tree::ROOT_SHEET].reset(
             new SheetModel(Graph::Tree::ROOT_SHEET, this));
+    instances.insert({Graph::Tree::ROOT_INSTANCE, Graph::Tree::ROOT_SHEET});
 
     connect(&watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
@@ -187,14 +188,15 @@ void GraphModel::gotResponse()
     }
 }
 
-QObject* GraphModel::modelOf(unsigned sheet, QList<int> env)
+QObject* GraphModel::modelOf(QList<int> env)
 {
+    qDebug() << "boop" << env;
     Graph::Env env_;
     for (auto e : env)
     {
         env_.push_back(e);
     }
-    auto i = sheets.at(sheet).get();
+    auto i = sheets.at(instances.at(env_.back())).get();
     QQmlEngine::setObjectOwnership(i, QQmlEngine::CppOwnership);
     i->setEnv(env_);
     return i;
