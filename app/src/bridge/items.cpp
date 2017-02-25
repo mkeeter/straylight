@@ -126,7 +126,9 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto new_value = QString::fromStdString(r.expr);
             auto& item = items[index];
             bool new_valid = r.flags & Graph::Response::RESPONSE_FLAG_VALID;
-            if (item.cell_value.at(env) != new_value ||
+            if (item.cell_value.count(env) == 0 ||
+                item.cell_value.at(env) != new_value ||
+                item.cell_valid.count(env) == 0 ||
                 item.cell_valid.at(env) != new_valid)
             {
                 items[index].cell_value[env] = new_value;
