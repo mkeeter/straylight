@@ -1,0 +1,32 @@
+#pragma once
+
+#include <thread>
+#include "graph/types/ptr.hpp"
+
+namespace Graph
+{
+
+////////////////////////////////////////////////////////////////////////////////
+
+class Escaped
+{
+public:
+    virtual ~Escaped() {}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+class Translator
+{
+public:
+    Translator();
+    virtual ~Translator() {}
+    virtual Escaped* operator()(ValuePtr ptr)=0;
+
+protected:
+    const std::thread::id target;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}   // namespace Graph

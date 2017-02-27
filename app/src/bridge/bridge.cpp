@@ -12,7 +12,10 @@ Bridge* Bridge::_instance = nullptr;
 Bridge::Bridge()
     : _graph(new GraphModel())
 {
-    // Nothing to do here
+    connect(_graph, &GraphModel::serialized,
+            this, &Bridge::onSerialized);
+    connect(_graph, &GraphModel::deserialized,
+            this, &Bridge::onDeserialized);
 }
 
 void Bridge::installHighlighter(QQuickTextDocument* doc)
@@ -25,39 +28,55 @@ QPoint Bridge::matchedParen(QQuickTextDocument* doc, int pos)
     return App::UI::SyntaxHighlighter::matchedParen(doc->textDocument(), pos);
 }
 
-QString Bridge::saveFile(QUrl filename)
+////////////////////////////////////////////////////////////////////////////////
+
+void Bridge::saveFile(QUrl f)
+{
+    filename = f;
+
+    // Kick off async serialization
+    _graph->serialize();
+}
+
+void Bridge::onSerialized(QString expr)
 {
     QFile file(filename.toLocalFile());
     if (!file.open(QIODevice::WriteOnly))
     {
-        return file.errorString();
+        emit(serializeError(file.errorString()));
     }
-
-#if 0   // TODO
-    auto str = r.getTree().toString();
-    file.write(str.data(), str.size());
-    undo_stack->setClean();
-#endif
-    return "";
+    else
+    {
+        QTextStream out(&file);
+        out << expr;
+    }
 }
 
-QString Bridge::loadFile(QUrl filename)
+////////////////////////////////////////////////////////////////////////////////
+
+void Bridge::loadFile(QUrl filename)
 {
     QFile file(filename.toLocalFile());
     if (!file.open(QIODevice::ReadOnly))
     {
-        return file.errorString();
+        emit(deserializeError(file.errorString()));
     }
-
-    auto str = file.readAll();
-#if 0   // TODO
-    auto out = QString::fromStdString(r.loadString(str.toStdString()));
-    sync();
-    undo_stack->clear();
-    return out;
-#endif
-    return "";
+    else
+    {
+        auto str = file.readAll();
+        _graph->deserialize(str);
+    }
 }
+
+void Bridge::onDeserialized(QString err)
+{
+    if (err.size())
+    {
+        emit(deserializeError(err));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void Bridge::clearFile()
 {

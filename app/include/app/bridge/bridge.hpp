@@ -33,8 +33,8 @@ public:
     /*
      *  Saves to the given file, returning an error string on failure
      */
-    Q_INVOKABLE QString saveFile(QUrl filename);
-    Q_INVOKABLE QString loadFile(QUrl filename);
+    Q_INVOKABLE void saveFile(QUrl filename);
+    Q_INVOKABLE void loadFile(QUrl filename);
     Q_INVOKABLE void clearFile();
 
     /*
@@ -53,10 +53,21 @@ public:
      */
     App::Bridge::GraphModel* graph() { return _graph; }
 
+signals:
+    void serializeError(QString err);
+    void deserializeError(QString err);
+
+protected slots:
+    void onSerialized(QString expr);
+    void onDeserialized(QString err);
+
 protected:
     /*  This is owned by Qt as a QML singleton, so we heap-allocate it
      *  and don't delete it ourselves  */
     App::Bridge::GraphModel* _graph;
+
+    /*  Current filename */
+    QUrl filename;
 
     static Bridge* _instance;
 };

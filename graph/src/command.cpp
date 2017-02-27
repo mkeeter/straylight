@@ -1,9 +1,9 @@
 #include "graph/command.hpp"
-#include "graph/root.hpp"
+#include "graph/async.hpp"
 
 namespace Graph {
 
-void Command::operator()(Graph::Root& root)
+void Command::operator()(Graph::AsyncRoot& root)
 {
     switch (op)
     {
@@ -18,7 +18,7 @@ void Command::operator()(Graph::Root& root)
             }
             else
             {
-                root.insertSheet(SheetIndex(parent), name);
+                static_cast<Root&>(root).insertSheet(SheetIndex(parent), name);
             }
             break;
 
@@ -38,7 +38,7 @@ void Command::operator()(Graph::Root& root)
             }
             else
             {
-                root.insertCell(SheetIndex(parent), name, expr);
+                static_cast<Root&>(root).insertCell(SheetIndex(parent), name, expr);
             }
             break;
 
@@ -66,7 +66,8 @@ void Command::operator()(Graph::Root& root)
             }
             else
             {
-                root.insertInstance(SheetIndex(parent), name, SheetIndex(target));
+                static_cast<Root&>(root).insertInstance(
+                        SheetIndex(parent), name, SheetIndex(target));
             }
             break;
 
@@ -82,6 +83,14 @@ void Command::operator()(Graph::Root& root)
         case REDO:
             // TODO
             assert(false);
+
+        case SERIALIZE:
+            root.serialize();
+            break;
+
+        case DESERIALIZE:
+            root.loadString(expr);
+            break;
 
         // All the other operations have a special, non-executable meaning.
         case PUSH_MACRO:
@@ -142,6 +151,16 @@ Command Command::RenameSheet(SheetIndex i, const std::string& name)
 Command Command::Clear()
 {
     return { CLEAR, "", "", 0, 0, 0, {} };
+}
+
+Command Command::Serialize()
+{
+    return { SERIALIZE, "", "", 0, 0, 0, {} };
+}
+
+Command Command::Deserialize(const std::string& data)
+{
+    return { DESERIALIZE, "", data, 0, 0, 0, {} };
 }
 
 }   // namespace Graph

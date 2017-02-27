@@ -50,6 +50,17 @@ public:
      */
     void wait();
 
+    /*
+     *  Installs a translator, which escapes values from the graph thread
+     *  into some other thread.
+     */
+    void installTranslator(Translator* t) { translator = t; }
+
+    /*
+     *  Pushes a SERIALIZED response down the pipe
+     */
+    void serialize();
+
 protected:
     /*
      *  Async run function

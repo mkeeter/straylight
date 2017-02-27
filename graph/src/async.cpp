@@ -1,4 +1,5 @@
 #include "graph/async.hpp"
+#include "graph/translator.hpp"
 
 namespace Graph {
 
@@ -286,21 +287,28 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
 void AsyncRoot::gotResult(const CellKey& k, const Value& result)
 {
     Root::gotResult(k, result);
-    changes.push(Response::ValueChanged(
-                tree.parentOf(k.second), k, result.str, result.valid));
 
-    auto c = tree.at(k.second).cell();
+    auto escaped = translator ? (*translator)(result.value) : nullptr;
+    changes.push(Response::ValueChanged(
+                tree.parentOf(k.second), k, result.str, result.valid,
+                escaped));
 
     // Announce new values if this is an IO cell
+    auto c = tree.at(k.second).cell();
     if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
     {
         for (auto i : tree.instancesOf(tree.parentOf(k.second)))
         {
             changes.push(Response::IOValueChanged(
                 tree.parentOf(i), i, CellIndex(k.second), k.first,
-                result.str, result.valid));
+                result.str, result.valid, escaped));
         }
     }
+}
+
+void AsyncRoot::serialize()
+{
+    changes.push(Response::Serialized(tree.toString()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

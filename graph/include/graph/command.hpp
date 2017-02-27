@@ -8,7 +8,7 @@
 
 namespace Graph {
 
-class Root; // Forward declaration
+class AsyncRoot; // Forward declaration
 
 struct Command
 {
@@ -37,6 +37,9 @@ struct Command
         PUSH_MACRO,
         POP_MACRO,
 
+        SERIALIZE,
+        DESERIALIZE,
+
         INVALID,
     } op;
 
@@ -50,7 +53,7 @@ struct Command
 
     Env env;
 
-    void operator()(Graph::Root& root);
+    void operator()(Graph::AsyncRoot& root);
 
     static Command InsertCell(
             SheetIndex s, const std::string& name, const std::string& expr);
@@ -64,6 +67,8 @@ struct Command
     static Command EraseSheet(SheetIndex i);
     static Command RenameSheet(SheetIndex i, const std::string& name);
     static Command Clear();
+    static Command Serialize();
+    static Command Deserialize(const std::string& data);
 
 };
 

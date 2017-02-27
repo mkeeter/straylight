@@ -9,6 +9,8 @@
 
 namespace Graph {
 
+class Escaped;
+
 struct Response
 {
     enum {
@@ -49,6 +51,9 @@ struct Response
         UNDO_NOT_READY,
         REDO_NOT_READY,
 
+        SERIALIZED,
+        DESERIALIZED,
+
         CLEAR,
     } op;
 
@@ -78,6 +83,7 @@ struct Response
         RESPONSE_FLAG_TYPE_UNKNOWN  = (1 << 6),
     };
     uint8_t flags;
+    Escaped* value;
 
     //  Helper constructors
     static Response CellErased(SheetIndex s, CellIndex i);
@@ -104,7 +110,8 @@ struct Response
             SheetIndex s, InstanceIndex i, CellIndex c, const std::string& expr);
     static Response IOValueChanged(
             SheetIndex s, InstanceIndex i, CellIndex c,
-            const Graph::Env& env, const std::string& value, bool valid);
+            const Graph::Env& env, const std::string& val, bool valid,
+            Escaped* value);
     static Response CellRenamed(
             SheetIndex s, CellIndex c, const std::string& name);
     static Response InstanceRenamed(
@@ -122,10 +129,13 @@ struct Response
             SheetIndex parent, SheetIndex i);
     static Response ValueChanged(
             SheetIndex i, const CellKey& k,
-            const std::string& value, bool valid);
+            const std::string& val, bool valid,
+            Escaped* value);
     static Response CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type);
     static Response InstanceSheetRenamed(
             SheetIndex s, InstanceIndex i, const std::string& sheet_name);
+    static Response Serialized(const std::string& result);
+    static Response Deserialized(const std::string& error);
 
     // Other
     static Response ReservedWord(const std::string& value);
@@ -134,11 +144,6 @@ struct Response
     static Response SheetNameRegexBad(const std::string& r, const std::string& err);
     static Response ItemNameRegex(const std::string& r);
     static Response SheetNameRegex(const std::string& r);
-
-    /* TODO
-     *  InputRenamed
-     *  OutputRenamed
-     */
 };
 
 }   // namespace Graph

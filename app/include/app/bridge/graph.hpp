@@ -74,6 +74,16 @@ public:
      */
     void clear();
 
+    /*
+     *  Pushes a SERIALIZED response down the pipe
+     */
+    void serialize();
+
+    /*
+     *  Requests deserialization of the given string
+     */
+    void deserialize(const QString& s);
+
 signals:
     /*
      *  Announces that a particular instance has been erased
@@ -82,6 +92,16 @@ signals:
      *  instance if it's currently open
      */
     void instanceErased(unsigned i);
+
+    /*
+     *  Emitted to finish a save operation
+     */
+    void serialized(QString expr);
+
+    /*
+     *  Emitted to mark that a load was successful
+     */
+    void deserialized(QString error);
 
 protected slots:
     void gotResponse();

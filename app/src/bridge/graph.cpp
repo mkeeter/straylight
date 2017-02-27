@@ -70,10 +70,24 @@ QString GraphModel::isValidSheetName(QString s) const
     return keywords.contains(s) ? "Interpreter keyword" : "";
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 void GraphModel::clear()
 {
     commands.push(Graph::Command::Clear());
 }
+
+void GraphModel::serialize()
+{
+    commands.push(Graph::Command::Serialize());
+}
+
+void GraphModel::deserialize(const QString& s)
+{
+    commands.push(Graph::Command::Deserialize(s.toStdString()));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void GraphModel::updateFrom(const Graph::Response& r)
 {
@@ -191,6 +205,13 @@ void GraphModel::updateFrom(const Graph::Response& r)
             break;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+        case Graph::Response::SERIALIZED:
+            emit(serialized(QString::fromStdString(r.expr)));
+            break;
+        case Graph::Response::DESERIALIZED:
+            emit(deserialized(QString::fromStdString(r.expr)));
+            break;
 
         case Graph::Response::RESET_UNDO_QUEUE:
         case Graph::Response::UNDO_READY:
