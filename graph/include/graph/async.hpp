@@ -61,6 +61,11 @@ public:
      */
     void serialize();
 
+    /*
+     *  Deserializes a string, pushing a DESERIALIZED Response
+     */
+    std::string loadString(const std::string& json) override;
+
 protected:
     /*
      *  Async run function

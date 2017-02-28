@@ -311,6 +311,12 @@ void AsyncRoot::serialize()
     changes.push(Response::Serialized(tree.toString()));
 }
 
+
+std::string AsyncRoot::loadString(const std::string& json)
+{
+    changes.push(Response::Serialized(Root::loadString(json)));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 shared_queue<Response>& AsyncRoot::run(shared_queue<Command>& input)

@@ -166,7 +166,7 @@ public:
      *  Returns an error string if there was an error, or empty string
      *  on success.
      */
-    std::string loadString(const std::string& s);
+    virtual std::string loadString(const std::string& s);
 
     ////////////////////////////////////////////////////////////////////////////
 
