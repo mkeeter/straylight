@@ -152,7 +152,6 @@ void SheetModel::updateFrom(const Graph::Response& r)
         case Graph::Response::INSTANCE_INSERTED:
         case Graph::Response::INSTANCE_SHEET_RENAMED:
         case Graph::Response::VALUE_CHANGED:
-        case Graph::Response::RESULT_CHANGED:
         case Graph::Response::IO_EXPR_CHANGED:
         case Graph::Response::IO_VALUE_CHANGED:
         case Graph::Response::IO_INPUT_CREATED:

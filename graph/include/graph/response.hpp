@@ -31,7 +31,6 @@ struct Response
         INSTANCE_ERASED,
 
         VALUE_CHANGED,
-        RESULT_CHANGED,
 
         IO_INPUT_CREATED,
         IO_OUTPUT_CREATED,

@@ -141,21 +141,18 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             auto new_value = QString::fromStdString(r.expr);
             auto& item = items[index];
             bool new_valid = r.flags & Graph::Response::RESPONSE_FLAG_VALID;
-            if (item.cell_value.count(env) == 0 ||
-                item.cell_value.at(env) != new_value ||
-                item.cell_valid.count(env) == 0 ||
-                item.cell_valid.at(env) != new_valid)
+            if (item.cell_value.count(r.env) == 0 ||
+                item.cell_value.at(r.env) != new_value ||
+                item.cell_valid.count(r.env) == 0 ||
+                item.cell_valid.at(r.env) != new_valid)
             {
-                item.cell_value[env] = new_value;
-                item.cell_valid[env] = new_valid;
+                item.cell_value[r.env] = new_value;
+                item.cell_valid[r.env] = new_valid;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ValueRole, ValidRole});
             }
             break;
         }
-        case Graph::Response::RESULT_CHANGED:
-            assert(false); // TODO
-            break;
 
         case Graph::Response::CELL_INSERTED:
         {
@@ -187,7 +184,9 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             beginInsertRows(QModelIndex(), index, index);
                 items.push_back(Item::Instance(
                             Graph::InstanceIndex(r.target), r.name, r.expr));
-                items.back().instance_io->setEnv(env);
+                auto env_ = env;
+                env_.push_back(Graph::InstanceIndex(r.target));
+                items.back().instance_io->setEnv(env_);
                 order.insert({r.target, index});
                 names.left.insert({r.target, r.name});
                 emit(countChanged());

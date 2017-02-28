@@ -353,7 +353,6 @@ TEST_CASE("Root::callSheet (dependencies)")
         auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
 
         REQUIRE(val.valid == false);
-        printf("Inserting cell\n");
         r.insertCell(s, "a", "(input 15)");
         REQUIRE(val.valid == true);
     }

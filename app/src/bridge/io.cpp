@@ -119,13 +119,13 @@ void IOModel::updateFrom(const Graph::Response& r)
             auto new_value = QString::fromStdString(r.expr);
             auto& cell = cells[index];
             bool new_valid = r.flags & Graph::Response::RESPONSE_FLAG_VALID;
-            if (cell.value.count(env) == 0 ||
-                cell.value.at(env) != new_value ||
-                cell.valid.count(env) == 0 ||
-                cell.valid.at(env) != new_valid)
+            if (cell.value.count(r.env) == 0 ||
+                cell.value.at(r.env) != new_value ||
+                cell.valid.count(r.env) == 0 ||
+                cell.valid.at(r.env) != new_valid)
             {
-                cell.value[env] = new_value;
-                cell.valid[env] = new_valid;
+                cell.value[r.env] = new_value;
+                cell.valid[r.env] = new_valid;
                 auto i = createIndex(index, 0);
                 dataChanged(i, i, {ValueRole, ValidRole});
             }

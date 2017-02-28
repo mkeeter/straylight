@@ -123,7 +123,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::CELL_ERASED:
         case Graph::Response::EXPR_CHANGED:
         case Graph::Response::VALUE_CHANGED:
-        case Graph::Response::RESULT_CHANGED:
         case Graph::Response::CELL_TYPE_CHANGED:
         case Graph::Response::CELL_RENAMED:
         case Graph::Response::IO_EXPR_CHANGED:
