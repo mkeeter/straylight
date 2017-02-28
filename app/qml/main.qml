@@ -147,8 +147,11 @@ ApplicationWindow {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
+        onResizingChanged: { if (!resizing) viewport.updatePicker() }
+
         SheetStack {
             id: sheetStack
+            onAnimDone: { viewport.updatePicker() }
 
             anchors.bottom: parent.bottom
             anchors.top: parent.top

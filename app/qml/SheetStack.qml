@@ -16,6 +16,8 @@ SplitView {
     function fixLayout() { layoutTimer.restart() }
     signal _fixLayout
 
+    signal animDone
+
     Component.onCompleted: {
         Graph.instanceErased.connect(onInstanceErased)
     }
@@ -123,6 +125,10 @@ SplitView {
                 var t = toOpen.slice()
                 toOpen = []
                 openTo(t)
+            }
+            else
+            {
+                animDone()
             }
         }
     }

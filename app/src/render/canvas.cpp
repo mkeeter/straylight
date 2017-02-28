@@ -31,8 +31,12 @@ void Canvas::render()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     // Draw the picker layer (with a dummy mouse position)
-    picker.draw({0,0}, Picker::DRAW_PICKER);
-    picker.setImage(framebufferObject()->toImage(false));
+    if (picker_changed)
+    {
+        picker.draw({0,0}, Picker::DRAW_PICKER);
+        picker.setImage(framebufferObject()->toImage(false));
+        picker_changed = false;
+    }
 
     //  toImage releases binding for some reason
     framebufferObject()->bind();
@@ -151,6 +155,9 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 {
     auto c = dynamic_cast<CanvasObject*>(item);
     assert(c);
+
+    picker_changed = c->picker_changed;
+    c->picker_changed = false;
 
     const auto M_ = c->M();
     const QSize window_size_(c->width(), c->height());
@@ -280,6 +287,13 @@ void CanvasObject::mouseRelease()
         mouse_drag = nullptr;
     }
     mouse_state = RELEASED;
+    picker_changed = true;
+    update();
+}
+
+void CanvasObject::updatePicker()
+{
+    picker_changed = true;
     update();
 }
 

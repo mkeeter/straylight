@@ -70,6 +70,9 @@ protected:
     Blitter blitter;
     /*  Used to pick items */
     Picker picker;
+    /*  Indicates that we should re-render the picker object
+     *  (this is an expensive operation!)  */
+    bool picker_changed = true;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +100,8 @@ public:
     Q_INVOKABLE void mouseClick(int button);
     Q_INVOKABLE void mouseRelease();
 
+    Q_INVOKABLE void updatePicker();
+
 protected:
     /*
      *  Returns the projection matrix
@@ -120,6 +125,9 @@ protected:
            DRAG_ROT, DRAG_PAN, DRAG_HANDLE } mouse_state;
     QVector2D mouse_pos;
     Drag* mouse_drag;
+
+    /*  Indicates that the Canvas should re-render its picker image  */
+    bool picker_changed = false;
 
     friend class Canvas;
 };
