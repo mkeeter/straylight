@@ -28,16 +28,6 @@ public:
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
     void render() override;
 
-public slots:
-    ////////////////////////////////////////////////////////////////////////////
-    //  Graph serialization
-    //  (which we only track closely enough to get shapes)
-    void push(const int instance_index, const QString& instance_name,
-              const QString& sheet_name);
-    void pop();
-    void cell(int c, const QString& name, const QString& expr, int type,
-              bool valid, const QString& val, void* ptr);
-
 signals:
     void viewChanged(QMatrix4x4 mat, QSize size);
 
