@@ -45,7 +45,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
 void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
                       const std::string& name, const std::string& expr)
 {
-    tree.insertCell(sheet, name, expr);
+    tree.insertCell(sheet, cell, name, expr);
     auto type = interpreter.cellType(expr);
     tree.at(cell).cell()->type = type;
 
