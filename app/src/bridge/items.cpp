@@ -84,7 +84,9 @@ void ItemsModel::setEnv(const Graph::Env& e)
     {
         if (i.type == Item::INSTANCE)
         {
-            i.instance_io->setEnv(e);
+            auto env_ = env;
+            env_.push_back(i.unique_index);
+            i.instance_io->setEnv(env_);
         }
     }
 }
