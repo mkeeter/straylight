@@ -72,6 +72,23 @@ void AsyncRoot::insertInstance(
     Root::insertInstance(parent, i, name, target);
 
     changes.push(Response::InstanceInserted(parent, i, target, name, tree.nameOf(target)));
+    for (auto item : tree.iterItems(target))
+    {
+        if (auto c = tree.at(item).cell())
+        {
+            if (c->type == Cell::INPUT)
+            {
+                changes.push(Response::InputCreated(
+                        parent, i, CellIndex(item), tree.nameOf(item),
+                        tree.at(i).instance()->inputs.at(CellIndex(item))));
+            }
+            else if (c->type == Cell::INPUT)
+            {
+                changes.push(Response::OutputCreated(
+                        parent, i, CellIndex(item), tree.nameOf(item)));
+            }
+        }
+    }
 
     // TODO: something with IO here?
 
