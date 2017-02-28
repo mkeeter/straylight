@@ -314,7 +314,19 @@ void AsyncRoot::serialize()
 
 std::string AsyncRoot::loadString(const std::string& json)
 {
-    changes.push(Response::Serialized(Root::loadString(json)));
+    auto lock = Lock();
+
+    auto err = Root::loadString(json);
+    changes.push(Response::Serialized(err));
+
+    // XXX package up the entire graph and write it out here
+    // This should be fun...
+
+    if (err.size())
+    {
+        clear();
+    }
+    return err;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
