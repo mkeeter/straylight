@@ -173,11 +173,7 @@ bool AsyncRoot::setInput(const InstanceIndex& instance, const CellIndex& cell,
     }
     else
     {
-        for (auto i : tree.instancesOf(parent))
-        {
-            changes.push(Response::InputExprChanged(tree.parentOf(i), i, cell,
-                        expr));
-        }
+        changes.push(Response::InputExprChanged(parent, instance, cell, expr));
         return true;
     }
 }

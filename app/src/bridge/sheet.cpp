@@ -64,6 +64,13 @@ void SheetModel::setExpr(unsigned i, const QString& str)
     graph->enqueue(Graph::Command::SetExpr(i, str.toStdString()));
 }
 
+void SheetModel::setInput(unsigned instance_index, unsigned cell_index,
+                          const QString& expr)
+{
+    graph->enqueue(Graph::Command::SetInput(instance_index, cell_index,
+                expr.toStdString()));
+}
+
 void SheetModel::eraseCell(unsigned i)
 {
     graph->enqueue(Graph::Command::EraseCell(i));

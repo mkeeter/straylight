@@ -59,6 +59,8 @@ struct Command
             SheetIndex s, const std::string& name, const std::string& expr);
     static Command RenameItem(ItemIndex i, const std::string& name);
     static Command SetExpr(CellIndex i, const std::string& expr);
+    static Command SetInput(InstanceIndex i, CellIndex c,
+            const std::string& expr);
     static Command EraseCell(CellIndex i);
     static Command EraseInstance(InstanceIndex i);
     static Command InsertSheet(SheetIndex parent, const std::string& name);

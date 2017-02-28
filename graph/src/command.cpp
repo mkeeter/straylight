@@ -117,6 +117,12 @@ Command Command::SetExpr(CellIndex i, const std::string& expr)
     return { SET_EXPR, "", expr, 0, i, 0, {}};
 }
 
+Command Command::SetInput(InstanceIndex i, CellIndex c,
+                          const std::string& expr)
+{
+    return { SET_INPUT, "", expr, i, c, 0, {}};
+}
+
 Command Command::EraseCell(CellIndex i)
 {
     return { ERASE_CELL, "", "", 0, i, 0, {}};

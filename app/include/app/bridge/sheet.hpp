@@ -52,6 +52,12 @@ public:
     Q_INVOKABLE void setExpr(unsigned cell_index, const QString& expr);
 
     /*
+     *  Sets the target input cell's expression
+     */
+    Q_INVOKABLE void setInput(unsigned instance_index, unsigned cell_index,
+                              const QString& expr);
+
+    /*
      *  Erases the target item
      */
     Q_INVOKABLE void eraseCell(unsigned cell_index);
