@@ -319,8 +319,106 @@ std::string AsyncRoot::loadString(const std::string& json)
     auto err = Root::loadString(json);
     changes.push(Response::Serialized(err));
 
-    // XXX package up the entire graph and write it out here
-    // This should be fun...
+    ////////////////////////////////////////////////////////////////////////////
+    // First, announce all of the sheets, building the skeleton of the graph
+    std::list<SheetIndex> sheets;
+    std::list<CellIndex> cells;
+    {
+        std::list<SheetIndex> todo = {Tree::ROOT_SHEET};
+        while (todo.size())
+        {
+            auto sheet = todo.front();
+            todo.pop_front();
+
+            for (auto i : tree.childrenOf(sheet))
+            {
+                if (tree.at(i).sheet())
+                {
+                    todo.push_back(SheetIndex(i));
+                }
+            }
+            if (sheet != Tree::ROOT_SHEET)
+            {
+                changes.push(Response::SheetCreated(
+                            tree.parentOf(sheet), sheet, tree.nameOf(sheet)));
+            }
+            sheets.push_back(sheet);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    for (auto sheet : sheets)
+    {
+        //  Cross-link sheets network based on what can be inserted where,
+        if (sheet != Tree::ROOT_SHEET)
+        {
+            auto parent = tree.parentOf(sheet);
+            auto name = tree.nameOf(sheet);
+            for (auto b : tree.sheetsBelow(parent))
+            {
+                if (b != parent)
+                {
+                    changes.push(Response::SheetAvailable(
+                                b, sheet, name, b != sheet));
+                }
+            }
+
+            for (auto a : tree.sheetsAbove(parent))
+            {
+                if (a != sheet)
+                {
+                    changes.push(Response::SheetAvailable(
+                                sheet, a, tree.nameOf(a), true));
+                }
+            }
+        }
+
+        // Announce instance construction, which needs to be done before
+        // cells so that I/O cells have a place to put themselves
+        for (auto i : tree.iterItems(sheet))
+        {
+            auto name = tree.nameOf(i);
+            if (tree.at(i).cell())
+            {
+                cells.push_back(CellIndex(i));
+            }
+            else if (auto n = tree.at(i).instance())
+            {
+                changes.push(Response::InstanceInserted(
+                            sheet, InstanceIndex(i), n->sheet,
+                            name, tree.nameOf(n->sheet)));
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //  Announce every cell and their input/output properties
+    for (auto cell : cells)
+    {
+        auto name = tree.nameOf(cell);
+        auto c = tree.at(cell).cell();
+        auto parent = tree.parentOf(cell);
+
+        changes.push(Response::CellInserted(parent, cell, name, c->expr));
+        changes.push(Response::CellTypeChanged(parent, cell, c->type));
+
+        if (parent != Tree::ROOT_SHEET)
+        {
+            for (auto i : tree.instancesOf(parent))
+            {
+                auto p = tree.parentOf(i);
+                if (c->type == Cell::INPUT)
+                {
+                    changes.push(Response::InputCreated(p, i, cell, name,
+                                tree.at(i).instance()->inputs.at(cell)));
+                }
+                else if (c->type == Cell::OUTPUT)
+                {
+                    changes.push(Response::OutputCreated(p, i, cell, name));
+                }
+            }
+        }
+    }
 
     if (err.size())
     {
