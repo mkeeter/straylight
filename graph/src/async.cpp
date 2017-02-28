@@ -82,15 +82,13 @@ void AsyncRoot::insertInstance(
                         parent, i, CellIndex(item), tree.nameOf(item),
                         tree.at(i).instance()->inputs.at(CellIndex(item))));
             }
-            else if (c->type == Cell::INPUT)
+            else if (c->type == Cell::OUTPUT)
             {
                 changes.push(Response::OutputCreated(
                         parent, i, CellIndex(item), tree.nameOf(item)));
             }
         }
     }
-
-    // TODO: something with IO here?
 
     // sync occurs on Lock destruction
 }
