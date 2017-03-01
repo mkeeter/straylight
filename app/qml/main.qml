@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 
-import Canvas 1.0
+import Scene 1.0
 import Style 1.0
 import Material 1.0
 import Bridge 1.0
@@ -158,7 +158,7 @@ ApplicationWindow {
         }
 
         // Rendering window (handled in C++)
-        Canvas {
+        Scene {
             id: viewport
             Layout.minimumWidth: 100
             Layout.fillWidth: true

@@ -28,6 +28,7 @@ set(SRCS
     src/ui/syntax.cpp
     src/render/canvas.cpp
     src/render/axes.cpp
+    src/render/scene.cpp
     src/render/picker.cpp
     src/render/drag.cpp
     src/render/handle.cpp

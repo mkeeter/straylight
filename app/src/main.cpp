@@ -8,7 +8,7 @@
 #include "app/bridge/bridge.hpp"
 #include "app/bridge/graph.hpp"
 #include "app/ui/material.hpp"
-#include "app/render/canvas.hpp"
+#include "app/render/scene.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ int main(int argc, char**argv)
     }
 
     // Register canvas class for drawing
-    qmlRegisterType<App::Render::CanvasObject>("Canvas", 1, 0, "Canvas");
+    qmlRegisterType<App::Render::Scene>("Scene", 1, 0, "Scene");
 
     //  Install Bridge singleton to make it available in QML
     qmlRegisterSingletonType<App::Bridge::Bridge>(

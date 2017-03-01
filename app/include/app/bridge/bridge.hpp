@@ -8,7 +8,7 @@
 
 namespace App {
 
-namespace Render { class Canvas; }
+namespace Render { class Scene; }
 namespace Bridge {
 
 ////////////////////////////////////////////////////////////////////////////////
