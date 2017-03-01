@@ -27,8 +27,6 @@ Renderer::~Renderer()
     {
         delete e;
     }
-
-    emit(goodbye(this));
 }
 
 void Renderer::deleteWhenNotRunning()
@@ -64,6 +62,13 @@ void Renderer::enqueue(QMatrix4x4 mat, QSize size)
         abort.store(true);
         checkNext();
     }
+}
+
+Renderer::Result* Renderer::getResult()
+{
+    auto r = result;
+    result = nullptr;
+    return r;
 }
 
 void Renderer::onRenderFinished()
@@ -133,7 +138,9 @@ void Renderer::run(Task t)
         // Then map the back Z value to 0
         *out.first = (*out.first == r.Z.values.back()).select(0, *out.first);
 
-        emit(gotResult(this, {out.first, out.second}, inv));
+        // Store the result in the parent object
+        result = new Result { out.first, out.second, inv };
+        emit(done());
 
         auto dt = start_time.elapsed();
         if (dt < 10 & base_level > 0)

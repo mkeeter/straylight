@@ -32,11 +32,18 @@ public:
      */
     bool updateVars(Kernel::Tree tree);
 
+    /*
+     *  This struct can be passed into a Blitter to draw
+     */
     struct Result {
         Kernel::DepthImage* depth;
         Kernel::NormalImage* norm;
+        QMatrix4x4 M;
     };
 
+    /*
+     *  This represents a single render task
+     */
     struct Task {
         Task() {}
         Task(QMatrix4x4 mat, QSize size, int level)
@@ -52,17 +59,16 @@ public:
      */
     void enqueue(QMatrix4x4 mat, QSize size);
 
+    /*
+     *  Returns the current result, claiming it and setting it to nullptr
+     */
+    Result* getResult();
+
 signals:
     /*
-     *  Passes off a result to the blitter
+     *  Emitted when a render operation is done
      */
-    void gotResult(Renderer* self, const Result r, const QMatrix4x4& mat);
-
-    /*
-     *  Emitted before (self-)destruction
-     *  Used to inform the blitter that these results should be forgotten
-     */
-    void goodbye(Renderer* self);
+    void done();
 
 protected slots:
     void onRenderFinished();
@@ -90,6 +96,8 @@ protected:
 
     QFuture<void> future;
     QFutureWatcher<void> watcher;
+
+    Result* result;
 };
 
 }   // namespace Render

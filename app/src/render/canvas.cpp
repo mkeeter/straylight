@@ -11,7 +11,7 @@ namespace Render {
 
 Canvas::Canvas()
 {
-    connect(&blitter, &Blitter::changed, [=](){ this->update(); });
+    // Nothing to do here
 }
 
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
@@ -49,39 +49,44 @@ void Canvas::render()
 
 void Canvas::synchronize(QQuickFramebufferObject *item)
 {
-    auto c = dynamic_cast<Scene*>(item);
-    assert(c);
+    auto scene = dynamic_cast<Scene*>(item);
+    assert(scene);
 
-    picker_changed = c->picker_changed;
-    c->picker_changed = false;
+    //////////////////////////////////////////////////////////////////////////
+    // Claim picker_changed from the parent scene
+    picker_changed = scene->picker_changed;
+    scene->picker_changed = false;
 
-    const auto M_ = c->M();
-    const QSize window_size_(c->width(), c->height());
+    const auto M_ = scene->M();
+    const QSize window_size_(scene->width(), scene->height());
 
     // Set mouse position, adjusting for high-DPI framebuffer
-    mouse = c->mouse_pos * (picker.width() / c->width());
+    mouse = scene->mouse_pos * (picker.width() / scene->width());
     QVector2D mouse_gl(
-        2 * c->mouse_pos.x() / c->width() - 1,
-        2 * c->mouse_pos.y() / c->height() - 1);
+        2 * scene->mouse_pos.x() / scene->width() - 1,
+        2 * scene->mouse_pos.y() / scene->height() - 1);
 
+    //////////////////////////////////////////////////////////////////////////
     // Handle mouse state machine based on picker state
-    if (c->mouse_state == c->CLICK_LEFT)
+    if (scene->mouse_state == scene->CLICK_LEFT)
     {
         if (auto h = picker.pickAt(mouse.toPoint()))
         {
-            c->mouse_state = c->DRAG_HANDLE;
-            c->mouse_drag = h->getDrag(M.inverted(), mouse_gl);
+            scene->mouse_state = scene->DRAG_HANDLE;
+            scene->mouse_drag = h->getDrag(M.inverted(), mouse_gl);
         }
         else
         {
-            c->mouse_state = c->DRAG_ROT;
+            scene->mouse_state = scene->DRAG_ROT;
         }
     }
-    else if (c->mouse_state == c->CLICK_RIGHT)
+    else if (scene->mouse_state == scene->CLICK_RIGHT)
     {
-        c->mouse_state = c->DRAG_PAN;
+        scene->mouse_state = scene->DRAG_PAN;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    //  Update view parameters
     const bool view_changed = (M != M_) || (window_size != window_size_);
 
     if (view_changed)
@@ -90,6 +95,21 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
         window_size = window_size_;
         picker.setView(M, window_size);
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    //  Update blitter with new shapes
+    QSet<App::Render::Renderer*> rs;
+    for (const auto& s : scene->shapes)
+    {
+        auto result = s.second->getResult();
+        if (result)
+        {
+            blitter.addQuad(s.second, *result);
+            delete result;
+        }
+        rs.insert(s.second);
+    }
+    blitter.prune(rs);
 }
 
 }   // namespace Render

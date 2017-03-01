@@ -169,8 +169,11 @@ void Scene::updateFrom(const Graph::Response& r)
                 {
                     shapes.at(k)->deleteWhenNotRunning();
                 }
-                shapes[k] = new App::Render::Renderer(n->eval);
-                shapes.at(k)->enqueue(M(), QSize(width(), height()));
+                auto ren = new App::Render::Renderer(n->eval);
+                shapes[k] = ren;
+                connect(ren, &App::Render::Renderer::done,
+                        this, &Scene::update);
+                ren->enqueue(M(), QSize(width(), height()));
             }
             break;
 
