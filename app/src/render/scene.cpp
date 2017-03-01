@@ -162,9 +162,10 @@ void Scene::updateFrom(const Graph::Response& r)
     switch (r.op)
     {
         case Graph::Response::VALUE_CHANGED:
+        {
+            const Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
             if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
             {
-                Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
                 if (shapes.count(k))
                 {
                     shapes.at(k)->deleteWhenNotRunning();
@@ -175,7 +176,15 @@ void Scene::updateFrom(const Graph::Response& r)
                         this, &Scene::update);
                 ren->enqueue(M(), QSize(width(), height()));
             }
+            // If the value changed to a non-shape, then erase it
+            else if (shapes.count(k))
+            {
+                shapes.at(k)->deleteWhenNotRunning();
+                shapes.erase(k);
+                update();
+            }
             break;
+        }
 
         default:    assert(false);
     }
