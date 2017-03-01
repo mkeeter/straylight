@@ -7,12 +7,10 @@
 #include "app/render/handle.hpp"
 #include "app/bind/bind_s7.hpp"
 
-#include "graph/translator.hpp"
-
 namespace App {
 namespace Render {
 
-class PointHandle : public Handle, public Graph::Escaped
+class PointHandle : public Handle
 {
 public:
     PointHandle(std::unique_ptr<Drag>& drag);
