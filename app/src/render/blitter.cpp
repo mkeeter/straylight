@@ -50,13 +50,19 @@ void Blitter::addQuad(Renderer* R, const Renderer::Result imgs)
 
 void Blitter::prune(const QSet<Renderer*>& rs)
 {
+    QSet<Renderer*> forgotten;
     for (auto q : quads)
     {
         if (rs.find(q.first) == rs.end())
         {
             delete q.second;
-            quads.erase(q.first);
+            forgotten.insert(q.first);
         }
+    }
+
+    for (auto q : forgotten)
+    {
+        quads.erase(q);
     }
 }
 
