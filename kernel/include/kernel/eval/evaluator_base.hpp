@@ -24,6 +24,11 @@ public:
     EvaluatorBase(const Tree root, const glm::mat4& M=glm::mat4());
 
     /*
+     *  Copy constructor
+     */
+    EvaluatorBase(const EvaluatorBase& other);
+
+    /*
      *  Single-argument evaluation
      */
     float eval(float x, float y, float z);

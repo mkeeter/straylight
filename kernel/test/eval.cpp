@@ -69,6 +69,23 @@ TEST_CASE("Evaluator::gradient")
     }
 }
 
+TEST_CASE("Evaluator copy-constructor")
+{
+    // Deliberately construct out of order
+    auto a = Tree::var(3.0);
+    auto c = Tree::var(7.0);
+    auto b = Tree::var(5.0);
+
+    Evaluator e_(Tree(a*1 + b*2 + c*3));
+
+    Evaluator e(e_);
+    REQUIRE(e.eval(0, 0, 0) == Approx(34));
+    auto g = e.gradient(0, 0, 0);
+    REQUIRE(g.at(a.var()) == Approx(1.0f));
+    REQUIRE(g.at(b.var()) == Approx(2.0f));
+    REQUIRE(g.at(c.var()) == Approx(3.0f));
+}
+
 TEST_CASE("Evaluator::setVar")
 {
     // Deliberately construct out of order

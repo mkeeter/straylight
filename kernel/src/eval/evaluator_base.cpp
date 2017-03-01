@@ -127,6 +127,58 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
     assert(clauses.at(root.id) == 0);
 }
 
+EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
+{
+    setMatrix(other.M);
+
+    // Copy over the base tape
+    tapes.push_back(Tape());
+    tape = tapes.begin();
+    for (auto itr = other.tapes.front().begin();
+              itr != other.tapes.front().end(); ++itr)
+    {
+        tape->push_back(*itr);
+    }
+
+    // Copy over all of the variables in the map
+    for (const auto& v : other.vars.left)
+    {
+        vars.left.insert(v);
+    }
+
+    // Copy over the fundamental variable locations
+    X = other.X;
+    Y = other.Y;
+    Z = other.Z;
+
+    // Allocate space for all of the clauses and variables
+    const auto clause_count = other.result.i.size();
+    const auto var_count = other.result.j[0].size();
+    result.resize(clause_count, var_count);
+    disabled.resize(clause_count);
+
+    // Copy over all of the values!
+    memcpy(result.f, other.result.f, clause_count * sizeof(*result.f));
+    memcpy(result.dx, other.result.dx, clause_count * sizeof(*result.dx));
+    memcpy(result.dy, other.result.dy, clause_count * sizeof(*result.dy));
+    memcpy(result.dz, other.result.dz, clause_count * sizeof(*result.dz));
+    memcpy(result.i.data(), other.result.i.data(),
+           clause_count * sizeof(*result.i.data()));
+
+    // Then copy over all of the derivatives!
+    for (unsigned i=0; i < clause_count; ++i)
+    {
+        memcpy(result.j[i].data(), other.result.j[i].data(),
+               var_count * sizeof(*result.j[i].data()));
+    }
+
+    // Reset all of the tagged data
+    for (auto& t : other.tags)
+    {
+        tags[t.first].reset(t.second->clone());
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 float EvaluatorBase::eval(float x, float y, float z)
