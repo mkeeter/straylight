@@ -299,7 +299,8 @@ void AsyncRoot::gotResult(const CellKey& k, const Value& result)
 {
     Root::gotResult(k, result);
 
-    auto escaped = translator ? (*translator)(result.value) : nullptr;
+    auto escaped = translator ? (*translator)(Interpreter::untag(result.value))
+                              : nullptr;
     changes.push(Response::ValueChanged(
                 tree.parentOf(k.second), k, result.str, result.valid,
                 escaped));

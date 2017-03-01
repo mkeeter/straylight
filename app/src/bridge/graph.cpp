@@ -2,9 +2,12 @@
 
 #include "app/bridge/graph.hpp"
 #include "app/bridge/bridge.hpp"
+#include "app/bridge/translator.hpp"
 
 #include "app/bind/bind_s7.hpp"
 #include "kernel/bind/bind_s7.h"
+
+#include "app/render/renderer.hpp"
 
 namespace App {
 namespace Bridge {
@@ -16,6 +19,9 @@ GraphModel::GraphModel(QObject* parent)
     sheets[Graph::Tree::ROOT_SHEET].reset(
             new SheetModel(Graph::Tree::ROOT_SHEET, this));
     instances.insert({Graph::Tree::ROOT_INSTANCE, Graph::Tree::ROOT_SHEET});
+
+    // We pass CellKeys through signals and slots to the Canvas window
+    qRegisterMetaType<Graph::CellKey>("Graph::CellKey");
 
     connect(&watcher, &QueueWatcher::gotResponse,
             this, &GraphModel::gotResponse);
@@ -34,6 +40,7 @@ shared_queue<Graph::Response>& GraphModel::runRoot(Graph::AsyncRoot& root,
 {
     root.call(Kernel::Bind::init);
     root.call(App::Bind::init);
+    root.installTranslator(new App::Bridge::Translator());
 
     return root.run(commands);
 }
@@ -119,10 +126,17 @@ void GraphModel::updateFrom(const Graph::Response& r)
         }
         ////////////////////////////////////////////////////////////////////////
         // Item-level operations
+        case Graph::Response::VALUE_CHANGED:
+        {
+            if (auto n = dynamic_cast<App::Render::Renderer*>(r.value))
+            {
+                emit(gotRenderer({r.env, Graph::CellIndex(r.target)}, n));
+            }
+            // FALLTHROUGH
+        }
         case Graph::Response::CELL_INSERTED:
         case Graph::Response::CELL_ERASED:
         case Graph::Response::EXPR_CHANGED:
-        case Graph::Response::VALUE_CHANGED:
         case Graph::Response::CELL_TYPE_CHANGED:
         case Graph::Response::CELL_RENAMED:
         case Graph::Response::IO_EXPR_CHANGED:

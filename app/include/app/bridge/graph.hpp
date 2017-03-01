@@ -19,6 +19,7 @@
 #include "kernel/solve/solver.hpp"
 
 namespace App {
+namespace Render { class Renderer; }
 namespace Bridge {
 
 class GraphModel : public QObject
@@ -102,6 +103,12 @@ signals:
      *  Emitted to mark that a load was successful
      */
     void deserialized(QString error);
+
+    /*
+     *  Emitted when we get a renderer object
+     *  Someone else should be listening and take ownership of r
+     */
+    void gotRenderer(Graph::CellKey cell, App::Render::Renderer* r);
 
 protected slots:
     void gotResponse();

@@ -2,12 +2,17 @@
 #include "app/render/canvas.hpp"
 #include "app/render/drag.hpp"
 
+#include "app/bridge/bridge.hpp"
+#include "app/bridge/graph.hpp"
+
 namespace App {
 namespace Render {
 
 QQuickFramebufferObject::Renderer* Scene::createRenderer() const
 {
     auto c = new Canvas();
+    connect(Bridge::GraphModel::instance(), &Bridge::GraphModel::gotRenderer,
+            c, &Canvas::gotRenderer);
     return c;
 }
 
