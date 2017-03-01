@@ -69,8 +69,10 @@ public:
      */
     float width() const { return img.width(); }
 
-public slots:
-    void onViewChanged(QMatrix4x4 mat, QSize size);
+    /*
+     *  Adjusts M and window_size
+     */
+    void setView(QMatrix4x4 mat, QSize size);
 
 protected:
 

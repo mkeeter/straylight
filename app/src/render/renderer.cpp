@@ -8,12 +8,12 @@
 namespace App {
 namespace Render {
 
-Renderer::Renderer(Kernel::Tree t)
+Renderer::Renderer(Kernel::Evaluator* e)
     : todo(NOTHING)
 {
     for (int i=0; i < 8; ++i)
     {
-        evaluators.push_back(new Kernel::Evaluator(t));
+        evaluators.push_back(new Kernel::Evaluator(*e));
     }
     connect(&watcher, &QFutureWatcher<Result>::finished,
             this, &Renderer::onRenderFinished);
@@ -54,7 +54,7 @@ bool Renderer::updateVars(Kernel::Tree tree)
     return changed;
 }
 
-void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
+void Renderer::enqueue(QMatrix4x4 mat, QSize size)
 {
     if (todo != DELETE)
     {

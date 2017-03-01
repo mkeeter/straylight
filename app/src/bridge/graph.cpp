@@ -3,7 +3,7 @@
 #include "app/bridge/graph.hpp"
 #include "app/bridge/bridge.hpp"
 #include "app/bridge/translator.hpp"
-#include "app/bridge/escaped.hpp"
+#include "app/render/scene.hpp"
 
 #include "app/bind/bind_s7.hpp"
 #include "kernel/bind/bind_s7.h"
@@ -127,10 +127,9 @@ void GraphModel::updateFrom(const Graph::Response& r)
         // Item-level operations
         case Graph::Response::VALUE_CHANGED:
         {
-            if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
+            if (scene)
             {
-                // TODO;
-                //emit(gotRenderer({r.env, Graph::CellIndex(r.target)}, n));
+                scene->updateFrom(r);
             }
             // FALLTHROUGH
         }

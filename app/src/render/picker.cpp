@@ -93,7 +93,7 @@ bool Picker::endUpdate()
     return to_erase.size();
 }
 
-void Picker::onViewChanged(QMatrix4x4 mat, QSize size)
+void Picker::setView(QMatrix4x4 mat, QSize size)
 {
     M = mat;
     window_size = size;

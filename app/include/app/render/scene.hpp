@@ -4,6 +4,9 @@
 #include <QVector3D>
 #include <QMatrix4x4>
 
+#include "graph/response.hpp"
+#include "app/render/renderer.hpp"
+
 namespace App {
 namespace Render {
 
@@ -13,6 +16,11 @@ class Scene : public QQuickFramebufferObject
 {
     Q_OBJECT
 public:
+    /*
+     *  Constructor installs this object into the App::GraphModel
+     */
+    Scene();
+
     QQuickFramebufferObject::Renderer* createRenderer() const override;
 
     /*
@@ -34,6 +42,11 @@ public:
 
     Q_INVOKABLE void updatePicker();
 
+    /*
+     *  Update the model state with the given response
+     */
+    void updateFrom(const Graph::Response& r);
+
 protected:
     /*
      *  Returns the projection matrix
@@ -46,6 +59,11 @@ protected:
      *  (with rotation, scale, and center applied)
      */
     QMatrix4x4 view() const;
+
+    /*
+     *  Requests that all Renderer objects update themselves
+     */
+    void updateRenderer();
 
     // Viewport settings
     float scale=1;
@@ -60,6 +78,9 @@ protected:
 
     /*  Indicates that the Canvas should re-render its picker image  */
     bool picker_changed = false;
+
+    /*  Here, we store the set of shapes to be drawn */
+    std::map<Graph::CellKey, App::Render::Renderer*> shapes;
 
     friend class Canvas;
 };

@@ -17,7 +17,7 @@ class Renderer : public QObject
 {
     Q_OBJECT
 public:
-    Renderer(Kernel::Tree t);
+    Renderer(Kernel::Evaluator* e);
     ~Renderer();
 
     /*
@@ -47,6 +47,11 @@ public:
         int level;
     };
 
+    /*
+     *  Marks that the view has changed and we should re-render
+     */
+    void enqueue(QMatrix4x4 mat, QSize size);
+
 signals:
     /*
      *  Passes off a result to the blitter
@@ -58,9 +63,6 @@ signals:
      *  Used to inform the blitter that these results should be forgotten
      */
     void goodbye(Renderer* self);
-
-public slots:
-    void onViewChanged(QMatrix4x4 mat, QSize size);
 
 protected slots:
     void onRenderFinished();

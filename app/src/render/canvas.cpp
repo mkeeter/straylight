@@ -12,7 +12,6 @@ namespace Render {
 Canvas::Canvas()
 {
     connect(&blitter, &Blitter::changed, [=](){ this->update(); });
-    connect(this, &Canvas::viewChanged, &picker, &Picker::onViewChanged);
 }
 
 QOpenGLFramebufferObject* Canvas::createFramebufferObject(const QSize &size)
@@ -46,31 +45,6 @@ void Canvas::render()
     blitter.draw(M);
     axes.draw(M);
     picker.draw(mouse.toPoint());
-}
-
-void Canvas::gotRenderer(Graph::CellKey k, App::Render::Renderer* r)
-{
-    if (shapes.count(k))
-    {
-        shapes.at(k)->deleteWhenNotRunning();
-    }
-
-    shapes[k] = r;
-
-    // Connect the renderer to our viewChanged signal so it will
-    // automatically redraw when necessary
-    connect(this, &Canvas::viewChanged,
-            r, &App::Render::Renderer::onViewChanged);
-
-    // Connect the renderer and the blitter, so bitmaps will
-    // magically appear in the 3D viewport
-    connect(r, &App::Render::Renderer::gotResult,
-            &blitter, &Blitter::addQuad, Qt::DirectConnection);
-    connect(r, &App::Render::Renderer::goodbye,
-            &blitter, &Blitter::forget);
-
-    // Kick off an initial render
-    r->onViewChanged(M, window_size);
 }
 
 void Canvas::synchronize(QQuickFramebufferObject *item)
@@ -114,7 +88,7 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     {
         M = M_;
         window_size = window_size_;
-        emit(viewChanged(M, window_size));
+        picker.setView(M, window_size);
     }
 }
 

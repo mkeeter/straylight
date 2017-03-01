@@ -1,6 +1,7 @@
 #include "app/render/scene.hpp"
 #include "app/render/canvas.hpp"
 #include "app/render/drag.hpp"
+#include "app/bridge/escaped.hpp"
 
 #include "app/bridge/bridge.hpp"
 #include "app/bridge/graph.hpp"
@@ -8,11 +9,15 @@
 namespace App {
 namespace Render {
 
+Scene::Scene()
+    : QQuickFramebufferObject()
+{
+    App::Bridge::GraphModel::instance()->installScene(this);
+}
+
 QQuickFramebufferObject::Renderer* Scene::createRenderer() const
 {
     auto c = new Canvas();
-    connect(Bridge::GraphModel::instance(), &Bridge::GraphModel::gotRenderer,
-            c, &Canvas::gotRenderer);
     return c;
 }
 
@@ -23,6 +28,7 @@ void Scene::rotateIncremental(float dx, float dy)
 
     pitch = fmax(fmin(pitch, 180), 0);
     yaw = fmod(yaw, 360);
+    updateRenderer();
     update();
 }
 
@@ -34,6 +40,7 @@ void Scene::panIncremental(float dx, float dy)
                 inv.map({0, 0, 0});
 
     center += diff*2;
+    updateRenderer();
     update();
 }
 
@@ -44,7 +51,16 @@ void Scene::zoomIncremental(float ds, float x, float y)
 
     scale *= pow(1.1, ds / 120.);
     center += 2 * (M().inverted().map(pt) - a);
+    updateRenderer();
     update();
+}
+
+void Scene::updateRenderer()
+{
+    for (auto& s : shapes)
+    {
+        s.second->enqueue(M(), QSize(width(), height()));
+    }
 }
 
 void Scene::mouseMove(float x, float y)
@@ -137,6 +153,29 @@ QMatrix4x4 Scene::view() const
     m.translate(center);
 
     return m;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Scene::updateFrom(const Graph::Response& r)
+{
+    switch (r.op)
+    {
+        case Graph::Response::VALUE_CHANGED:
+            if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
+            {
+                Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
+                if (shapes.count(k))
+                {
+                    shapes.at(k)->deleteWhenNotRunning();
+                }
+                shapes[k] = new App::Render::Renderer(n->eval);
+                shapes.at(k)->enqueue(M(), QSize(width(), height()));
+            }
+            break;
+
+        default:    assert(false);
+    }
 }
 
 }   // namespace Render

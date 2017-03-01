@@ -19,7 +19,7 @@
 #include "kernel/solve/solver.hpp"
 
 namespace App {
-namespace Render { class Renderer; }
+namespace Render { class Scene; }
 namespace Bridge {
 
 class GraphModel : public QObject
@@ -85,6 +85,12 @@ public:
      */
     void deserialize(const QString& s);
 
+    /*
+     *  Installs a Scene
+     *  (should be called from Scene constructor)
+     */
+    void installScene(App::Render::Scene* s) { scene = s; }
+
 signals:
     /*
      *  Announces that a particular instance has been erased
@@ -104,12 +110,6 @@ signals:
      */
     void deserialized(QString error);
 
-    /*
-     *  Emitted when we get a renderer object
-     *  Someone else should be listening and take ownership of r
-     */
-    void gotRenderer(Graph::CellKey cell, App::Render::Renderer* r);
-
 protected slots:
     void gotResponse();
 
@@ -126,6 +126,8 @@ protected:
     shared_queue<Graph::Command> commands;
     shared_queue<Graph::Response>& responses;
     QueueWatcher watcher;
+
+    App::Render::Scene* scene;
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;

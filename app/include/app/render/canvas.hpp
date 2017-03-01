@@ -10,7 +10,6 @@
 #include "kernel/bind/bind_s7.h"
 
 #include "app/render/axes.hpp"
-#include "app/render/renderer.hpp"
 #include "app/render/blitter.hpp"
 #include "app/render/picker.hpp"
 
@@ -26,15 +25,6 @@ public:
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
     void render() override;
 
-signals:
-    void viewChanged(QMatrix4x4 mat, QSize size);
-
-public slots:
-    /*
-     *  Add a new renderer for the given CellKey
-     */
-    void gotRenderer(Graph::CellKey k, App::Render::Renderer* r);
-
 protected:
     /* Pull in matrix and size from parent */
     void synchronize(QQuickFramebufferObject *item) override;
@@ -43,9 +33,6 @@ protected:
     QMatrix4x4 M;
     QSize window_size;
     QVector2D mouse;
-
-    /*  Here, we store the set of shapes to be drawn */
-    std::map<Graph::CellKey, App::Render::Renderer*> shapes;
 
     /*  Draws the background axes  */
     Axes axes;
