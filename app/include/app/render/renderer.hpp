@@ -10,10 +10,12 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/render/heightmap.hpp"
 
+#include "graph/translator.hpp"
+
 namespace App {
 namespace Render {
 
-class Renderer : public QObject
+class Renderer : public QObject, public Graph::Escaped
 {
     Q_OBJECT
 public:

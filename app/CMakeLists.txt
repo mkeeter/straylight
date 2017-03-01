@@ -17,6 +17,7 @@ find_package(Qt5Concurrent REQUIRED)
 
 set(SRCS
     src/bridge/bridge.cpp
+    src/bridge/translator.cpp
     src/bridge/graph.cpp
     src/bridge/items.cpp
     src/bridge/sheet.cpp
