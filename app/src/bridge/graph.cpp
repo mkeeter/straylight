@@ -280,6 +280,38 @@ void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+bool GraphModel::hasVar(const Graph::CellKey& k) const
+{
+    return vars.left.find(k) != vars.left.end();
+}
+
+Kernel::Cache::VarId GraphModel::varId(const Graph::CellKey& k) const
+{
+    return vars.left.count(k) ? vars.left.at(k) : 0;
+}
+
+void GraphModel::defineVar(const Graph::CellKey& k,
+                           const Kernel::Cache::VarId id)
+{
+    vars.insert({k, id});
+}
+
+void GraphModel::forgetVar(const Graph::CellKey& k)
+{
+    if (vars.left.count(k))
+    {
+        vars.left.erase(k);
+    }
+}
+
+std::unique_lock<std::mutex>&& GraphModel::varLock()
+{
+    return std::move(std::unique_lock<std::mutex>(var_lock));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 QObject* GraphModel::instance(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     (void)engine;

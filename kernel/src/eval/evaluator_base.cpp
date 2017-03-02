@@ -115,15 +115,6 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
         }
     }
 
-    // Copy over tag data
-    for (auto c : connected)
-    {
-        if (auto t = cache->tag(c))
-        {
-            tags[c].reset(t->clone());
-        }
-    }
-
     assert(clauses.at(root.id) == 0);
 }
 
@@ -170,12 +161,6 @@ EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
     {
         memcpy(result.j[i].data(), other.result.j[i].data(),
                var_count * sizeof(*result.j[i].data()));
-    }
-
-    // Reset all of the tagged data
-    for (auto& t : other.tags)
-    {
-        tags[t.first].reset(t.second->clone());
     }
 }
 

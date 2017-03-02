@@ -89,13 +89,6 @@ public:
     uint8_t flags() const           { return parent->flags(id); }
 
     /*
-     *  Getters and setters for tags
-     *  (owned by parent Cache)
-     */
-    Tag* tag() const { return parent->tag(id); }
-    void setTag(Tag* t) { parent->setTag(id, t); }
-
-    /*
      *  Sets a VAR tree's value
      *
      *  Note that this may invalidate values of trees that use this variable;

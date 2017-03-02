@@ -132,12 +132,6 @@ public:
     std::map<Cache::VarId, float> varValues() const;
 
     /*
-     *  Returns the tag associated with a particular Id, or nullptr
-     */
-    Tag* tag(Cache::Id id) const
-        { return tags.count(id) ? tags.at(id).get() : nullptr; }
-
-    /*
      *  Updates variable values, returning true if changed
      */
     bool updateVars(const Cache& cache);
@@ -195,9 +189,6 @@ protected:
      *  their ids in their respective Tree (e.g. what you get when calling
      *  Tree::var(3.0).var() */
     boost::bimap<Clause::Id, Cache::VarId> vars;
-
-    /*  Id tags (copied from Tree on Evaluator construction)  */
-    std::map<Cache::Id, std::unique_ptr<Kernel::Tag>> tags;
 
     /*  Tape containing our opcodes in reverse order */
     typedef std::vector<Clause> Tape;

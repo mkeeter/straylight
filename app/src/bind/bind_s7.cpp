@@ -101,40 +101,38 @@ int get_handle_tag(s7_cell* obj)
 s7_pointer reader(s7_scheme* sc, s7_pointer args)
 {
     auto begin = s7_car(args);
+    auto graph = App::Bridge::GraphModel::instance();
+    const auto& cell = *static_cast<Graph::CellKey*>(
+            s7_c_pointer(s7_cadr(args)));
 
     if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
-        auto& root = *static_cast<Graph::Root*>(s7_c_pointer(s7_cadr(args)));
         auto cache = Kernel::Cache::instance();
-        auto& cell = *static_cast<Graph::CellKey*>(s7_c_pointer(s7_caddr(args)));
 
         const auto v = s7_number_to_real(sc, s7_car(begin));
 
         // If this variable is already in use, then update its value and
         // return a Shape with the changed flag set if the value changed.
-        if (auto t = root.tag(cell))
+        if (graph->hasVar(cell))
         {
-            assert(dynamic_cast<IdTag*>(t));
-
-            auto id = static_cast<IdTag*>(t)->id;
+            auto id = graph->varId(cell);
             const bool changed = cache->value(id) != v;
             cache->setValue(id, v);
 
             auto var = Kernel::Tree::var(id);
             return s7_list(sc, 1, Kernel::Bind::shape_new_(sc, var, changed));
         }
-        // Otherwise, make a new variable and cross-link it into the cache
-        // and the graph root.
+        // Otherwise, make a new variable and save it in the graph model
         else
         {
             auto var = Kernel::Tree::var(v);
-            var.setTag(new CellKeyTag(cell));
-            root.setTag(cell, new IdTag(var.var()));
+            graph->defineVar(cell, var.var());
             return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
         }
     }
     else
     {
+        graph->forgetVar(cell);
         return begin;
     }
 }
@@ -158,7 +156,7 @@ void init(s7_scheme* sc)
     s7_define_function(sc, "ui-point", point_handle_new, 3, 0, false,
             "(ui-point x y z) makes a point handle in the 3D viewport");
 
-    s7_define_function(sc, "*cell-reader*", reader, 3, 0, 0,
+    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
         "Reads a list of s-exprs, doing special things to floats");
 }
 

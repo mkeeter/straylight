@@ -15,7 +15,6 @@
 #include "graph/types/cell.hpp"
 #include "graph/types/instance.hpp"
 #include "graph/types/keys.hpp"
-#include "graph/types/tag.hpp"
 
 namespace Graph {
 
@@ -200,14 +199,6 @@ public:
     /*  Get const reference to our internally mutable tree */
     const Tree& getTree() const { return tree; }
 
-    /*
-     *  Getter and setter functions for tags
-     */
-    Graph::Tag* tag(const CellKey& id) const
-        { return tags.count(id) ? tags.at(id).get() : nullptr; }
-    void setTag(const CellKey& id, Graph::Tag* t)
-        { tags[id].reset(t); }
-
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -252,9 +243,6 @@ protected:
 
     /*  List of keys that need re-evaluation  */
     std::stack<std::list<CellKey>> dirty;
-
-    /*  Tags are associated with cell keys  */
-    std::map<CellKey, std::unique_ptr<Tag>> tags;
 
     // Regex strings aren't stored, so we store them statically heree
     static const std::list<std::pair<std::string, std::string>> _bad_item_names;

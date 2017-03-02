@@ -11,7 +11,6 @@
 #include "glm/vec4.hpp"
 
 #include "kernel/tree/opcode.hpp"
-#include "kernel/tree/tag.hpp"
 
 namespace Kernel {
 
@@ -120,14 +119,6 @@ public:
     float value(Id id) const { return token(id).value(); }
 
     /*
-     *  Getter and setter functions for tags
-     */
-    Kernel::Tag* tag(Id id) const
-        { return tags.count(id) ? tags.at(id).get() : nullptr; }
-    void setTag(Id id, Kernel::Tag* t)
-        { tags[id].reset(t); }
-
-    /*
      *  Looks up flags for a node.  The id must exist in this cache.
      */
     uint8_t flags(Id id) const { return flags_.at(id); }
@@ -226,7 +217,6 @@ protected:
      *  of the Cache, but it is less expensive to calculate them once per
      *  Id and store them here.  This should be a bitwise Or of Flags */
     std::map<Id, uint8_t> flags_;
-    std::map<Id, std::unique_ptr<Kernel::Tag>> tags;
 
     /*  Here's the master list of per-thread caches */
     static std::map<std::thread::id, std::shared_ptr<Cache>> instances;

@@ -16,7 +16,10 @@
 #include "graph/queue.hpp"
 #include "graph/async.hpp"
 
+#include "kernel/tree/cache.hpp"
 #include "kernel/solve/solver.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
 
 namespace App {
 namespace Render { class Scene; }
@@ -91,6 +94,21 @@ public:
      */
     void installScene(App::Render::Scene* s) { scene = s; }
 
+    /*
+     *  Manipulate the mapping of cell keys (in the Graph)
+     *  to variable Ids (in the Kernel's tree).
+     */
+    bool hasVar(const Graph::CellKey& k) const;
+    Kernel::Cache::VarId varId(const Graph::CellKey& k) const;
+    void defineVar(const Graph::CellKey& k,
+                   const Kernel::Cache::VarId id);
+    void forgetVar(const Graph::CellKey& k);
+
+    /*
+     *  Returns a lock on a mutex used for wrangling variables
+     */
+    std::unique_lock<std::mutex>&& varLock();
+
 signals:
     /*
      *  Announces that a particular instance has been erased
@@ -128,6 +146,10 @@ protected:
     QueueWatcher watcher;
 
     App::Render::Scene* scene;
+
+    /*  Bindings from cells to variables  */
+    boost::bimap<Graph::CellKey, Kernel::Cache::VarId> vars;
+    std::mutex var_lock;
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;
