@@ -108,19 +108,18 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
     if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
         auto cache = Kernel::Cache::instance();
-
         const auto v = s7_number_to_real(sc, s7_car(begin));
 
         // If this variable is already in use, then update its value and
-        // return a Shape with the changed flag set if the value changed.
+        // return a Shape with the new variable value (which will be
+        // marked as not equal because of the vars map in each shape)
         if (graph->hasVar(cell))
         {
             auto id = graph->varId(cell);
-            const bool changed = cache->value(id) != v;
             cache->setValue(id, v);
 
             auto var = Kernel::Tree::var(id);
-            return s7_list(sc, 1, Kernel::Bind::shape_new_(sc, var, changed));
+            return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
         }
         // Otherwise, make a new variable and save it in the graph model
         else

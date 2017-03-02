@@ -133,6 +133,13 @@ public:
      */
     const Cache& cache() const { return *parent; }
 
+    /*
+     *  Returns a mapping of variables to their values
+     *  at this particular point in time.
+     */
+    std::map<Kernel::Cache::VarId, float> vars() const
+        { return parent->vars(id); }
+
 protected:
     /*
      *  Private constructor

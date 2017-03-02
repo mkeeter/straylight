@@ -428,4 +428,17 @@ void Cache::setValue(Id id, float v)
     (void)s;
 }
 
+std::map<Kernel::Cache::VarId, float> Cache::vars(Id id) const
+{
+    std::map<Kernel::Cache::VarId, float> out;
+    for (auto t : findConnected(id))
+    {
+        if (opcode(t) == Opcode::VAR)
+        {
+            out.insert({token(t).var(), value(t)});
+        }
+    }
+    return out;
+}
+
 }   // namespace Kernel

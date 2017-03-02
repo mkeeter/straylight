@@ -131,6 +131,11 @@ public:
      */
     void setValue(Id id, float v);
 
+    /*
+     *  Returns all the variable values underneath the given node
+     */
+    std::map<Kernel::Cache::VarId, float> vars(Id id) const;
+
 protected:
     /*
      *  Cache constructor is private so outsiders must use instance()

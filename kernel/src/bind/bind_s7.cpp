@@ -16,13 +16,8 @@ int shape_t::tag = -1;
  */
 s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
-    return s7_make_object(sc, shape_t::tag, new shape_t(t));
-}
-
-s7_pointer shape_new_(s7_scheme* sc, Kernel::Tree t, bool changed)
-{
     auto s = new shape_t(t);
-    s->value_changed = changed;
+    s->vars = t.vars();
     return s7_make_object(sc, shape_t::tag, s);
 }
 
@@ -90,11 +85,26 @@ static bool shape_equal(void* a, void* b)
     auto sa = static_cast<shape_t*>(a);
     auto sb = static_cast<shape_t*>(b);
 
-    const bool value_changed = sa->value_changed || sb->value_changed;
-    sa->value_changed = false;
-    sb->value_changed = false;
+    if (!(sa->tree == sb->tree))
+    {
+        return false;
+    }
+    else
+    {
+        const auto& va = sa->vars;
+        const auto& vb = sb->vars;
+        assert(va.size() == vb.size());
 
-    return !value_changed && (sa->tree == sb->tree);
+        for (auto& k : va)
+        {
+            if (vb.count(k.first) == 0 || vb.at(k.first) != k.second)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 static char* shape_print(s7_scheme* sc, void* s)
