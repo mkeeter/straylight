@@ -211,28 +211,31 @@ void Scene::updateFrom(const Graph::Response& r)
                 changed = true;
             }
 
+            // If the value is an EscapedHandle, then turn it into a real
+            // Handle and update its values, etc.
             else if (auto p = dynamic_cast<App::Bridge::EscapedHandle*>(r.value))
             {
-                bool create_new = true;
-                if (handles.find(k) != handles.end())
+                // If handle type mismatch, delete
+                if (handles.count(k) && handles.at(k)->tag() != p->tag())
                 {
-                    if (auto p_ = dynamic_cast<PointHandle*>(handles.at(k)))
+                    handles.erase(k);
+                    changed = true;
+                }
+                // If not present, create a new handle here
+                if (!handles.count(k))
+                {
+                    if (auto p_ = dynamic_cast<Bridge::EscapedPointHandle*>(p))
                     {
-                        // update it
-                        create_new = false;
+                        handles.insert({k, new PointHandle(p_)});
                     }
                     else
                     {
-                        delete handles.at(k);
-                        handles.erase(k);
+                        assert(false);  // Unknown handle type!
                     }
+                    changed = true;
                 }
-                if (create_new)
-                {
-                    assert(!handles.count(k));
-                        // Make new handle here
-                }
-                changed = true;
+                //  Update the handle from the EscapedHandle
+                changed |= handles.at(k)->updateFrom(p);
             }
 
             if (changed)
