@@ -11,6 +11,7 @@ namespace App {
 namespace Render {
 
 class Drag;
+class Handle;
 
 class Scene : public QQuickFramebufferObject
 {
@@ -81,7 +82,13 @@ protected:
 
     /*  Here, we store the set of shapes to be drawn */
     std::map<Graph::CellKey, App::Render::Renderer*> shapes;
+
+    /*  This maps a particular cell to all the CellKeys that it is used in,
+     *  so when a cell is erased we can erase all of its shapes  */
     std::map<Graph::CellIndex, std::set<Graph::CellKey>> cells;
+
+    /*  This typedef reflects a cell + handle tag  */
+    std::map<Graph::CellKey, Handle*> handles;
 
     friend class Canvas;
 };

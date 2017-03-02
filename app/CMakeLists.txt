@@ -31,7 +31,7 @@ set(SRCS
     src/render/axes.cpp
     src/render/scene.cpp
     src/render/picker.cpp
-    src/render/drag.cpp
+    src/render/point_drag.cpp
     src/render/handle.cpp
     src/render/point_handle.cpp
     src/render/renderer.cpp

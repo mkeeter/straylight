@@ -3,7 +3,7 @@
 #include <glm/vec3.hpp>
 #include <memory>
 
-#include "app/render/drag.hpp"
+#include "app/render/point_drag.hpp"
 
 #include "graph/types/keys.hpp"
 #include "kernel/tree/cache.hpp"
@@ -20,7 +20,7 @@ namespace Bind {
 
 struct point_handle_t {
     point_handle_t(float x, float y, float z, const std::string& axes,
-                   App::Render::Drag* d)
+                   App::Render::PointDrag* d)
         : pos{x, y, z}, axes(axes), drag(d) {}
 
     float pos[3];
@@ -29,7 +29,7 @@ struct point_handle_t {
     std::string axes;
 
     /*  Drag handle  */
-    std::unique_ptr<App::Render::Drag> drag;
+    std::unique_ptr<App::Render::PointDrag> drag;
 
     // Type tag for interpreter
     static int tag;

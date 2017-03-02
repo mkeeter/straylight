@@ -1,10 +1,15 @@
 #include "app/render/scene.hpp"
 #include "app/render/canvas.hpp"
 #include "app/render/drag.hpp"
-#include "app/bridge/escaped.hpp"
+#include "app/render/point_handle.hpp"
 
+#include "app/bridge/escaped.hpp"
 #include "app/bridge/bridge.hpp"
 #include "app/bridge/graph.hpp"
+
+#include "app/bind/bind_s7.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
 
 namespace App {
 namespace Render {
@@ -180,12 +185,22 @@ void Scene::updateFrom(const Graph::Response& r)
         case Graph::Response::VALUE_CHANGED:
         {
             const Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
+            bool changed = false;
+
+            // We replace the renderer without fail, so always delete a
+            // pre-existing renderer if there's one in place for this key.
+            if (shapes.count(k))
+            {
+                shapes.at(k)->deleteWhenNotRunning();
+                shapes.erase(k);
+                cells[k.second].erase(k);
+                changed = true;
+            }
+
+            // If the value is a shape, then convert it into a renderer and
+            // wire it into the Scene, kicking off an initial render.
             if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
             {
-                if (shapes.count(k))
-                {
-                    shapes.at(k)->deleteWhenNotRunning();
-                }
                 auto ren = new App::Render::Renderer(n->eval);
                 shapes[k] = ren;
                 connect(ren, &App::Render::Renderer::done,
@@ -193,13 +208,35 @@ void Scene::updateFrom(const Graph::Response& r)
                 ren->enqueue(M(), QSize(width(), height()));
 
                 cells[k.second].insert(k);
+                changed = true;
             }
-            // If the value changed to a non-shape, then erase it
-            else if (shapes.count(k))
+
+            else if (auto p = dynamic_cast<App::Bridge::EscapedHandle*>(r.value))
             {
-                shapes.at(k)->deleteWhenNotRunning();
-                shapes.erase(k);
-                cells[k.second].erase(k);
+                bool create_new = true;
+                if (handles.find(k) != handles.end())
+                {
+                    if (auto p_ = dynamic_cast<PointHandle*>(handles.at(k)))
+                    {
+                        // update it
+                        create_new = false;
+                    }
+                    else
+                    {
+                        delete handles.at(k);
+                        handles.erase(k);
+                    }
+                }
+                if (create_new)
+                {
+                    assert(!handles.count(k));
+                        // Make new handle here
+                }
+                changed = true;
+            }
+
+            if (changed)
+            {
                 update();
             }
             break;

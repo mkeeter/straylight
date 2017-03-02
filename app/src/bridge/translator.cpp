@@ -23,14 +23,11 @@ Graph::Escaped* Translator::operator()(Graph::ValuePtr ptr)
             return new App::Bridge::EscapedShape(s->tree);
         }
     }
-// XXX
-#if 0
     else if (App::Bind::is_point_handle(ptr))
     {
         auto p = App::Bind::get_point_handle(ptr);
-        return new App::Render::PointHandle(p->drag);
+        return new App::Bridge::EscapedPointHandle(p->drag);
     }
-#endif
 
     return nullptr;
 }

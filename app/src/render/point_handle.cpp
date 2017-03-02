@@ -2,6 +2,7 @@
 
 #include "app/render/point_handle.hpp"
 #include "app/ui/material.hpp"
+#include "app/bridge/escaped.hpp"
 
 using namespace boost::math::float_constants;
 
@@ -10,8 +11,8 @@ namespace Render {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle(std::unique_ptr<Drag>& drag)
-    : Handle(drag)
+PointHandle::PointHandle(App::Bridge::EscapedPointHandle* h)
+    : drag(h->drag.release())
 {
     // Nothing to do here
 }
@@ -29,9 +30,9 @@ static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
     glUniformColor3f(shader, var, QColor::fromRgb(color));
 }
 
-void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
-                          QOpenGLShaderProgram& shader, Picker::DrawMode mode,
-                          QRgb color)
+void PointHandle::setShaderVars(
+        const QMatrix4x4& world, const QMatrix4x4& proj,
+        QOpenGLShaderProgram& shader, Picker::DrawMode mode, QRgb color)
 {
     glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
     glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
@@ -62,14 +63,14 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     vao.bind();
 
     shader_solid.bind();
-    setVars(world, proj, shader_solid, mode, color);
+    setShaderVars(world, proj, shader_solid, mode, color);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
     shader_solid.release();
 
     if (mode != Picker::DRAW_PICKER)
     {
         shader_dotted.bind();
-        setVars(world, proj, shader_dotted, mode, color);
+        setShaderVars(world, proj, shader_dotted, mode, color);
         glDisable(GL_DEPTH_TEST);
         glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
         glEnable(GL_DEPTH_TEST);
@@ -79,13 +80,13 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     vao.release();
 }
 
-bool PointHandle::updateFrom(Graph::ValuePtr ptr)
+bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
 {
-    auto p = App::Bind::get_point_handle(ptr);
+    auto p = dynamic_cast<Bridge::EscapedPointHandle*>(h);
+    assert(p);
 
-    QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
-    bool changed = (c != center);
-    center = c;
+    bool changed = center != p->pos;
+    center = p->pos;
 
     return changed;
 }
@@ -135,11 +136,13 @@ void PointHandle::initGL()
     }
 }
 
-QVector3D PointHandle::pos(const QMatrix4x4& M, const QVector2D& cursor) const
+Drag* PointHandle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
 {
     (void)M;
     (void)cursor;
-    return center;
+
+    drag->startDrag(center);
+    return drag.get();
 }
 
 }   // namespace Render

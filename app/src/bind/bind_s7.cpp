@@ -76,7 +76,7 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
     return s7_make_object(sc, point_handle_t::tag,
             new point_handle_t(
                 x.value(), y.value(), z.value(), axes,
-                new App::Render::Drag(x, y, z)));
+                new App::Render::PointDrag(x, y, z)));
 }
 
 bool is_point_handle(s7_pointer s)

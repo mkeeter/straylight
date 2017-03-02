@@ -4,23 +4,25 @@
 #include <QOpenGLFunctions>
 #include <QColor>
 
-#include "graph/types/ptr.hpp"
-
 #include "app/render/picker.hpp"
-#include "app/render/drag.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
 
 namespace App {
+
+// Forward declaration
+namespace Bridge { class EscapedHandle; }
+
 namespace Render {
 
+// Forward declaration
 class Drag;
+
+////////////////////////////////////////////////////////////////////////////////
 
 class Handle : public QOpenGLFunctions
 {
 public:
-    /*
-     *  Claims ownership of the given Drag object
-     */
-    Handle(std::unique_ptr<Drag>& drag);
     virtual ~Handle() { /* Nothing to do here */ }
 
     /*
@@ -40,30 +42,27 @@ public:
      *
      *  Returns true if things have changed
      */
-    virtual bool updateFrom(Graph::ValuePtr p)=0;
+    virtual bool updateFrom(App::Bridge::EscapedHandle* h)=0;
 
     /*
      *  Returns a drag pointer
      *  The drag pointer escapes from render thread
      */
-    Drag* getDrag(const QMatrix4x4& M, const QVector2D& cursor);
+    virtual Drag* getDrag(const QMatrix4x4& M, const QVector2D& cursor)=0;
+
+    /*
+     *  Every Handle should rederive this class differently
+     */
+    virtual int tag() const=0;
 
 protected:
     /*
      *  Overloaded by derived classes to build VBOs, etc
      */
-    virtual void initGL() { }
-
-    /*
-     *  Returns the current position of the drag handle
-     *  (used when setting initial drag parameters in getDrag)
-     */
-    virtual QVector3D pos(const QMatrix4x4& M, const QVector2D& cursor) const=0;
+    virtual void initGL()=0;
 
     /*  Stores whether we've called initalizeOpenGLFunctions */
     bool gl_ready = false;
-
-    std::unique_ptr<Drag> drag;
 };
 
 }   // namespace Render
