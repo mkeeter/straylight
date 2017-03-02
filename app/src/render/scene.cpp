@@ -161,6 +161,22 @@ void Scene::updateFrom(const Graph::Response& r)
 {
     switch (r.op)
     {
+        case Graph::Response::CELL_ERASED:
+        {
+            const Graph::CellIndex cell(r.target);
+            if (cells.count(cell))
+            {
+                for (const auto& k : cells.at(cell))
+                {
+                    shapes.at(k)->deleteWhenNotRunning();
+                    shapes.erase(k);
+                }
+                cells.erase(cell);
+                update();
+            }
+            break;
+
+        }
         case Graph::Response::VALUE_CHANGED:
         {
             const Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
@@ -175,12 +191,15 @@ void Scene::updateFrom(const Graph::Response& r)
                 connect(ren, &App::Render::Renderer::done,
                         this, &Scene::update);
                 ren->enqueue(M(), QSize(width(), height()));
+
+                cells[k.second].insert(k);
             }
             // If the value changed to a non-shape, then erase it
             else if (shapes.count(k))
             {
                 shapes.at(k)->deleteWhenNotRunning();
                 shapes.erase(k);
+                cells[k.second].erase(k);
                 update();
             }
             break;

@@ -81,6 +81,7 @@ protected:
 
     /*  Here, we store the set of shapes to be drawn */
     std::map<Graph::CellKey, App::Render::Renderer*> shapes;
+    std::map<Graph::CellIndex, std::set<Graph::CellKey>> cells;
 
     friend class Canvas;
 };

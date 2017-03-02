@@ -125,6 +125,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         }
         ////////////////////////////////////////////////////////////////////////
         // Item-level operations
+        case Graph::Response::CELL_ERASED:
         case Graph::Response::VALUE_CHANGED:
         {
             if (scene)
@@ -134,7 +135,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
             // FALLTHROUGH
         }
         case Graph::Response::CELL_INSERTED:
-        case Graph::Response::CELL_ERASED:
         case Graph::Response::EXPR_CHANGED:
         case Graph::Response::CELL_TYPE_CHANGED:
         case Graph::Response::CELL_RENAMED:
