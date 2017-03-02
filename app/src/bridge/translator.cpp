@@ -18,7 +18,10 @@ Graph::Escaped* Translator::operator()(Graph::ValuePtr ptr)
     if (Kernel::Bind::is_shape(ptr))
     {
         auto s = Kernel::Bind::get_shape(ptr);
-        return new App::Bridge::EscapedShape(s->tree);
+        if (!(s->tree.flags() & Kernel::Tree::FLAG_LOCATION_AGNOSTIC))
+        {
+            return new App::Bridge::EscapedShape(s->tree);
+        }
     }
 // XXX
 #if 0
