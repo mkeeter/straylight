@@ -142,6 +142,11 @@ public:
      */
     bool updateVars(const Cache& cache);
 
+    /*
+     *  Updates variable values, return true if changed
+     */
+    bool updateVars(const EvaluatorBase& other);
+
 protected:
     /*
      *  Evaluate a single clause, populating the out array

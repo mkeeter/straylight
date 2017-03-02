@@ -6,7 +6,7 @@
 
 #include "kernel/tree/cache.hpp"
 #include "kernel/tree/tree.hpp"
-#include "kernel/eval/evaluator.hpp"
+#include "kernel/eval/evaluator_base.hpp"
 #include "kernel/eval/clause.hpp"
 
 namespace Kernel {
@@ -1090,6 +1090,22 @@ bool EvaluatorBase::updateVars(const Cache& cache)
     {
         auto val = cache.value(v.second);
         if (val != result.f[v.first][0])
+        {
+            setVar(v.second, val);
+            changed = true;
+        }
+    }
+    return changed;
+}
+
+bool EvaluatorBase::updateVars(const EvaluatorBase& other)
+{
+    bool changed = false;
+    const auto vs = other.varValues();
+    for (const auto& v : vars.right)
+    {
+        auto val = vs.at(v.first);
+        if (val != result.f[v.second][0])
         {
             setVar(v.second, val);
             changed = true;
