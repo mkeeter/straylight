@@ -48,6 +48,7 @@ Cache::Id Cache::constant(float v)
     if (data.left.find(k) == data.left.end())
     {
         data.insert({k, next});
+        values.insert({next, v});
         flags_.insert({next++, Tree::FLAG_COLLAPSED|
                                Tree::FLAG_LOCATION_AGNOSTIC});
     }
@@ -59,6 +60,7 @@ Cache::VarId Cache::var(float v)
     auto k = Key(v, next);
     assert(data.left.find(k) == data.left.end());
     data.insert({k, next});
+    values.insert({next, v});
     flags_.insert({next++, Tree::FLAG_COLLAPSED|
                            Tree::FLAG_LOCATION_AGNOSTIC});
     return VarId(data.left.at(k).i);
@@ -88,6 +90,7 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
     if (data.left.find(k) == data.left.end())
     {
         data.insert({k, next});
+        values.insert({next, 0.0f});
         flags_.insert({next++,
 
                 (((a == 0 || (flags(a) & Tree::FLAG_COLLAPSED)) &&
@@ -419,13 +422,7 @@ Cache::Id Cache::collapse(Id root)
 void Cache::setValue(Id id, float v)
 {
     assert(flags(id) & Tree::FLAG_LOCATION_AGNOSTIC);
-
-    auto it = data.right.find(id);
-    assert(it != data.right.end());
-
-    auto s = data.right.modify_data(it, [=](Key& k){ std::get<4>(k) = v; });
-    assert(s);
-    (void)s;
+    values.at(id) = v;
 }
 
 std::map<Kernel::Cache::VarId, float> Cache::vars(Id id) const

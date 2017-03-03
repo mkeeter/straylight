@@ -116,7 +116,7 @@ public:
     Id lhs(Id id) const { return token(id).lhs(); }
     Id rhs(Id id) const { return token(id).rhs(); }
     size_t rank(Id id) const { return token(id).rank(); }
-    float value(Id id) const { return token(id).value(); }
+    float value(Id id) const { return values.at(id); }
 
     /*
      *  Looks up flags for a node.  The id must exist in this cache.
@@ -215,6 +215,11 @@ protected:
     Key token(Id id) const { return data.right.at(id); }
 
     boost::bimap<Key, Id> data;
+
+    /*  For non-constants, values are stored in this separate array
+     *  (to keep the data array immutable)  */
+    std::map<Id, float> values;
+
     unsigned next=1;
 
     /*  Per-Id flags
