@@ -26,7 +26,8 @@ Graph::Escaped* Translator::operator()(Graph::ValuePtr ptr)
     else if (App::Bind::is_point_handle(ptr))
     {
         auto p = App::Bind::get_point_handle(ptr);
-        return new App::Bridge::EscapedPointHandle(p->drag);
+        return new App::Bridge::EscapedPointHandle(
+                {p->pos[0], p->pos[1], p->pos[2]}, p->drag);
     }
 
     return nullptr;

@@ -10,8 +10,9 @@ EscapedShape::EscapedShape(Kernel::Tree tree)
     // Nothing to do here
 }
 
-EscapedPointHandle::EscapedPointHandle(std::unique_ptr<App::Render::PointDrag>& d)
-    : drag(d.release())
+EscapedPointHandle::EscapedPointHandle(
+        QVector3D p, std::unique_ptr<App::Render::PointDrag>& d)
+    : pos(p), drag(d.release())
 {
     // Nothing to do here
 }

@@ -27,7 +27,7 @@ public:
 class EscapedPointHandle : public EscapedHandle
 {
 public:
-    EscapedPointHandle(std::unique_ptr<App::Render::PointDrag>& d);
+    EscapedPointHandle(QVector3D p, std::unique_ptr<App::Render::PointDrag>& d);
     int tag() const override;
 
     QVector3D pos;
