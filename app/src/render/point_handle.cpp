@@ -11,8 +11,7 @@ namespace Render {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle(App::Bridge::EscapedPointHandle* h)
-    : drag(h->drag.release())
+PointHandle::PointHandle()
 {
     // Nothing to do here
 }
@@ -85,8 +84,10 @@ bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
     auto p = dynamic_cast<Bridge::EscapedPointHandle*>(h);
     assert(p);
 
-    bool changed = center != p->pos;
+    bool changed = (center != p->pos);
     center = p->pos;
+
+    changed |= drag->updateFrom(p);
 
     return changed;
 }

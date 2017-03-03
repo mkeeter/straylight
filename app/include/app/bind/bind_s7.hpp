@@ -19,17 +19,9 @@ namespace Bind {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct point_handle_t {
-    point_handle_t(float x, float y, float z, const std::string& axes,
-                   App::Render::PointDrag* d)
-        : pos{x, y, z}, axes(axes), drag(d) {}
+    point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z);
 
-    float pos[3];
-
-    /*  'x', 'xy', 'yz', 'xyz', etc */
-    std::string axes;
-
-    /*  Drag handle  */
-    std::unique_ptr<App::Render::PointDrag> drag;
+    Kernel::Tree xyz[3];
 
     // Type tag for interpreter
     static int tag;

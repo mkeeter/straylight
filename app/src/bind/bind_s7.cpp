@@ -15,15 +15,35 @@ namespace Bind {
 // s7 type tag for point_handle_t
 int point_handle_t::tag = -1;
 
+////////////////////////////////////////////////////////////////////////////////
+
+point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z)
+    : xyz{x, y, z}
+{
+    // Nothing to do here
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static char* point_handle_print(s7_scheme* sc, void* s)
 {
     (void)sc;
     std::string desc = "point-handle";
 
     auto p = static_cast<point_handle_t*>(s);
-    if (p->axes.length())
+
+    std::string axes;
+    for (unsigned i=0; i < 3; ++i)
     {
-        desc += "_" + p->axes;
+        if (p->xyz[i].opcode() != Kernel::Opcode::CONST)
+        {
+            axes += "xyz"[i];
+        }
+    }
+
+    if (axes.length())
+    {
+        desc += "_" + axes;
     }
 
     return Graph::Interpreter::print(desc, s);
@@ -39,8 +59,6 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
     auto _x = s7_car(args);
     auto _y = s7_cadr(args);
     auto _z = s7_caddr(args);
-
-    std::string axes = "";
 
     {   // Check arguments: they should be location-agnostic trees or numbers
         s7_pointer args[3] = {_x, _y, _z};
@@ -59,7 +77,6 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
                     return s7_wrong_type_arg_error(sc, "point_handle_new", i,
                             args[i], "location-agnostic tree");
                 }
-                axes += "xyz"[i];
             }
         }
     }
@@ -74,9 +91,7 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
     auto z = to_tree(_z);
 
     return s7_make_object(sc, point_handle_t::tag,
-            new point_handle_t(
-                x.value(), y.value(), z.value(), axes,
-                new App::Render::PointDrag(x, y, z)));
+            new point_handle_t(x, y, z));
 }
 
 bool is_point_handle(s7_pointer s)

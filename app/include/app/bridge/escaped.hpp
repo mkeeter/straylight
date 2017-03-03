@@ -1,8 +1,9 @@
 #pragma once
 
+#include <QVector3D>
+
 #include "graph/translator.hpp"
 #include "kernel/eval/evaluator.hpp"
-#include "app/render/point_drag.hpp"
 
 namespace App {
 namespace Bridge {
@@ -27,11 +28,11 @@ public:
 class EscapedPointHandle : public EscapedHandle
 {
 public:
-    EscapedPointHandle(QVector3D p, std::unique_ptr<App::Render::PointDrag>& d);
+    EscapedPointHandle(Kernel::Tree xyz[3]);
     int tag() const override;
 
     QVector3D pos;
-    std::unique_ptr<App::Render::PointDrag> drag;
+    Kernel::Evaluator xyz[3];
 };
 
 ////////////////////////////////////////////////////////////////////////////////

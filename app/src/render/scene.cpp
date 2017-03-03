@@ -222,9 +222,9 @@ void Scene::updateFrom(const Graph::Response& r)
                 // If not present, create a new handle here
                 if (!handles.count(k))
                 {
-                    if (auto p_ = dynamic_cast<Bridge::EscapedPointHandle*>(p))
+                    if (dynamic_cast<Bridge::EscapedPointHandle*>(p))
                     {
-                        handles.insert({k, new PointHandle(p_)});
+                        handles.insert({k, new PointHandle()});
                     }
                     else
                     {

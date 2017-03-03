@@ -17,7 +17,7 @@ namespace Render {
 class PointHandle : public Handle
 {
 public:
-    PointHandle(App::Bridge::EscapedPointHandle* h);
+    PointHandle();
 
     /*
      *  Draws the point in the 3D viewport
