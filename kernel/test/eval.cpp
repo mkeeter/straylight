@@ -315,6 +315,8 @@ TEST_CASE("Evaluator::derivs")
 
 TEST_CASE("Evaluator::toTree")
 {
+    boost::bimap<Cache::VarId, Cache::VarId> vm;
+
     SECTION("Tree without XYZ")
     {
         auto a = Tree::var(3.0);
@@ -322,7 +324,6 @@ TEST_CASE("Evaluator::toTree")
 
         auto e = Evaluator(b);
 
-        boost::bimap<Cache::VarId, Cache::VarId> vm;
         auto t = e.toTree(vm);
 
         REQUIRE(vm.size() == 1);
@@ -352,7 +353,6 @@ TEST_CASE("Evaluator::toTree")
 
         auto e = Evaluator(b);
 
-        boost::bimap<Cache::VarId, Cache::VarId> vm;
         auto t = e.toTree(vm);
 
         REQUIRE(vm.size() == 1);
@@ -366,5 +366,38 @@ TEST_CASE("Evaluator::toTree")
         REQUIRE(t.lhs().var() == a_);
 
         REQUIRE(t.rhs().opcode() == Opcode::VAR_X);
+    }
+
+    SECTION("Constant")
+    {
+        auto a = Tree(3.0);
+        auto e = Evaluator(a);
+
+        auto a_ = e.toTree(vm);
+        REQUIRE(a_.opcode() == Opcode::CONST);
+        REQUIRE(a_.value() == 3.0);
+    }
+
+    SECTION("X")
+    {
+        auto a = Tree::X();
+        auto e = Evaluator(a);
+
+        auto a_ = e.toTree(vm);
+        REQUIRE(a_.opcode() == Opcode::VAR_X);
+    }
+
+    SECTION("Var")
+    {
+        auto a = Tree::var(5.5);
+        auto e = Evaluator(a);
+
+        auto a_ = e.toTree(vm);
+        REQUIRE(a_.opcode() == Opcode::VAR);
+        REQUIRE(a.value() == 5.5);
+
+        REQUIRE(vm.size() == 1);
+        auto v = vm.left.at(a.var());
+        REQUIRE(a_.var() == v);
     }
 }
