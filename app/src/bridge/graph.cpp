@@ -261,21 +261,16 @@ QObject* GraphModel::modelOf(QList<int> env)
 
 void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 {
-#if 0   // TODO
-    {   // Roll out a set of variable updates
-        auto lock = r.Lock();
-        for (const auto& s : sol)
-        {
-            auto k = static_cast<Bind::CellKeyTag*>(
-                    Kernel::Cache::instance()->tag(s.first))->key;
+    for (const auto& s : sol)
+    {
+        var_lock.lock();
+        const auto key = vars.right.at(s.first);
+        var_lock.unlock();
 
-            std::stringstream ss;
-            ss << s.second;
-            r.setExprOrInput(k, ss.str());
-        }
+        std::stringstream ss;
+        ss << s.second;
+        commands.push(Graph::Command::SetExprOrInput(key, ss.str()));
     }
-    sync();
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
