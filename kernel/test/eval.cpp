@@ -8,9 +8,17 @@ using namespace Kernel;
 
 TEST_CASE("Principle variable evaluation")
 {
-    Evaluator e(Tree::X());
+    SECTION("X")
+    {
+        Evaluator e(Tree::X());
+        REQUIRE(e.eval(1.0, 2.0, 3.0) == 1.0);
+    }
 
-    REQUIRE(e.eval(1.0, 2.0, 3.0) == 1.0);
+    SECTION("Y")
+    {
+        Evaluator e(Tree::Y());
+        REQUIRE(e.eval(1.0, 2.0, 3.0) == 2.0);
+    }
 }
 
 TEST_CASE("Constant evaluation")
