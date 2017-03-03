@@ -29,6 +29,15 @@ public:
     EvaluatorBase(const EvaluatorBase& other);
 
     /*
+     *  Converts this evaluator back into a tree
+     *
+     *  The VarId map defines how to convert variables from the original
+     *  cache to the new cache (as they are expected to live in different
+     *  threads).
+     */
+    Tree toTree(boost::bimap<Cache::VarId, Cache::VarId>& vars) const;
+
+    /*
      *  Single-argument evaluation
      */
     float eval(float x, float y, float z);

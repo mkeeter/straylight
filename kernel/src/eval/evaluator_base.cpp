@@ -166,6 +166,74 @@ EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
+{
+    std::map<Clause::Id, Tree> trees;
+
+    // Looks up a clause from the map with special-case behavior for constants
+    // and variables (identified because they're not already in the map)
+    auto getTree = [&](const Clause::Id id){
+        if (!trees.count(id))
+        {
+            // If the id is a variable, then handle it in this branch
+            if (vars.left.count(id))
+            {
+                // Do something with vm here
+                auto var_other = vars.left.at(id);
+                if (!vm.left.count(var_other))
+                {
+                    // Make a dummy tree to get the variable id
+                    auto t = Tree::var(result.f[id][0]);
+                    // Record the variable id mapping into this thread
+                    vm.left.insert({var_other, t.var()});
+                }
+                trees.insert({id, Tree::var(vm.left.at(var_other))});
+            }
+            // Otherwise, it must be a constant (if we've walked through
+            // the tree correctly).
+            else
+            {
+                trees.insert({id, Tree(result.f[id][0])});
+            }
+        }
+        return trees.at(id);
+    };
+
+    // Insert coordinate nodes
+    trees.insert({X, Tree::X()});
+    trees.insert({Y, Tree::Y()});
+    trees.insert({Z, Tree::Z()});
+
+    // Roll through the tape, making all of the trees
+    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    {
+        auto& c = *itr;
+        if (c.a == 0 && c.b == 0)
+        {
+            trees.insert({c.id, Tree(c.op)});
+        }
+        else if (c.b == 0)
+        {
+            trees.insert({c.id, Tree(c.op, getTree(c.a))});
+        }
+        else
+        {
+            trees.insert({c.id, Tree(c.op, getTree(c.a), getTree(c.b))});
+        }
+    }
+
+    // Sanity-checking that the root node was created
+    assert(trees.count(0));
+
+    // Sanity-checking: anything that comes out of an Evaluator
+    // must be collapsed
+    assert(trees.at(0).flags() & Tree::FLAG_COLLAPSED);
+
+    return trees.at(0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 float EvaluatorBase::eval(float x, float y, float z)
 {
     set(x, y, z, 0);
