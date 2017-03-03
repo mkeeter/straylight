@@ -232,6 +232,19 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
     return out;
 }
 
+s7_pointer shape_get_const(s7_scheme* sc, s7_pointer args)
+{
+    auto obj = s7_car(args);
+    CHECK_SHAPE(obj);
+
+    auto& tree = get_shape(obj)->tree;
+    if (tree.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
+    {
+        return s7_make_real(sc, tree.value());
+    }
+    return obj;
+}
+
 #define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)           \
 static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
 {                                                                           \
@@ -484,6 +497,8 @@ void init(s7_scheme* sc)
 
     s7_define_function(sc, "make-shape", shape_new, 1, 0, false,
             "(make-shape func) makes a new shape");
+    s7_define_function(sc, "const", shape_get_const, 1, 0, false,
+            "(const value) returns a constant number");
     s7_define_function(sc, "shape?", is_shape, 1, 0, false,
             "(shape? s) checks if something is a shape");
 
