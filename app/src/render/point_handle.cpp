@@ -60,24 +60,24 @@ void PointHandle::setShaderVars(
 void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
                         Picker::DrawMode mode, QRgb color)
 {
-    vao.bind();
+    vao->bind();
 
-    shader_solid.bind();
-    setShaderVars(world, proj, shader_solid, mode, color);
+    shader_solid->bind();
+    setShaderVars(world, proj, *shader_solid, mode, color);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
-    shader_solid.release();
+    shader_solid->release();
 
     if (mode != Picker::DRAW_PICKER)
     {
-        shader_dotted.bind();
-        setShaderVars(world, proj, shader_dotted, mode, color);
+        shader_dotted->bind();
+        setShaderVars(world, proj, *shader_dotted, mode, color);
         glDisable(GL_DEPTH_TEST);
         glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
         glEnable(GL_DEPTH_TEST);
-        shader_dotted.release();
+        shader_dotted->release();
     }
 
-    vao.release();
+    vao->release();
 }
 
 bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
@@ -95,17 +95,22 @@ void PointHandle::initGL()
 {
     if (!gl_ready)
     {
-        shader_solid.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_solid.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/gl/point_handle.frag");
-        shader_solid.link();
+        vbo.reset(new QOpenGLBuffer);
+        vao.reset(new QOpenGLVertexArrayObject);
+        shader_solid.reset(new QOpenGLShaderProgram);
+        shader_dotted.reset(new QOpenGLShaderProgram);
 
-        shader_dotted.addShaderFromSourceFile(
+        shader_solid->addShaderFromSourceFile(
                 QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_dotted.addShaderFromSourceFile(
+        shader_solid->addShaderFromSourceFile(
+                QOpenGLShader::Fragment, ":/gl/point_handle.frag");
+        shader_solid->link();
+
+        shader_dotted->addShaderFromSourceFile(
+                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
+        shader_dotted->addShaderFromSourceFile(
                 QOpenGLShader::Fragment, ":/gl/point_handle_dotted.frag");
-        shader_dotted.link();
+        shader_dotted->link();
 
         {
             std::vector<GLfloat> data;
@@ -116,21 +121,21 @@ void PointHandle::initGL()
                 data.push_back(cos(2.0f * pi * i / segments));
                 data.push_back(sin(2.0f * pi * i / segments));
             }
-            vbo.create();
-            vbo.bind();
-            vbo.allocate(data.data(), data.size() * sizeof(GLfloat));
+            vbo->create();
+            vbo->bind();
+            vbo->allocate(data.data(), data.size() * sizeof(GLfloat));
         }
 
-        vao.create();
-        vao.bind();
+        vao->create();
+        vao->bind();
 
         glVertexAttribPointer(
                 0, 2, GL_FLOAT, GL_FALSE,
                 2 * sizeof(GLfloat), (GLvoid*)0);
         glEnableVertexAttribArray(0);
 
-        vbo.release();
-        vao.release();
+        vbo->release();
+        vao->release();
 
         gl_ready = true;
     }

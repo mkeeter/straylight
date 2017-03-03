@@ -52,13 +52,23 @@ void Picker::installHandle(Handle* h)
     }
 }
 
-void Picker::eraseHandle(Handle* h)
+void Picker::prune(const QSet<Handle*>& hs)
 {
-    assert(handles.count(h));
-    assert(colors.right.count(h));
+    QSet<Handle*> forgotten;
+    for (auto h : handles)
+    {
+        if (hs.find(h) == hs.end())
+        {
+            delete h;
+            forgotten.insert(h);
+        }
+    }
 
-    handles.erase(h);
-    colors.right.erase(h);
+    for (auto h : forgotten)
+    {
+        handles.erase(h);
+        colors.right.erase(h);
+    }
 }
 
 void Picker::setView(QMatrix4x4 mat, QSize size)

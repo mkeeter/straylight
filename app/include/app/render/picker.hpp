@@ -39,9 +39,9 @@ public:
     void installHandle(Handle* h);
 
     /*
-     *  Erase the given handle from the picker
+     *  Erase any handle that's not in hs
      */
-    void eraseHandle(Handle* h);
+    void prune(const QSet<Handle*>& hs);
 
     /*
      *  Loads the picker image!

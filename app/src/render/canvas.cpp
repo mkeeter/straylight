@@ -110,6 +110,15 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
         rs.insert(s.second);
     }
     blitter.prune(rs);
+
+    //////////////////////////////////////////////////////////////////////////
+    QSet<App::Render::Handle*> hs;
+    for (const auto& h : scene->handles)
+    {
+        picker.installHandle(h.second);
+        hs.insert(h.second);
+    }
+    picker.prune(hs);
 }
 
 }   // namespace Render
