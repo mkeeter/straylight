@@ -37,7 +37,7 @@ Kernel::Solver::Solution PointDrag::dragTo(const QMatrix4x4& M,
                                            const QVector2D& cursor)
 {
     const QVector3D offset = M * QVector3D(0, 0, 0);
-    const QVector3D _cursor_ray = M * QVector3D(0, 0, -1) - offset;
+    const QVector3D _cursor_ray = (M * QVector3D(0, 0, -1) - offset).normalized();
 
     // Position _cursor_pos to minimize travel along the ray from start point
     // TODO: clean up this vector math
