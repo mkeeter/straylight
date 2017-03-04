@@ -465,6 +465,10 @@ void EvaluatorBase::eval_clause_values(Opcode::Opcode op,
             EVAL_LOOP
             out[i] = b[i];
             break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            out[i] = a[i];
+            break;
 
         case Opcode::INVALID:
         case Opcode::CONST:
@@ -740,6 +744,15 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
                 odz[i] = bdz[i];
             }
             break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            {
+                odx[i] = adx[i];
+                ody[i] = ady[i];
+                odz[i] = adz[i];
+            }
+            break;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:
@@ -953,6 +966,13 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
                 (*o) = (*b);
             }
             break;
+        case Opcode::CONST_VAR:
+            JAC_LOOP
+            {
+                (*o) = 0;
+            }
+            break;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:
@@ -1018,6 +1038,9 @@ Interval EvaluatorBase::eval_clause_interval(
             return a;
         case Opcode::DUMMY_B:
             return b;
+        case Opcode::CONST_VAR:
+            return a;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:

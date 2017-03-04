@@ -16,6 +16,7 @@ enum Opcode
     VAR_Y,
     VAR_Z,
     VAR,
+    CONST_VAR,
 
     SQUARE,
     SQRT,

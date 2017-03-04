@@ -240,7 +240,9 @@ s7_pointer shape_get_const(s7_scheme* sc, s7_pointer args)
     auto& tree = get_shape(obj)->tree;
     if (tree.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
     {
-        return s7_make_real(sc, tree.value());
+        auto out = Tree(Opcode::CONST_VAR, tree);
+        out.checkValue();
+        return shape_new(sc, out);
     }
     return obj;
 }

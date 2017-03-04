@@ -26,6 +26,7 @@ size_t Opcode::args(Opcode op)
         case ACOS:
         case ATAN:
         case EXP:
+        case CONST_VAR:
             return 1;
 
         case ADD: // fallthrough
@@ -56,6 +57,7 @@ std::string Opcode::to_str(Opcode op)
     switch (op)
     {
         case Opcode::CONST: return "const";
+        case Opcode::CONST_VAR: return "const";
         case Opcode::AFFINE_VEC: return "affine-vec";
         case Opcode::DUMMY_A: return "dummy-a";
         case Opcode::DUMMY_B: return "dummy-b";
@@ -139,6 +141,7 @@ bool Opcode::isCommutative(Opcode op)
         case INVALID:
         case DUMMY_A:
         case DUMMY_B:
+        case CONST_VAR: // fallthrough
         case LAST_OP:
             return false;
 
