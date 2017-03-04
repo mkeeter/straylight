@@ -176,10 +176,10 @@ protected:
      *  Evaluate the tree's values and Jacobian
      *  with respect to all its variables
      */
-    static void eval_clause_jacobians(Opcode::Opcode op,
-        const float* __restrict av,  std::vector<float>& aj,
-        const float* __restrict bv,  std::vector<float>& bj,
-        float* __restrict ov, std::vector<float>& oj);
+    static float eval_clause_jacobians(Opcode::Opcode op,
+        const float av,  std::vector<float>& aj,
+        const float bv,  std::vector<float>& bj,
+                         std::vector<float>& oj);
 
     /*
      *  Evaluates a single Interval clause
