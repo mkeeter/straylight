@@ -187,7 +187,9 @@ Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
                 // Record the variable id mapping into this thread
                 vm.left.insert({var_other, t.var()});
             }
-            return Tree::var(vm.left.at(var_other));
+            auto t = Tree::var(vm.left.at(var_other));
+            t.setValue(result.f[0][0]);
+            return t;
         }
     }
 
@@ -210,7 +212,9 @@ Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
                     // Record the variable id mapping into this thread
                     vm.left.insert({var_other, t.var()});
                 }
-                trees.insert({id, Tree::var(vm.left.at(var_other))});
+                auto t = Tree::var(vm.left.at(var_other));
+                t.setValue(result.f[id][0]);
+                trees.insert({id, t});
             }
             // Otherwise, it must be a constant (if we've walked through
             // the tree correctly).
