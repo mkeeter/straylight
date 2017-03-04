@@ -336,6 +336,16 @@ TEST_CASE("Root::callSheet (dependencies)")
         REQUIRE(val.valid == true);
     }
 
+    SECTION("Sheet is renamed")
+    {
+        auto c = r.insertCell(Tree::ROOT_SHEET, "c", "(Sheet)");
+        auto& val = r.getValue({{Tree::ROOT_INSTANCE}, c});
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        REQUIRE(val.valid == true);
+        r.renameSheet(s, "NotSheet");
+        REQUIRE(val.valid == false);
+    }
+
     SECTION("Sheet input count changes")
     {
         auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
@@ -623,4 +633,3 @@ TEST_CASE("Root::loadString")
         REQUIRE(r.getTree().at(a).cell()->type == Cell::INPUT);
     }
 }
-

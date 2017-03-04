@@ -89,13 +89,6 @@ public:
     uint8_t flags() const           { return parent->flags(id); }
 
     /*
-     *  Getters and setters for tags
-     *  (owned by parent Cache)
-     */
-    Tag* tag() const { return parent->tag(id); }
-    void setTag(Tag* t) { parent->setTag(id, t); }
-
-    /*
      *  Sets a VAR tree's value
      *
      *  Note that this may invalidate values of trees that use this variable;
@@ -139,6 +132,13 @@ public:
      *  Returns the parent Cache
      */
     const Cache& cache() const { return *parent; }
+
+    /*
+     *  Returns a mapping of variables to their values
+     *  at this particular point in time.
+     */
+    std::map<Kernel::Cache::VarId, float> vars() const
+        { return parent->vars(id); }
 
 protected:
     /*

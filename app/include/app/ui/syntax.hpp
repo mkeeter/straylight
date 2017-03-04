@@ -9,7 +9,7 @@ namespace UI {
 class SyntaxHighlighter : public QSyntaxHighlighter
 {
 public:
-    SyntaxHighlighter(QTextDocument* doc);
+    SyntaxHighlighter(QTextDocument* doc, const QSet<QString>& keywords);
     static QPoint matchedParen(QTextDocument* doc, int pos);
 
 protected:
@@ -35,7 +35,7 @@ protected:
         int capture;
     };
 
-    void buildRules();
+    void buildRules(const QSet<QString>& keywords);
     static QList<Rule> rules;
 
     void highlightBlock(const QString& text) override;

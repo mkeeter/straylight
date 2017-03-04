@@ -14,6 +14,12 @@ public:
         : EvaluatorBase(root, M) { /* Nothing to do here */ }
 
     /*
+     *  Copy constructor
+     */
+    EvaluatorAVX(const EvaluatorAVX& other)
+        : EvaluatorBase(other) { /* Nothing to do here */ }
+
+    /*
      *  AVX-accelerated versions of existing Evaluator functions
      */
     void applyTransform(Result::Index count);

@@ -3,17 +3,17 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "render/renderer.hpp"
+#include "app/render/renderer.hpp"
 
 namespace App {
 namespace Render {
 
-Renderer::Renderer(Kernel::Tree t)
+Renderer::Renderer(Kernel::Evaluator* e)
     : todo(NOTHING)
 {
     for (int i=0; i < 8; ++i)
     {
-        evaluators.push_back(new Kernel::Evaluator(t));
+        evaluators.push_back(new Kernel::Evaluator(*e));
     }
     connect(&watcher, &QFutureWatcher<Result>::finished,
             this, &Renderer::onRenderFinished);
@@ -27,8 +27,6 @@ Renderer::~Renderer()
     {
         delete e;
     }
-
-    emit(goodbye(this));
 }
 
 void Renderer::deleteWhenNotRunning()
@@ -54,7 +52,7 @@ bool Renderer::updateVars(Kernel::Tree tree)
     return changed;
 }
 
-void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
+void Renderer::enqueue(QMatrix4x4 mat, QSize size)
 {
     if (todo != DELETE)
     {
@@ -64,6 +62,13 @@ void Renderer::onViewChanged(QMatrix4x4 mat, QSize size)
         abort.store(true);
         checkNext();
     }
+}
+
+Renderer::Result* Renderer::getResult()
+{
+    auto r = result;
+    result = nullptr;
+    return r;
 }
 
 void Renderer::onRenderFinished()
@@ -133,7 +138,9 @@ void Renderer::run(Task t)
         // Then map the back Z value to 0
         *out.first = (*out.first == r.Z.values.back()).select(0, *out.first);
 
-        emit(gotResult(this, {out.first, out.second}, inv));
+        // Store the result in the parent object
+        result = new Result { out.first, out.second, inv };
+        emit(done());
 
         auto dt = start_time.elapsed();
         if (dt < 10 & base_level > 0)

@@ -1,7 +1,7 @@
 #include "graph/tree.hpp"
 
 #include "graph/types/instance.hpp"
-#include "graph/types/serializer.hpp"
+#include "graph/types/cell.hpp"
 
 namespace Graph {
 
@@ -144,7 +144,7 @@ void Tree::erase(const ItemIndex& i)
     order[sheet].remove(i);
 }
 
-std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
+std::list<CellKey> Tree::iterCellsRecursive(const SheetIndex& s) const
 {
     std::list<CellKey> out;
     for (auto i : iterItems(s))
@@ -155,7 +155,7 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
         }
         else if (auto n = at(i).instance())
         {
-            for (auto k : cellsOf(n->sheet))
+            for (auto k : iterCellsRecursive(n->sheet))
             {
                 k.first.push_front(InstanceIndex(i));
                 out.push_back(k);
@@ -165,70 +165,22 @@ std::list<CellKey> Tree::cellsOf(const SheetIndex& s) const
     return out;
 }
 
-void Tree::serialize(TreeSerializer* s) const
+std::list<std::pair<Env, ItemIndex>> Tree::iterItemsRecursive(const SheetIndex& s) const
 {
-    s->instance(Tree::ROOT_INSTANCE, "", "");
-    serialize(s, {Tree::ROOT_INSTANCE});
-}
-
-void Tree::serialize(TreeSerializer* s, const Env& env) const
-{
-    auto instance = env.back();
-    auto sheet = at(instance).instance()->sheet;
-
-    if (s->push(instance.i,
-                instance == Tree::ROOT_INSTANCE ? "" : nameOf(instance),
-                sheet == Tree::ROOT_SHEET ? "" : nameOf(sheet)))
+    std::list<std::pair<Env, ItemIndex>> out;
+    for (auto i : iterItems(s))
     {
-        for (auto i : iterItems(sheet))
+        out.push_back({{}, i});
+        if (auto n = at(i).instance())
         {
-            const auto& name = nameOf(i);
-            const auto& item = at(i);
-
-            if (auto c = item.cell())
+            for (auto k : iterItemsRecursive(n->sheet))
             {
-                const auto& value = c->values.at(env);
-                s->cell(CellIndex(i), name, c->expr, c->type,
-                        value.valid, value.str, value.value);
+                k.first.push_front(InstanceIndex(i));
+                out.push_back(k);
             }
-            else if (auto n = item.instance())
-            {
-                InstanceIndex index(i.i);
-                s->instance(index, name, nameOf(n->sheet));
-
-                auto env_ = env;
-                env_.push_back(index);
-
-                for (auto item : iterItems(n->sheet))
-                {
-                    if (auto c = at(item).cell())
-                    {
-                        const auto& v = c->values.at(env_);
-                        if (c->type == Cell::INPUT)
-                        {
-                            s->input(CellIndex(item), nameOf(item),
-                                     n->inputs.at(CellIndex(item)),
-                                     v.valid, v.str);
-                        }
-                        else if (c->type == Cell::OUTPUT)
-                        {
-                            s->output(CellIndex(item), nameOf(item),
-                                      v.valid, v.str);
-                        }
-                    }
-                }
-                serialize(s, env_);
-            }
-        }
-
-        // Pass all sheets through to the serializer
-        for (const auto& e : sheetsAbove(env))
-        {
-            s->sheet(e, nameOf(e), parentOf(e) == sheet,
-                     canInsertInstance(sheet, e));
         }
     }
-    s->pop();
+    return out;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -393,24 +345,53 @@ std::string Tree::fromJson(SheetIndex sheet, const picojson::value& value)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<SheetIndex> Tree::sheetsAbove(const Env& env) const
+std::list<SheetIndex> Tree::sheetsAbove(const SheetIndex& sheet) const
 {
     std::list<SheetIndex> out;
 
-    // Walk through parents, accumulating sheets
-    for (const auto& v : env)
+    auto p = sheet;
+    while (true)
     {
-        auto es = childrenOf(at(v).instance()->sheet);
-        for (const auto& e : es)
+        for (const auto& e : childrenOf(p))
         {
             if (at(e).sheet())
             {
                 out.push_back(SheetIndex(e));
             }
         }
+
+        if (p == ROOT_SHEET)
+        {
+            break;
+        }
+        else
+        {
+            p = parentOf(p);
+        }
     }
 
     return out;
+}
+
+std::list<SheetIndex> Tree::sheetsBelow(const SheetIndex& parent) const
+{
+    std::list<SheetIndex> todo = {parent};
+    std::list<SheetIndex> done;
+
+    while(todo.size())
+    {
+        auto s = todo.front();
+        for (auto i : childrenOf(s))
+        {
+            if (at(i).sheet())
+            {
+                todo.push_back(SheetIndex(i));
+            }
+        }
+        done.push_back(s);
+        todo.pop_front();
+    }
+    return done;
 }
 
 bool Tree::checkEnv(const Env& env) const

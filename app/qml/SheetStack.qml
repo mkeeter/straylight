@@ -3,6 +3,7 @@ import QtQuick.Controls 1.4
 
 import Bridge 1.0
 import Style 1.0
+import Graph 1.0
 
 SplitView {
     id: sstack
@@ -14,6 +15,27 @@ SplitView {
     // Called when a file is loaded (and used to trigger a layout fix)
     function fixLayout() { layoutTimer.restart() }
     signal _fixLayout
+
+    signal animDone
+
+    Component.onCompleted: {
+        Graph.instanceErased.connect(onInstanceErased)
+    }
+
+    function onInstanceErased(instance) {
+        var prefix = []
+        for (var i in env) {
+            if (env[i] == instance) {
+                break;
+            } else {
+                prefix.push(env[i]);
+            }
+        }
+        if (prefix.length < env.length)
+        {
+            closeTo(prefix)
+        }
+    }
 
     Timer {
         id: layoutTimer
@@ -78,13 +100,11 @@ SplitView {
         {
             env.push(e[env.length])
             items.push(sheetViewComponent.createObject(sheetStack,
-                {sheetEnv: env.slice(),
-                 sheetIndex: Bridge.sheetOf(env[env.length - 1])}))
+                {sheetEnv: env.slice()}))
             addItem(items[items.length - 1])
             new_width += 250
         }
         envChanged()
-        Bridge.sync()
 
         widthAnim.to = new_width
         widthAnim.start()
@@ -108,7 +128,7 @@ SplitView {
             }
             else
             {
-                Bridge.sync()
+                animDone()
             }
         }
     }

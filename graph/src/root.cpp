@@ -2,8 +2,19 @@
 
 namespace Graph {
 
+const std::list<std::pair<std::string, std::string>> Root::_bad_item_names = {
+        {"^$", "Name cannot be empty"},
+        {"^[A-Z].*$", "First character must be lowercase"}};
+const std::list<std::pair<std::string, std::string>> Root::_bad_sheet_names = {
+        {"^$", "Name cannot be empty"},
+        {"^[a-z].*$", "First character must be uppercase"}};
+
+const std::string Root::_good_item_name = "^[a-z][A-Za-z0-9\\-_]*$";
+const std::string Root::_good_sheet_name = "^[A-Z][A-Za-z0-9\\-_]*$";
+
 Root::Root()
-    : deps(*this), interpreter(*this, &deps)
+    : deps(*this), interpreter(*this, &deps),
+    good_item_name(_good_item_name), good_sheet_name(_good_sheet_name)
 {
     dirty.push({});
 }
@@ -34,7 +45,7 @@ CellIndex Root::insertCell(const SheetIndex& sheet, const std::string& name,
 void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
                       const std::string& name, const std::string& expr)
 {
-    tree.insertCell(sheet, name, expr);
+    tree.insertCell(sheet, cell, name, expr);
     auto type = interpreter.cellType(expr);
     tree.at(cell).cell()->type = type;
 
@@ -44,23 +55,16 @@ void Root::insertCell(const SheetIndex& sheet, const CellIndex& cell,
         markDirty({e, name});
     }
 
-    // If this could influence sheets that are invoked as functions, then
-    // mark all of them for re-evaluation
     if ((type == Cell::INPUT || type == Cell::OUTPUT) &&
         sheet != Tree::ROOT_SHEET)
     {
-        auto sheetName = tree.nameOf(sheet);
-        for (const auto& e : tree.envsOf(tree.parentOf(sheet)))
-        {
-            markDirty({e, sheetName});
-        }
+        // If this could influence sheets that are invoked as functions, then
+        // mark all of them for re-evaluation
+        markDirty(NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
     }
 
-    {   // Mark everything that looked at the cell's dummy key as dirty
-        std::stringstream ss;
-        ss << cell.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark everything that looked at the cell's dummy key as dirty
+    markDirty(NameKey(cell));
 
     sync();
 }
@@ -84,24 +88,27 @@ void Root::insertInstance(const SheetIndex& parent, const InstanceIndex& i,
         markDirty({e, name});
 
         // Then, mark all cells as dirty
-        for (const auto& c : tree.cellsOf(target))
+        for (const auto& c : tree.iterCellsRecursive(target))
         {
             auto env = e; // copy
             env.push_back(i);
             env.insert(env.end(), c.first.begin(), c.first.end());
-            markDirty({env, tree.nameOf(c.second)});
+
+            const auto name = tree.nameOf(c.second);
+            const auto expr = tree.at(c.second).cell()->expr;
+            markDirty({env, name});
         }
     }
 
-    // Assign default expressions for inputs
+    // Assign default expressions for inputs, and mark input / output changes
     for (const auto& t : tree.iterItems(target))
     {
         if (auto c = tree.at(t).cell())
         {
             if (c->type == Cell::INPUT)
             {
-                tree.at(i).instance()->inputs[CellIndex(t.i)] =
-                    interpreter.defaultExpr(c->expr);
+                const auto expr = interpreter.defaultExpr(c->expr);
+                tree.at(i).instance()->inputs[CellIndex(t.i)] = expr;
             }
         }
     }
@@ -113,7 +120,7 @@ void Root::eraseCell(const CellIndex& cell)
 {
     auto sheet = tree.parentOf(cell);
     auto name = tree.nameOf(cell);
-    bool was_input = tree.at(cell).cell()->type == Cell::INPUT;
+    auto type = tree.at(cell).cell()->type;
 
     // Release all interpreter-allocated values
     for (const auto& v : tree.at(cell).cell()->values)
@@ -124,6 +131,7 @@ void Root::eraseCell(const CellIndex& cell)
     // Mark this cell as dirty in all its environments, and clear
     // anything that has it marked as downstream
     tree.erase(cell);
+
     for (const auto& e : tree.envsOf(sheet))
     {
         deps.clear({e, cell});
@@ -131,7 +139,7 @@ void Root::eraseCell(const CellIndex& cell)
     }
 
     // Erase all input data associated with this cell
-    if (was_input)
+    if (type == Cell::INPUT)
     {
         for (const auto& i : tree.instancesOf(sheet))
         {
@@ -139,11 +147,8 @@ void Root::eraseCell(const CellIndex& cell)
         }
     }
 
-    {   // Mark everything that looked at the cell's dummy key as dirty
-        std::stringstream ss;
-        ss << cell.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark everything that looked at the cell's dummy key as dirty
+    markDirty(NameKey(cell));
 
     sync();
 }
@@ -154,7 +159,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
     std::set<std::string> outputs;
 
     auto sheet = tree.at(instance).instance()->sheet;
-    auto cells = tree.cellsOf(sheet);
+    auto cells = tree.iterCellsRecursive(sheet);
     for (auto i : tree.iterItems(sheet))
     {
         if (auto cell = tree.at(i).cell())
@@ -205,9 +210,9 @@ void Root::eraseInstance(const InstanceIndex& instance)
     sync();
 }
 
-bool Root::setExpr(const CellIndex& i, const std::string& expr)
+bool Root::setExpr(const CellIndex& c, const std::string& expr)
 {
-    auto cell = tree.at(i).cell();
+    auto cell = tree.at(c).cell();
     assert(cell);
 
     // Early exit if this is a no-op
@@ -226,16 +231,16 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
     {
         auto d = interpreter.defaultExpr(expr);
-        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        for (auto i : tree.instancesOf(tree.parentOf(c)))
         {
-            tree.at(instance).instance()->inputs[i] = d;
+            tree.at(i).instance()->inputs[c] = d;
         }
     }
     else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
     {
-        for (auto instance : tree.instancesOf(tree.parentOf(i)))
+        for (auto i : tree.instancesOf(tree.parentOf(c)))
         {
-            tree.at(instance).instance()->inputs.erase(i);
+            tree.at(i).instance()->inputs.erase(c);
         }
     }
 
@@ -247,9 +252,9 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     // look at its value.
     if ((prev_type == Cell::OUTPUT) ^ (cell->type == Cell::OUTPUT))
     {
-        for (const auto& e : tree.envsOf(tree.parentOf(i)))
+        for (const auto& e : tree.envsOf(tree.parentOf(c)))
         {
-            for (const auto& d : deps.inverseDeps(toNameKey({e, i})))
+            for (const auto& d : deps.inverseDeps(toNameKey({e, c})))
             {
                 pushDirty(d);
             }
@@ -257,18 +262,15 @@ bool Root::setExpr(const CellIndex& i, const std::string& expr)
     }
 
     // Mark all envs containing this cell as dirty
-    for (const auto& e : tree.envsOf(tree.parentOf(i)))
+    for (const auto& e : tree.envsOf(tree.parentOf(c)))
     {
-        markDirty({e, tree.nameOf(i)});
+        markDirty({e, tree.nameOf(c)});
     }
 
-    {   // Mark anything that looked for the cell's dummy NameKey as dirty
-        // This is how we properly re-evaluate things that call a sheet when
-        // a cell internal to that sheet changes.
-        std::stringstream ss;
-        ss << i.i;
-        markDirty({{}, ss.str()});
-    }
+    // Mark anything that looked for the cell's dummy NameKey as dirty
+    // This is how we properly re-evaluate things that call a sheet when
+    // a cell internal to that sheet changes.
+    markDirty(NameKey(c));
 
     sync();
 
@@ -346,7 +348,7 @@ std::string Root::loadString(const std::string& s)
     {
         std::set<Cell*> cells;
 
-        for (auto& c : tree.cellsOf(Tree::ROOT_SHEET))
+        for (auto& c : tree.iterCellsRecursive(Tree::ROOT_SHEET))
         {
             c.first.push_front(Tree::ROOT_INSTANCE);
             cells.insert(tree.at(c.second).cell());
@@ -367,35 +369,23 @@ std::string Root::loadString(const std::string& s)
 
 bool Root::isItemName(const std::string& name, std::string* err) const
 {
-    if (name.size() == 0)
+    for (auto& b : bad_item_names)
     {
-        if (err)
+        if (std::regex_search(name, b.first))
         {
-            *err = "Name cannot be empty";
+            if (err)
+            {
+                *err = b.second;
+            }
+            return false;
         }
-        return false;
     }
-    else if (!islower(name[0]))
-    {
-        if (err)
-        {
-            *err = "Name must begin with a lowercase letter";
-        }
-        return false;
-    }
-    else if (!interpreter.nameValid(name))
+
+    if (!std::regex_search(name, good_item_name))
     {
         if (err)
         {
             *err = "Invalid name";
-        }
-        return false;
-    }
-    else if (interpreter.isReserved(name))
-    {
-        if (err)
-        {
-            *err = "Name is reserved by interpreter";
         }
         return false;
     }
@@ -419,14 +409,14 @@ bool Root::checkItemName(const SheetIndex& parent,
     return isItemName(name, err);;
 }
 
-void Root::renameItem(const ItemIndex& i, const std::string& name)
+bool Root::renameItem(const ItemIndex& i, const std::string& name)
 {
     auto prev_name = tree.nameOf(i);
 
     // Skip renaming if it's a no-op
     if (prev_name == name)
     {
-        return;
+        return false;
     }
 
     tree.rename(i, name);
@@ -444,14 +434,36 @@ void Root::renameItem(const ItemIndex& i, const std::string& name)
         }
     }
     sync();
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void Root::clear()
 {
-    tree.reset();
-    deps.reset();
+    auto lock = Lock();
+
+    for (const auto& c : tree.childrenOf(Tree::ROOT_SHEET))
+    {
+        if (!tree.isValid(c))
+        {
+            // Already got erased, e.g. an instance whose sheet was erased
+        }
+        else if (tree.at(c).cell())
+        {
+            eraseCell(CellIndex(c));
+        }
+        else if (tree.at(c).instance())
+        {
+            eraseInstance(InstanceIndex(c));
+        }
+        else if (tree.at(c).sheet())
+        {
+            eraseSheet(SheetIndex(c));
+        }
+    }
+
+    assert(dirty.top().size() == 0);
 }
 
 std::map<std::string, Value> Root::callSheet(
@@ -461,22 +473,11 @@ std::map<std::string, Value> Root::callSheet(
     auto p = tree.parentOf(caller.second);
     std::map<std::string, Value> out;
 
-    {   // Find and push a dependency on the sheet in its parent environment
-        //
-        // The sheet will notify this dependency network when I/O changes or
-        // when it is erased, triggering re-evaluation of this cell
-        auto sheet_parent = tree.parentOf(sheet);
-        Env sheet_env = {};
-        for (auto& e : caller.first)
-        {
-            sheet_env.push_back(e);
-            if (tree.at(e).instance()->sheet == sheet_parent)
-            {
-                break;
-            }
-        }
-        deps.insert(caller, {sheet_env, tree.nameOf(sheet)});
-    }
+    // Find and push a dependency on the sheet in its parent environment
+    //
+    // The sheet will notify this dependency network when I/O changes or
+    // when it is erased, triggering re-evaluation of this cell
+    deps.insert(caller, NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
 
     if (!tree.canInsertInstance(p, sheet))
     {
@@ -501,7 +502,7 @@ std::map<std::string, Value> Root::callSheet(
     dirty.push({});
     auto itr = inputs.begin();
 
-    for (const auto& c : tree.cellsOf(sheet))
+    for (const auto& c : tree.iterCellsRecursive(sheet))
     {
         // If this is a top-level cell and is an input cell, then inject an
         // value from the input list into the cell for the dummy env
@@ -545,7 +546,7 @@ std::map<std::string, Value> Root::callSheet(
 
     {   // Grab all inputs and outputs and put them in the output map
         std::set<CellIndex> cells;
-        for (const auto& c : tree.cellsOf(sheet))
+        for (const auto& c : tree.iterCellsRecursive(sheet))
         {
             cells.insert(c.second);
             if (c.first.empty())
@@ -567,9 +568,7 @@ std::map<std::string, Value> Root::callSheet(
         // upstream deps of output cells in the temporary instance
         for (const auto& c : cells)
         {
-            std::stringstream ss;
-            ss << c.i;
-            deps.insert(caller, {{}, ss.str()});
+            deps.insert(caller, NameKey(c));
         }
     }
 
@@ -581,22 +580,27 @@ std::map<std::string, Value> Root::callSheet(
 
 bool Root::isSheetName(const std::string& name, std::string* err) const
 {
-    if (name.size() == 0)
+    for (auto& b : bad_sheet_names)
+    {
+        if (std::regex_search(name, b.first))
+        {
+            if (err)
+            {
+                *err = b.second;
+            }
+            return false;
+        }
+    }
+
+    if (!std::regex_search(name, good_sheet_name))
     {
         if (err)
         {
-            *err = "Name cannot be empty";
+            *err = "Invalid name";
         }
         return false;
     }
-    else if (!isupper(name[0]))
-    {
-        if (err)
-        {
-            *err = "Name must begin with a uppercase letter";
-        }
-        return false;
-    }
+
     return true;
 }
 
@@ -618,14 +622,8 @@ bool Root::checkSheetName(const SheetIndex& parent,
 
 SheetIndex Root::insertSheet(const SheetIndex& parent, const std::string& name)
 {
-    assert(canInsertSheet(parent, name));
-    auto s = SheetIndex(tree.insert(parent, name, Item()));
-
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-    }
-    sync();
+    auto s = SheetIndex(tree.nextIndex());
+    insertSheet(parent, s, name);
     return s;
 }
 
@@ -635,21 +633,20 @@ void Root::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     assert(canInsertSheet(parent, name));
     tree.insert(parent, sheet, name, Item());
 
-    for (const auto& e : tree.envsOf(parent))
-    {
-        markDirty({e, name});
-    }
+    markDirty(NameKey(parent, name));
     sync();
 }
 
 void Root::renameSheet(const SheetIndex& i, const std::string& name)
 {
+    auto prev_name = tree.nameOf(i);
     tree.rename(i, name);
 
-    for (const auto& e : tree.envsOf(tree.parentOf(i)))
-    {
-        markDirty({e, name});
-    }
+    auto parent = tree.parentOf(i);
+    markDirty(NameKey(parent, prev_name));
+    markDirty(NameKey(parent, name));
+
+    sync();
 }
 
 void Root::eraseSheet(const SheetIndex& s)
@@ -660,7 +657,7 @@ void Root::eraseSheet(const SheetIndex& s)
 
     // Store parent envs and sheet name so that we can trigger re-evaluation
     // of everything watching the sheet by name
-    const auto envs = tree.envsOf(tree.parentOf(s));
+    const auto parent = tree.parentOf(s);
     const auto name = tree.nameOf(s);
 
     for (const auto& i : instances)
@@ -691,11 +688,7 @@ void Root::eraseSheet(const SheetIndex& s)
     tree.erase(s);
 
     //  Re-evaluate anything that was watching the sheet (by name)
-    for (const auto& e : envs)
-    {
-        markDirty({e, name});
-    }
-    // Sync is called on lock destruction
+    markDirty({{InstanceIndex(parent)}, name});
 }
 
 void Root::markDirty(const NameKey& k)
@@ -730,12 +723,17 @@ void Root::sync()
 
         if (result.value)
         {
-            setValue(k, result);
-            for (const auto& d : deps.inverseDeps(toNameKey(k)))
-            {
-                pushDirty(d);
-            }
+            gotResult(k, result);
         }
+    }
+}
+
+void Root::gotResult(const CellKey& k, const Value& result)
+{
+    setValue(k, result);
+    for (const auto& d : deps.inverseDeps(toNameKey(k)))
+    {
+        pushDirty(d);
     }
 }
 

@@ -3,7 +3,6 @@ import QtQuick 2.7
 import Bridge 1.0
 import Style 1.0
 import Material 1.0
-import UndoStack 1.0
 
 Flickable {
     id: flick

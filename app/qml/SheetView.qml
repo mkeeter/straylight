@@ -5,123 +5,28 @@ import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
 import Bridge 1.0
+import Graph 1.0
 import Awesome 4.7
 
 SplitView {
+    id: sview
     orientation: Qt.Vertical
 
     property var sheetEnv
-    // TODO property alias sheetIndex: lib.sheetIndex
 
     // Used in drawing title
     property string instanceName: ""
     property string sheetName: ""
 
-    // Keep track of bridge deserialization protocol
-    property var bridgeEnv: []
-    property bool visited: false
-    function inBridgeEnv() {
-        return _.isEqual(sheetEnv, bridgeEnv)
-    }
+    property var sheetModel: Graph.modelOf(sheetEnv)
 
     // Forwards a call to fix item layout
     function fixLayout() { items.fixLayout() }
 
     Component.onCompleted: {
-        Bridge.push.connect(push)
-        Bridge.pop.connect(pop)
+        items.itemsModel = sheetModel.itemsModel()
+        lib.libraryModel = sheetModel.libraryModel()
         lib.slideOpen()
-    }
-
-    Component.onDestruction: {
-        Bridge.push.disconnect(push)
-        Bridge.pop.disconnect(pop)
-    }
-
-    function connectBridge() {
-        Bridge.instance.connect(instance)
-        Bridge.input.connect(input)
-        Bridge.output.connect(output)
-        Bridge.cell.connect(cell)
-        Bridge.sheet.connect(sheet)
-    }
-
-    function disconnectBridge() {
-        Bridge.instance.disconnect(instance)
-        Bridge.input.disconnect(input)
-        Bridge.output.disconnect(output)
-        Bridge.cell.disconnect(cell)
-        Bridge.sheet.disconnect(sheet)
-    }
-
-    function push(instance_index, instance_name, sheet_name) {
-        // Reset the visited flag on our first push
-        if (bridgeEnv.length == 0) {
-            visited = false
-        }
-
-        bridgeEnv.push(instance_index)
-        if (inBridgeEnv()) {
-            visited = true
-            instanceName = instance_name
-            sheetName = sheet_name
-
-            items.push()
-            lib.push()
-            Bridge.ping()
-
-            connectBridge()
-        } else {
-            disconnectBridge()
-        }
-    }
-
-    function pop() {
-        if (inBridgeEnv()) {
-            items.pop()
-            lib.pop()
-        }
-        bridgeEnv.pop()
-        if (inBridgeEnv()) {
-            items.cleanPreviousInstance()
-            connectBridge()
-        } else {
-            disconnectBridge()
-        }
-
-        // If we're done and didn't visit this sheet, then
-        // request that we open to the next-highest sheet
-        if (bridgeEnv.length == 0 && !visited)
-        {
-            Bridge.push.disconnect(push)
-            Bridge.pop.disconnect(pop)
-
-            var env_ = sheetEnv.slice()
-            env_.pop()
-
-            // TODO: we should open to the longest prefix visited here
-            sheetStack.closeTo(env_)
-        }
-    }
-
-    function instance(instance_index, name, sheet) {
-        items.instance(instance_index, name, sheet)
-    }
-
-    function input(cell_index, name, expr, valid, value) {
-        items.input(cell_index, name, expr, valid, value)
-    }
-
-    function output(cell_index, name, valid, value) {
-        items.output(cell_index, name, valid, value)
-    }
-
-    function cell(cell_index, name, expr, type, valid, value, ptr) {
-        items.cell(cell_index, name, expr, type, valid, value)
-    }
-
-    function sheet(sheet_index, name, editable, insertable) {
-        lib.sheet(sheet_index, name, editable, insertable)
     }
 
     // XXX This is an inelegant strategy to call renameLast
@@ -148,10 +53,10 @@ SplitView {
             SheetTitle {
                 Layout.fillWidth: true
                 onInsertCell: {
-                    var instance = sheetEnv[sheetEnv.length - 1]
-                    var sheet = Bridge.sheetOf(instance)
-                    var name = Bridge.nextItemName(sheet)
-                    Bridge.insertCell(sheet, name)
+                    //var instance = sheetEnv[sheetEnv.length - 1]
+                    //var sheet = Bridge.sheetOf(instance)
+                    //var name = Bridge.nextItemName(sheet)
+                    sheetModel.insertCell()
                     renameLastItemTimer.restart()
                 }
             }
@@ -215,23 +120,17 @@ SplitView {
         visible: false
 
         onAddInstance: {
-            var instance = sheetEnv[sheetEnv.length - 1]
-            var sheet = Bridge.sheetOf(instance)
-            var name = Bridge.nextItemName(sheet)
-            Bridge.insertInstance(sheet, name, targetSheetIndex)
+            sheetModel.insertInstance(targetSheetIndex)
             renameLastItemTimer.restart()
         }
 
         onAddSheet: {
-            var instance = sheetEnv[sheetEnv.length - 1]
-            var sheet = Bridge.sheetOf(instance)
-            var name = Bridge.nextSheetName(sheet)
-            Bridge.insertSheet(sheet, name)
+            sheetModel.insertSheet()
             renameLastSheetTimer.restart()
         }
 
         onEraseSheet: {
-            Bridge.eraseSheet(targetSheetIndex)
+            sheetModel.eraseSheet(targetSheetIndex)
         }
 
         onClosePane: { slideClose() }

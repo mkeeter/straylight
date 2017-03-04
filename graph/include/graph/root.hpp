@@ -1,18 +1,24 @@
 #pragma once
 
 #include <stack>
+#include <future>
+#include <regex>
 
 #include "graph/item.hpp"
+#include "graph/response.hpp"
+#include "graph/command.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/dependencies.hpp"
 #include "graph/tree.hpp"
+#include "graph/queue.hpp"
 
 #include "graph/types/cell.hpp"
 #include "graph/types/instance.hpp"
 #include "graph/types/keys.hpp"
-#include "graph/types/tag.hpp"
 
 namespace Graph {
+
+class Translator;
 
 class Root
 {
@@ -36,8 +42,8 @@ public:
      */
     CellIndex insertCell(const SheetIndex& parent, const std::string& name,
                          const std::string& expr="");
-    void insertCell(const SheetIndex& parent, const CellIndex& cell,
-                    const std::string& name, const std::string& expr);
+    virtual void insertCell(const SheetIndex& parent, const CellIndex& cell,
+                            const std::string& name, const std::string& expr);
 
     /*
      *  Inserts a new instance into the graph
@@ -45,31 +51,31 @@ public:
     InstanceIndex insertInstance(const SheetIndex& parent,
                                  const std::string& name,
                                  const SheetIndex& target);
-    void insertInstance(const SheetIndex& parent,
-                        const InstanceIndex& instance,
-                        const std::string& name,
-                        const SheetIndex& target);
+    virtual void insertInstance(const SheetIndex& parent,
+                                const InstanceIndex& instance,
+                                const std::string& name,
+                                const SheetIndex& target);
 
     /*
      *  Erases a cell, triggering re-evaluation
      */
-    void eraseCell(const CellIndex& cell);
+    virtual void eraseCell(const CellIndex& cell);
 
     /*
      *  Erases an instance, triggering re-evaluation
      */
-    void eraseInstance(const InstanceIndex& instance);
+    virtual void eraseInstance(const InstanceIndex& instance);
 
     /*
      *  Changes a cell's expression, re-evaluating as necessary
      */
-    bool setExpr(const CellIndex& cell, const std::string& expr);
+    virtual bool setExpr(const CellIndex& cell, const std::string& expr);
 
     /*
      *  Changes the input expression for a particular instance
      */
-    bool setInput(const InstanceIndex& instance, const CellIndex& cell,
-                  const std::string& expr);
+    virtual bool setInput(const InstanceIndex& instance, const CellIndex& cell,
+                          const std::string& expr);
 
     /*
      *  If the given key points to an input cell, set its input value;
@@ -104,7 +110,7 @@ public:
     /*
      *  Renames an item, resynching anything that looked for it
      */
-    void renameItem(const ItemIndex& i, const std::string& name);
+    virtual bool renameItem(const ItemIndex& i, const std::string& name);
 
     /*
      *  Removes all items from the graph
@@ -129,18 +135,18 @@ public:
         { return checkSheetName(parent, name); }
 
     SheetIndex insertSheet(const SheetIndex& parent, const std::string& name);
-    void insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
-                     const std::string& name);
+    virtual void insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
+                             const std::string& name);
 
     /*
      *  Renames a sheet
      */
-    void renameSheet(const SheetIndex& i, const std::string& name);
+    virtual void renameSheet(const SheetIndex& i, const std::string& name);
 
     /*
      *  Erases a sheet and any instances thereof
      */
-    void eraseSheet(const SheetIndex& s);
+    virtual void eraseSheet(const SheetIndex& s);
 
     /*
      *  Temporarily builds up the given sheet, setting the given inputs
@@ -159,7 +165,7 @@ public:
      *  Returns an error string if there was an error, or empty string
      *  on success.
      */
-    std::string loadString(const std::string& s);
+    virtual std::string loadString(const std::string& s);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -193,14 +199,6 @@ public:
     /*  Get const reference to our internally mutable tree */
     const Tree& getTree() const { return tree; }
 
-    /*
-     *  Getter and setter functions for tags
-     */
-    Graph::Tag* tag(const CellKey& id) const
-        { return tags.count(id) ? tags.at(id).get() : nullptr; }
-    void setTag(const CellKey& id, Graph::Tag* t)
-        { tags[id].reset(t); }
-
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date
@@ -223,6 +221,11 @@ protected:
      */
     void pushDirty(const CellKey& k);
 
+    /*
+     *  Called when a value changes
+     */
+    virtual void gotResult(const CellKey& k, const Value& v);
+
     ////////////////////////////////////////////////////////////////////////////
 
     /*  Here's all the data in the graph.  */
@@ -241,8 +244,16 @@ protected:
     /*  List of keys that need re-evaluation  */
     std::stack<std::list<CellKey>> dirty;
 
-    /*  Tags are associated with cell keys  */
-    std::map<CellKey, std::unique_ptr<Tag>> tags;
+    // Regex strings aren't stored, so we store them statically heree
+    static const std::list<std::pair<std::string, std::string>> _bad_item_names;
+    static const std::list<std::pair<std::string, std::string>> _bad_sheet_names;
+    static const std::string _good_item_name;
+    static const std::string _good_sheet_name;
+
+    std::list<std::pair<std::regex, std::string>> bad_item_names;
+    std::list<std::pair<std::regex, std::string>> bad_sheet_names;
+    std::regex good_item_name;
+    std::regex good_sheet_name;
 };
 
 }   // namespace Graph

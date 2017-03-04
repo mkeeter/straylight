@@ -85,9 +85,9 @@ Column {
                 sequence: StandardKey.Delete
                 onActivated: {
                     if (type == 'cell') {
-                        Bridge.eraseCell(uniqueIndex)
+                        sheetModel.eraseCell(uniqueIndex)
                     } else if (type == 'instance') {
-                        Bridge.eraseInstance(uniqueIndex)
+                        sheetModel.eraseInstance(uniqueIndex)
                     } else {
                         console.log("Unknown type " + type)
                     }

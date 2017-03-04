@@ -1,17 +1,23 @@
 #include <boost/math/constants/constants.hpp>
 
-#include "render/point_handle.hpp"
-#include "ui/material.hpp"
+#include "app/render/point_handle.hpp"
+#include "app/ui/material.hpp"
+#include "app/bridge/escaped.hpp"
 
 using namespace boost::math::float_constants;
 
 namespace App {
 namespace Render {
 
+QOpenGLBuffer* PointHandle::vbo;
+QOpenGLVertexArrayObject* PointHandle::vao;
+QOpenGLShaderProgram* PointHandle::shader_solid;
+QOpenGLShaderProgram* PointHandle::shader_dotted;
+
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle(std::unique_ptr<Drag>& drag)
-    : Handle(drag)
+PointHandle::PointHandle()
+    : drag(new PointDrag())
 {
     // Nothing to do here
 }
@@ -29,9 +35,9 @@ static void glUniformColor3f(QOpenGLShaderProgram& shader, const QString& var,
     glUniformColor3f(shader, var, QColor::fromRgb(color));
 }
 
-void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
-                          QOpenGLShaderProgram& shader, Picker::DrawMode mode,
-                          QRgb color)
+void PointHandle::setShaderVars(
+        const QMatrix4x4& world, const QMatrix4x4& proj,
+        QOpenGLShaderProgram& shader, Picker::DrawMode mode, QRgb color)
 {
     glUniformMatrix4fv(shader.uniformLocation("m_world"), 1, GL_FALSE, world.data());
     glUniformMatrix4fv(shader.uniformLocation("m_proj"), 1, GL_FALSE, proj.data());
@@ -59,33 +65,36 @@ void PointHandle::setVars(const QMatrix4x4& world, const QMatrix4x4& proj,
 void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
                         Picker::DrawMode mode, QRgb color)
 {
-    vao.bind();
+    vao->bind();
 
-    shader_solid.bind();
-    setVars(world, proj, shader_solid, mode, color);
+    shader_solid->bind();
+    setShaderVars(world, proj, *shader_solid, mode, color);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
-    shader_solid.release();
+    shader_solid->release();
 
     if (mode != Picker::DRAW_PICKER)
     {
-        shader_dotted.bind();
-        setVars(world, proj, shader_dotted, mode, color);
+        shader_dotted->bind();
+        setShaderVars(world, proj, *shader_dotted, mode, color);
         glDisable(GL_DEPTH_TEST);
         glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
         glEnable(GL_DEPTH_TEST);
-        shader_dotted.release();
+        shader_dotted->release();
     }
 
-    vao.release();
+    vao->release();
 }
 
-bool PointHandle::updateFrom(Graph::ValuePtr ptr)
+bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
 {
-    auto p = App::Bind::get_point_handle(ptr);
+    auto p = dynamic_cast<Bridge::EscapedPointHandle*>(h);
+    assert(p);
 
-    QVector3D c(p->pos[0], p->pos[1], p->pos[2]);
-    bool changed = (c != center);
-    center = c;
+    bool changed = (center != p->pos);
+    center = p->pos;
+
+    assert(drag.get());
+    changed |= drag->updateFrom(p);
 
     return changed;
 }
@@ -94,52 +103,62 @@ void PointHandle::initGL()
 {
     if (!gl_ready)
     {
-        shader_solid.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_solid.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/gl/point_handle.frag");
-        shader_solid.link();
-
-        shader_dotted.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_dotted.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/gl/point_handle_dotted.frag");
-        shader_dotted.link();
-
+        if (vbo == nullptr)
         {
-            std::vector<GLfloat> data;
-            data.push_back(0);
-            data.push_back(0);
-            for (int i=0; i <= segments; ++i)
+            vbo = new QOpenGLBuffer;
+            vao = new QOpenGLVertexArrayObject;
+            shader_solid = new QOpenGLShaderProgram;
+            shader_dotted = new QOpenGLShaderProgram;
+
+            shader_solid->addShaderFromSourceFile(
+                    QOpenGLShader::Vertex, ":/gl/point_handle.vert");
+            shader_solid->addShaderFromSourceFile(
+                    QOpenGLShader::Fragment, ":/gl/point_handle.frag");
+            shader_solid->link();
+
+            shader_dotted->addShaderFromSourceFile(
+                    QOpenGLShader::Vertex, ":/gl/point_handle.vert");
+            shader_dotted->addShaderFromSourceFile(
+                    QOpenGLShader::Fragment, ":/gl/point_handle_dotted.frag");
+            shader_dotted->link();
+
             {
-                data.push_back(cos(2.0f * pi * i / segments));
-                data.push_back(sin(2.0f * pi * i / segments));
+                std::vector<GLfloat> data;
+                data.push_back(0);
+                data.push_back(0);
+                for (int i=0; i <= segments; ++i)
+                {
+                    data.push_back(cos(2.0f * pi * i / segments));
+                    data.push_back(sin(2.0f * pi * i / segments));
+                }
+                vbo->create();
+                vbo->bind();
+                vbo->allocate(data.data(), data.size() * sizeof(GLfloat));
             }
-            vbo.create();
-            vbo.bind();
-            vbo.allocate(data.data(), data.size() * sizeof(GLfloat));
+
+            vao->create();
+            vao->bind();
+
+            glVertexAttribPointer(
+                    0, 2, GL_FLOAT, GL_FALSE,
+                    2 * sizeof(GLfloat), (GLvoid*)0);
+            glEnableVertexAttribArray(0);
+
+            vbo->release();
+            vao->release();
         }
-
-        vao.create();
-        vao.bind();
-
-        glVertexAttribPointer(
-                0, 2, GL_FLOAT, GL_FALSE,
-                2 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
-
-        vbo.release();
-        vao.release();
 
         gl_ready = true;
     }
 }
 
-QVector3D PointHandle::pos(const QMatrix4x4& M, const QVector2D& cursor) const
+Drag* PointHandle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
 {
     (void)M;
     (void)cursor;
-    return center;
+
+    drag->startDrag(center);
+    return drag.get();
 }
 
 }   // namespace Render

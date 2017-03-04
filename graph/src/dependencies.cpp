@@ -16,9 +16,9 @@ int Dependencies::insert(const CellKey& looker, const NameKey& lookee)
     inverse[lookee].insert(looker);
 
     // If the target exists, then check for recursive lookups
-    if (lookee.first.size() >= 1)
+    if (lookee.type == NameKey::NAME_KEY_BASIC)
     {
-        const auto sheet = root.getTree().at(lookee.first.back()).instance()->sheet;
+        auto sheet = root.getTree().at(lookee.first.back()).instance()->sheet;
         if (root.getTree().hasItem(sheet, lookee.second) &&
             root.getTree().at(sheet, lookee.second).cell())
         {

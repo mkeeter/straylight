@@ -1,7 +1,7 @@
-#include "render/picker.hpp"
-#include "render/point_handle.hpp"
+#include "app/render/picker.hpp"
+#include "app/render/point_handle.hpp"
 
-#include "bind/bind_s7.h"
+#include "app/bind/bind_s7.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ Handle* Picker::pickAt(QPoint p)
         auto rgb = img.pixel(p) & 0xFFFFFF; // Mask alpha bits
 
         auto f = colors.left.find(rgb);
-        return (f == colors.left.end()) ? nullptr : handles.at(f->second);
+        return (f == colors.left.end()) ? nullptr : f->second;
     }
 }
 
@@ -36,64 +36,42 @@ void Picker::draw(QPoint p, Picker::DrawMode mode)
     auto picked = pickAt(p);
     for (auto& h : handles)
     {
-        h.second->draw(M, proj, (mode == DRAW_NORMAL)
-                ? (h.second == picked ? DRAW_HOVER : DRAW_NORMAL)
-                : mode, colors.right.at(h.first));
+        h->draw(M, proj, (mode == DRAW_NORMAL)
+                ? (h == picked ? DRAW_HOVER : DRAW_NORMAL)
+                : mode, colors.right.at(h));
     }
 }
 
-void Picker::beginUpdate()
+void Picker::installHandle(Handle* h)
 {
-    visited.clear();
-}
-
-bool Picker::isHandle(Graph::ValuePtr ptr)
-{
-    return App::Bind::is_point_handle(ptr);
-}
-
-bool Picker::installHandle(const Graph::CellKey& k, Graph::ValuePtr p)
-{
-    bool changed = false;
-
-    // TODO: once we have more than one handle type,
-    // check whether the types match here
-    auto tag = App::Bind::get_handle_tag(p);
-    HandleKey key = {k, tag};
-    if (handles.count(key) == 0)
+    if (handles.find(h) == handles.end())
     {
-        handles[key] = new PointHandle(App::Bind::get_point_handle(p)->drag);
+        handles.insert(h);
         auto rgb = colors.size() ? (colors.left.rbegin()->first + 1) : 1;
-        colors.insert({rgb, key});
-        changed = true;
+        colors.insert({rgb, h});
     }
-    visited.insert(key);
-
-    changed |= handles[key]->updateFrom(p);
-    return changed;
 }
 
-bool Picker::endUpdate()
+void Picker::prune(const QSet<Handle*>& hs)
 {
-    std::set<HandleKey> to_erase;
+    QSet<Handle*> forgotten;
     for (auto h : handles)
     {
-        if (visited.find(h.first) == visited.end())
+        if (hs.find(h) == hs.end())
         {
-            to_erase.insert(h.first);
+            delete h;
+            forgotten.insert(h);
         }
     }
-    for (auto e : to_erase)
-    {
-        delete handles[e];
-        handles.erase(e);
-        colors.right.erase(e);
-    }
 
-    return to_erase.size();
+    for (auto h : forgotten)
+    {
+        handles.erase(h);
+        colors.right.erase(h);
+    }
 }
 
-void Picker::onViewChanged(QMatrix4x4 mat, QSize size)
+void Picker::setView(QMatrix4x4 mat, QSize size)
 {
     M = mat;
     window_size = size;

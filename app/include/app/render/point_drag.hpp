@@ -1,25 +1,26 @@
 #pragma once
 
-#include <QMatrix4x4>
 #include <QVector3D>
 #include <QPoint>
 
+#include "app/render/drag.hpp"
+#include "app/bridge/escaped.hpp"
+
 #include "kernel/eval/evaluator.hpp"
 #include "kernel/tree/cache.hpp"
-#include "kernel/solve/solver.hpp"
 
 namespace App {
 namespace Render {
 
-class Drag
+class PointDrag : public Drag
 {
 public:
     /*
      *  Constructs a dragger object for a single point
      *
-     *  This must be called in the same thread as the Kernel objects
+     *  The dragger is invalid until updateFrom is called
      */
-    Drag(const Kernel::Tree& x, const Kernel::Tree& y, const Kernel::Tree& z);
+    PointDrag();
 
     /*
      *  Loads a starting position for a drag operation
@@ -30,7 +31,12 @@ public:
      *  Drags to a particular position
      */
     Kernel::Solver::Solution dragTo(const QMatrix4x4& M,
-                                    const QVector2D& cursor);
+                                    const QVector2D& cursor) override;
+
+    /*
+     *  Updates the solver tree
+     */
+    bool updateFrom(App::Bridge::EscapedPointHandle* pt);
 
 protected:
     std::unique_ptr<Kernel::Evaluator> err;
@@ -49,15 +55,18 @@ protected:
      *  The solver will find a solution in terms of the base variables
      *  and d; we lock pos and ray
      */
-    Kernel::Cache::VarId cursor_pos[3];
-    Kernel::Cache::VarId cursor_ray[3];
-    Kernel::Cache::VarId d;
+    Kernel::Tree cursor_pos[3];
+    Kernel::Tree cursor_ray[3];
+    Kernel::Tree d;
 
     /*  We store the starting position for a drag here
      *
      *  This lets us minimize changes in the z plane (which can't be
      *  controlled by the user)     */
     QVector3D start;
+
+    /*  Map from interpreter thread to local vars  */
+    boost::bimap<Kernel::Cache::VarId, Kernel::Cache::VarId> vars;
 };
 
 }   // namespace Render

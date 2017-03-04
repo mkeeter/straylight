@@ -10,14 +10,14 @@ namespace Solver
 {
 
 std::pair<float, Solution> findRoot(const Tree& t, const glm::vec3 v,
-                                    const Mask& mask)
+                                    const Mask& mask, unsigned gas)
 {
     Evaluator e(t);
-    return findRoot(e, v, mask);
+    return findRoot(e, v, mask, gas);
 }
 
 std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
-                                    const Mask& mask)
+                                    const Mask& mask, unsigned gas)
 {
     const float EPSILON = 1e-6;
 
@@ -35,7 +35,7 @@ std::pair<float, Solution> findRoot(Evaluator& e, const glm::vec3 v,
 
     bool converged = false;
 
-    while (!converged && fabs(r) >= EPSILON)
+    while (!converged && fabs(r) >= EPSILON && --gas)
     {
         // Vars should be set from the most recent evaluation
         auto ds = e.gradient(v.x, v.y, v.z);

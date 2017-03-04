@@ -11,8 +11,6 @@
 
 namespace Graph {
 
-class TreeSerializer;
-
 class Tree : public KeyNameStore<Item, ItemIndex, SheetIndex>
 {
 public:
@@ -60,12 +58,13 @@ public:
                            const SheetIndex& target) const;
 
     /*
-     *  Iterate over items for a given parent
+     *  Iterate over items for a given parent (non-recursive)
      */
     const std::list<ItemIndex>& iterItems(const SheetIndex& parent) const;
 
     /*
-     *  Returns all the environments that the given sheet is instanced into
+     *  Returns all the environments that the given sheet is instanced into,
+     *  relative to the root of the graph
      */
     std::list<Env> envsOf(const SheetIndex& s) const;
 
@@ -82,13 +81,12 @@ public:
     /*
      *  Returns a list of cell keys relative to the given sheet
      */
-    std::list<CellKey> cellsOf(const SheetIndex& s) const;
+    std::list<CellKey> iterCellsRecursive(const SheetIndex& s) const;
 
     /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     *  This is commonly used to render into a UI in a immediate style
+     *  Returns a list of cell and instance keys relative to the given sheet
      */
-    void serialize(TreeSerializer* s) const;
+    std::list<std::pair<Env, ItemIndex>> iterItemsRecursive(const SheetIndex& s) const;
 
     /*
      *  Encode the entire graph in JSON
@@ -106,13 +104,19 @@ public:
     std::string fromString(const std::string& str);
 
     /*
-     *  Returns all of the sheets above (contained within) the given env
+     *  Returns all of the sheets above the given sheet
      *
      *  Note that this doesn't tell us whether we can insert an instance
      *  of these sheets, as this could create a recursive loop; use
      *  tree.canInsertInstance to check.
      */
-    std::list<SheetIndex> sheetsAbove(const Env& e) const;
+    std::list<SheetIndex> sheetsAbove(const SheetIndex& s) const;
+
+    /*
+     *  Returns all of the sheets below a particular parent
+     *  (including the parent)
+     */
+    std::list<SheetIndex> sheetsBelow(const SheetIndex& parent) const;
 
     /*
      *  Checks to see whether the given env is valid
@@ -124,11 +128,6 @@ public:
     const static InstanceIndex ROOT_INSTANCE;
 
 protected:
-    /*
-     *  Exports the graph to any object implementing the TreeSerializer API
-     */
-    void serialize(TreeSerializer* s, const Env& env) const;
-
     /*
      *  Export the given sheet to JSON (recursively)
      */

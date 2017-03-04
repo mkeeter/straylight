@@ -24,6 +24,20 @@ public:
     EvaluatorBase(const Tree root, const glm::mat4& M=glm::mat4());
 
     /*
+     *  Copy constructor
+     */
+    EvaluatorBase(const EvaluatorBase& other);
+
+    /*
+     *  Converts this evaluator back into a tree
+     *
+     *  The VarId map defines how to convert variables from the original
+     *  cache to the new cache (as they are expected to live in different
+     *  threads).
+     */
+    Tree toTree(boost::bimap<Cache::VarId, Cache::VarId>& vars) const;
+
+    /*
      *  Single-argument evaluation
      */
     float eval(float x, float y, float z);
@@ -127,15 +141,14 @@ public:
     std::map<Cache::VarId, float> varValues() const;
 
     /*
-     *  Returns the tag associated with a particular Id, or nullptr
-     */
-    Tag* tag(Cache::Id id) const
-        { return tags.count(id) ? tags.at(id).get() : nullptr; }
-
-    /*
      *  Updates variable values, returning true if changed
      */
     bool updateVars(const Cache& cache);
+
+    /*
+     *  Updates variable values, return true if changed
+     */
+    bool updateVars(const EvaluatorBase& other);
 
 protected:
     /*
@@ -163,10 +176,10 @@ protected:
      *  Evaluate the tree's values and Jacobian
      *  with respect to all its variables
      */
-    static void eval_clause_jacobians(Opcode::Opcode op,
-        const float* __restrict av,  std::vector<float>& aj,
-        const float* __restrict bv,  std::vector<float>& bj,
-        float* __restrict ov, std::vector<float>& oj);
+    static float eval_clause_jacobians(Opcode::Opcode op,
+        const float av,  std::vector<float>& aj,
+        const float bv,  std::vector<float>& bj,
+                         std::vector<float>& oj);
 
     /*
      *  Evaluates a single Interval clause
@@ -186,13 +199,14 @@ protected:
      *  Tree::var(3.0).var() */
     boost::bimap<Clause::Id, Cache::VarId> vars;
 
-    /*  Id tags (copied from Tree on Evaluator construction)  */
-    std::map<Cache::Id, std::unique_ptr<Kernel::Tag>> tags;
-
     /*  Tape containing our opcodes in reverse order */
     typedef std::vector<Clause> Tape;
     std::list<Tape> tapes;
     std::list<Tape>::iterator tape;
+
+    /*  Store the root opcode explicitly so that we can convert back into
+     *  a tree even if there's nothing in the tape  */
+    Opcode::Opcode root_op;
 
     std::vector<uint8_t> disabled;
 

@@ -239,19 +239,6 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
                     "")))
             (lambda args "")))
       )")),
-      name_valid(s7_eval_c_string(sc, R"(
-        (lambda (str)
-          (and (not (char-position #\( str))
-               (not (char-position #\) str))
-               (not (char-position #\  str))
-              (catch #t
-                (lambda ()
-                  (let* ((s (format #f "(define ~a #t) " str))
-                         (r (read (open-input-string s))))
-                    (eval r)
-                    #t))
-                (lambda args #f))))
-      )")),
       eval_func(s7_eval_c_string(sc, R"(
         (lambda (str eval-env cell-env)
           (define (read-all port)
@@ -285,8 +272,7 @@ Interpreter::Interpreter(Root& parent, Dependencies* deps)
     // Install default *cell-reader*
     setReader(s7_eval_c_string(sc, "(lambda (s c) s)"));
 
-    for (s7_pointer ptr: {is_input, is_output, default_expr, name_valid,
-                          eval_func})
+    for (s7_pointer ptr: {is_input, is_output, default_expr, eval_func})
     {
         s7_gc_protect(sc, ptr);
     }
@@ -382,15 +368,6 @@ Cell::Type Interpreter::cellType(const std::string& expr) const
                             Cell::BASIC;
 }
 
-bool Interpreter::nameValid(const std::string& str) const
-{
-    return
-        s7_is_eq(s7_t(sc),
-            s7_call(sc, name_valid,
-                s7_list(sc, 1,
-                    s7_make_string(sc, str.c_str()))));
-}
-
 Value Interpreter::eval(const CellKey& key)
 {
     deps->clear(key);
@@ -421,11 +398,11 @@ Value Interpreter::eval(const CellKey& key)
     }
 
     // If we didn't get an error, then make bindings for all symbols
+    const auto parent = root.getTree().at(env.back()).instance()->sheet;
     if (value == nullptr)
     {
         auto bindings = s7_nil(sc); // empty list
-        const auto& sheet = root.getTree().at(env.back()).instance()->sheet;
-        for (auto& i : root.getTree().iterItems(sheet))
+        for (auto& i : root.getTree().iterItems(parent))
         {
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(sc,
@@ -434,7 +411,7 @@ Value Interpreter::eval(const CellKey& key)
                     bindings));
         }
 
-        for (auto& i : root.getTree().sheetsAbove(env))
+        for (auto& i : root.getTree().sheetsAbove(parent))
         {
             bindings = s7_cons(sc,
                     s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
@@ -471,12 +448,20 @@ Value Interpreter::eval(const CellKey& key)
             else if (root.isSheetName(target))
             {
                 // The target sheet could be inserted in any of the parent
-                // environments, so we'll insert a dependency on all of them
-                Env env_;
-                for (const auto& e : env)
+                // sheets, so we'll insert a dependency on all of them
+                auto sheet = parent;
+                while (true)
                 {
-                    env_.push_back(e);
-                    deps->insert(key, {env_, std::string(target)});
+                    deps->insert(key, NameKey(sheet, target));
+
+                    if (sheet == Tree::ROOT_SHEET)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        sheet = root.getTree().parentOf(sheet);
+                    }
                 }
             }
         }
@@ -556,13 +541,13 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
                 {
                     if (cell->type >= Cell::INPUT)
                     {
-                        values[root.getTree().nameOf(c)] = ValueThunk {
+                        values.insert({root.getTree().nameOf(c), ValueThunk {
                             root.toNameKey({env_, CellIndex(c)}),
                             cell->values.count(env_)
                                 ? cell->values.at(env_).value
                                 : s7_nil(sc),
                             looker, deps,
-                        };
+                        }});
                     }
                 }
             }

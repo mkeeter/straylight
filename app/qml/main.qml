@@ -4,11 +4,10 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 
-import Canvas 1.0
+import Scene 1.0
 import Style 1.0
 import Material 1.0
 import Bridge 1.0
-import UndoStack 1.0
 
 import "/js/vendor/underscore.js" as Underscore
 
@@ -148,15 +147,18 @@ ApplicationWindow {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
+        onResizingChanged: { if (!resizing) viewport.updatePicker() }
+
         SheetStack {
             id: sheetStack
+            onAnimDone: { viewport.updatePicker() }
 
             anchors.bottom: parent.bottom
             anchors.top: parent.top
         }
 
         // Rendering window (handled in C++)
-        Canvas {
+        Scene {
             id: viewport
             Layout.minimumWidth: 100
             Layout.fillWidth: true

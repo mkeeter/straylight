@@ -10,7 +10,6 @@
 #include <boost/bimap.hpp>
 
 #include "graph/types/keys.hpp"
-#include "graph/types/ptr.hpp"
 
 namespace App {
 namespace Render {
@@ -35,28 +34,14 @@ public:
     Handle* pickAt(QPoint p);
 
     /*
-     *  Mark that no handles have yet been seen
+     *  Installs this handle into the picker for rendering
      */
-    void beginUpdate();
+    void installHandle(Handle* h);
 
     /*
-     *  Erase all unseen handles
-     *
-     *  Returns true if anything changed
+     *  Erase any handle that's not in hs
      */
-    bool endUpdate();
-
-    /*
-     *  Checks to see if the pointer is any handle type
-     */
-    bool isHandle(Graph::ValuePtr ptr);
-
-    /*
-     *  Installs this handle into the list of handles, marking that
-     *  it has been visited (so it won't be erased)
-     */
-    typedef std::pair<Graph::CellKey, int> HandleKey;
-    bool installHandle(const Graph::CellKey& k, Graph::ValuePtr p);
+    void prune(const QSet<Handle*>& hs);
 
     /*
      *  Loads the picker image!
@@ -69,15 +54,17 @@ public:
      */
     float width() const { return img.width(); }
 
-public slots:
-    void onViewChanged(QMatrix4x4 mat, QSize size);
+    /*
+     *  Adjusts M and window_size
+     */
+    void setView(QMatrix4x4 mat, QSize size);
 
 protected:
-
     /*  Here, we store the set of handles to be drawn & picked */
-    std::map<HandleKey, Handle*> handles;
-    std::set<HandleKey> visited;
-    boost::bimap<QRgb, HandleKey> colors;
+    std::set<Handle*> handles;
+
+    /*  These are colors assigned to each handle for picking  */
+    boost::bimap<QRgb, Handle*> colors;
 
     /*  Global transform matrix, used to position centers */
     QMatrix4x4 M;

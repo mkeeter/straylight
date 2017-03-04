@@ -5,11 +5,10 @@ import QtQuick.Controls.Styles 1.4
 
 import Style 1.0
 import Awesome 4.7
-import "/js/model_util.js" as ModelUtil
 
 ColumnLayout {
     id: lib
-    property ListModel libraryModel: ListModel { }
+    property alias libraryModel: sheetList.model
 
     signal addInstance(int targetSheetIndex)
     signal eraseSheet(int targetSheetIndex)
@@ -36,26 +35,6 @@ ColumnLayout {
 
     // Used when deserializing from bridge
     property int itemIndex: 0
-
-    function push() {
-        itemIndex = 0;
-    }
-
-    function pop() {
-        ModelUtil.pop(libraryModel, itemIndex)
-    }
-
-    function sheet(sheet_index, sheet_name, editable, insertable)
-    {
-        var found = ModelUtil.findItem('sheet', sheet_index,
-                                       itemIndex, libraryModel)
-
-        libraryModel.setProperty(itemIndex, "name", sheet_name)
-        libraryModel.setProperty(itemIndex, "editable", editable)
-        libraryModel.setProperty(itemIndex, "insertable", insertable)
-
-        itemIndex++
-    }
 
     // Library title
     Rectangle {
@@ -93,58 +72,59 @@ ColumnLayout {
         }
     }
 
-    Text {
-        visible: libraryModel.count == 0
-        text: "No sheets in library"
-        color: Style.textDarkHint
-        padding: 10
-    }
-
-    ScrollView {
+    Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        id: libraryView
-
-        style: ScrollViewStyle {
-            transientScrollBars: true
+        Text {
+            visible: libraryModel.count == 0
+            text: "No sheets in library"
+            color: Style.textDarkHint
+            padding: 10
         }
 
-        ListView {
-            id: sheetList
+        ScrollView {
+            id: libraryView
+            anchors.fill: parent
 
-            model: libraryModel
+            style: ScrollViewStyle {
+                transientScrollBars: true
+            }
 
-            delegate: SheetLibraryDelegate {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 15
-                anchors.leftMargin: 10
+            ListView {
+                id: sheetList
 
-                Component.onCompleted: {
-                    addInstance.connect(lib.addInstance)
-                    eraseSheet.connect(lib.eraseSheet)
+                delegate: SheetLibraryDelegate {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.rightMargin: 15
+                    anchors.leftMargin: 10
+
+                    Component.onCompleted: {
+                        addInstance.connect(lib.addInstance)
+                        eraseSheet.connect(lib.eraseSheet)
+                    }
                 }
-            }
 
-            displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 100 }
-            }
-            move: Transition {
-                NumberAnimation { properties: "x,y"; duration: 100 }
-            }
-            remove: Transition {
-                NumberAnimation { property: "opacity"; to: 0; duration: 100 }
-            }
-            add: Transition {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
-            }
+                displaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 100 }
+                }
+                move: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 100 }
+                }
+                remove: Transition {
+                    NumberAnimation { property: "opacity"; to: 0; duration: 100 }
+                }
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 }
+                }
 
-            NumberAnimation {
-                id: scrollTo
-                target: libraryView.flickableItem
-                property: 'contentY'
-                duration: 100
+                NumberAnimation {
+                    id: scrollTo
+                    target: libraryView.flickableItem
+                    property: 'contentY'
+                    duration: 100
+                }
             }
         }
     }

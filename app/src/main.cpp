@@ -5,10 +5,10 @@
 
 #include <QQuickItem>
 
-#include "core/bridge.hpp"
-#include "core/undo.hpp"
-#include "ui/material.hpp"
-#include "render/canvas.hpp"
+#include "app/bridge/bridge.hpp"
+#include "app/bridge/graph.hpp"
+#include "app/ui/material.hpp"
+#include "app/render/scene.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,13 +23,18 @@ int main(int argc, char**argv)
     }
 
     // Register canvas class for drawing
-    qmlRegisterType<App::Render::CanvasObject>("Canvas", 1, 0, "Canvas");
+    qmlRegisterType<App::Render::Scene>("Scene", 1, 0, "Scene");
 
-    // Install Bridge singleton
-    qmlRegisterSingletonType<App::Core::Bridge>(
-            "Bridge", 1, 0, "Bridge", App::Core::Bridge::singleton);
-    qmlRegisterSingletonType<App::Core::UndoStack>(
-            "UndoStack", 1, 0, "UndoStack", App::Core::UndoStack::singleton);
+    //  Install Bridge singleton to make it available in QML
+    qmlRegisterSingletonType<App::Bridge::Bridge>(
+            "Bridge", 1, 0, "Bridge", App::Bridge::Bridge::instance);
+    qmlRegisterSingletonType<App::Bridge::GraphModel>(
+            "Graph", 1, 0, "Graph", App::Bridge::GraphModel::instance);
+
+    // Construct bridge singleton
+    App::Bridge::Bridge::instance();
+
+    // Install Material singleton (available from both C++ / QML)
     qmlRegisterSingletonType<App::UI::Material>(
             "Material", 1, 0, "Material", App::UI::Material::singleton);
 
@@ -40,10 +45,6 @@ int main(int argc, char**argv)
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
-
-    // Construct a default cell
-    App::Core::Bridge::root()->insertCell(0, "x", "0");
-    App::Core::Bridge::root()->insertCell(0, "y", "(+ 1 0)");
 
     return app.exec();
 }

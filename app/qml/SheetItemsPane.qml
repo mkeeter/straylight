@@ -4,14 +4,9 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import Bridge 1.0
-import "/js/model_util.js" as ModelUtil
 
 ScrollView {
-    property ListModel itemsModel: ListModel { }
-
-    // Used when deserializing from bridge
-    property int itemIndex: 0
-    property int ioIndex: 0
+    property alias itemsModel: listView.model
 
     function renameLast() {
         // XXX This is slightly evil, as we're poking members of the ListView
@@ -48,77 +43,14 @@ ScrollView {
         }
     }
 
-    function push() {
-        itemIndex = 0;
-    }
-
-    function pop() {
-        ModelUtil.pop(itemsModel, itemIndex)
-    }
-
-    function instance(instance_index, name, sheet) {
-        ModelUtil.findItem('instance', instance_index, itemIndex, itemsModel,
-            {'ioCells': new Array(),
-             'valid': false, 'expr': '', 'value': '', 'ioType': 'unknown'})
-
-        itemsModel.setProperty(itemIndex, "name", name)
-        itemsModel.setProperty(itemIndex, "sheet", sheet)
-
-        itemIndex++
-        ioIndex = 0
-    }
-
-    function cleanPreviousInstance() {
-        if (itemIndex > 0 && itemIndex <= itemsModel.count &&
-            itemsModel.get(itemIndex - 1).type == 'instance')
-        {
-            ModelUtil.pop(itemsModel.get(itemIndex - 1).ioCells, ioIndex)
-        }
-    }
-
-    function input(cell_index, name, expr, valid, value) {
-        var model = itemsModel.get(itemIndex - 1).ioCells
-        ModelUtil.findItem('input', cell_index, ioIndex, model)
-
-        model.setProperty(ioIndex, "name", name)
-        model.setProperty(ioIndex, "valid", valid)
-        model.setProperty(ioIndex, "expr", expr)
-        model.setProperty(ioIndex, "value", value)
-
-        ioIndex++
-    }
-
-    function output(cell_index, name, valid, value) {
-        var model = itemsModel.get(itemIndex - 1).ioCells
-        ModelUtil.findItem('output', cell_index, ioIndex, model, {'expr': ''})
-
-        model.setProperty(ioIndex, "name", name)
-        model.setProperty(ioIndex, "valid", valid)
-        model.setProperty(ioIndex, "value", value)
-
-        ioIndex++
-    }
-
-    function cell(cell_index, name, expr, type, valid, value) {
-        ModelUtil.findItem('cell', cell_index, itemIndex, itemsModel,
-            {'sheet':'', 'ioCells': new Array()})
-
-        itemsModel.setProperty(itemIndex, "name", name)
-        itemsModel.setProperty(itemIndex, "valid", valid)
-        itemsModel.setProperty(itemIndex, "expr", expr)
-        itemsModel.setProperty(itemIndex, "value", value)
-        itemsModel.setProperty(itemIndex, "ioType",
-            ["unknown", "basic", "input", "output"][type])
-
-        itemIndex++
-    }
-
     ListView {
         id: listView
 
         anchors.fill: parent
-        model: itemsModel
         spacing: 5
+
+        onModelChanged: { console.log(model) }
+
         delegate: SheetItemDelegate {
             anchors.left: parent.left
             anchors.right: parent.right

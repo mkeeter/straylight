@@ -3,7 +3,6 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 import Style 1.0
-import Bridge 1.0
 import Awesome 4.7
 
 GridLayout {
@@ -34,7 +33,7 @@ GridLayout {
         Layout.column: 1
 
         Text {
-            text: type == 'cell' ? '' : sheet
+            text: type == 'cell' ? '' : sheetName
             font.pointSize: 14
             color: Style.textDarkSecondary
             rightPadding: 8
@@ -82,10 +81,10 @@ GridLayout {
         id: renamer
         label: "Rename to"
         getError: function(name) {
-            return Bridge.checkItemRename(uniqueIndex, name)
+            return sheetModel.checkItemRename(uniqueIndex, name)
         }
         onAccepted: function(t) {
-            Bridge.renameItem(uniqueIndex, t)
+            sheetModel.renameItem(uniqueIndex, t)
         }
         onActiveChanged: { focusCell() }
     }

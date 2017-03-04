@@ -2,8 +2,8 @@
 
 #include "s7/s7.h"
 
-#include "core/bridge.hpp"
-#include "bind/bind_s7.h"
+#include "app/bridge/bridge.hpp"
+#include "app/bind/bind_s7.hpp"
 
 #include "kernel/bind/bind_s7.h"
 #include "kernel/tree/tree.hpp"
@@ -15,15 +15,35 @@ namespace Bind {
 // s7 type tag for point_handle_t
 int point_handle_t::tag = -1;
 
+////////////////////////////////////////////////////////////////////////////////
+
+point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z)
+    : xyz{x, y, z}
+{
+    // Nothing to do here
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static char* point_handle_print(s7_scheme* sc, void* s)
 {
     (void)sc;
     std::string desc = "point-handle";
 
     auto p = static_cast<point_handle_t*>(s);
-    if (p->axes.length())
+
+    std::string axes;
+    for (unsigned i=0; i < 3; ++i)
     {
-        desc += "_" + p->axes;
+        if (p->xyz[i].opcode() != Kernel::Opcode::CONST)
+        {
+            axes += "xyz"[i];
+        }
+    }
+
+    if (axes.length())
+    {
+        desc += "_" + axes;
     }
 
     return Graph::Interpreter::print(desc, s);
@@ -39,8 +59,6 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
     auto _x = s7_car(args);
     auto _y = s7_cadr(args);
     auto _z = s7_caddr(args);
-
-    std::string axes = "";
 
     {   // Check arguments: they should be location-agnostic trees or numbers
         s7_pointer args[3] = {_x, _y, _z};
@@ -59,7 +77,6 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
                     return s7_wrong_type_arg_error(sc, "point_handle_new", i,
                             args[i], "location-agnostic tree");
                 }
-                axes += "xyz"[i];
             }
         }
     }
@@ -74,9 +91,7 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
     auto z = to_tree(_z);
 
     return s7_make_object(sc, point_handle_t::tag,
-            new point_handle_t(
-                x.value(), y.value(), z.value(), axes,
-                new App::Render::Drag(x, y, z)));
+            new point_handle_t(x, y, z));
 }
 
 bool is_point_handle(s7_pointer s)
@@ -101,40 +116,37 @@ int get_handle_tag(s7_cell* obj)
 s7_pointer reader(s7_scheme* sc, s7_pointer args)
 {
     auto begin = s7_car(args);
+    auto graph = App::Bridge::GraphModel::instance();
+    const auto& cell = *static_cast<Graph::CellKey*>(
+            s7_c_pointer(s7_cadr(args)));
 
     if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
-        auto root = Core::Bridge::root();
         auto cache = Kernel::Cache::instance();
-        auto& cell = *static_cast<Graph::CellKey*>(s7_c_pointer(s7_cadr(args)));
-
         const auto v = s7_number_to_real(sc, s7_car(begin));
 
         // If this variable is already in use, then update its value and
-        // return a Shape with the changed flag set if the value changed.
-        if (auto t = root->tag(cell))
+        // return a Shape with the new variable value (which will be
+        // marked as not equal because of the vars map in each shape)
+        if (graph->hasVar(cell))
         {
-            assert(dynamic_cast<IdTag*>(t));
-
-            auto id = static_cast<IdTag*>(t)->id;
-            const bool changed = cache->value(id) != v;
+            auto id = graph->varId(cell);
             cache->setValue(id, v);
 
             auto var = Kernel::Tree::var(id);
-            return s7_list(sc, 1, Kernel::Bind::shape_new_(sc, var, changed));
+            return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
         }
-        // Otherwise, make a new variable and cross-link it into the cache
-        // and the graph root.
+        // Otherwise, make a new variable and save it in the graph model
         else
         {
             auto var = Kernel::Tree::var(v);
-            var.setTag(new CellKeyTag(cell));
-            root->setTag(cell, new IdTag(var.var()));
+            graph->defineVar(cell, var.var());
             return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
         }
     }
     else
     {
+        graph->forgetVar(cell);
         return begin;
     }
 }

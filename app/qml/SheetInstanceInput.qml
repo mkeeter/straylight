@@ -29,7 +29,7 @@ GridLayout {
         Layout.fillHeight: true
 
         function setExpr(text) {
-            Bridge.setInput(instanceIndex, uniqueIndex, text)
+            sheetModel.setInput(instanceIndex, uniqueIndex, text)
         }
 
         function getText(focus) {

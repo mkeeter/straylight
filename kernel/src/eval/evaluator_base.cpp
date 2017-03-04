@@ -6,7 +6,7 @@
 
 #include "kernel/tree/cache.hpp"
 #include "kernel/tree/tree.hpp"
-#include "kernel/eval/evaluator.hpp"
+#include "kernel/eval/evaluator_base.hpp"
 #include "kernel/eval/clause.hpp"
 
 namespace Kernel {
@@ -18,6 +18,8 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
     setMatrix(M);
 
     auto root = root_.collapse();
+    root_op = root.opcode();
+
     Cache* cache = root.parent.get();
     auto connected = cache->findConnected(root.id);
 
@@ -60,7 +62,7 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
                 }
                 else if (m.first.opcode() == Opcode::VAR)
                 {
-                    constants[id] = m.first.value();
+                    constants[id] = cache->value(m.second);
                     vars.left.insert({id, m.first.var()});
                 }
                 clauses[m.second] = id--;
@@ -115,16 +117,146 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
         }
     }
 
-    // Copy over tag data
-    for (auto c : connected)
+    assert(clauses.at(root.id) == 0);
+}
+
+EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
+{
+    setMatrix(other.M);
+
+    // Copy over the base tape
+    tapes.push_back(Tape());
+    tape = tapes.begin();
+    for (auto itr = other.tapes.front().begin();
+              itr != other.tapes.front().end(); ++itr)
     {
-        if (auto t = cache->tag(c))
+        tape->push_back(*itr);
+    }
+
+    // Copy over all of the variables in the map
+    for (const auto& v : other.vars.left)
+    {
+        vars.left.insert(v);
+    }
+
+    // Copy over the fundamental variable locations
+    X = other.X;
+    Y = other.Y;
+    Z = other.Z;
+
+    // Allocate space for all of the clauses and variables
+    const auto clause_count = other.result.i.size();
+    const auto var_count = other.result.j[0].size();
+    result.resize(clause_count, var_count);
+    disabled.resize(clause_count);
+
+    // Copy over all of the values!
+    memcpy(result.f, other.result.f, clause_count * sizeof(*result.f));
+    memcpy(result.dx, other.result.dx, clause_count * sizeof(*result.dx));
+    memcpy(result.dy, other.result.dy, clause_count * sizeof(*result.dy));
+    memcpy(result.dz, other.result.dz, clause_count * sizeof(*result.dz));
+    memcpy(result.i.data(), other.result.i.data(),
+           clause_count * sizeof(*result.i.data()));
+
+    // Then copy over all of the derivatives!
+    for (unsigned i=0; i < clause_count; ++i)
+    {
+        memcpy(result.j[i].data(), other.result.j[i].data(),
+               var_count * sizeof(*result.j[i].data()));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
+{
+    // Special-case for when the tape has no operations
+    if (tape->size() == 0)
+    {
+        if (root_op == Opcode::CONST)
         {
-            tags[c].reset(t->clone());
+            return Tree(result.f[0][0]);
+        }
+        else if (root_op == Opcode::VAR)
+        {
+            auto var_other = vars.left.at(0);
+            if (!vm.left.count(var_other))
+            {
+                // Make a dummy tree to get the variable id
+                auto t = Tree::var(result.f[0][0]);
+                // Record the variable id mapping into this thread
+                vm.left.insert({var_other, t.var()});
+            }
+            auto t = Tree::var(vm.left.at(var_other));
+            t.setValue(result.f[0][0]);
+            return t;
         }
     }
 
-    assert(clauses.at(root.id) == 0);
+    std::map<Clause::Id, Tree> trees;
+
+    // Looks up a clause from the map with special-case behavior for constants
+    // and variables (identified because they're not already in the map)
+    auto getTree = [&](const Clause::Id id){
+        if (!trees.count(id))
+        {
+            // If the id is a variable, then handle it in this branch
+            if (vars.left.count(id))
+            {
+                // Do something with vm here
+                auto var_other = vars.left.at(id);
+                if (!vm.left.count(var_other))
+                {
+                    // Make a dummy tree to get the variable id
+                    auto t = Tree::var(result.f[id][0]);
+                    // Record the variable id mapping into this thread
+                    vm.left.insert({var_other, t.var()});
+                }
+                auto t = Tree::var(vm.left.at(var_other));
+                t.setValue(result.f[id][0]);
+                trees.insert({id, t});
+            }
+            // Otherwise, it must be a constant (if we've walked through
+            // the tree correctly).
+            else
+            {
+                trees.insert({id, Tree(result.f[id][0])});
+            }
+        }
+        return trees.at(id);
+    };
+
+    // Insert coordinate nodes
+    trees.insert({X, Tree::X()});
+    trees.insert({Y, Tree::Y()});
+    trees.insert({Z, Tree::Z()});
+
+    // Roll through the tape, making all of the trees
+    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    {
+        auto& c = *itr;
+        if (c.a == 0 && c.b == 0)
+        {
+            trees.insert({c.id, Tree(c.op)});
+        }
+        else if (c.b == 0)
+        {
+            trees.insert({c.id, Tree(c.op, getTree(c.a))});
+        }
+        else
+        {
+            trees.insert({c.id, Tree(c.op, getTree(c.a), getTree(c.b))});
+        }
+    }
+
+    // Sanity-checking that the root node was created
+    assert(trees.count(0));
+
+    // Sanity-checking: anything that comes out of an Evaluator
+    // must be collapsed
+    assert(trees.at(0).flags() & Tree::FLAG_COLLAPSED);
+
+    return trees.at(0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -336,6 +468,10 @@ void EvaluatorBase::eval_clause_values(Opcode::Opcode op,
         case Opcode::DUMMY_B:
             EVAL_LOOP
             out[i] = b[i];
+            break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            out[i] = a[i];
             break;
 
         case Opcode::INVALID:
@@ -612,6 +748,15 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
                 odz[i] = bdz[i];
             }
             break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            {
+                odx[i] = adx[i];
+                ody[i] = ady[i];
+                odz[i] = adz[i];
+            }
+            break;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:
@@ -624,13 +769,14 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
 }
 
 #define JAC_LOOP for (auto a = aj.begin(), b = bj.begin(), o = oj.begin(); a != aj.end(); ++a, ++b, ++o)
-void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
-        const float* __restrict av,  std::vector<float>& aj,
-        const float* __restrict bv,  std::vector<float>& bj,
-        float* __restrict ov, std::vector<float>& oj)
+float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
+        const float av,  std::vector<float>& aj,
+        const float bv,  std::vector<float>& bj,
+        std::vector<float>& oj)
 {
     // Evaluate the base operations in a single pass
-    eval_clause_values(op, av, bv, ov, 1);
+    float out;
+    eval_clause_values(op, &av, &bv, &out, 1);
 
     switch (op) {
         case Opcode::ADD:
@@ -642,13 +788,13 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::MUL:
             JAC_LOOP
             {   // Product rule
-                (*o) = (*av) * (*b) + (*bv) * (*a);
+                (*o) = av * (*b) + bv * (*a);
             }
             break;
         case Opcode::MIN:
             JAC_LOOP
             {
-                if ((*av) < (*bv))
+                if (av < bv)
                 {
                     (*o) = (*a);
                 }
@@ -661,7 +807,7 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::MAX:
             JAC_LOOP
             {
-                if ((*av) < (*bv))
+                if (av < bv)
                 {
                     (*o) = (*b);
                 }
@@ -680,34 +826,34 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::DIV:
             JAC_LOOP
             {
-                const float p = pow((*bv), 2);
-                (*o) = ((*bv)*(*a) - (*av)*(*b)) / p;
+                const float p = pow(bv, 2);
+                (*o) = (bv*(*a) - av*(*b)) / p;
             }
             break;
         case Opcode::ATAN2:
             JAC_LOOP
             {
-                const float d = pow((*av), 2) + pow((*bv), 2);
-                (*o) = ((*a)*(*bv) - (*av)*(*b)) / d;
+                const float d = pow(av, 2) + pow(bv, 2);
+                (*o) = ((*a)*bv - av*(*b)) / d;
             }
             break;
         case Opcode::POW:
             JAC_LOOP
             {
-                const float m = pow((*av), (*bv) - 1);
+                const float m = pow(av, bv - 1);
 
                 // The full form of the derivative is
-                // (*o) = m * ((*bv) * (*a) + (*av) * log((*av)) * (*b)))
-                // However, log((*av)) is often NaN and (*b) is always zero,
+                // (*o) = m * (bv * (*a) + av * log(av) * (*b)))
+                // However, log(av) is often NaN and (*b) is always zero,
                 // (since it must be CONST), so we skip that part.
-                (*o) = m * ((*bv) * (*a));
+                (*o) = m * (bv * (*a));
             }
             break;
         case Opcode::NTH_ROOT:
             JAC_LOOP
             {
-                const float m = pow((*av), 1.0f/(*bv) - 1);
-                (*o) = m * (1.0f/(*bv) * (*a));
+                const float m = pow(av, 1.0f/bv - 1);
+                (*o) = m * (1.0f/bv * (*a));
             }
             break;
         case Opcode::MOD:
@@ -721,26 +867,26 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::NANFILL:
             JAC_LOOP
             {
-                (*o) = std::isnan((*av)) ? (*b) : (*a);
+                (*o) = std::isnan(av) ? (*b) : (*a);
             }
             break;
 
         case Opcode::SQUARE:
             JAC_LOOP
             {
-                (*o) = 2 * (*av) * (*a);
+                (*o) = 2 * av * (*a);
             }
             break;
         case Opcode::SQRT:
             JAC_LOOP
             {
-                if ((*av) < 0)
+                if (av < 0)
                 {
                     (*o) = 0;
                 }
                 else
                 {
-                    (*o) = (*a) / (2 * (*ov));
+                    (*o) = (*a) / (2 * out);
                 }
             }
             break;
@@ -753,7 +899,7 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::ABS:
             JAC_LOOP
             {
-                if ((*av) < 0)
+                if (av < 0)
                 {
                     (*o) = -(*a);
                 }
@@ -766,49 +912,49 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::SIN:
             JAC_LOOP
             {
-                const float c = cos((*av));
+                const float c = cos(av);
                 (*o) = (*a) * c;
             }
             break;
         case Opcode::COS:
             JAC_LOOP
             {
-                const float s = -sin((*av));
+                const float s = -sin(av);
                 (*o) = (*a) * s;
             }
             break;
         case Opcode::TAN:
             JAC_LOOP
             {
-                const float s = pow(1/cos((*av)), 2);
+                const float s = pow(1/cos(av), 2);
                 (*o) = (*a) * s;
             }
             break;
         case Opcode::ASIN:
             JAC_LOOP
             {
-                const float d = sqrt(1 - pow((*av), 2));
+                const float d = sqrt(1 - pow(av, 2));
                 (*o) = (*a) / d;
             }
             break;
         case Opcode::ACOS:
             JAC_LOOP
             {
-                const float d = -sqrt(1 - pow((*av), 2));
+                const float d = -sqrt(1 - pow(av, 2));
                 (*o) = (*a) / d;
             }
             break;
         case Opcode::ATAN:
             JAC_LOOP
             {
-                const float d = pow((*av), 2) + 1;
+                const float d = pow(av, 2) + 1;
                 (*o) = (*a) / d;
             }
             break;
         case Opcode::EXP:
             JAC_LOOP
             {
-                const float e = exp((*av));
+                const float e = exp(av);
                 (*o) = e * (*a);
             }
             break;
@@ -825,6 +971,13 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
                 (*o) = (*b);
             }
             break;
+        case Opcode::CONST_VAR:
+            JAC_LOOP
+            {
+                (*o) = 0;
+            }
+            break;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:
@@ -834,6 +987,8 @@ void EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
+
+    return out;
 }
 
 Interval EvaluatorBase::eval_clause_interval(
@@ -890,6 +1045,9 @@ Interval EvaluatorBase::eval_clause_interval(
             return a;
         case Opcode::DUMMY_B:
             return b;
+        case Opcode::CONST_VAR:
+            return a;
+
         case Opcode::INVALID:
         case Opcode::CONST:
         case Opcode::VAR_X:
@@ -954,13 +1112,13 @@ std::map<Cache::VarId, float> EvaluatorBase::gradient(float x, float y, float z)
 
     for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
     {
-        const float* av = &result.f[itr->a][0];
-        const float* bv = &result.f[itr->b][0];
+        float av = result.f[itr->a][0];
+        float bv = result.f[itr->b][0];
         std::vector<float>& aj = result.j[itr->a];
         std::vector<float>& bj = result.j[itr->b];
 
-         eval_clause_jacobians(itr->op, av, aj, bv, bj,
-            &result.f[itr->id][0], result.j[itr->id]);
+        result.f[itr->id][0] = eval_clause_jacobians(
+                itr->op, av, aj, bv, bj, result.j[itr->id]);
     }
 
     std::map<Cache::VarId, float> out;
@@ -1038,6 +1196,22 @@ bool EvaluatorBase::updateVars(const Cache& cache)
     {
         auto val = cache.value(v.second);
         if (val != result.f[v.first][0])
+        {
+            setVar(v.second, val);
+            changed = true;
+        }
+    }
+    return changed;
+}
+
+bool EvaluatorBase::updateVars(const EvaluatorBase& other)
+{
+    bool changed = false;
+    const auto vs = other.varValues();
+    for (const auto& v : vars.right)
+    {
+        auto val = vs.at(v.first);
+        if (val != result.f[v.second][0])
         {
             setVar(v.second, val);
             changed = true;

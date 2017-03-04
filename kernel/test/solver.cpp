@@ -107,7 +107,7 @@ TEST_CASE("Solver::findRoot")
 
         auto res = out.first;
         auto vals = out.second;
-        REQUIRE(res < 1e-4);
+        REQUIRE(res < 1e-3);
         REQUIRE(vals.size() == 6);
     }
 }

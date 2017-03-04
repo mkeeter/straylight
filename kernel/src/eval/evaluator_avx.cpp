@@ -60,6 +60,10 @@ void EvaluatorAVX::eval_clause_values(Opcode::Opcode op,
             EVAL_LOOP
             out[i] = b[i];
             break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            out[i] = a[i];
+            break;
 
         // Trig functions don't have AVX equivalents, so fall back to
         // default clause evaluation
@@ -237,6 +241,14 @@ void EvaluatorAVX::eval_clause_derivs(Opcode::Opcode op,
                 odx[i] = bdx[i];
                 ody[i] = bdy[i];
                 odz[i] = bdz[i];
+            }
+            break;
+        case Opcode::CONST_VAR:
+            EVAL_LOOP
+            {
+                odx[i] = adx[i];
+                ody[i] = ady[i];
+                odz[i] = adz[i];
             }
             break;
 

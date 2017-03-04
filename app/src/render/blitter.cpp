@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QThread>
 
-#include "render/blitter.hpp"
+#include "app/render/blitter.hpp"
 
 namespace App {
 namespace Render {
@@ -39,19 +39,31 @@ Blitter::Blitter()
     quad_vao.release();
 }
 
-void Blitter::addQuad(Renderer* R, const Renderer::Result imgs,
-                      const QMatrix4x4& mat)
+void Blitter::addQuad(Renderer* R, const Renderer::Result imgs)
 {
-    getWindow()->scheduleRenderJob(
-            new QuadAdd(this, R, mat, imgs.depth, imgs.norm),
-            QQuickWindow::NoStage);
+    delete quads[R];
+    quads[R] = new Quad(imgs.M, imgs.depth, imgs.norm);
+
+    delete imgs.depth;
+    delete imgs.norm;
 }
 
-void Blitter::forget(Renderer* R)
+void Blitter::prune(const QSet<Renderer*>& rs)
 {
-    getWindow()->scheduleRenderJob(
-            new QuadForget(this, R),
-            QQuickWindow::NoStage);
+    QSet<Renderer*> forgotten;
+    for (auto q : quads)
+    {
+        if (rs.find(q.first) == rs.end())
+        {
+            delete q.second;
+            forgotten.insert(q.first);
+        }
+    }
+
+    for (auto q : forgotten)
+    {
+        quads.erase(q);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,22 +94,6 @@ void Blitter::draw(QMatrix4x4 M)
     glActiveTexture(GL_TEXTURE0);
 }
 
-QQuickWindow* Blitter::getWindow() const
-{
-    auto app = dynamic_cast<QGuiApplication*>(QCoreApplication::instance());
-    assert(app);
-    for (auto w : app->allWindows())
-    {
-        if (auto q = dynamic_cast<QQuickWindow*>(w))
-        {
-            return q;
-        }
-    }
-
-    assert(false);
-    return nullptr;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 Blitter::Quad::Quad(const QMatrix4x4& mat,
@@ -121,41 +117,6 @@ Blitter::Quad::Quad(const QMatrix4x4& mat,
     assert(depth.isCreated());
     assert(norm.isCreated());
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-Blitter::QuadAdd::QuadAdd(
-        Blitter* parent, Renderer* R, const QMatrix4x4& mat,
-        const Kernel::DepthImage* d, const Kernel::NormalImage* n)
-    : parent(parent), R(R), mat(mat), depth(d), norm(n)
-{
-    // Nothing to do here
-}
-
-void Blitter::QuadAdd::run()
-{
-    delete parent->quads[R];
-    parent->quads[R] = new Quad(mat, depth, norm);
-
-    delete depth;
-    delete norm;
-
-    emit(parent->changed());
-}
-
-Blitter::QuadForget::QuadForget(Blitter* parent, Renderer* R)
-    : parent(parent), R(R)
-{
-    // Nothing to do here
-}
-
-void Blitter::QuadForget::run()
-{
-    delete parent->quads[R];
-    parent->quads.erase(R);
-    emit(parent->changed());
-}
-
 
 }   // namespace Render
 }   // namespace App

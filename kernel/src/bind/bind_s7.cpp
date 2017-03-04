@@ -16,13 +16,8 @@ int shape_t::tag = -1;
  */
 s7_pointer shape_new(s7_scheme* sc, Kernel::Tree t)
 {
-    return s7_make_object(sc, shape_t::tag, new shape_t(t));
-}
-
-s7_pointer shape_new_(s7_scheme* sc, Kernel::Tree t, bool changed)
-{
     auto s = new shape_t(t);
-    s->value_changed = changed;
+    s->vars = t.vars();
     return s7_make_object(sc, shape_t::tag, s);
 }
 
@@ -90,11 +85,26 @@ static bool shape_equal(void* a, void* b)
     auto sa = static_cast<shape_t*>(a);
     auto sb = static_cast<shape_t*>(b);
 
-    const bool value_changed = sa->value_changed || sb->value_changed;
-    sa->value_changed = false;
-    sb->value_changed = false;
+    if (!(sa->tree == sb->tree))
+    {
+        return false;
+    }
+    else
+    {
+        const auto& va = sa->vars;
+        const auto& vb = sb->vars;
+        assert(va.size() == vb.size());
 
-    return !value_changed && (sa->tree == sb->tree);
+        for (auto& k : va)
+        {
+            if (vb.count(k.first) == 0 || vb.at(k.first) != k.second)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 static char* shape_print(s7_scheme* sc, void* s)
@@ -220,6 +230,21 @@ static s7_pointer result_to_const(s7_scheme* sc, s7_pointer out)
         tree.checkValue();
     }
     return out;
+}
+
+s7_pointer shape_get_const(s7_scheme* sc, s7_pointer args)
+{
+    auto obj = s7_car(args);
+    CHECK_SHAPE(obj);
+
+    auto& tree = get_shape(obj)->tree;
+    if (tree.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
+    {
+        auto out = Tree(Opcode::CONST_VAR, tree);
+        out.checkValue();
+        return shape_new(sc, out);
+    }
+    return obj;
 }
 
 #define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)           \
@@ -412,37 +437,6 @@ static void install_overload(s7_scheme* sc, const char* op,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-s7_pointer reader(s7_scheme* sc, s7_pointer args)
-{
-    auto begin = s7_car(args);
-    if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
-    {
-        auto env_tree_map = s7_name_to_value(sc, "*env-tree-map*");
-        auto env = s7_cadr(args);
-        auto cell_ref = s7_hash_table_ref(sc, env_tree_map, env);
-
-        const auto v = s7_number_to_real(sc, s7_car(begin));
-        if (cell_ref == s7_f(sc))
-        {
-            cell_ref = shape_new(sc, Kernel::Tree::var(v));
-            s7_hash_table_set(sc, env_tree_map, env, cell_ref);
-
-            auto tree_env_map = s7_name_to_value(sc, "*tree-env-map*");
-            s7_hash_table_set(sc, tree_env_map, cell_ref, env);
-        }
-        else
-        {
-            to_tree(cell_ref).setValue(v);
-            get_mutable_shape(cell_ref)->value_changed = true;
-        }
-
-        return s7_list(sc, 1, cell_ref);
-    }
-    return begin;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 static s7_pointer detree_args(s7_scheme* sc, s7_pointer args)
 {
     bool has_tree = false;
@@ -505,6 +499,8 @@ void init(s7_scheme* sc)
 
     s7_define_function(sc, "make-shape", shape_new, 1, 0, false,
             "(make-shape func) makes a new shape");
+    s7_define_function(sc, "const", shape_get_const, 1, 0, false,
+            "(const value) returns a constant number");
     s7_define_function(sc, "shape?", is_shape, 1, 0, false,
             "(shape? s) checks if something is a shape");
 

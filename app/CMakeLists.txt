@@ -15,21 +15,35 @@ find_package(Qt5Quick REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 
-add_executable(Straylight MACOSX_BUNDLE
-    src/main.cpp
-    src/core/bridge.cpp
-    src/core/undo.cpp
+set(SRCS
+    src/bridge/bridge.cpp
+    src/bridge/translator.cpp
+    src/bridge/escaped.cpp
+    src/bridge/graph.cpp
+    src/bridge/items.cpp
+    src/bridge/sheet.cpp
+    src/bridge/library.cpp
+    src/bridge/watcher.cpp
+    src/bridge/io.cpp
     src/ui/material.cpp
     src/ui/syntax.cpp
     src/render/canvas.cpp
     src/render/axes.cpp
+    src/render/scene.cpp
     src/render/picker.cpp
-    src/render/drag.cpp
+    src/render/point_drag.cpp
     src/render/handle.cpp
     src/render/point_handle.cpp
     src/render/renderer.cpp
     src/render/blitter.cpp
-    src/bind/bind_s7.cpp
+    src/bind/bind_s7.cpp)
+
+string(REPLACE "src/" ";include/app/" _INCS ${SRCS})
+string(REPLACE ".cpp" ".hpp;" INCS ${_INCS})
+add_executable(Straylight MACOSX_BUNDLE
+    src/main.cpp
+    ${SRCS}
+    ${INCS}
     resources.qrc)
 
 target_link_libraries(Straylight
@@ -40,7 +54,7 @@ target_link_libraries(Straylight
     straylight-graph
     straylight-kernel
     ${OPENGL_LIBRARIES})
-target_include_directories(Straylight PRIVATE src)
+target_include_directories(Straylight PRIVATE include)
 
 # Set application Info.plist file
 set_target_properties(Straylight PROPERTIES

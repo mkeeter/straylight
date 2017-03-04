@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.0
 
 import Style 1.0
 import Bridge 1.0
-import UndoStack 1.0
 import Awesome 4.7
 import Material 1.0
 
@@ -40,7 +39,7 @@ GridLayout {
 
         function setExpr(text) {
             if (text != expr) {
-                Bridge.setExpr(uniqueIndex, text)
+                sheetModel.setExpr(uniqueIndex, text)
             }
         }
     }
