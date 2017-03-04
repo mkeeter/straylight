@@ -20,8 +20,8 @@ PointDrag::PointDrag()
 bool PointDrag::updateFrom(App::Bridge::EscapedPointHandle* p)
 {
     auto x = p->xyz[0].toTree(vars);
-    auto y = p->xyz[0].toTree(vars);
-    auto z = p->xyz[0].toTree(vars);
+    auto y = p->xyz[1].toTree(vars);
+    auto z = p->xyz[2].toTree(vars);
 
     auto dx = x - (cursor_pos[0] + d*cursor_ray[0]);
     auto dy = y - (cursor_pos[1] + d*cursor_ray[1]);
