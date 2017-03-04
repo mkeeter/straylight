@@ -187,8 +187,8 @@ protected:
           : _Key(0, Opcode::CONST, 0, 0, v) { /* Nothing to do here */ }
         Key(Opcode::Opcode op, Id a, Id b, size_t rank)
           : _Key(rank, op, a, b, 0.0f) { /* Nothing to do here */}
-        Key(float v, Id id)
-          : _Key(0, Opcode::VAR, id, 0, v) { /* Nothing to do here */}
+        Key(Id id)
+          : _Key(0, Opcode::VAR, id, 0, 0) { /* Nothing to do here */}
 
         size_t rank() const             { return std::get<0>(*this); }
         Opcode::Opcode opcode() const   { return std::get<1>(*this); }

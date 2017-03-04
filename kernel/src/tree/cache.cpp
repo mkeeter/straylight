@@ -57,7 +57,7 @@ Cache::Id Cache::constant(float v)
 
 Cache::VarId Cache::var(float v)
 {
-    auto k = Key(v, next);
+    auto k = Key(Id(next));
     assert(data.left.find(k) == data.left.end());
     data.insert({k, next});
     values.insert({next, v});
