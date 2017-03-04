@@ -162,6 +162,8 @@ QMatrix4x4 Scene::view() const
 
 void Scene::updateFrom(const Graph::Response& r)
 {
+    bool changed = false;
+
     switch (r.op)
     {
         case Graph::Response::CELL_ERASED:
@@ -171,19 +173,25 @@ void Scene::updateFrom(const Graph::Response& r)
             {
                 for (const auto& k : cells.at(cell))
                 {
-                    shapes.at(k)->deleteWhenNotRunning();
-                    shapes.erase(k);
+                    if (shapes.count(k))
+                    {
+                        shapes.at(k)->deleteWhenNotRunning();
+                        shapes.erase(k);
+                    }
+                    if (handles.count(k))
+                    {
+                        handles.erase(k);
+                    }
                 }
                 cells.erase(cell);
-                update();
+                changed = true;
             }
             break;
-
         }
         case Graph::Response::VALUE_CHANGED:
         {
             const Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
-            bool changed = false;
+            cells[k.second].insert(k);
 
             // We replace the renderer without fail, so always delete a
             // pre-existing renderer if there's one in place for this key.
@@ -191,7 +199,6 @@ void Scene::updateFrom(const Graph::Response& r)
             {
                 shapes.at(k)->deleteWhenNotRunning();
                 shapes.erase(k);
-                cells[k.second].erase(k);
                 changed = true;
             }
 
@@ -205,7 +212,6 @@ void Scene::updateFrom(const Graph::Response& r)
                         this, &Scene::update);
                 ren->enqueue(M(), QSize(width(), height()));
 
-                cells[k.second].insert(k);
                 changed = true;
             }
 
@@ -225,6 +231,7 @@ void Scene::updateFrom(const Graph::Response& r)
                     if (dynamic_cast<Bridge::EscapedPointHandle*>(p))
                     {
                         handles.insert({k, new PointHandle()});
+                        picker_changed = true;
                     }
                     else
                     {
@@ -235,15 +242,15 @@ void Scene::updateFrom(const Graph::Response& r)
                 //  Update the handle from the EscapedHandle
                 changed |= handles.at(k)->updateFrom(p);
             }
-
-            if (changed)
-            {
-                update();
-            }
             break;
         }
 
         default:    assert(false);
+    }
+
+    if (changed)
+    {
+        update();
     }
 }
 
