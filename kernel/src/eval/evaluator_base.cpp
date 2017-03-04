@@ -18,6 +18,8 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
     setMatrix(M);
 
     auto root = root_.collapse();
+    root_op = root.opcode();
+
     Cache* cache = root.parent.get();
     auto connected = cache->findConnected(root.id);
 
@@ -168,6 +170,27 @@ EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
 
 Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
 {
+    // Special-case for when the tape has no operations
+    if (tape->size() == 0)
+    {
+        if (root_op == Opcode::CONST)
+        {
+            return Tree(result.f[0][0]);
+        }
+        else if (root_op == Opcode::VAR)
+        {
+            auto var_other = vars.left.at(0);
+            if (!vm.left.count(var_other))
+            {
+                // Make a dummy tree to get the variable id
+                auto t = Tree::var(result.f[0][0]);
+                // Record the variable id mapping into this thread
+                vm.left.insert({var_other, t.var()});
+            }
+            return Tree::var(vm.left.at(var_other));
+        }
+    }
+
     std::map<Clause::Id, Tree> trees;
 
     // Looks up a clause from the map with special-case behavior for constants

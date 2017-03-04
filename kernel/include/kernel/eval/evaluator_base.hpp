@@ -204,6 +204,10 @@ protected:
     std::list<Tape> tapes;
     std::list<Tape>::iterator tape;
 
+    /*  Store the root opcode explicitly so that we can convert back into
+     *  a tree even if there's nothing in the tape  */
+    Opcode::Opcode root_op;
+
     std::vector<uint8_t> disabled;
 
     Result result;

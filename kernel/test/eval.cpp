@@ -387,6 +387,15 @@ TEST_CASE("Evaluator::toTree")
         REQUIRE(a_.opcode() == Opcode::VAR_X);
     }
 
+    SECTION("Y")
+    {
+        auto a = Tree::Y();
+        auto e = Evaluator(a);
+
+        auto a_ = e.toTree(vm);
+        REQUIRE(a_.opcode() == Opcode::VAR_Y);
+    }
+
     SECTION("Var")
     {
         auto a = Tree::var(5.5);
