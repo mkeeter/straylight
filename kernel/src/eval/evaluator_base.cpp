@@ -62,7 +62,7 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
                 }
                 else if (m.first.opcode() == Opcode::VAR)
                 {
-                    constants[id] = m.first.value();
+                    constants[id] = cache->value(m.second);
                     vars.left.insert({id, m.first.var()});
                 }
                 clauses[m.second] = id--;

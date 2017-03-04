@@ -69,11 +69,8 @@ void Tree::checkValue()
            (flags() & Tree::FLAG_LOCATION_AGNOSTIC));
     assert(Opcode::args(opcode()) == 1 || Opcode::args(opcode()) == 2);
 
-    auto t = Opcode::args(opcode()) == 1
-        ? Tree(opcode(), Tree(lhs().value()))
-        : Tree(opcode(), Tree(lhs().value()), Tree(rhs().value()));
-    assert(t.opcode() == Opcode::CONST);
-    setValue(t.value());
+    Evaluator e(*this);
+    setValue(e.values(1)[0]);
 }
 
 }   // namespace Kernel
