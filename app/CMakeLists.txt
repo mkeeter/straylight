@@ -34,6 +34,7 @@ set(SRCS
     src/render/point_drag.cpp
     src/render/handle.cpp
     src/render/point_handle.cpp
+    src/render/shape_handle.cpp
     src/render/renderer.cpp
     src/render/blitter.cpp
     src/bind/bind_s7.cpp)

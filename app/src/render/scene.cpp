@@ -2,6 +2,7 @@
 #include "app/render/canvas.hpp"
 #include "app/render/drag.hpp"
 #include "app/render/point_handle.hpp"
+#include "app/render/shape_handle.hpp"
 
 #include "app/bridge/escaped.hpp"
 #include "app/bridge/bridge.hpp"
@@ -217,7 +218,7 @@ void Scene::updateFrom(const Graph::Response& r)
 
             // If the value is an EscapedHandle, then turn it into a real
             // Handle and update its values, etc.
-            else if (auto p = dynamic_cast<App::Bridge::EscapedHandle*>(r.value))
+            if (auto p = dynamic_cast<App::Bridge::EscapedHandle*>(r.value))
             {
                 // If handle type mismatch, delete
                 if (handles.count(k) && handles.at(k)->tag() != p->tag())
@@ -231,12 +232,16 @@ void Scene::updateFrom(const Graph::Response& r)
                     if (dynamic_cast<Bridge::EscapedPointHandle*>(p))
                     {
                         handles.insert({k, new PointHandle()});
-                        picker_changed = true;
+                    }
+                    else if (dynamic_cast<Bridge::EscapedShape*>(p))
+                    {
+                        handles.insert({k, new ShapeHandle()});
                     }
                     else
                     {
                         assert(false);  // Unknown handle type!
                     }
+                    picker_changed = true;
                     changed = true;
                 }
                 //  Update the handle from the EscapedHandle

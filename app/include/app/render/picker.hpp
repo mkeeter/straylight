@@ -36,12 +36,12 @@ public:
     /*
      *  Installs this handle into the picker for rendering
      */
-    void installHandle(Handle* h);
+    void installHandle(const Graph::CellKey& k, Handle* h);
 
     /*
      *  Erase any handle that's not in hs
      */
-    void prune(const QSet<Handle*>& hs);
+    void prune(const std::set<Graph::CellKey>& hs);
 
     /*
      *  Loads the picker image!
@@ -59,9 +59,14 @@ public:
      */
     void setView(QMatrix4x4 mat, QSize size);
 
+    /*
+     *  Looks up a handle by key
+     */
+    Handle* getHandle(const Graph::CellKey& k) const;
+
 protected:
     /*  Here, we store the set of handles to be drawn & picked */
-    std::set<Handle*> handles;
+    std::map<Graph::CellKey, Handle*> handles;
 
     /*  These are colors assigned to each handle for picking  */
     boost::bimap<QRgb, Handle*> colors;

@@ -3,6 +3,7 @@
 #include "app/render/canvas.hpp"
 #include "app/render/scene.hpp"
 #include "app/render/handle.hpp"
+#include "app/render/shape_handle.hpp"
 
 #include "kernel/bind/bind_s7.h"
 
@@ -105,6 +106,18 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
         if (result)
         {
             blitter.addQuad(s.second, *result);
+
+            if (auto h = picker.getHandle(s.first))
+            {
+                if (auto s = dynamic_cast<ShapeHandle*>(h))
+                {
+                    s->updateTexture(*result);
+                }
+                else
+                {
+                    assert(false);
+                }
+            }
             delete result;
         }
         rs.insert(s.second);
@@ -112,11 +125,11 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
     blitter.prune(rs);
 
     //////////////////////////////////////////////////////////////////////////
-    QSet<App::Render::Handle*> hs;
+    std::set<Graph::CellKey> hs;
     for (const auto& h : scene->handles)
     {
-        picker.installHandle(h.second);
-        hs.insert(h.second);
+        picker.installHandle(h.first, h.second);
+        hs.insert(h.first);
     }
     picker.prune(hs);
 }

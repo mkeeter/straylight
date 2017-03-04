@@ -8,13 +8,6 @@
 namespace App {
 namespace Bridge {
 
-class EscapedShape : public Graph::Escaped
-{
-public:
-    EscapedShape(Kernel::Tree tree);
-    Kernel::Evaluator* eval;
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 class EscapedHandle : public Graph::Escaped
@@ -33,6 +26,17 @@ public:
 
     QVector3D pos;
     Kernel::Evaluator xyz[3];
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+class EscapedShape : public EscapedHandle
+{
+public:
+    EscapedShape(Kernel::Tree tree);
+    int tag() const override;
+
+    Kernel::Evaluator* eval;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

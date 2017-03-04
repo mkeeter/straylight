@@ -36,38 +36,38 @@ void Picker::draw(QPoint p, Picker::DrawMode mode)
     auto picked = pickAt(p);
     for (auto& h : handles)
     {
-        h->draw(M, proj, (mode == DRAW_NORMAL)
-                ? (h == picked ? DRAW_HOVER : DRAW_NORMAL)
-                : mode, colors.right.at(h));
+        h.second->draw(M, proj, (mode == DRAW_NORMAL)
+                ? (h.second == picked ? DRAW_HOVER : DRAW_NORMAL)
+                : mode, colors.right.at(h.second));
     }
 }
 
-void Picker::installHandle(Handle* h)
+void Picker::installHandle(const Graph::CellKey& k, Handle* h)
 {
-    if (handles.find(h) == handles.end())
+    if (handles.find(k) == handles.end())
     {
-        handles.insert(h);
+        handles.insert({k, h});
         auto rgb = colors.size() ? (colors.left.rbegin()->first + 1) : 1;
         colors.insert({rgb, h});
     }
 }
 
-void Picker::prune(const QSet<Handle*>& hs)
+void Picker::prune(const std::set<Graph::CellKey>& hs)
 {
-    QSet<Handle*> forgotten;
+    std::set<Graph::CellKey> forgotten;
     for (auto h : handles)
     {
-        if (hs.find(h) == hs.end())
+        if (hs.find(h.first) == hs.end())
         {
-            delete h;
-            forgotten.insert(h);
+            delete h.second;
+            forgotten.insert(h.first);
         }
     }
 
     for (auto h : forgotten)
     {
+        colors.right.erase(handles.at(h));
         handles.erase(h);
-        colors.right.erase(h);
     }
 }
 
@@ -88,6 +88,11 @@ void Picker::setView(QMatrix4x4 mat, QSize size)
     {
         proj.scale(1, frac, 1);
     }
+}
+
+Handle* Picker::getHandle(const Graph::CellKey& k) const
+{
+    return handles.count(k) ? handles.at(k) : nullptr;
 }
 
 }   // namespace Render

@@ -1,5 +1,7 @@
 #include "app/bridge/escaped.hpp"
+
 #include "app/render/point_handle.hpp"
+#include "app/render/shape_handle.hpp"
 
 namespace App {
 namespace Bridge {
@@ -22,6 +24,13 @@ EscapedPointHandle::EscapedPointHandle(Kernel::Tree xyz[3])
 int EscapedPointHandle::tag() const
 {
     return App::Render::PointHandle::_tag;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int EscapedShape::tag() const
+{
+    return App::Render::ShapeHandle::_tag;
 }
 
 }   // namespace Bridge
