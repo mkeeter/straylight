@@ -54,11 +54,12 @@ protected:
 
     QVector3D center;
 
-    // TODO: share these among all instances
-    QScopedPointer<QOpenGLBuffer> vbo;
-    QScopedPointer<QOpenGLVertexArrayObject> vao;
-    QScopedPointer<QOpenGLShaderProgram> shader_solid;
-    QScopedPointer<QOpenGLShaderProgram> shader_dotted;
+    // These are shared by all instances and allocated once
+    // in the render thread (upon the first call to initGL)
+    static QOpenGLBuffer* vbo;
+    static QOpenGLVertexArrayObject* vao;
+    static QOpenGLShaderProgram* shader_solid;
+    static QOpenGLShaderProgram* shader_dotted;
 
     static const int segments=128;
 

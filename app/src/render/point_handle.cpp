@@ -9,6 +9,11 @@ using namespace boost::math::float_constants;
 namespace App {
 namespace Render {
 
+QOpenGLBuffer* PointHandle::vbo;
+QOpenGLVertexArrayObject* PointHandle::vao;
+QOpenGLShaderProgram* PointHandle::shader_solid;
+QOpenGLShaderProgram* PointHandle::shader_dotted;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 PointHandle::PointHandle()
@@ -98,47 +103,50 @@ void PointHandle::initGL()
 {
     if (!gl_ready)
     {
-        vbo.reset(new QOpenGLBuffer);
-        vao.reset(new QOpenGLVertexArrayObject);
-        shader_solid.reset(new QOpenGLShaderProgram);
-        shader_dotted.reset(new QOpenGLShaderProgram);
-
-        shader_solid->addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_solid->addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/gl/point_handle.frag");
-        shader_solid->link();
-
-        shader_dotted->addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/gl/point_handle.vert");
-        shader_dotted->addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/gl/point_handle_dotted.frag");
-        shader_dotted->link();
-
+        if (vbo == nullptr)
         {
-            std::vector<GLfloat> data;
-            data.push_back(0);
-            data.push_back(0);
-            for (int i=0; i <= segments; ++i)
+            vbo = new QOpenGLBuffer;
+            vao = new QOpenGLVertexArrayObject;
+            shader_solid = new QOpenGLShaderProgram;
+            shader_dotted = new QOpenGLShaderProgram;
+
+            shader_solid->addShaderFromSourceFile(
+                    QOpenGLShader::Vertex, ":/gl/point_handle.vert");
+            shader_solid->addShaderFromSourceFile(
+                    QOpenGLShader::Fragment, ":/gl/point_handle.frag");
+            shader_solid->link();
+
+            shader_dotted->addShaderFromSourceFile(
+                    QOpenGLShader::Vertex, ":/gl/point_handle.vert");
+            shader_dotted->addShaderFromSourceFile(
+                    QOpenGLShader::Fragment, ":/gl/point_handle_dotted.frag");
+            shader_dotted->link();
+
             {
-                data.push_back(cos(2.0f * pi * i / segments));
-                data.push_back(sin(2.0f * pi * i / segments));
+                std::vector<GLfloat> data;
+                data.push_back(0);
+                data.push_back(0);
+                for (int i=0; i <= segments; ++i)
+                {
+                    data.push_back(cos(2.0f * pi * i / segments));
+                    data.push_back(sin(2.0f * pi * i / segments));
+                }
+                vbo->create();
+                vbo->bind();
+                vbo->allocate(data.data(), data.size() * sizeof(GLfloat));
             }
-            vbo->create();
-            vbo->bind();
-            vbo->allocate(data.data(), data.size() * sizeof(GLfloat));
+
+            vao->create();
+            vao->bind();
+
+            glVertexAttribPointer(
+                    0, 2, GL_FLOAT, GL_FALSE,
+                    2 * sizeof(GLfloat), (GLvoid*)0);
+            glEnableVertexAttribArray(0);
+
+            vbo->release();
+            vao->release();
         }
-
-        vao->create();
-        vao->bind();
-
-        glVertexAttribPointer(
-                0, 2, GL_FLOAT, GL_FALSE,
-                2 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
-
-        vbo->release();
-        vao->release();
 
         gl_ready = true;
     }
