@@ -12,6 +12,7 @@ namespace Render {
 ////////////////////////////////////////////////////////////////////////////////
 
 PointHandle::PointHandle()
+    : drag(new PointDrag())
 {
     // Nothing to do here
 }
@@ -87,6 +88,7 @@ bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
     bool changed = (center != p->pos);
     center = p->pos;
 
+    assert(drag.get());
     changed |= drag->updateFrom(p);
 
     return changed;
