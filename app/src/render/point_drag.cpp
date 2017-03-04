@@ -27,6 +27,8 @@ bool PointDrag::updateFrom(App::Bridge::EscapedPointHandle* p)
     auto dy = y - (cursor_pos[1] + d*cursor_ray[1]);
     auto dz = z - (cursor_pos[2] + d*cursor_ray[2]);
 
+    // TODO: update evaluator variables instead of making a new one here
+    // (if X/Y/Z trees are identical)
     err.reset(new Kernel::Evaluator(
                 square(dx) + square(dy) + square(dz)));
 
