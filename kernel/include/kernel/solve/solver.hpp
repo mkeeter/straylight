@@ -23,10 +23,10 @@ namespace Solver
      */
     std::pair<float, Solution> findRoot(
             const Tree& t, const glm::vec3 v={0,0,0},
-            const Mask& mask=Mask());
+            const Mask& mask=Mask(), unsigned gas=25000);
     std::pair<float, Solution> findRoot(
             Evaluator& t, const glm::vec3 v={0,0,0},
-            const Mask& mask=Mask());
+            const Mask& mask=Mask(), unsigned gas=25000);
 
 }   // namespace Solver
 }   // namespace Kernel
