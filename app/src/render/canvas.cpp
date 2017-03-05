@@ -54,8 +54,11 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 
     //////////////////////////////////////////////////////////////////////////
     // Claim picker_changed from the parent scene
-    picker_changed = scene->picker_changed;
-    scene->picker_changed = false;
+    if (scene->mouse_state == Scene::RELEASED)
+    {
+        picker_changed = scene->picker_changed;
+        scene->picker_changed = false;
+    }
 
     const auto M_ = scene->M();
     const QSize window_size_(scene->width(), scene->height());
@@ -108,7 +111,6 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
                 auto s = dynamic_cast<ShapeHandle*>(h);
                 assert(s);
                 s->updateTexture(result);
-                picker_changed = true;
             }
             delete result;
         }
