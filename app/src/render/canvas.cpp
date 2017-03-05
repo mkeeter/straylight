@@ -108,6 +108,7 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
                 auto s = dynamic_cast<ShapeHandle*>(h);
                 assert(s);
                 s->updateTexture(result);
+                picker_changed = true;
             }
             delete result;
         }
