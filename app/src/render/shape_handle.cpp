@@ -17,13 +17,7 @@ void ShapeHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     {
         return;
     }
-
-    if (mode != Picker::DRAW_NORMAL)
-    {
-        return;
-    }
-    // TODO
-    (void)color;
+    (void)proj;
 
     QMatrix4x4 M = world;
 
@@ -33,6 +27,10 @@ void ShapeHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
 
     glUniform1i(shader->uniformLocation("depth"), 0);
     glUniform1i(shader->uniformLocation("norm"), 1);
+
+    // Load mode and picker color in case this is a pick render
+    glUniform1i(shader->uniformLocation("draw_mode"), mode);
+    glUniformColor3f(*shader, "picker_color", color);
 
     vao->bind();
     depth->bind(0);

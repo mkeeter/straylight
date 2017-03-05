@@ -2,6 +2,9 @@
 
 uniform mat4 m;
 
+uniform int draw_mode;
+uniform vec3 picker_color;
+
 in vec2 tex_coord;
 uniform sampler2D depth;
 uniform sampler2D norm;
@@ -10,6 +13,11 @@ out vec4 fragColor;
 
 vec4 shade(vec3 n)
 {
+    if (draw_mode == 0)
+    {
+        return vec4(picker_color, 1.0f);
+    }
+
     // Calculate dot product coming in from three different angles
     // (imitating three-point lighting)
     vec3 n_ = normalize(n);
@@ -22,6 +30,12 @@ vec4 shade(vec3 n)
 
     // Fake gamma correction
     brightness = sqrt(brightness);
+
+    // Brighten up if we're being hovered
+    if (draw_mode == 2)
+    {
+        brightness = brightness * 0.8f + 0.2f;
+    }
 
     vec3 light = vec3(0.99f, 0.96f, 0.89f);
     vec3 dark  = vec3(0.10f, 0.15f, 0.20f);
