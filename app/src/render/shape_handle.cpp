@@ -71,7 +71,8 @@ void ShapeHandle::updateTexture(const Renderer::Result* imgs)
             tex->height() != imgs->depth->rows())
         {
             tex->destroy();
-            tex->setFormat(tex == depth.data() ? QOpenGLTexture::D32F : QOpenGLTexture::RGBA8_UNorm);
+            tex->setFormat(tex == depth.data() ? QOpenGLTexture::D32F
+                                               : QOpenGLTexture::RGBA8_UNorm);
             tex->setSize(imgs->depth->rows(), imgs->depth->cols());
             tex->setAutoMipMapGenerationEnabled(false);
             tex->allocateStorage();
