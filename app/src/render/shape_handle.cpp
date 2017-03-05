@@ -63,11 +63,25 @@ void ShapeHandle::updateTexture(const Renderer::Result* imgs)
         /*  Construct textures  */
         depth.reset(new QOpenGLTexture(QOpenGLTexture::Target2D));
         norm.reset(new QOpenGLTexture(QOpenGLTexture::Target2D));
-        depth->setFormat(QOpenGLTexture::D32F);
-        norm->setFormat(QOpenGLTexture::RGBA8_UNorm);
     }
-    depth->setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, imgs->depth.get());
-    norm->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, imgs->norm.get());
+
+    for (auto tex : {depth.data(), norm.data()})
+    {
+        if (tex->width() != imgs->depth->cols() ||
+            tex->height() != imgs->depth->rows())
+        {
+            tex->destroy();
+            tex->setFormat(tex == depth.data() ? QOpenGLTexture::D32F : QOpenGLTexture::RGBA8_UNorm);
+            tex->setSize(imgs->depth->rows(), imgs->depth->cols());
+            tex->setAutoMipMapGenerationEnabled(false);
+            tex->allocateStorage();
+        }
+    }
+    assert(depth->isCreated());
+    assert(norm->isCreated());
+
+    depth->setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, imgs->depth->data());
+    norm->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, imgs->norm->data());
     mat = imgs->M;
 }
 
