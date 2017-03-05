@@ -2,6 +2,7 @@
 
 #include <QMatrix4x4>
 #include <QOpenGLFunctions>
+#include <QOpenGLShader>
 #include <QColor>
 
 #include "app/render/picker.hpp"
@@ -54,6 +55,14 @@ public:
      *  Every Handle should rederive this class differently
      */
     virtual int tag() const=0;
+
+    /*
+     * Helper functions to bind colors into shaders
+     */
+    void glUniformColor3f(QOpenGLShaderProgram& shader,
+                          const QString& var, const QColor& color);
+    void glUniformColor3f(QOpenGLShaderProgram& shader,
+                          const QString& var, const QRgb color);
 
 protected:
     /*

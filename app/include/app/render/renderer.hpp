@@ -36,8 +36,10 @@ public:
      *  This struct can be passed into a Blitter to draw
      */
     struct Result {
-        Kernel::DepthImage* depth;
-        Kernel::NormalImage* norm;
+        Result(Kernel::DepthImage* d, Kernel::NormalImage* n,
+               QMatrix4x4 M) : depth(d), norm(n), M(M) {}
+        std::unique_ptr<Kernel::DepthImage> depth;
+        std::unique_ptr<Kernel::NormalImage> norm;
         QMatrix4x4 M;
     };
 

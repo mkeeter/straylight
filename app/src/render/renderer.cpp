@@ -139,7 +139,7 @@ void Renderer::run(Task t)
         *out.first = (*out.first == r.Z.values.back()).select(0, *out.first);
 
         // Store the result in the parent object
-        result = new Result { out.first, out.second, inv };
+        result = new Result(out.first, out.second, inv);
         emit(done());
 
         auto dt = start_time.elapsed();

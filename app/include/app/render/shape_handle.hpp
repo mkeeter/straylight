@@ -35,7 +35,7 @@ public:
     /*
      *  Updates the picker texture
      */
-    void updateTexture(const Renderer::Result imgs);
+    void updateTexture(const Renderer::Result* imgs);
 
     /*
      *  Returns a drag pointer
@@ -57,7 +57,11 @@ protected:
     static QOpenGLVertexArrayObject* vao;
     static QOpenGLShaderProgram* shader;
 
-    QScopedPointer<QOpenGLTexture> tex;
+    QScopedPointer<QOpenGLTexture> depth;
+    QScopedPointer<QOpenGLTexture> norm;
+
+    /*  Local transform matrix for depth / norm textures */
+    QMatrix4x4 mat;
 
     /*  Our unique copy of the evaluator
      *  (purloined from the EscapedShape)  */

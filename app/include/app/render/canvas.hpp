@@ -10,7 +10,6 @@
 #include "kernel/bind/bind_s7.h"
 
 #include "app/render/axes.hpp"
-#include "app/render/blitter.hpp"
 #include "app/render/picker.hpp"
 
 namespace App {
@@ -37,10 +36,7 @@ protected:
     /*  Draws the background axes  */
     Axes axes;
 
-    /*  Responsible for actually blitting rendered shapes to the screen */
-    Blitter blitter;
-
-    /*  Used to pick items */
+    /*  Used to draw + pick everything  */
     Picker picker;
 
     /*  Indicates that we should re-render the picker object

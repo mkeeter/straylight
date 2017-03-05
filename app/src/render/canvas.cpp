@@ -43,7 +43,6 @@ void Canvas::render()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     // Draw all of the scene objects
-    blitter.draw(M);
     axes.draw(M);
     picker.draw(mouse.toPoint());
 }
@@ -99,30 +98,20 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 
     //////////////////////////////////////////////////////////////////////////
     //  Update blitter with new shapes
-    QSet<App::Render::Renderer*> rs;
     for (const auto& s : scene->shapes)
     {
         auto result = s.second->getResult();
         if (result)
         {
-            blitter.addQuad(s.second, *result);
-
             if (auto h = picker.getHandle(s.first))
             {
-                if (auto s = dynamic_cast<ShapeHandle*>(h))
-                {
-                    s->updateTexture(*result);
-                }
-                else
-                {
-                    assert(false);
-                }
+                auto s = dynamic_cast<ShapeHandle*>(h);
+                assert(s);
+                s->updateTexture(result);
             }
             delete result;
         }
-        rs.insert(s.second);
     }
-    blitter.prune(rs);
 
     //////////////////////////////////////////////////////////////////////////
     std::set<Graph::CellKey> hs;
