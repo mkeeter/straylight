@@ -200,6 +200,11 @@ void Scene::updateFrom(const Graph::Response& r)
             {
                 shapes.at(k)->deleteWhenNotRunning();
                 shapes.erase(k);
+                if (handles.count(k))
+                {
+                    assert(dynamic_cast<ShapeHandle*>(handles.at(k)));
+                    handles.erase(k);
+                }
                 changed = true;
             }
 
