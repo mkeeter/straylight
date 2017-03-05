@@ -10,17 +10,23 @@ out vec4 fragColor;
 
 vec4 shade(vec3 n)
 {
+    // Calculate dot product coming in from three different angles
+    // (imitating three-point lighting)
+    vec3 n_ = normalize(n);
+    float key = dot(n_, vec3(0.0f,   0.0f, 1.0f));
+    float fill = max(0.0f, dot(n_, vec3(0.4f, -0.4f, 0.8f)));
+    float back = max(0.0f, dot(n_, vec3(-0.6f, 0.6f, 0.5f)));
+
+    // Mix the three lights to get an overall brightness
+    float brightness = key * 0.5f + fill * 0.4f + back * 0.1f;
+
+    // Fake gamma correction
+    brightness = sqrt(brightness);
+
     vec3 light = vec3(0.99f, 0.96f, 0.89f);
-    vec3 dark  = vec3(0.20f, 0.25f, 0.30f);
+    vec3 dark  = vec3(0.10f, 0.15f, 0.20f);
 
-    // a is a light pointed directly down
-    float a = dot(n, vec3(0.0f,   0.0f, 1.0f));
-
-    // b is a light coming in from an angle
-    float b = dot(n, vec3(0.57f, 0.57f, 0.57f));
-
-    return vec4((a*light + (1.0f - a)*dark)*0.35f +
-                (b*light + (1.0f - b)*dark)*0.65f, 1.0f);
+    return vec4(brightness * light + (1 - brightness) * dark, 1.0f);
 }
 
 void main()
@@ -40,7 +46,7 @@ void main()
         }
         else
         {
-            fragColor = vec4(texture(norm, tex_coord).rgb, 1.0f); //shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
+            fragColor = shade(2.0f * (texture(norm, tex_coord).rgb - 0.5f));
         }
     }
 }
