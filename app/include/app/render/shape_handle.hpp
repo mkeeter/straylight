@@ -7,6 +7,7 @@
 
 #include "app/render/handle.hpp"
 #include "app/render/renderer.hpp"
+#include "app/render/shape_drag.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,12 +68,8 @@ protected:
     /*  Local transform matrix for depth / norm textures */
     QMatrix4x4 mat;
 
-    /*  Our unique copy of the evaluator
-     *  (purloined from the EscapedShape)  */
-    std::unique_ptr<Kernel::Evaluator> eval;
-
-    /*  Map from interpreter thread to local vars  */
-    boost::bimap<Kernel::Cache::VarId, Kernel::Cache::VarId> vars;
+    /*  Our local drag object  */
+    ShapeDrag drag;
 };
 
 }   // namespace Render

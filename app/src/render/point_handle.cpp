@@ -16,12 +16,6 @@ QOpenGLShaderProgram* PointHandle::shader_dotted;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PointHandle::PointHandle()
-    : drag(new PointDrag())
-{
-    // Nothing to do here
-}
-
 void PointHandle::setShaderVars(
         const QMatrix4x4& world, const QMatrix4x4& proj,
         QOpenGLShaderProgram& shader, Picker::DrawMode mode, QRgb color)
@@ -80,8 +74,7 @@ bool PointHandle::updateFrom(App::Bridge::EscapedHandle* h)
     bool changed = (center != p->pos);
     center = p->pos;
 
-    assert(drag.get());
-    changed |= drag->updateFrom(p);
+    changed |= drag.updateFrom(p);
 
     return changed;
 }
@@ -139,8 +132,8 @@ Drag* PointHandle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
     (void)M;
     (void)cursor;
 
-    drag->startDrag(center);
-    return drag.get();
+    drag.startDrag(center);
+    return &drag;
 }
 
 }   // namespace Render

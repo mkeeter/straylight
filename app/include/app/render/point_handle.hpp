@@ -17,8 +17,6 @@ namespace Render {
 class PointHandle : public Handle
 {
 public:
-    PointHandle();
-
     /*
      *  Draws the point in the 3D viewport
      */
@@ -63,7 +61,8 @@ protected:
 
     static const int segments=128;
 
-    std::unique_ptr<PointDrag> drag;
+    /*  The drag object is owned by the handle  */
+    PointDrag drag;
 };
 
 }   // namespace Render

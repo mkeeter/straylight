@@ -50,7 +50,7 @@ bool ShapeHandle::updateFrom(App::Bridge::EscapedHandle* h)
     auto s = dynamic_cast<Bridge::EscapedShape*>(h);
     assert(s);
 
-    eval.reset(s->eval);
+    drag.updateFrom(s);
     return false;
 }
 
