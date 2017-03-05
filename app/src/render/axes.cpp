@@ -151,7 +151,19 @@ Axes::Axes()
     }
 }
 
-void Axes::draw(QMatrix4x4 M)
+void Axes::drawSolid(QMatrix4x4 M)
+{
+    shader.bind();
+    glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, M.data());
+
+    solid_vao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 54);
+    solid_vao.release();
+
+    shader.release();
+}
+
+void Axes::drawWire(QMatrix4x4 M)
 {
     shader.bind();
     glUniformMatrix4fv(shader.uniformLocation("m"), 1, GL_FALSE, M.data());
@@ -160,10 +172,6 @@ void Axes::draw(QMatrix4x4 M)
     wire_vao.bind();
     glDrawArrays(GL_LINES, 0, 6);
     glEnable(GL_DEPTH_TEST);
-
-    solid_vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, 54);
-    solid_vao.release();
 
     shader.release();
 }

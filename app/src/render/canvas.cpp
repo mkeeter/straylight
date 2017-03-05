@@ -43,8 +43,9 @@ void Canvas::render()
     }
 
     // Draw all of the scene objects
-    axes.draw(M);
+    axes.drawSolid(M);
     picker.draw(mouse.toPoint());
+    axes.drawWire(M);
 }
 
 void Canvas::synchronize(QQuickFramebufferObject *item)

@@ -12,7 +12,8 @@ class Axes : public QOpenGLFunctions
 {
 public:
     Axes();
-    void draw(QMatrix4x4 M);
+    void drawSolid(QMatrix4x4 M);
+    void drawWire(QMatrix4x4 M);
 
 protected:
     QOpenGLBuffer solid_vbo;
