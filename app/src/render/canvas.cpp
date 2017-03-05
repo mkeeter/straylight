@@ -36,11 +36,11 @@ void Canvas::render()
         picker.draw({0,0}, Picker::DRAW_PICKER);
         picker.setImage(framebufferObject()->toImage(false));
         picker_changed = false;
-    }
 
-    //  toImage releases binding for some reason
-    framebufferObject()->bind();
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        //  toImage releases binding for some reason
+        framebufferObject()->bind();
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    }
 
     // Draw all of the scene objects
     axes.draw(M);
