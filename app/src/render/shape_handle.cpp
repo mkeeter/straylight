@@ -54,7 +54,7 @@ bool ShapeHandle::updateFrom(App::Bridge::EscapedHandle* h)
     return false;
 }
 
-void ShapeHandle::updateTexture(const Renderer::Result* imgs)
+void ShapeHandle::updateTexture(Renderer::Result* imgs)
 {
     if (!depth.data())
     {
@@ -81,6 +81,10 @@ void ShapeHandle::updateTexture(const Renderer::Result* imgs)
 
     depth->setData(QOpenGLTexture::Depth, QOpenGLTexture::Float32, imgs->depth->data());
     norm->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, imgs->norm->data());
+
+    _depth.reset(imgs->depth.release());
+    _norm.reset(imgs->norm.release());
+
     mat = imgs->M;
 }
 

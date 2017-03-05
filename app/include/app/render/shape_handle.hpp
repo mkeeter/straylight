@@ -35,7 +35,7 @@ public:
     /*
      *  Updates the picker texture
      */
-    void updateTexture(const Renderer::Result* imgs);
+    void updateTexture(Renderer::Result* imgs);
 
     /*
      *  Returns a drag pointer
@@ -59,6 +59,10 @@ protected:
 
     QScopedPointer<QOpenGLTexture> depth;
     QScopedPointer<QOpenGLTexture> norm;
+
+    /*  Depth and normal images are claimed from Renderer::Result  */
+    std::unique_ptr<Kernel::DepthImage> _depth;
+    std::unique_ptr<Kernel::NormalImage> _norm;
 
     /*  Local transform matrix for depth / norm textures */
     QMatrix4x4 mat;
