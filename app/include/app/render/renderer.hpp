@@ -95,6 +95,7 @@ protected:
      *  (this would be nicer as a variant type) */
     Task next;
     enum { NOTHING, NEXT, DELETE } todo;
+    std::mutex todo_lock;
 
     QFuture<void> future;
     QFutureWatcher<void> watcher;

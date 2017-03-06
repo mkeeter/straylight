@@ -31,6 +31,7 @@ Renderer::~Renderer()
 
 void Renderer::deleteWhenNotRunning()
 {
+    std::lock_guard<std::mutex> lock(todo_lock);
     if (!watcher.isRunning())
     {
         delete this;
@@ -54,6 +55,7 @@ bool Renderer::updateVars(Kernel::Tree tree)
 
 void Renderer::enqueue(QMatrix4x4 mat, QSize size)
 {
+    std::lock_guard<std::mutex> lock(todo_lock);
     if (todo != DELETE)
     {
         next = Task(mat, size, base_level);
@@ -72,6 +74,7 @@ Renderer::Result* Renderer::getResult()
 
 void Renderer::onRenderFinished()
 {
+    std::lock_guard<std::mutex> lock(todo_lock);
     if (todo == DELETE)
     {
         delete this;
