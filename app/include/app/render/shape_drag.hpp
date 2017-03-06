@@ -48,7 +48,7 @@ protected:
 
     /*  This is the drag normal.  It is in world space and depends on
      *  the normal where the user clicked on the shape  */
-    QVector3D dir;
+    QVector3D norm;
 
     /*  Map from interpreter thread to local vars  */
     boost::bimap<Kernel::Cache::VarId, Kernel::Cache::VarId> vars;

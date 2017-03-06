@@ -90,8 +90,6 @@ void ShapeHandle::updateTexture(Renderer::Result* imgs)
 
 Drag* ShapeHandle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
 {
-    qDebug() << cursor;
-    qDebug() << _depth->rows() << _depth->cols();
     const auto c = (cursor + QVector2D(1, 1)) / 2;
     const int x = c.x() * _depth->cols();
     const int y = c.y() * _depth->rows();
@@ -99,11 +97,9 @@ Drag* ShapeHandle::getDrag(const QMatrix4x4& M, const QVector2D& cursor)
 
     const QVector3D pos_screen(cursor.x(), cursor.y(), depth);
     const QVector3D pos = M * pos_screen;
-    qDebug() << M;
-    qDebug() << pos_screen;
-    qDebug() << pos;
-    qDebug() << "";
-    return nullptr;
+
+    drag.startDrag(pos);
+    return &drag;
 }
 
 void ShapeHandle::initGL()
