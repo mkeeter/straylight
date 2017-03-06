@@ -66,9 +66,8 @@ void Renderer::enqueue(QMatrix4x4 mat, QSize size)
 
 Renderer::Result* Renderer::getResult()
 {
-    auto r = result;
-    result = nullptr;
-    return r;
+    std::lock_guard<std::mutex> lock(result_lock);
+    return result.release();
 }
 
 void Renderer::onRenderFinished()
@@ -138,8 +137,10 @@ void Renderer::run(Task t)
         // Then map the back Z value to 0
         *out.first = (*out.first == r.Z.values.back()).select(0, *out.first);
 
-        // Store the result in the parent object
-        result = new Result(out.first, out.second, inv);
+        {   // Store the result, safe against other threads
+            std::lock_guard<std::mutex> lock(result_lock);
+            result.reset(new Result(out.first, out.second, inv));
+        }
         emit(done());
 
         auto dt = start_time.elapsed();

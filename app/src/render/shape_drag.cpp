@@ -35,7 +35,6 @@ Kernel::Solver::Solution ShapeDrag::dragTo(const QMatrix4x4& M,
     const auto n2 = QVector3D::crossProduct(cursor_ray, n);
     auto nearest = start + QVector3D::dotProduct(cursor_pos - start, n2) /
         QVector3D::dotProduct(norm, n2) * norm;
-    qDebug() << "nearest point:" << nearest;
 
     auto sol = Kernel::Solver::findRoot(
             *shape, {nearest.x(), nearest.y(), nearest.z()});

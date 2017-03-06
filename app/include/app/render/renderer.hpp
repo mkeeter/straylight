@@ -99,7 +99,8 @@ protected:
     QFuture<void> future;
     QFutureWatcher<void> watcher;
 
-    Result* result;
+    std::mutex result_lock;
+    std::unique_ptr<Result> result;
 };
 
 }   // namespace Render
