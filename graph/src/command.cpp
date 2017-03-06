@@ -119,7 +119,7 @@ Command Command::SetExpr(CellIndex i, const std::string& expr)
 
 Command Command::SetExprOrInput(const CellKey& k, const std::string& expr)
 {
-    return { SET_EXPR, "", expr, 0, k.second, 0, k.first };
+    return { SET_EXPR_OR_INPUT, "", expr, 0, k.second, 0, k.first };
 }
 
 Command Command::SetInput(InstanceIndex i, CellIndex c,
