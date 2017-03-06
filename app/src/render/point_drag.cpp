@@ -38,14 +38,9 @@ bool PointDrag::updateFrom(App::Bridge::EscapedPointHandle* p)
 Kernel::Solver::Solution PointDrag::dragTo(const QMatrix4x4& M,
                                            const QVector2D& cursor)
 {
-    const QVector3D offset = M * QVector3D(0, 0, 0);
-    const QVector3D _cursor_ray = (M * QVector3D(0, 0, -1) - offset).normalized();
-
-    // Position _cursor_pos to minimize travel along the ray from start point
-    // TODO: clean up this vector math
-    const QVector3D base_pos = M * QVector3D(cursor.x(), cursor.y(), 0);
-    const QVector3D _cursor_pos = base_pos + _cursor_ray *
-        QVector3D::dotProduct(start - base_pos, _cursor_ray);
+    auto world = toWorld(M, cursor, start);
+    auto _cursor_pos = world.first;
+    auto _cursor_ray = world.second;
 
     // Set position and delta vector
     std::set<Kernel::Cache::VarId> masked;
