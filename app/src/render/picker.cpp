@@ -47,6 +47,16 @@ void Picker::draw(QPoint p, const Graph::Env& env, Picker::DrawMode mode)
         {
             to_draw[h.second->tag()].push_back(h.second);
         }
+        // IO ports are drawn in their parent environment
+        else if (h.second->isIO())
+        {
+            auto env_ = h.first.first;
+            env_.pop_back();
+            if (boost::algorithm::starts_with(env, env_))
+            {
+                to_draw[h.second->tag()].push_back(h.second);
+            }
+        }
     }
 
     for (const auto& level : to_draw)

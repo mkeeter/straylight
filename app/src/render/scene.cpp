@@ -167,6 +167,30 @@ void Scene::updateFrom(const Graph::Response& r)
 
     switch (r.op)
     {
+        case Graph::Response::IO_VALUE_CHANGED:
+        {
+            Graph::CellKey key(env, Graph::CellIndex(r.other));
+            if (handles.count(key))
+            {
+                changed |= handles.at(key)->setIO(true);
+            }
+            break;
+        }
+        case Graph::Response::IO_DELETED:
+        {
+            const Graph::CellIndex cell(r.other);
+            if (cells.count(cell))
+            {
+                for (const auto& key : cells.at(cell))
+                {
+                    if (handles.count(key))
+                    {
+                        changed |= handles.at(key)->setIO(false);
+                    }
+                }
+            }
+            break;
+        }
         case Graph::Response::CELL_ERASED:
         {
             const Graph::CellIndex cell(r.target);

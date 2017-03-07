@@ -120,6 +120,21 @@ void AsyncRoot::eraseInstance(const InstanceIndex& instance)
     auto lock = Lock();
 
     const auto parent = tree.parentOf(instance);
+    const auto sheet = tree.at(instance).instance()->sheet;
+
+    // Notify the changelog about all of the instance IO that disappeared
+    for (auto cell : tree.iterItems(sheet))
+    {
+        if (auto c = tree.at(cell).cell())
+        {
+            if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
+            {
+                    changes.push(Response::IOErased(
+                                parent, instance, Graph::CellIndex(cell)));
+            }
+        }
+    }
+
     Root::eraseInstance(instance);
     changes.push(Response::InstanceErased(parent, instance));
 }

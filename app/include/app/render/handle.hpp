@@ -64,6 +64,12 @@ public:
     void glUniformColor3f(QOpenGLShaderProgram& shader,
                           const QString& var, const QRgb color);
 
+    /*
+     *  Getter / setter for is_io
+     */
+    bool isIO() const { return is_io; }
+    bool setIO(bool i) { bool c = (is_io != i); is_io = i; return c; }
+
 protected:
     /*
      *  Overloaded by derived classes to build VBOs, etc
