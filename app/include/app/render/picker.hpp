@@ -26,7 +26,7 @@ public:
      *  Renders all Handles, using the mouse position for highlights
      */
     enum DrawMode { DRAW_PICKER, DRAW_NORMAL, DRAW_HOVER, DRAW_DRAG };
-    void draw(QPoint p, DrawMode mode=DRAW_NORMAL);
+    void draw(QPoint p, const Graph::Env& env, DrawMode mode=DRAW_NORMAL);
 
     /*
      *  Returns a handle at the given point, or nullptr

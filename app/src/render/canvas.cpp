@@ -33,7 +33,7 @@ void Canvas::render()
     // Draw the picker layer (with a dummy mouse position)
     if (picker_changed)
     {
-        picker.draw({0,0}, Picker::DRAW_PICKER);
+        picker.draw({0,0}, env, Picker::DRAW_PICKER);
         picker.setImage(framebufferObject()->toImage(false));
         picker_changed = false;
 
@@ -44,7 +44,7 @@ void Canvas::render()
 
     // Draw all of the scene objects
     axes.drawSolid(M);
-    picker.draw(mouse.toPoint());
+    picker.draw(mouse.toPoint(), env);
     axes.drawWire(M);
 }
 
@@ -91,12 +91,17 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
 
     //////////////////////////////////////////////////////////////////////////
     //  Update view parameters
-    const bool view_changed = (M != M_) || (window_size != window_size_);
+    const bool view_changed =
+        (M != M_) ||
+        (window_size != window_size_) ||
+        (scene->env != env);
 
     if (view_changed)
     {
         M = M_;
         window_size = window_size_;
+        env = scene->env;
+
         picker.setView(M, window_size);
     }
 

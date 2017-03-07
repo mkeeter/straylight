@@ -48,6 +48,11 @@ public:
      */
     void updateFrom(const Graph::Response& r);
 
+    /*
+     *  Sets the env variable and triggers a render update
+     */
+    void setEnv(Graph::Env env_);
+
 protected:
     /*
      *  Returns the projection matrix
@@ -89,6 +94,10 @@ protected:
 
     /*  This typedef reflects a cell + handle tag  */
     std::map<Graph::CellKey, Handle*> handles;
+
+    /*  Env for drawing
+     *  We only render Handles that are in or above the given env  */
+    Graph::Env env;
 
     friend class Canvas;
 };

@@ -239,7 +239,12 @@ void GraphModel::updateFrom(const Graph::Response& r)
 
 void GraphModel::viewEnvChanged(QList<int> env)
 {
-    qDebug() << env;
+    Graph::Env env_;
+    for (auto e : env)
+    {
+        env_.push_back(e);
+    }
+    scene->setEnv(env_);
 }
 
 void GraphModel::gotResponse()

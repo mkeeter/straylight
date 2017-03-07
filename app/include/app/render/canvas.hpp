@@ -42,6 +42,9 @@ protected:
     /*  Indicates that we should re-render the picker object
      *  (this is an expensive operation!)  */
     bool picker_changed = true;
+
+    /*  Only handles at or above the given env are drawn  */
+    Graph::Env env;
 };
 
 }   // namespace Render

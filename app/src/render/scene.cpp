@@ -264,5 +264,15 @@ void Scene::updateFrom(const Graph::Response& r)
     }
 }
 
+
+void Scene::setEnv(Graph::Env env_)
+{
+    if (env_ != env)
+    {
+        env = env_;
+        update();
+    }
+}
+
 }   // namespace Render
 }   // namespace App

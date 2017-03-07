@@ -1,3 +1,5 @@
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "app/render/picker.hpp"
 #include "app/render/point_handle.hpp"
 
@@ -31,14 +33,30 @@ Handle* Picker::pickAt(QPoint p)
     }
 }
 
-void Picker::draw(QPoint p, Picker::DrawMode mode)
+void Picker::draw(QPoint p, const Graph::Env& env, Picker::DrawMode mode)
 {
     auto picked = pickAt(p);
+
+    //  Store a list of handles for each rank, so that we draw in
+    //  correct order (e.g. points above shapes)
+    std::map<int, std::list<Handle*>> to_draw;
+
     for (auto& h : handles)
     {
-        h.second->draw(M, proj, (mode == DRAW_NORMAL)
-                ? (h.second == picked ? DRAW_HOVER : DRAW_NORMAL)
-                : mode, colors.right.at(h.second));
+        if (boost::algorithm::starts_with(env, h.first.first))
+        {
+            to_draw[h.second->tag()].push_back(h.second);
+        }
+    }
+
+    for (const auto& level : to_draw)
+    {
+        for (auto& h : level.second)
+        {
+            h->draw(M, proj, (mode == DRAW_NORMAL)
+                    ? (h == picked ? DRAW_HOVER : DRAW_NORMAL)
+                    : mode, colors.right.at(h));
+        }
     }
 }
 
