@@ -176,6 +176,22 @@ void Scene::updateFrom(const Graph::Response& r)
             }
             break;
         }
+        case Graph::Response::IO_INPUT_CREATED:
+        case Graph::Response::IO_OUTPUT_CREATED:
+        {
+            const Graph::CellIndex cell(r.other);
+            if (cells.count(cell))
+            {
+                for (const auto& key : cells.at(cell))
+                {
+                    if (handles.count(key))
+                    {
+                        changed |= handles.at(key)->setIO(true);
+                    }
+                }
+            }
+            break;
+        }
         case Graph::Response::IO_DELETED:
         {
             const Graph::CellIndex cell(r.other);

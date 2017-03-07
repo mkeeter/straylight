@@ -129,6 +129,8 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::IO_DELETED:
         case Graph::Response::IO_VALUE_CHANGED:
+        case Graph::Response::IO_INPUT_CREATED:
+        case Graph::Response::IO_OUTPUT_CREATED:
         {
             if (scene)
             {
@@ -141,8 +143,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::CELL_TYPE_CHANGED:
         case Graph::Response::CELL_RENAMED:
         case Graph::Response::IO_EXPR_CHANGED:
-        case Graph::Response::IO_INPUT_CREATED:
-        case Graph::Response::IO_OUTPUT_CREATED:
         case Graph::Response::IO_RENAMED:
         case Graph::Response::SHEET_AVAILABLE:
         case Graph::Response::SHEET_UNAVAILABLE:
