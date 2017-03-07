@@ -72,6 +72,10 @@ protected:
 
     /*  Stores whether we've called initalizeOpenGLFunctions */
     bool gl_ready = false;
+
+    /*  If true, this handle is exposed to the parent sheet as an I/O port
+     *  This means it is drawn at a higher level of view environment  */
+    bool is_io = false;
 };
 
 }   // namespace Render
