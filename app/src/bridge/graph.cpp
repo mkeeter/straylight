@@ -237,6 +237,11 @@ void GraphModel::updateFrom(const Graph::Response& r)
     }
 }
 
+void GraphModel::viewEnvChanged(QList<int> env)
+{
+    qDebug() << env;
+}
+
 void GraphModel::gotResponse()
 {
     if (!responses.empty())

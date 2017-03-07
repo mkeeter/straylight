@@ -20,6 +20,7 @@ SplitView {
 
     Component.onCompleted: {
         Graph.instanceErased.connect(onInstanceErased)
+        envChanged.connect(function() { Graph.viewEnvChanged(env) })
     }
 
     function onInstanceErased(instance) {

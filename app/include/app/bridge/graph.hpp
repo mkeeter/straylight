@@ -129,6 +129,15 @@ signals:
     void deserialized(QString error);
 
 protected slots:
+    /*
+     *  When the viewport env changes, this is called to change which
+     *  handles are drawn.
+     */
+    void viewEnvChanged(QList<int> env);
+
+    /*
+     *  Used to signal a response from the response watcher thread
+     */
     void gotResponse();
 
     /*
