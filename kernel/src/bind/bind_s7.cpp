@@ -114,6 +114,7 @@ static char* shape_print(s7_scheme* sc, void* s)
     Tree t = static_cast<shape_t*>(s)->tree;
     std::stringstream ss;
 
+#if 0   // verbose printing of variables and expressions
     if (t.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
     {
         if (t.opcode() == Kernel::Opcode::VAR)
@@ -125,10 +126,17 @@ static char* shape_print(s7_scheme* sc, void* s)
             ss << t.value() << " (expression at <" << s << ">)";
         }
     }
+#else
+    if (t.flags() & Tree::FLAG_LOCATION_AGNOSTIC)
+    {
+        ss << t.value();
+    }
+#endif
     else
     {
         ss << "#<shape at " << s << ">";
     }
+
     auto str = ss.str();
 
     auto out = static_cast<char*>(calloc(str.length() + 1, sizeof(char)));
