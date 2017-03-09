@@ -346,20 +346,20 @@ std::string Root::loadString(const std::string& s)
     }
     else
     {
-        std::set<Cell*> cells;
-
+        // Queue up dirty evaluation for cells in tree
         for (auto& c : tree.iterCellsRecursive(Tree::ROOT_SHEET))
         {
             c.first.push_front(Tree::ROOT_INSTANCE);
-            cells.insert(tree.at(c.second).cell());
             pushDirty(c);
         }
 
         // Parse cells to grab expression type here
-        for (auto& c : cells)
+        for (auto& i : tree.iterAll())
         {
-            assert(c);
-            c->type = interpreter.cellType(c->expr);
+            if (auto c = tree.at(i).cell())
+            {
+                c->type = interpreter.cellType(c->expr);
+            }
         }
         sync();
 

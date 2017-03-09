@@ -127,6 +127,11 @@ public:
     const static SheetIndex ROOT_SHEET;
     const static InstanceIndex ROOT_INSTANCE;
 
+    /*
+     *  Returns a list of every item in the tree
+     */
+    std::list<ItemIndex> iterAll() const;
+
 protected:
     /*
      *  Export the given sheet to JSON (recursively)

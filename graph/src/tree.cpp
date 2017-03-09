@@ -165,6 +165,16 @@ std::list<CellKey> Tree::iterCellsRecursive(const SheetIndex& s) const
     return out;
 }
 
+std::list<ItemIndex> Tree::iterAll() const
+{
+    std::list<ItemIndex> out;
+    for (const auto& i : storage)
+    {
+        out.push_back(i.first);
+    }
+    return out;
+}
+
 std::list<std::pair<Env, ItemIndex>> Tree::iterItemsRecursive(const SheetIndex& s) const
 {
     std::list<std::pair<Env, ItemIndex>> out;
