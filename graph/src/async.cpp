@@ -9,22 +9,22 @@ AsyncRoot::AsyncRoot()
     // Announce all of the interpreter's keywords
     for (const auto& k : interpreter.keywords())
     {
-        changes.push(Response::ReservedWord(k));
+        pushChange(Response::ReservedWord(k));
     }
 
     for (const auto& i : _bad_item_names)
     {
-        changes.push(Response::ItemNameRegexBad(i.first, i.second));
+        pushChange(Response::ItemNameRegexBad(i.first, i.second));
         bad_item_names.push_back({std::regex(i.first), i.second});
     }
 
     for (const auto& i : _bad_sheet_names)
     {
-        changes.push(Response::SheetNameRegexBad(i.first, i.second));
+        pushChange(Response::SheetNameRegexBad(i.first, i.second));
         bad_sheet_names.push_back({std::regex(i.first), i.second});
     }
-    changes.push(Response::ItemNameRegex(_good_item_name));
-    changes.push(Response::SheetNameRegex(_good_sheet_name));
+    pushChange(Response::ItemNameRegex(_good_item_name));
+    pushChange(Response::SheetNameRegex(_good_sheet_name));
 }
 
 void AsyncRoot::insertCell(
@@ -36,8 +36,8 @@ void AsyncRoot::insertCell(
     Root::insertCell(sheet, cell, name, expr);
     const auto type = interpreter.cellType(expr);
 
-    changes.push(Response::CellInserted(sheet, cell, name, expr));
-    changes.push(Response::CellTypeChanged(sheet, cell, type));
+    pushChange(Response::CellInserted(sheet, cell, name, expr));
+    pushChange(Response::CellTypeChanged(sheet, cell, type));
 
     // Then, mark input / output changes
     if (sheet != Tree::ROOT_SHEET)
@@ -47,7 +47,7 @@ void AsyncRoot::insertCell(
             // TODO: this is wrong, as it's the default expr not the input expr
             for (auto i : tree.instancesOf(sheet))
             {
-                changes.push(Response::InputCreated(tree.parentOf(i), i, cell,
+                pushChange(Response::InputCreated(tree.parentOf(i), i, cell,
                             name, interpreter.defaultExpr(expr)));
             }
         }
@@ -55,7 +55,7 @@ void AsyncRoot::insertCell(
         {
             for (auto i : tree.instancesOf(sheet))
             {
-                changes.push(Response::OutputCreated(tree.parentOf(i), i, cell, name));
+                pushChange(Response::OutputCreated(tree.parentOf(i), i, cell, name));
             }
         }
     }
@@ -71,20 +71,20 @@ void AsyncRoot::insertInstance(
 
     Root::insertInstance(parent, i, name, target);
 
-    changes.push(Response::InstanceInserted(parent, i, target, name, tree.nameOf(target)));
+    pushChange(Response::InstanceInserted(parent, i, target, name, tree.nameOf(target)));
     for (auto item : tree.iterItems(target))
     {
         if (auto c = tree.at(item).cell())
         {
             if (c->type == Cell::INPUT)
             {
-                changes.push(Response::InputCreated(
+                pushChange(Response::InputCreated(
                         parent, i, CellIndex(item), tree.nameOf(item),
                         tree.at(i).instance()->inputs.at(CellIndex(item))));
             }
             else if (c->type == Cell::OUTPUT)
             {
-                changes.push(Response::OutputCreated(
+                pushChange(Response::OutputCreated(
                         parent, i, CellIndex(item), tree.nameOf(item)));
             }
         }
@@ -101,14 +101,14 @@ void AsyncRoot::eraseCell(const CellIndex& cell)
     const auto sheet = tree.parentOf(cell);
     Root::eraseCell(cell);
 
-    changes.push(Response::CellErased(sheet, cell));
+    pushChange(Response::CellErased(sheet, cell));
 
     // Mark I/O changes (TODO)
     if (type == Cell::INPUT || type == Cell::OUTPUT)
     {
         for (auto i : tree.instancesOf(sheet))
         {
-            changes.push(Response::IOErased(tree.parentOf(i), i, cell));
+            pushChange(Response::IOErased(tree.parentOf(i), i, cell));
         }
     }
 
@@ -129,14 +129,14 @@ void AsyncRoot::eraseInstance(const InstanceIndex& instance)
         {
             if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
             {
-                    changes.push(Response::IOErased(
+                    pushChange(Response::IOErased(
                                 parent, instance, Graph::CellIndex(cell)));
             }
         }
     }
 
     Root::eraseInstance(instance);
-    changes.push(Response::InstanceErased(parent, instance));
+    pushChange(Response::InstanceErased(parent, instance));
 }
 
 bool AsyncRoot::setExpr(const CellIndex& c, const std::string& expr)
@@ -153,12 +153,12 @@ bool AsyncRoot::setExpr(const CellIndex& c, const std::string& expr)
     }
 
     // Mark that the expression itself has changed
-    changes.push(Response::ExprChanged(parent, c, expr));
+    pushChange(Response::ExprChanged(parent, c, expr));
 
     // If the type changed then pass that info along to the changelog
     if (prev_type != cell->type)
     {
-        changes.push(Response::CellTypeChanged(parent, c, cell->type));
+        pushChange(Response::CellTypeChanged(parent, c, cell->type));
     }
 
     auto d = (cell->type == Cell::INPUT) ? interpreter.defaultExpr(expr) : "";
@@ -170,20 +170,20 @@ bool AsyncRoot::setExpr(const CellIndex& c, const std::string& expr)
 
             if (prev_type != Cell::INPUT && cell->type == Cell::INPUT)
             {
-                changes.push(Response::InputCreated(p, i, c, tree.nameOf(c), d));
+                pushChange(Response::InputCreated(p, i, c, tree.nameOf(c), d));
             }
             else if (prev_type == Cell::INPUT && cell->type != Cell::INPUT)
             {
-                changes.push(Response::IOErased(p, i, c));
+                pushChange(Response::IOErased(p, i, c));
             }
 
             if (prev_type != Cell::OUTPUT && cell->type == Cell::OUTPUT)
             {
-                changes.push(Response::OutputCreated(p, i, c, tree.nameOf(c)));
+                pushChange(Response::OutputCreated(p, i, c, tree.nameOf(c)));
             }
             else if (prev_type == Cell::OUTPUT && cell->type != Cell::OUTPUT)
             {
-                changes.push(Response::IOErased(p, i, c));
+                pushChange(Response::IOErased(p, i, c));
             }
         }
     }
@@ -203,7 +203,7 @@ bool AsyncRoot::setInput(const InstanceIndex& instance, const CellIndex& cell,
     }
     else
     {
-        changes.push(Response::InputExprChanged(parent, instance, cell, expr));
+        pushChange(Response::InputExprChanged(parent, instance, cell, expr));
         return true;
     }
 }
@@ -221,21 +221,21 @@ bool AsyncRoot::renameItem(const ItemIndex& item, const std::string& name)
 
         if (auto c = tree.at(item).cell())
         {
-            changes.push(Response::CellRenamed(
+            pushChange(Response::CellRenamed(
                         parent, CellIndex(item), name));
 
             if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
             {
                 for (auto i : tree.instancesOf(parent))
                 {
-                    changes.push(Response::IORenamed(
+                    pushChange(Response::IORenamed(
                         tree.parentOf(i), i, CellIndex(item), name));
                 }
             }
         }
         else
         {
-            changes.push(Response::InstanceRenamed(
+            pushChange(Response::InstanceRenamed(
                     parent, InstanceIndex(item), name));
         }
         return true;
@@ -248,13 +248,13 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     auto lock = Lock();
     Root::insertSheet(parent, sheet, name);
 
-    changes.push(Response::SheetCreated(parent, sheet, name));
+    pushChange(Response::SheetCreated(parent, sheet, name));
 
     for (auto b : tree.sheetsBelow(parent))
     {
         if (b != parent)
         {
-            changes.push(Response::SheetAvailable(b, sheet, name, b != sheet));
+            pushChange(Response::SheetAvailable(b, sheet, name, b != sheet));
         }
     }
 
@@ -262,7 +262,7 @@ void AsyncRoot::insertSheet(const SheetIndex& parent, const SheetIndex& sheet,
     {
         if (a != sheet)
         {
-            changes.push(Response::SheetAvailable(sheet, a, tree.nameOf(a), true));
+            pushChange(Response::SheetAvailable(sheet, a, tree.nameOf(a), true));
         }
     }
 }
@@ -274,13 +274,13 @@ void AsyncRoot::renameSheet(const SheetIndex& sheet, const std::string& name)
 
     for (auto s : tree.sheetsBelow(tree.parentOf(sheet)))
     {
-        changes.push(Response::SheetRenamed(s, sheet, name));
+        pushChange(Response::SheetRenamed(s, sheet, name));
     }
 
     // Inform all instances of this sheet that it has been renamed
     for (const auto& i : tree.instancesOf(sheet))
     {
-        changes.push(Response::InstanceSheetRenamed(tree.parentOf(i), i, name));
+        pushChange(Response::InstanceSheetRenamed(tree.parentOf(i), i, name));
     }
 }
 
@@ -295,7 +295,7 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
     {
         if (b != p)
         {
-            changes.push(Response::SheetUnavailable(b, s));
+            pushChange(Response::SheetUnavailable(b, s));
         }
     }
 
@@ -303,39 +303,45 @@ void AsyncRoot::eraseSheet(const SheetIndex& s)
     {
         if (a != s)
         {
-            changes.push(Response::SheetUnavailable(s, a));
+            pushChange(Response::SheetUnavailable(s, a));
         }
     }
 
-    changes.push(Response::SheetErased(p, s));
+    pushChange(Response::SheetErased(p, s));
 }
 
 void AsyncRoot::gotResult(const CellKey& k, const Value& result)
 {
     Root::gotResult(k, result);
 
-    auto escaped = translator ? (*translator)(Interpreter::untag(result.value))
-                              : nullptr;
-    changes.push(Response::ValueChanged(
-                tree.parentOf(k.second), k, result.str, result.valid,
-                escaped));
-
-    // Announce new values if this is an IO cell
-    auto c = tree.at(k.second).cell();
-    if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
+    // Avoid leaking translated values by only constructing them
+    // if we're connected (instead of using pushChange)
+    if (dirty.size() == 1)
     {
-        for (auto i : tree.instancesOf(tree.parentOf(k.second)))
+            auto escaped = translator
+                ? (*translator)(Interpreter::untag(result.value))
+                : nullptr;
+            changes.push(Response::ValueChanged(
+                        tree.parentOf(k.second), k, result.str, result.valid,
+                        escaped));
+
+        // Announce new values if this is an IO cell
+        auto c = tree.at(k.second).cell();
+        if (c->type == Cell::INPUT || c->type == Cell::OUTPUT)
         {
-            changes.push(Response::IOValueChanged(
-                tree.parentOf(i), i, CellIndex(k.second), k.first,
-                result.str, result.valid, escaped));
+            for (auto i : tree.instancesOf(tree.parentOf(k.second)))
+            {
+                changes.push(Response::IOValueChanged(
+                    tree.parentOf(i), i, CellIndex(k.second), k.first,
+                    result.str, result.valid, escaped));
+            }
         }
     }
 }
 
 void AsyncRoot::serialize()
 {
-    changes.push(Response::Serialized(tree.toString()));
+    pushChange(Response::Serialized(tree.toString()));
 }
 
 
@@ -344,7 +350,7 @@ std::string AsyncRoot::loadString(const std::string& json)
     auto lock = Lock();
 
     auto err = Root::loadString(json);
-    changes.push(Response::Serialized(err));
+    pushChange(Response::Serialized(err));
 
     ////////////////////////////////////////////////////////////////////////////
     // First, announce all of the sheets, building the skeleton of the graph
@@ -366,7 +372,7 @@ std::string AsyncRoot::loadString(const std::string& json)
             }
             if (sheet != Tree::ROOT_SHEET)
             {
-                changes.push(Response::SheetCreated(
+                pushChange(Response::SheetCreated(
                             tree.parentOf(sheet), sheet, tree.nameOf(sheet)));
             }
             sheets.push_back(sheet);
@@ -385,7 +391,7 @@ std::string AsyncRoot::loadString(const std::string& json)
             {
                 if (b != parent)
                 {
-                    changes.push(Response::SheetAvailable(
+                    pushChange(Response::SheetAvailable(
                                 b, sheet, name, b != sheet));
                 }
             }
@@ -394,7 +400,7 @@ std::string AsyncRoot::loadString(const std::string& json)
             {
                 if (a != sheet)
                 {
-                    changes.push(Response::SheetAvailable(
+                    pushChange(Response::SheetAvailable(
                                 sheet, a, tree.nameOf(a), true));
                 }
             }
@@ -411,7 +417,7 @@ std::string AsyncRoot::loadString(const std::string& json)
             }
             else if (auto n = tree.at(i).instance())
             {
-                changes.push(Response::InstanceInserted(
+                pushChange(Response::InstanceInserted(
                             sheet, InstanceIndex(i), n->sheet,
                             name, tree.nameOf(n->sheet)));
             }
@@ -426,8 +432,8 @@ std::string AsyncRoot::loadString(const std::string& json)
         auto c = tree.at(cell).cell();
         auto parent = tree.parentOf(cell);
 
-        changes.push(Response::CellInserted(parent, cell, name, c->expr));
-        changes.push(Response::CellTypeChanged(parent, cell, c->type));
+        pushChange(Response::CellInserted(parent, cell, name, c->expr));
+        pushChange(Response::CellTypeChanged(parent, cell, c->type));
 
         if (parent != Tree::ROOT_SHEET)
         {
@@ -436,12 +442,12 @@ std::string AsyncRoot::loadString(const std::string& json)
                 auto p = tree.parentOf(i);
                 if (c->type == Cell::INPUT)
                 {
-                    changes.push(Response::InputCreated(p, i, cell, name,
+                    pushChange(Response::InputCreated(p, i, cell, name,
                                 tree.at(i).instance()->inputs.at(cell)));
                 }
                 else if (c->type == Cell::OUTPUT)
                 {
-                    changes.push(Response::OutputCreated(p, i, cell, name));
+                    pushChange(Response::OutputCreated(p, i, cell, name));
                 }
             }
         }
@@ -482,6 +488,16 @@ void AsyncRoot::_run(shared_queue<Command>& input)
             auto cmd = input.pop();
             cmd(*this);
         }
+    }
+}
+
+void AsyncRoot::pushChange(const Response& response)
+{
+    // Only push changes through to the UI when we're not evaluating
+    // a nested sheet (with callSheet)
+    if (dirty.size() == 1)
+    {
+        changes.push(response);
     }
 }
 

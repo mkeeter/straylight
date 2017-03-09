@@ -73,6 +73,11 @@ protected:
      */
     void _run(shared_queue<Command>& input);
 
+    /*
+     *  Pushes a change, unless we're in a nested callSheet evaluation
+     */
+    void pushChange(const Response& response);
+
     /*  Queue of changes  */
     shared_queue<Response> changes;
 
