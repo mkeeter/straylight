@@ -381,7 +381,7 @@ std::string AsyncRoot::loadString(const std::string& json)
         {
             auto parent = tree.parentOf(sheet);
             auto name = tree.nameOf(sheet);
-            for (auto b : tree.sheetsBelow(parent))
+            for (auto b : tree.sheetsBelow(sheet))
             {
                 if (b != parent)
                 {
