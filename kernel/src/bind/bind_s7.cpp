@@ -155,8 +155,11 @@ static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
     assert(is_shape(obj));
 
     auto x = shape_new_(sc, s7_car(args), "shape-apply");
+    CHECK_SHAPE(x);
     auto y = shape_new_(sc, s7_cadr(args), "shape-apply");
+    CHECK_SHAPE(y);
     auto z = shape_new_(sc, s7_caddr(args), "shape-apply");
+    CHECK_SHAPE(z);
 
     auto e = to_tree(obj);
     return shape_new(sc, e.remap(to_tree(x), to_tree(y), to_tree(z)));

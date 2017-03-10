@@ -365,21 +365,24 @@ std::set<Cache::Id> Cache::findConnected(Id root) const
 
 Cache::Id Cache::rebuild(Id root, std::map<Id, Id> changed)
 {
-    // Deep copy of clauses so that changes don't invalidate iterators
-    decltype(data) tokens = data;
+    std::map<Id, Key> tokens;
+    for (auto c : findConnected(root))
+    {
+        tokens.insert({c, token(c)});
+    }
 
     // Iterate over weight levels from bottom to top
-    for (auto c : tokens.left)
+    for (auto c : tokens)
     {
         // Get child Ids
-        auto a = c.first.lhs();
-        auto b = c.first.rhs();
+        auto a = c.second.lhs();
+        auto b = c.second.rhs();
 
         // If either of the child pointers has changed, regenerate
         // the operation to ensure correct pointers and weight
         if (changed.count(a) || changed.count(b))
         {
-            changed.insert({c.second, operation(c.first.opcode(),
+            changed.insert({c.first, operation(c.second.opcode(),
                 changed.count(a) ? changed.at(a) : a,
                 changed.count(b) ? changed.at(b) : b)});
         }
@@ -440,7 +443,8 @@ std::map<Kernel::Cache::VarId, float> Cache::vars(Id id) const
 
 Cache::Id Cache::remap(Id root, Id x, Id y, Id z)
 {
-    return rebuild(root, {{X(), x}, {Y(), y}, {Z(), z}});
+    auto r = collapse(root);
+    return rebuild(r, {{X(), x}, {Y(), y}, {Z(), z}});
 }
 
 }   // namespace Kernel
