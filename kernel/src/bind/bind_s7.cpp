@@ -195,7 +195,14 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
             }
             else
             {
-                return s7_wrong_number_of_args_error(sc, func_name, list);
+                // FIXME
+                // This is an ugly hack where we make a Scheme string,
+                // which guarantees that it won't be GC'd for a little while,
+                // in order to make a heap-allocated string that escapes this
+                // function but will be deleted eventually
+                std::string err = std::string(func_name) + ": too few arguments: ~A";
+                auto err_sc = s7_make_string(sc, err.c_str());
+                return s7_wrong_number_of_args_error(sc, s7_string(err_sc), list);
             }
         }
         case 1:
