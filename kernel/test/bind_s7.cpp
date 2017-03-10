@@ -14,8 +14,14 @@ std::string eval(s7_scheme* sc, std::string expr)
 double num(s7_scheme* sc, std::string expr)
 {
     auto out = s7_eval_c_string(sc, expr.c_str());
-    assert(s7_is_number(out));
-    return s7_real(out);
+    if (s7_is_number(out))
+    {
+        return s7_real(out);
+    }
+    else if (Kernel::Bind::is_shape(out))
+    {
+        return Kernel::Bind::get_shape(out)->tree.value();
+    }
 }
 
 s7_scheme* get_scm()
