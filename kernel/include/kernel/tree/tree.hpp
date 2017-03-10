@@ -140,6 +140,12 @@ public:
     std::map<Kernel::Cache::VarId, float> vars() const
         { return parent->vars(id); }
 
+    /*
+     *  Applies a coordinate transform to the tree
+     */
+    Tree remap(Tree x, Tree y, Tree z) const
+        { return Tree(parent, parent->remap(id, x.id, y.id, z.id)); }
+
 protected:
     /*
      *  Private constructor

@@ -438,4 +438,9 @@ std::map<Kernel::Cache::VarId, float> Cache::vars(Id id) const
     return out;
 }
 
+Cache::Id Cache::remap(Id root, Id x, Id y, Id z)
+{
+    return rebuild(root, {{X(), x}, {Y(), y}, {Z(), z}});
+}
+
 }   // namespace Kernel

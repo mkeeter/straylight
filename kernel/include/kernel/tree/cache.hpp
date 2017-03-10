@@ -136,6 +136,11 @@ public:
      */
     std::map<Kernel::Cache::VarId, float> vars(Id id) const;
 
+    /*
+     *  Remaps X, Y, Z coordinates
+     */
+    Id remap(Id root, Id x, Id y, Id z);
+
 protected:
     /*
      *  Cache constructor is private so outsiders must use instance()

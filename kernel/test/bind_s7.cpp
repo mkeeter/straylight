@@ -135,3 +135,12 @@ TEST_CASE("shape_mod")
     REQUIRE(eval(sc, "(modulo 3 2)") == "1.0");
     REQUIRE(eval(sc, "(modulo -5 4)") == "3.0");
 }
+
+TEST_CASE("make-shape")
+{
+    auto sc = get_scm();
+
+    REQUIRE(num(sc,
+        "(let ((f (make-shape (lambda (x y z) x))))"
+        "  (f 1 2 3))") == 1);
+}
