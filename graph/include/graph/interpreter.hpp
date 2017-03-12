@@ -11,12 +11,11 @@ struct s7_scheme;
 namespace Graph {
 
 class Root;
-class Dependencies;
 
 class Interpreter
 {
 public:
-    Interpreter(Root& parent, Dependencies* deps);
+    Interpreter(Root* parent);
     ~Interpreter();
 
     /*
@@ -98,8 +97,7 @@ private:
                            const CellKey& looker);
 
     /*  Reference to graph root  */
-    Root& root;
-    Dependencies* deps;
+    Root* root;
 
     /*  This is the main interpreter process  */
     s7_scheme* const sc;

@@ -37,6 +37,11 @@ public:
     const std::set<CellKey>& inverseDeps(const NameKey& k) const;
 
     /*
+     *  Lookup in the forward map
+     */
+    const std::set<NameKey>& forwardDeps(const CellKey& k) const;
+
+    /*
      *  Checks whether b is upstream of a
      */
     bool isUpstream(const CellKey& a, const CellKey& b) const

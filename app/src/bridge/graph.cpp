@@ -131,6 +131,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
         case Graph::Response::IO_VALUE_CHANGED:
         case Graph::Response::IO_INPUT_CREATED:
         case Graph::Response::IO_OUTPUT_CREATED:
+        case Graph::Response::IS_ENDPOINT_CHANGED:
         {
             if (scene)
             {

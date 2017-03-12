@@ -18,7 +18,7 @@ struct ValueThunk {
     ValuePtr value;
 
     CellKey looker;
-    Dependencies* deps;
+    Root* root;
     static int tag;
 
     static void free(void* v)
@@ -41,7 +41,7 @@ struct ValueThunk {
 
     static s7_pointer apply(s7_scheme* sc, ValueThunk* out)
     {
-        if (out->deps->insert(out->looker, out->target))
+        if (out->root->insertDep(out->looker, out->target))
         {
             return s7_error(sc, s7_make_symbol(sc, "circular-lookup"),
                     s7_list(sc, 1, s7_make_string(sc, "Circular lookup")));
@@ -61,7 +61,7 @@ struct InstanceThunk {
     std::map<std::string, ValueThunk> values;
 
     CellKey looker;
-    Dependencies* deps;
+    Root* root;
     static int tag;
 
     static void free(void* v)
@@ -91,7 +91,7 @@ struct InstanceThunk {
         assert(out);
 
         // Record a lookup of the instance, to detect instance name changes
-        if (out->deps->insert(out->looker, out->target))
+        if (out->root->insertDep(out->looker, out->target))
         {
             return s7_error(sc, s7_make_symbol(sc, "circular-lookup"),
                     s7_list(sc, 1, s7_make_string(sc, "Circular lookup")));
@@ -104,7 +104,7 @@ struct InstanceThunk {
             auto env_ = out->target.first;
             env_.push_back(out->index);
 
-            out->deps->insert(out->looker, {env_, key});
+            out->root->insertDep(out->looker, {env_, key});
             return s7_error(sc, s7_make_symbol(sc, "missing-lookup"),
                     s7_list(sc, 1, s7_make_string(sc, "Missing instance lookup")));
         }
@@ -211,8 +211,8 @@ int SheetThunk::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Interpreter::Interpreter(Root& parent, Dependencies* deps)
-    : root(parent), deps(deps), sc(s7_init()),
+Interpreter::Interpreter(Root* parent)
+    : root(parent), sc(s7_init()),
       is_input(s7_eval_c_string(sc, R"(
         (lambda (str)
           (catch #t
@@ -370,14 +370,14 @@ Cell::Type Interpreter::cellType(const std::string& expr) const
 
 Value Interpreter::eval(const CellKey& key)
 {
-    deps->clear(key);
+    root->clearDeps(key);
 
     auto env = key.first;
     auto cell = key.second;
 
     // Input cells are evaluated in their parent's environment and with an
     // input string from their containing Instance
-    std::string expr = root.getTree().at(cell).cell()->expr;
+    std::string expr = root->getTree().at(cell).cell()->expr;
     s7_pointer value = nullptr;
     if (isInput(expr))
     {
@@ -390,7 +390,7 @@ Value Interpreter::eval(const CellKey& key)
         {
             // Get the input expression for the given cell key
             // (which lives in the parent instance)
-            const auto& parent = root.getTree().at(env.back());
+            const auto& parent = root->getTree().at(env.back());
             assert(parent.instance());
             expr = parent.instance()->inputs.at(cell);
             env.pop_back();
@@ -398,23 +398,23 @@ Value Interpreter::eval(const CellKey& key)
     }
 
     // If we didn't get an error, then make bindings for all symbols
-    const auto parent = root.getTree().at(env.back()).instance()->sheet;
+    const auto parent = root->getTree().at(env.back()).instance()->sheet;
     if (value == nullptr)
     {
         auto bindings = s7_nil(sc); // empty list
-        for (auto& i : root.getTree().iterItems(parent))
+        for (auto& i : root->getTree().iterItems(parent))
         {
             // Prepend (symbol name, thunk) to the bindings list
             bindings = s7_cons(sc,
-                    s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
+                    s7_make_symbol(sc, root->getTree().nameOf(i).c_str()),
                     s7_cons(sc, getItemThunk(env, i, key),
                     bindings));
         }
 
-        for (auto& i : root.getTree().sheetsAbove(parent))
+        for (auto& i : root->getTree().sheetsAbove(parent))
         {
             bindings = s7_cons(sc,
-                    s7_make_symbol(sc, root.getTree().nameOf(i).c_str()),
+                    s7_make_symbol(sc, root->getTree().nameOf(i).c_str()),
                     s7_cons(sc, getSheetThunk(i, key),
                     bindings));
         }
@@ -441,18 +441,18 @@ Value Interpreter::eval(const CellKey& key)
             std::string target(target_);
             free(target_);
 
-            if (root.isItemName(target))
+            if (root->isItemName(target))
             {
-                deps->insert(key, {env, std::string(target)});
+                root->insertDep(key, {env, std::string(target)});
             }
-            else if (root.isSheetName(target))
+            else if (root->isSheetName(target))
             {
                 // The target sheet could be inserted in any of the parent
                 // sheets, so we'll insert a dependency on all of them
                 auto sheet = parent;
                 while (true)
                 {
-                    deps->insert(key, NameKey(sheet, target));
+                    root->insertDep(key, NameKey(sheet, target));
 
                     if (sheet == Tree::ROOT_SHEET)
                     {
@@ -460,7 +460,7 @@ Value Interpreter::eval(const CellKey& key)
                     }
                     else
                     {
-                        sheet = root.getTree().parentOf(sheet);
+                        sheet = root->getTree().parentOf(sheet);
                     }
                 }
             }
@@ -468,7 +468,7 @@ Value Interpreter::eval(const CellKey& key)
     }
 
     // If the value is present and unchanged, return false
-    auto c = root.getTree().at(cell).cell();
+    auto c = root->getTree().at(cell).cell();
     if (c->values.count(env) &&
         s7_is_equal(sc, value, c->values.at(env).value))
     {
@@ -516,15 +516,15 @@ void Interpreter::setReader(s7_cell* r)
 s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
                                    const CellKey& looker)
 {
-    const auto& item = root.getTree().at(index);
+    const auto& item = root->getTree().at(index);
     if (auto cell = item.cell())
     {
         // Construct a lookup thunk and return it immediately
         return s7_make_object(sc, ValueThunk::tag, new ValueThunk {
-            {env, root.getTree().nameOf(index)},
+            {env, root->getTree().nameOf(index)},
             cell->values.count(env) ? cell->values.at(env).value
                                     : s7_nil(sc),
-            looker, deps,
+            looker, root,
         });
     }
     else if (auto instance = item.instance())
@@ -535,18 +535,18 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
             // build up a list of OUTPUT cells within this instance
             auto env_ = env;
             env_.push_back(InstanceIndex(index));
-            for (const auto& c : root.getTree().iterItems(instance->sheet))
+            for (const auto& c : root->getTree().iterItems(instance->sheet))
             {
-                if (auto cell = root.getTree().at(c).cell())
+                if (auto cell = root->getTree().at(c).cell())
                 {
                     if (cell->type >= Cell::INPUT)
                     {
-                        values.insert({root.getTree().nameOf(c), ValueThunk {
-                            root.toNameKey({env_, CellIndex(c)}),
+                        values.insert({root->getTree().nameOf(c), ValueThunk {
+                            root->toNameKey({env_, CellIndex(c)}),
                             cell->values.count(env_)
                                 ? cell->values.at(env_).value
                                 : s7_nil(sc),
-                            looker, deps,
+                            looker, root,
                         }});
                     }
                 }
@@ -555,10 +555,10 @@ s7_cell* Interpreter::getItemThunk(const Env& env, const ItemIndex& index,
 
         return s7_make_object(sc, InstanceThunk::tag,
             new InstanceThunk {
-                {env, root.getTree().nameOf(index)},
+                {env, root->getTree().nameOf(index)},
                 InstanceIndex(index),
                 values,
-                looker, deps,
+                looker, root,
         });
     }
 
@@ -570,7 +570,7 @@ s7_cell* Interpreter::getSheetThunk(const SheetIndex& index,
                                     const CellKey& looker)
 {
     return s7_make_object(sc, SheetThunk::tag, new SheetThunk {
-        index, looker, &root
+        index, looker, root
     });
 }
 

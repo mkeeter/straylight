@@ -11,7 +11,7 @@ TEST_CASE("Interpreter::cellType")
 {
     Root r;
     Dependencies d(r);
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
 
     REQUIRE(interp.cellType("(input 12)") == Cell::INPUT);
     REQUIRE(interp.cellType("(input (+ 1 2))") == Cell::INPUT);
@@ -26,7 +26,7 @@ TEST_CASE("Interpreter::defaultExpr")
 {
     Root r;
     Dependencies d(r);
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
 
     REQUIRE(interp.defaultExpr("(input 12)") == "12");
     REQUIRE(interp.defaultExpr("(input (+ 1 2))") == "(+ 1 2)");
@@ -38,7 +38,7 @@ TEST_CASE("Interpreter::eval")
     Dependencies d(r);
     auto lock = r.Lock();
 
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
     auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "");
     auto c = r.getTree().at(cell).cell();
     CellKey key = {{Tree::ROOT_INSTANCE}, cell};
@@ -131,7 +131,7 @@ TEST_CASE("Interpreter::isReserved")
 {
     Root r;
     Dependencies d(r);
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
 
     REQUIRE(interp.isReserved("input"));
     REQUIRE(interp.isReserved("output"));
@@ -150,7 +150,7 @@ TEST_CASE("Interpreter::keywords")
 {
     Root r;
     Dependencies d(r);
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
 
     auto k = interp.keywords();
 
@@ -171,7 +171,7 @@ TEST_CASE("Interpreter::setReader")
 {
     Root r;
     Dependencies d(r);
-    auto interp = Interpreter(r, &d);
+    auto interp = Interpreter(&r);
 
     auto cell = r.insertCell(Tree::ROOT_SHEET, "c", "");
     auto c = r.getTree().at(cell).cell();

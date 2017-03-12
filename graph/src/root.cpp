@@ -13,7 +13,7 @@ const std::string Root::_good_item_name = "^[a-z][A-Za-z0-9\\-_]*$";
 const std::string Root::_good_sheet_name = "^[A-Z][A-Za-z0-9\\-_]*$";
 
 Root::Root()
-    : deps(*this), interpreter(*this, &deps),
+    : deps(*this), interpreter(this),
     good_item_name(_good_item_name), good_sheet_name(_good_sheet_name)
 {
     dirty.push({});
@@ -135,7 +135,7 @@ void Root::eraseCell(const CellIndex& cell)
     for (const auto& e : tree.envsOf(sheet))
     {
         CellKey key(e, cell);
-        deps.clear(key);
+        clearDeps(key);
         auto itr = std::find(dirty.top().begin(), dirty.top().end(), key);
         if (itr != dirty.top().end())
         {
@@ -211,7 +211,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
 
             // Then clear dependencies for this cell, so that we don't
             // end up trying to evaluate it
-            deps.clear({env_, c.second});
+            clearDeps({env_, c.second});
         }
     }
     sync();
@@ -485,7 +485,7 @@ std::map<std::string, Value> Root::callSheet(
     //
     // The sheet will notify this dependency network when I/O changes or
     // when it is erased, triggering re-evaluation of this cell
-    deps.insert(caller, NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
+    insertDep(caller, NameKey(tree.parentOf(sheet), tree.nameOf(sheet)));
 
     if (!tree.canInsertInstance(p, sheet))
     {
@@ -576,7 +576,7 @@ std::map<std::string, Value> Root::callSheet(
         // upstream deps of output cells in the temporary instance
         for (const auto& c : cells)
         {
-            deps.insert(caller, NameKey(c));
+            insertDep(caller, NameKey(c));
         }
     }
 
@@ -743,6 +743,16 @@ void Root::gotResult(const CellKey& k, const Value& result)
     {
         pushDirty(d);
     }
+}
+
+void Root::clearDeps(const CellKey& k)
+{
+    deps.clear(k);
+}
+
+bool Root::insertDep(const CellKey& looker, const NameKey& lookee)
+{
+    return deps.insert(looker, lookee);
 }
 
 void Root::pushDirty(const CellKey& c)

@@ -199,6 +199,12 @@ public:
     /*  Get const reference to our internally mutable tree */
     const Tree& getTree() const { return tree; }
 
+    /*
+     *  Clears all dependencies for the given cell
+     */
+    virtual void clearDeps(const CellKey& k);
+    virtual bool insertDep(const CellKey& looker, const NameKey& lookee);
+
 protected:
     /*
      *  Flushes the dirty buffer, ensuring that everything is up to date

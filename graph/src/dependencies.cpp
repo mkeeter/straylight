@@ -49,4 +49,10 @@ const std::set<CellKey>& Dependencies::inverseDeps(const NameKey& k) const
     return inverse.count(k) ? inverse.at(k) : empty;
 }
 
+const std::set<NameKey>& Dependencies::forwardDeps(const CellKey& k) const
+{
+    const static std::set<NameKey> empty;
+    return forward.count(k) ? forward.at(k) : empty;
+}
+
 }   // namespace Graph

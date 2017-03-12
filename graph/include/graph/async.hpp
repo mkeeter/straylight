@@ -29,6 +29,7 @@ public:
     void renameSheet(const SheetIndex& sheet, const std::string& name) override;
     void eraseSheet(const SheetIndex& s) override;
     void gotResult(const CellKey& k, const Value& result) override;
+    void clearDeps(const CellKey& k) override;
 
     /*
      *  Start an async evaluation thread running.

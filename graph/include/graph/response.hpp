@@ -39,6 +39,8 @@ struct Response
         IO_VALUE_CHANGED,
         IO_RENAMED,
 
+        IS_ENDPOINT_CHANGED,
+
         ITEM_NAME_REGEX_BAD,
         SHEET_NAME_REGEX_BAD,
         ITEM_NAME_REGEX_GOOD,
@@ -80,6 +82,7 @@ struct Response
         RESPONSE_FLAG_TYPE_OUTPUT   = (1 << 4),
         RESPONSE_FLAG_TYPE_BASE     = (1 << 5),
         RESPONSE_FLAG_TYPE_UNKNOWN  = (1 << 6),
+        RESPONSE_FLAG_ENDPOINT      = (1 << 7),
     };
     uint8_t flags;
     Escaped* value;
@@ -130,6 +133,8 @@ struct Response
             SheetIndex i, const CellKey& k,
             const std::string& val, bool valid,
             Escaped* value);
+    static Response IsEndpointChanged(
+            SheetIndex s, const CellKey& k, bool endpoint);
     static Response CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type);
     static Response InstanceSheetRenamed(
             SheetIndex s, InstanceIndex i, const std::string& sheet_name);

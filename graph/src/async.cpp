@@ -321,6 +321,25 @@ void AsyncRoot::gotResult(const CellKey& k, const Value& result)
     }
 }
 
+void AsyncRoot::clearDeps(const CellKey& k)
+{
+    auto f = deps.forwardDeps(k);
+    Root::clearDeps(k);
+    for (auto d : f)
+    {
+        if (deps.inverseDeps(d).size() == 0 &&
+            tree.checkEnv(d.first))
+        {
+            auto sheet = tree.at(d.first.back()).instance()->sheet;
+            if (tree.hasItem(sheet, d.second))
+            {
+                changes.push(Response::IsEndpointChanged(
+                    sheet, toCellKey(d), false));
+            }
+        }
+    }
+}
+
 void AsyncRoot::serialize()
 {
     pushChange(Response::Serialized(tree.toString()));
