@@ -323,21 +323,48 @@ void AsyncRoot::gotResult(const CellKey& k, const Value& result)
 
 void AsyncRoot::clearDeps(const CellKey& k)
 {
-    auto f = deps.forwardDeps(k);
+    auto before = deps.forwardDeps(k);
     Root::clearDeps(k);
-    for (auto d : f)
+    auto after = deps.forwardDeps(k);
+
+    // Anything that was in our dependency list beforehand
+    // and now is not in that list should be examined: if it
+    // has no dependencies (and is a valid cell), then push
+    // a change to the log
+    for (auto d : before)
     {
-        if (deps.inverseDeps(d).size() == 0 &&
+        if (!after.count(d) && deps.inverseDeps(d).size() == 0 &&
             tree.checkEnv(d.first))
         {
             auto sheet = tree.at(d.first.back()).instance()->sheet;
-            if (tree.hasItem(sheet, d.second))
+
+            if (tree.hasItem(sheet, d.second) &&
+                tree.at(toCellKey(d).second).cell())
             {
                 changes.push(Response::IsEndpointChanged(
                     sheet, toCellKey(d), false));
             }
         }
     }
+}
+
+bool AsyncRoot::insertDep(const CellKey& looker, const NameKey& lookee)
+{
+    // If the target doesn't have any dependencies (and is a valid cell, etc),
+    // then mark that it has become a non-endpoint cell
+    if (deps.inverseDeps(lookee).size() == 0 && tree.checkEnv(lookee.first))
+    {
+        auto sheet = tree.at(lookee.first.back()).instance()->sheet;
+
+        if (tree.hasItem(sheet, lookee.second) &&
+            tree.at(toCellKey(lookee).second).cell())
+        {
+            changes.push(Response::IsEndpointChanged(
+                sheet, toCellKey(lookee), true));
+        }
+    }
+
+    return Root::insertDep(looker, lookee);
 }
 
 void AsyncRoot::serialize()
