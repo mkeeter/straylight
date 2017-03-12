@@ -22,6 +22,8 @@ double num(s7_scheme* sc, std::string expr)
     {
         return Kernel::Bind::get_shape(out)->tree.value();
     }
+    assert(false);
+    return 0;
 }
 
 s7_scheme* get_scm()
