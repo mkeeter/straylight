@@ -6,25 +6,7 @@ namespace Graph {
 AsyncRoot::AsyncRoot()
     : Root()
 {
-    // Announce all of the interpreter's keywords
-    for (const auto& k : interpreter.keywords())
-    {
-        pushChange(Response::ReservedWord(k));
-    }
-
-    for (const auto& i : _bad_item_names)
-    {
-        pushChange(Response::ItemNameRegexBad(i.first, i.second));
-        bad_item_names.push_back({std::regex(i.first), i.second});
-    }
-
-    for (const auto& i : _bad_sheet_names)
-    {
-        pushChange(Response::SheetNameRegexBad(i.first, i.second));
-        bad_sheet_names.push_back({std::regex(i.first), i.second});
-    }
-    pushChange(Response::ItemNameRegex(_good_item_name));
-    pushChange(Response::SheetNameRegex(_good_sheet_name));
+    // Nothing to do here
 }
 
 void AsyncRoot::insertCell(
@@ -475,6 +457,26 @@ void AsyncRoot::wait()
 
 void AsyncRoot::_run(shared_queue<Command>& input)
 {
+    // Announce all of the interpreter's keywords
+    for (const auto& k : interpreter.keywords())
+    {
+        pushChange(Response::ReservedWord(k));
+    }
+
+    for (const auto& i : _bad_item_names)
+    {
+        pushChange(Response::ItemNameRegexBad(i.first, i.second));
+        bad_item_names.push_back({std::regex(i.first), i.second});
+    }
+
+    for (const auto& i : _bad_sheet_names)
+    {
+        pushChange(Response::SheetNameRegexBad(i.first, i.second));
+        bad_sheet_names.push_back({std::regex(i.first), i.second});
+    }
+    pushChange(Response::ItemNameRegex(_good_item_name));
+    pushChange(Response::SheetNameRegex(_good_sheet_name));
+
     while (true)
     {
         input.wait();
