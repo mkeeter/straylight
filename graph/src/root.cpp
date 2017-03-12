@@ -134,7 +134,14 @@ void Root::eraseCell(const CellIndex& cell)
 
     for (const auto& e : tree.envsOf(sheet))
     {
-        deps.clear({e, cell});
+        CellKey key(e, cell);
+        deps.clear(key);
+        auto itr = std::find(dirty.top().begin(), dirty.top().end(), key);
+        if (itr != dirty.top().end())
+        {
+            dirty.top().erase(itr);
+        }
+
         markDirty({e, name});
     }
 
