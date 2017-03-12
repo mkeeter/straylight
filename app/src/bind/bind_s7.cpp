@@ -28,7 +28,7 @@ point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z)
 static char* point_handle_print(s7_scheme* sc, void* s)
 {
     (void)sc;
-    std::string desc = "point-handle";
+    std::string desc = "#<point-handle";
 
     auto p = static_cast<point_handle_t*>(s);
 
@@ -43,10 +43,13 @@ static char* point_handle_print(s7_scheme* sc, void* s)
 
     if (axes.length())
     {
-        desc += "_" + axes;
+        desc += "-" + axes;
     }
+    desc += ">";
 
-    return Graph::Interpreter::print(desc, s);
+    auto out = static_cast<char*>(calloc(desc.length() + 1, sizeof(char)));
+    memcpy(out, &desc[0], desc.length());
+    return out;
 }
 
 static void point_handle_free(void* p)
