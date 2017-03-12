@@ -17,6 +17,13 @@ void ShapeHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
     {
         return;
     }
+
+    // Only draw terminal values
+    if (!is_endpoint)
+    {
+        return;
+    }
+
     (void)proj;
 
     QMatrix4x4 M = world;

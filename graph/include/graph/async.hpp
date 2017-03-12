@@ -30,6 +30,7 @@ public:
     void eraseSheet(const SheetIndex& s) override;
     void gotResult(const CellKey& k, const Value& result) override;
     void clearDeps(const CellKey& k) override;
+    bool insertDep(const CellKey& looker, const NameKey& lookee) override;
 
     /*
      *  Start an async evaluation thread running.

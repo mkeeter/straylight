@@ -177,6 +177,18 @@ void Scene::updateFrom(const Graph::Response& r)
             }
             break;
         }
+
+        case Graph::Response::IS_ENDPOINT_CHANGED:
+        {
+            Graph::CellKey key(r.env, Graph::CellIndex(r.target));
+
+            if (handles.count(key))
+            {
+                changed |= handles.at(key)->setEndpoint(
+                        r.flags & Graph::Response::RESPONSE_FLAG_ENDPOINT);
+            }
+            break;
+        }
         case Graph::Response::IO_INPUT_CREATED:
         case Graph::Response::IO_OUTPUT_CREATED:
         {

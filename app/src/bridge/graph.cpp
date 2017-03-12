@@ -125,13 +125,22 @@ void GraphModel::updateFrom(const Graph::Response& r)
         }
         ////////////////////////////////////////////////////////////////////////
         // Item-level operations
+        case Graph::Response::IS_ENDPOINT_CHANGED:
+        {
+            printf("Got IS_ENDPOINT_CHANGED\n");
+            if (scene)
+            {
+                scene->updateFrom(r);
+            }
+            break;
+        }
+
         case Graph::Response::CELL_ERASED:
         case Graph::Response::VALUE_CHANGED:
         case Graph::Response::IO_DELETED:
         case Graph::Response::IO_VALUE_CHANGED:
         case Graph::Response::IO_INPUT_CREATED:
         case Graph::Response::IO_OUTPUT_CREATED:
-        case Graph::Response::IS_ENDPOINT_CHANGED:
         {
             if (scene)
             {

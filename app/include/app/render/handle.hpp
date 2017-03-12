@@ -70,6 +70,12 @@ public:
     bool isIO() const { return is_io; }
     bool setIO(bool i) { bool c = (is_io != i); is_io = i; return c; }
 
+    /*
+     *  Getter / setter for is_endpoint
+     */
+    bool isEndpoint() const { return is_endpoint; }
+    bool setEndpoint(bool i) { bool c = (is_endpoint != i); is_endpoint = i; return c; }
+
 protected:
     /*
      *  Overloaded by derived classes to build VBOs, etc
@@ -82,6 +88,10 @@ protected:
     /*  If true, this handle is exposed to the parent sheet as an I/O port
      *  This means it is drawn at a higher level of view environment  */
     bool is_io = false;
+
+    /*  If true, this handle is the end of a computation chain
+     *  (this determines whether shapes are rendered)  */
+    bool is_endpoint = true;
 };
 
 }   // namespace Render

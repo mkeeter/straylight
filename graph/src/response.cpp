@@ -129,8 +129,8 @@ Response Response::ValueChanged(
 Response Response::IsEndpointChanged(
             SheetIndex s, const CellKey& k, bool endpoint)
 {
-    return Response { IS_ENDPOINT_CHANGED, s, k.second, 0, k.first, "", 0,
-        (uint8_t)(endpoint ? RESPONSE_FLAG_ENDPOINT : 0), 0 };
+    return Response { IS_ENDPOINT_CHANGED, s, k.second, 0, k.first, "", "",
+        (uint8_t)(endpoint ? RESPONSE_FLAG_ENDPOINT : 0), nullptr };
 }
 
 Response Response::CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type)

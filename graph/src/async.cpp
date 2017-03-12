@@ -339,10 +339,10 @@ void AsyncRoot::clearDeps(const CellKey& k)
             auto sheet = tree.at(d.first.back()).instance()->sheet;
 
             if (tree.hasItem(sheet, d.second) &&
-                tree.at(toCellKey(d).second).cell())
+                tree.at(sheet, d.second).cell())
             {
                 changes.push(Response::IsEndpointChanged(
-                    sheet, toCellKey(d), false));
+                    sheet, toCellKey(d), true));
             }
         }
     }
@@ -357,10 +357,10 @@ bool AsyncRoot::insertDep(const CellKey& looker, const NameKey& lookee)
         auto sheet = tree.at(lookee.first.back()).instance()->sheet;
 
         if (tree.hasItem(sheet, lookee.second) &&
-            tree.at(toCellKey(lookee).second).cell())
+            tree.at(sheet, lookee.second).cell())
         {
             changes.push(Response::IsEndpointChanged(
-                sheet, toCellKey(lookee), true));
+                sheet, toCellKey(lookee), false));
         }
     }
 
