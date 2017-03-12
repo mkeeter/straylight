@@ -85,7 +85,6 @@ public:
 
     /*
      *  Assigns the given value to a cell
-     *  TODO: this is only used in test harnesses
      */
     void setValue(const CellKey& cell, const Value& v);
 
@@ -231,6 +230,11 @@ protected:
      *  Called when a value changes
      */
     virtual void gotResult(const CellKey& k, const Value& v);
+
+    /*
+     *  Erase a cell's value
+     */
+    virtual void eraseCellValue(const CellKey& k);
 
     ////////////////////////////////////////////////////////////////////////////
 

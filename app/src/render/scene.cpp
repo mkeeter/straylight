@@ -308,8 +308,29 @@ void Scene::updateFrom(const Graph::Response& r)
             break;
         }
 
+        case Graph::Response::VALUE_ERASED:
+        {
+            const Graph::CellKey k { r.env, Graph::CellIndex(r.target) };
+            cells[k.second].erase(k);
+
+            if (shapes.count(k))
+            {
+                shapes.at(k)->deleteWhenNotRunning();
+                shapes.erase(k);
+            }
+
+            if (handles.count(k))
+            {
+                assert(dynamic_cast<ShapeHandle*>(handles.at(k)));
+                handles.erase(k);
+            }
+            changed = true;
+            break;
+        }
+
         default:    assert(false);
     }
+
 
     if (changed)
     {

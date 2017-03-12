@@ -321,6 +321,12 @@ void AsyncRoot::gotResult(const CellKey& k, const Value& result)
     }
 }
 
+void AsyncRoot::eraseCellValue(const CellKey& k)
+{
+    Root::eraseCellValue(k);
+    changes.push(Response::ValueErased(tree.parentOf(k.second), k));
+}
+
 void AsyncRoot::clearDeps(const CellKey& k)
 {
     auto before = deps.forwardDeps(k);

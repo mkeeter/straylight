@@ -202,16 +202,12 @@ void Root::eraseInstance(const InstanceIndex& instance)
             auto env_ = env;
             env_.insert(env_.end(), c.first.begin(), c.first.end());
 
-            auto cell = tree.at(c.second).cell();
-            assert(cell != nullptr);
-
-            // Release the allocated value, then erase by key
-            interpreter.release(cell->values.at(env_).value);
-            cell->values.erase(env_);
+            CellKey k(env_, c.second);
+            eraseCellValue(k);
 
             // Then clear dependencies for this cell, so that we don't
             // end up trying to evaluate it
-            clearDeps({env_, c.second});
+            clearDeps(k);
         }
     }
     sync();
@@ -331,8 +327,7 @@ void Root::setValue(const CellKey& cell, const Value& v)
 
     if (c->values.count(cell.first))
     {
-        interpreter.release(c->values.at(cell.first).value);
-        c->values.erase(c->values.find(cell.first));
+        eraseCellValue(cell);
     }
     c->values.insert({cell.first, v});
 }
@@ -743,6 +738,16 @@ void Root::gotResult(const CellKey& k, const Value& result)
     {
         pushDirty(d);
     }
+}
+
+void Root::eraseCellValue(const CellKey& k)
+{
+    // Release the allocated value, then erase by key
+    auto cell = tree.at(k.second).cell();
+    assert(cell);
+
+    interpreter.release(cell->values.at(k.first).value);
+    cell->values.erase(k.first);
 }
 
 void Root::clearDeps(const CellKey& k)

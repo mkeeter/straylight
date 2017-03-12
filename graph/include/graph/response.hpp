@@ -31,6 +31,7 @@ struct Response
         INSTANCE_ERASED,
 
         VALUE_CHANGED,
+        VALUE_ERASED,
 
         IO_INPUT_CREATED,
         IO_OUTPUT_CREATED,
@@ -133,6 +134,7 @@ struct Response
             SheetIndex i, const CellKey& k,
             const std::string& val, bool valid,
             Escaped* value);
+    static Response ValueErased(SheetIndex i, const CellKey& k);
     static Response IsEndpointChanged(
             SheetIndex s, const CellKey& k, bool endpoint);
     static Response CellTypeChanged(SheetIndex s, CellIndex c, Cell::Type type);

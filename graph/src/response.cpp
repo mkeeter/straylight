@@ -126,6 +126,11 @@ Response Response::ValueChanged(
         (uint8_t)(valid ? RESPONSE_FLAG_VALID : 0), value };
 }
 
+Response Response::ValueErased(SheetIndex s, const CellKey& k)
+{
+    return Response { VALUE_ERASED, s, k.second, 0, k.first, "", "", 0, nullptr };
+}
+
 Response Response::IsEndpointChanged(
             SheetIndex s, const CellKey& k, bool endpoint)
 {

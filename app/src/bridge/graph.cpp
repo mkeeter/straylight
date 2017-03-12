@@ -136,6 +136,7 @@ void GraphModel::updateFrom(const Graph::Response& r)
 
         case Graph::Response::CELL_ERASED:
         case Graph::Response::VALUE_CHANGED:
+        case Graph::Response::VALUE_ERASED:
         case Graph::Response::IO_DELETED:
         case Graph::Response::IO_VALUE_CHANGED:
         case Graph::Response::IO_INPUT_CREATED:

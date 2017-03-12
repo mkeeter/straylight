@@ -31,6 +31,7 @@ public:
     void gotResult(const CellKey& k, const Value& result) override;
     void clearDeps(const CellKey& k) override;
     bool insertDep(const CellKey& looker, const NameKey& lookee) override;
+    void eraseCellValue(const CellKey& k) override;
 
     /*
      *  Start an async evaluation thread running.

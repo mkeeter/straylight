@@ -156,6 +156,17 @@ void ItemsModel::updateFrom(const Graph::Response& r)
             break;
         }
 
+        case Graph::Response::VALUE_ERASED:
+        {
+            auto index = order.at(r.target);
+            auto new_value = QString::fromStdString(r.expr);
+            auto& item = items[index];
+
+            item.cell_value.erase(r.env);
+            item.cell_valid.erase(r.env);
+            break;
+        }
+
         case Graph::Response::CELL_INSERTED:
         {
             auto index = items.size();
