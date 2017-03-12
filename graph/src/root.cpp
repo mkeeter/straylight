@@ -470,6 +470,7 @@ void Root::clear()
         }
     }
 
+    assert(dirty.size() == 1);
     assert(dirty.top().size() == 0);
 }
 
