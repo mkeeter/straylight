@@ -127,7 +127,6 @@ void GraphModel::updateFrom(const Graph::Response& r)
         // Item-level operations
         case Graph::Response::IS_ENDPOINT_CHANGED:
         {
-            printf("Got IS_ENDPOINT_CHANGED\n");
             if (scene)
             {
                 scene->updateFrom(r);
