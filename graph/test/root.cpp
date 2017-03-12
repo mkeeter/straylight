@@ -599,6 +599,16 @@ TEST_CASE("Root::clear")
         r.clear();
         REQUIRE(r.insertCell(Tree::ROOT_SHEET, "a", "15").i == 2);
     }
+
+    SECTION("With called sheet")
+    {
+        auto s = r.insertSheet(Tree::ROOT_SHEET, "Sheet");
+        auto out = r.insertCell(s, "out", "(output 1)");
+
+        auto b = r.insertCell(Tree::ROOT_SHEET, "b", "((Sheet) 'out)");
+        r.clear();
+        REQUIRE(true); // No crashing!
+    }
 }
 
 TEST_CASE("Root::loadString")
