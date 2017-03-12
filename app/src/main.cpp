@@ -46,5 +46,18 @@ int main(int argc, char**argv)
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
 
+    if (argc == 2)
+    {
+        QFile file(argv[1]);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            std::cerr << "Invalid filename " << argv[1] << std::endl;
+        }
+        else
+        {
+            auto str = file.readAll();
+            App::Bridge::Bridge::instance()->graph()->deserialize(str);
+        }
+    }
     return app.exec();
 }
