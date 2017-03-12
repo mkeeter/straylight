@@ -169,7 +169,8 @@ void Scene::updateFrom(const Graph::Response& r)
     {
         case Graph::Response::IO_VALUE_CHANGED:
         {
-            Graph::CellKey key(env, Graph::CellIndex(r.other));
+            Graph::CellKey key(r.env, Graph::CellIndex(r.other));
+
             if (handles.count(key))
             {
                 changed |= handles.at(key)->setIO(true);
