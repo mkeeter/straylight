@@ -53,6 +53,14 @@ public:
      */
     void setEnv(Graph::Env env_);
 
+    /*
+     *  Checks whether the given cell should be drawn, given the
+     *  active environment env.
+     *
+     *  io cells are also drawn in their parent environment, hence the flag.
+     */
+    static bool shouldDraw(const Graph::Env& env, const Graph::CellKey& k, bool io);
+
 protected:
     /*
      *  Returns the projection matrix
@@ -70,6 +78,12 @@ protected:
      *  Requests that all Renderer objects update themselves
      */
     void updateRenderer();
+
+    /*
+     *  Activates or deactivates a renderer for the given key
+     *  (if one exists)
+     */
+    void checkRenderer(const Graph::CellKey& k);
 
     // Viewport settings
     float scale=1;

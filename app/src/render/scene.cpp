@@ -1,3 +1,5 @@
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "app/render/scene.hpp"
 #include "app/render/canvas.hpp"
 #include "app/render/drag.hpp"
@@ -66,6 +68,22 @@ void Scene::updateRenderer()
     for (auto& s : shapes)
     {
         s.second->enqueue(M(), QSize(width(), height()));
+    }
+}
+
+void Scene::checkRenderer(const Graph::CellKey& k)
+{
+    if (shapes.count(k))
+    {
+        if (handles.at(k)->isEndpoint() &&
+            shouldDraw(env, k, handles.at(k)->isIO()))
+        {
+            shapes.at(k)->activate();
+        }
+        else
+        {
+            shapes.at(k)->deactivate();
+        }
     }
 }
 
@@ -174,6 +192,7 @@ void Scene::updateFrom(const Graph::Response& r)
             if (handles.count(key))
             {
                 changed |= handles.at(key)->setIO(true);
+                checkRenderer(key);
             }
             break;
         }
@@ -186,6 +205,7 @@ void Scene::updateFrom(const Graph::Response& r)
             {
                 changed |= handles.at(key)->setEndpoint(
                         r.flags & Graph::Response::RESPONSE_FLAG_ENDPOINT);
+                checkRenderer(key);
             }
             break;
         }
@@ -200,6 +220,7 @@ void Scene::updateFrom(const Graph::Response& r)
                     if (handles.count(key))
                     {
                         changed |= handles.at(key)->setIO(true);
+                        checkRenderer(key);
                     }
                 }
             }
@@ -215,6 +236,7 @@ void Scene::updateFrom(const Graph::Response& r)
                     if (handles.count(key))
                     {
                         changed |= handles.at(key)->setIO(false);
+                        checkRenderer(key);
                     }
                 }
             }
@@ -256,19 +278,6 @@ void Scene::updateFrom(const Graph::Response& r)
                 changed = true;
             }
 
-            // If the value is a shape, then convert it into a renderer and
-            // wire it into the Scene, kicking off an initial render.
-            if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
-            {
-                auto ren = new App::Render::Renderer(n->eval);
-                shapes[k] = ren;
-                connect(ren, &App::Render::Renderer::done,
-                        this, &Scene::update);
-                ren->enqueue(M(), QSize(width(), height()));
-
-                changed = true;
-            }
-
             // If the value is an EscapedHandle, then turn it into a real
             // Handle and update its values, etc.
             if (auto p = dynamic_cast<App::Bridge::EscapedHandle*>(r.value))
@@ -300,6 +309,23 @@ void Scene::updateFrom(const Graph::Response& r)
                 //  Update the handle from the EscapedHandle
                 changed |= handles.at(k)->updateFrom(p);
             }
+
+            // If the value is a shape, then convert it into a renderer and
+            // wire it into the Scene, kicking off an initial render.
+            if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
+            {
+                auto ren = new App::Render::Renderer(n->eval);
+                shapes[k] = ren;
+                connect(ren, &App::Render::Renderer::done,
+                        this, &Scene::update);
+
+                // Only activate renderers that will be drawn in the given env
+                checkRenderer(k);
+                ren->enqueue(M(), QSize(width(), height()));
+
+                changed = true;
+            }
+
             break;
         }
 
@@ -339,8 +365,31 @@ void Scene::setEnv(Graph::Env env_)
     if (env_ != env)
     {
         env = env_;
+        for (auto& s : shapes)
+        {
+            checkRenderer(s.first);
+        }
         update();
     }
+}
+
+
+bool Scene::shouldDraw(const Graph::Env& env, const Graph::CellKey& k, bool io)
+{
+    if (boost::algorithm::starts_with(env, k.first))
+    {
+        return true;
+    }
+    else if (io)
+    {
+        auto env_ = k.first;
+        env_.pop_back();
+        if (boost::algorithm::starts_with(env, env_))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 }   // namespace Render

@@ -96,7 +96,7 @@ void Renderer::checkNext()
             todo = NEXT;
         }
 
-        if (todo == NEXT)
+        if (todo == NEXT && active)
         {
             todo = NOTHING;
 
@@ -105,6 +105,17 @@ void Renderer::checkNext()
             watcher.setFuture(future);
         }
     }
+}
+
+void Renderer::activate()
+{
+    active = true;
+    checkNext();
+}
+
+void Renderer::deactivate()
+{
+    active = false;
 }
 
 void Renderer::run(Task t)

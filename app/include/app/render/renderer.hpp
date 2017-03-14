@@ -66,6 +66,16 @@ public:
      */
     Result* getResult();
 
+    /*
+     *  Activates the renderer, kicking off a render operation if there's one
+     */
+    void activate();
+
+    /*
+     *  Deactivates the renderer
+     */
+    void deactivate();
+
 signals:
     /*
      *  Emitted when a render operation is done
@@ -95,6 +105,7 @@ protected:
      *  (this would be nicer as a variant type) */
     Task next;
     enum { NOTHING, NEXT, DELETE } todo;
+    bool active = true;
     std::mutex todo_lock;
 
     QFuture<void> future;

@@ -1,6 +1,5 @@
-#include <boost/algorithm/string/predicate.hpp>
-
 #include "app/render/picker.hpp"
+#include "app/render/scene.hpp"
 #include "app/render/point_handle.hpp"
 
 #include "app/bind/bind_s7.hpp"
@@ -43,19 +42,9 @@ void Picker::draw(QPoint p, const Graph::Env& env, Picker::DrawMode mode)
 
     for (auto& h : handles)
     {
-        if (boost::algorithm::starts_with(env, h.first.first))
+        if (Scene::shouldDraw(env, h.first, h.second->isIO()))
         {
             to_draw[h.second->tag()].push_back(h.second);
-        }
-        // IO ports are drawn in their parent environment
-        else if (h.second->isIO())
-        {
-            auto env_ = h.first.first;
-            env_.pop_back();
-            if (boost::algorithm::starts_with(env, env_))
-            {
-                to_draw[h.second->tag()].push_back(h.second);
-            }
         }
     }
 
