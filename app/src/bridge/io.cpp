@@ -22,10 +22,10 @@ QVariant IOModel::data(const QModelIndex& index, int role) const
     switch (role) {
         case TypeRole:  return i.type == IOCell::INPUT ? "input" : "output";
         case NameRole:  return i.name;
-        case ValidRole: return i.valid.at(env);
+        case ValidRole: return i.valid.count(env) ? i.valid.at(env) : false;
         case ExprRole:  return i.expr;
-        case ValueRole:  return i.value.at(env);
-        case UniqueIndexRole: return i.unique_index;
+        case ValueRole: return i.value.count(env) ? i.value.at(env) : "";
+        case UniqueIndexRole:   return i.unique_index;
         default: return QVariant();
     }
 }
