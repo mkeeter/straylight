@@ -327,7 +327,14 @@ void Root::setValue(const CellKey& cell, const Value& v)
 
     if (c->values.count(cell.first))
     {
-        eraseCellValue(cell);
+        // We don't call eraseCellValue here, because we're
+        // swapping in a new value.  In theory, this wouldn't matter
+        // because the eraseCellValue call would be followed by a call
+        // to gotResult which informs watchers of the new value; in
+        // practice, this breaks things like dragging shapes, which
+        // don't expect to be deleted and created mid-drag.
+        interpreter.release(c->values.at(cell.first).value);
+        c->values.erase(cell.first);
     }
     c->values.insert({cell.first, v});
 }
