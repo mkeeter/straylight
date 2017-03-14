@@ -117,6 +117,11 @@ void Canvas::synchronize(QQuickFramebufferObject *item)
                 auto s = dynamic_cast<ShapeHandle*>(h);
                 assert(s);
                 s->updateTexture(result);
+                // If we're not in the middle of a drag, redraw picker
+                if (scene->mouse_state == Scene::RELEASED)
+                {
+                    picker_changed = true;
+                }
             }
             delete result;
         }
