@@ -342,7 +342,6 @@ void Scene::updateFrom(const Graph::Response& r)
 
             if (handles.count(k))
             {
-                assert(dynamic_cast<ShapeHandle*>(handles.at(k)));
                 handles.erase(k);
             }
             changed = true;
