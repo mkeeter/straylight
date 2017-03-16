@@ -26,7 +26,7 @@ GridLayout {
         Layout.row: 0
         Layout.column: 1
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        Layout.preferredHeight: height
 
         function setExpr(text) {
             sheetModel.setInput(instanceIndex, uniqueIndex, text)
