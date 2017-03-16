@@ -9,7 +9,7 @@ namespace App {
 namespace Render {
 
 Renderer::Renderer(Kernel::Evaluator* e)
-    : todo(NOTHING)
+    : next(QMatrix4x4(), {0,0}, 0), todo(NOTHING)
 {
     for (int i=0; i < 8; ++i)
     {
@@ -58,10 +58,15 @@ void Renderer::enqueue(QMatrix4x4 mat, QSize size)
     std::lock_guard<std::mutex> lock(todo_lock);
     if (todo != DELETE)
     {
+        // Make rendering at the base level un-abortable
+        // (otherwise we'd have a bunch of black images when rotating)
+        if (watcher.isRunning() && next.level != base_level)
+        {
+            abort.store(true);
+        }
+
         next = Task(mat, size, base_level);
         todo = NEXT;
-
-        abort.store(true);
         checkNext();
     }
 }
@@ -109,6 +114,7 @@ void Renderer::checkNext()
 
 void Renderer::activate()
 {
+    std::lock_guard<std::mutex> lock(todo_lock);
     active = true;
     checkNext();
 }
@@ -134,14 +140,9 @@ void Renderer::run(Task t)
     scaled.scale(1, 1, -1);
     auto m = glm::make_mat4(scaled.data());
 
-    // Make rendering at the base level un-abortable
-    // (otherwise we'd have a bunch of black images when rotating)
-    std::atomic_bool dummy(false);
-    std::atomic_bool& abort_ = (t.level == base_level) ? dummy : abort;
+    auto out = Kernel::Heightmap::render_(evaluators, r, abort, m);
 
-    auto out = Kernel::Heightmap::render_(evaluators, r, abort_, m);
-
-    if (!abort_.load())
+    if (!abort.load())
     {
         // Map the depth buffer into the 0 - 1 range, with -inf = 1
         *out.first =
