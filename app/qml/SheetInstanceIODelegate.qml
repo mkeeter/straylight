@@ -89,7 +89,6 @@ Column {
     }
 
     Rectangle {
-        visible: !last
         width: parent.width
         color: 'transparent'
         height: 2
