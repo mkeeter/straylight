@@ -184,14 +184,15 @@ static void fill(Evaluator* e, const Subregion& r, DepthImage& depth,
 
 /*
 * Helper function that reduces a particular matrix block
+* Returns true if finished, false if aborted
 */
-static void recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
+static bool recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
                 NormalImage& norm, const std::atomic_bool& abort)
 {
     // Stop rendering if the abort flag is set
     if (abort.load())
     {
-        return;
+        return false;
     }
 
     // Extract the block of the image that's being inspected
@@ -200,14 +201,14 @@ static void recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
     // If all points in the region are below the heightmap, skip it
     if ((block >= r.Z.pos(r.Z.size - 1)).all())
     {
-        return;
+        return true;
     }
 
     // If we're below a certain size, render pixel-by-pixel
     if (r.voxels() <= Result::N)
     {
         pixels(e, r, depth, norm);
-        return;
+        return true;
     }
 
     // Do the interval evaluation
@@ -231,12 +232,19 @@ static void recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
 
         // Since the higher Z region is in the second item of the
         // split, evaluate rs.second then rs.first
-        recurse(e, rs.second, depth, norm, abort);
-        recurse(e, rs.first, depth, norm, abort);
+        if (!recurse(e, rs.second, depth, norm, abort))
+        {
+            return false;
+        }
+        if (!recurse(e, rs.first, depth, norm, abort))
+        {
+            return false;
+        }
 
         // Re-enable disabled nodes from the tree
         e->pop();
     }
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
