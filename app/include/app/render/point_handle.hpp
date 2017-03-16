@@ -35,7 +35,7 @@ public:
 
     /*  Used to disambiguate between Handle types */
     int tag() const override { return _tag; }
-    static const int _tag=1;
+    static const int _tag=2;
 
 protected:
     /*
