@@ -48,6 +48,10 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
 {
     vao->bind();
 
+    if (mode == Picker::DRAW_PICKER)
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
     shader_solid->bind();
     setShaderVars(world, proj, *shader_solid, mode, color);
     glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
@@ -59,9 +63,9 @@ void PointHandle::_draw(const QMatrix4x4& world, const QMatrix4x4& proj,
         setShaderVars(world, proj, *shader_dotted, mode, color);
         glDisable(GL_DEPTH_TEST);
         glDrawArrays(GL_TRIANGLE_FAN, 0, segments + 2);
-        glEnable(GL_DEPTH_TEST);
         shader_dotted->release();
     }
+    glEnable(GL_DEPTH_TEST);
 
     vao->release();
 }
