@@ -180,6 +180,20 @@ static s7_pointer shape_lambda(s7_scheme* sc, s7_pointer args)
     return s7_cons(sc, ms, s7_list(sc, 1, s7_cons(sc, lambda, args)));
 }
 
+static s7_pointer shape_define(s7_scheme* sc, s7_pointer args)
+{
+    s7_pointer def = s7_make_symbol(sc, "define");
+    s7_pointer ms = s7_make_symbol(sc, "make-shape");
+    s7_pointer lambda = s7_make_symbol(sc, "lambda");
+    s7_pointer out = s7_list(sc, 3,
+        def,
+        s7_car(s7_car(args)),
+        s7_cons(sc, ms, s7_list(sc, 1,
+            s7_cons(sc, lambda, s7_cons(sc, s7_cdr(s7_car(args)),
+                                s7_cdr(args))))));
+    return out;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //  Operations
 
@@ -520,8 +534,10 @@ void init(s7_scheme* sc)
             "(const value) returns a constant number");
     s7_define_function(sc, "shape?", is_shape, 1, 0, false,
             "(shape? s) checks if something is a shape");
-    s7_define_macro(sc, "shape-lambda", shape_lambda, 2, 0, true,
-            "(shape-lambda (x y z) body) -> (make-shape (lambda (x y z) body))");
+    s7_define_macro(sc, "lambda-shape", shape_lambda, 2, 0, true,
+            "(lambda-shape (x y z) body) -> (make-shape (lambda (x y z) body))");
+    s7_define_macro(sc, "define-shape", shape_define, 2, 0, true,
+            "(define-shape (name x y z) body) -> (define name (lambda (x y z) body))");
 
     install_overload(sc, "+", shape_add);
     install_overload(sc, "*", shape_mul);
