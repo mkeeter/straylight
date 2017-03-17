@@ -173,6 +173,16 @@ static shape_t* get_mutable_shape(s7_pointer obj)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static s7_pointer shape_lambda(s7_scheme* sc, s7_pointer args)
+{
+    s7_pointer ms = s7_make_symbol(sc, "make-shape");
+    s7_pointer lambda = s7_make_symbol(sc, "lambda");
+    return s7_cons(sc, ms, s7_list(sc, 1, s7_cons(sc, lambda, args)));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Operations
+
 static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
                          Kernel::Opcode::Opcode op, const float* d)
 {
@@ -510,6 +520,8 @@ void init(s7_scheme* sc)
             "(const value) returns a constant number");
     s7_define_function(sc, "shape?", is_shape, 1, 0, false,
             "(shape? s) checks if something is a shape");
+    s7_define_macro(sc, "shape-lambda", shape_lambda, 2, 0, true,
+            "(shape-lambda (x y z) body) -> (make-shape (lambda (x y z) body))");
 
     install_overload(sc, "+", shape_add);
     install_overload(sc, "*", shape_mul);
