@@ -210,7 +210,9 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
                 continue;
             }
 
-            if (!match.hasMatch() || m.capturedStart(r.capture) < match.capturedStart(rule.capture))
+            if (!match.hasMatch() ||
+                m.capturedStart(r.capture) < match.capturedStart(rule.capture) ||
+                m.capturedEnd(r.capture) > match.capturedEnd(rule.capture))
             {
                 match = m;
                 rule = r;
