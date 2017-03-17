@@ -234,10 +234,12 @@ static bool recurse(Evaluator* e, const Subregion& r, DepthImage& depth,
         // split, evaluate rs.second then rs.first
         if (!recurse(e, rs.second, depth, norm, abort))
         {
+            e->pop();
             return false;
         }
         if (!recurse(e, rs.first, depth, norm, abort))
         {
+            e->pop();
             return false;
         }
 
