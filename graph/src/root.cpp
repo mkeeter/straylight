@@ -165,6 +165,8 @@ void Root::eraseInstance(const InstanceIndex& instance)
     // Find all output cells in this instance
     std::set<std::string> outputs;
 
+    // Record all outputs that will be erased, so that we can
+    // inform their downstream watchers
     auto sheet = tree.at(instance).instance()->sheet;
     auto cells = tree.iterCellsRecursive(sheet);
     for (auto i : tree.iterItems(sheet))
@@ -181,6 +183,7 @@ void Root::eraseInstance(const InstanceIndex& instance)
     const std::string name = tree.nameOf(instance);
     const auto parent = tree.parentOf(instance);
     tree.erase(instance); // Bye!
+
     for (auto env : tree.envsOf(parent))
     {
         // Mark the instance itself as dirty
@@ -206,8 +209,16 @@ void Root::eraseInstance(const InstanceIndex& instance)
             eraseCellValue(k);
 
             // Then clear dependencies for this cell, so that we don't
-            // end up trying to evaluate it
+            // end up trying to evaluate it later on
             clearDeps(k);
+
+            // Finally, erase this cell from the dirty queue (which can happen
+            // if it looked at another cell in the instance)
+            auto itr = std::find(dirty.top().begin(), dirty.top().end(), k);
+            if (itr != dirty.top().end())
+            {
+                dirty.top().erase(itr);
+            }
         }
     }
     sync();
