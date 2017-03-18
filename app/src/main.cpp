@@ -46,6 +46,7 @@ int main(int argc, char**argv)
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/qml/main.qml"));
 
+    // TODO: this doesn't set file in QML correctly
     if (argc == 2)
     {
         QFile file(argv[1]);
