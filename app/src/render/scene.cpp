@@ -309,6 +309,11 @@ void Scene::updateFrom(const Graph::Response& r)
                 //  Update the handle from the EscapedHandle
                 changed |= handles.at(k)->updateFrom(p);
             }
+            else if (handles.count(k))
+            {
+                handles.erase(k);
+                changed = true;
+            }
 
             // If the value is a shape, then convert it into a renderer and
             // wire it into the Scene, kicking off an initial render.
