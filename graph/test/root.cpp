@@ -487,6 +487,15 @@ TEST_CASE("Root::insertInstance")
 
         REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, is, iz}, c}).str == "15");
     }
+
+    SECTION("Local lookups with 'this'")
+    {
+        auto a = r.insertCell(sum, "a", "(input 15)");
+        auto b = r.insertCell(sum, "b", "(input (+ 1 (this 'a)))");
+
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "s", sum);
+        REQUIRE(r.getValue({{Tree::ROOT_INSTANCE, i}, b}).str == "16");
+    }
 }
 
 TEST_CASE("Root::setInput")
