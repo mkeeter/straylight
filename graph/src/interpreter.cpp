@@ -405,10 +405,17 @@ Value Interpreter::eval(const CellKey& key)
         for (auto& i : root->getTree().iterItems(parent))
         {
             // Prepend (symbol name, thunk) to the bindings list
+            const auto thunk = getItemThunk(env, i, key);
             bindings = s7_cons(sc,
                     s7_make_symbol(sc, root->getTree().nameOf(i).c_str()),
-                    s7_cons(sc, getItemThunk(env, i, key),
-                    bindings));
+                    s7_cons(sc, thunk, bindings));
+
+            if (key.first.size() && i == key.first.back())
+            {
+                bindings = s7_cons(sc,
+                        s7_make_symbol(sc, "this"),
+                        s7_cons(sc, thunk, bindings));
+            }
         }
 
         for (auto& i : root->getTree().sheetsAbove(parent))
@@ -582,7 +589,7 @@ std::set<std::string> Interpreter::keywords() const
     std::set<std::string> keywords = {
         "#t", "#f", "#<unspecified>", "#<undefined>",
         "#<eof>", "#true", "#false",
-        "input", "output"};
+        "input", "output", "this"};
     std::pair<s7_scheme*, decltype(keywords)*> data = {sc, &keywords};
     s7_for_each_symbol_name(sc, set_insert_, &data);
     return keywords;
