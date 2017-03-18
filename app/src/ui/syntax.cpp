@@ -212,7 +212,8 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
 
             if (!match.hasMatch() ||
                 m.capturedStart(r.capture) < match.capturedStart(rule.capture) ||
-                m.capturedEnd(r.capture) > match.capturedEnd(rule.capture))
+                (m.capturedStart(r.capture) <= match.capturedStart(rule.capture) &&
+                 m.capturedEnd(r.capture) > match.capturedEnd(rule.capture)))
             {
                 match = m;
                 rule = r;
