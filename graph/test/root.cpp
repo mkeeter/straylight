@@ -567,6 +567,16 @@ TEST_CASE("Root::eraseInstance")
         r.setExpr(a, "13");
         /*  If this crashes, then the test fails!  */
     }
+
+    SECTION("Cells that look at each other")
+    {
+        auto i = r.insertInstance(Tree::ROOT_SHEET, "instance", sum);
+        auto a = r.insertCell(sum, "a", "(input 15)");
+        auto b = r.insertCell(sum, "b", "(input (instance 'a))");
+
+        r.eraseInstance(i);
+        /*  If this crashes, then the test fails!  */
+    }
 }
 
 TEST_CASE("Root::clear")
