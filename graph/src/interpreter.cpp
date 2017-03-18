@@ -576,19 +576,13 @@ s7_cell* Interpreter::getSheetThunk(const SheetIndex& index,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool Interpreter::isReserved(const std::string& k) const
-{
-    // For simplicity, reserve all names starting in #
-    return (k.size() && k[0] == '#') || k == "input" || k == "output" ||
-           s7_name_to_value(sc, k.c_str()) != s7_undefined(sc);
-}
-
 std::set<std::string> Interpreter::keywords() const
 {
     // Hard-code special keywords, then look up the rest
     std::set<std::string> keywords = {
         "#t", "#f", "#<unspecified>", "#<undefined>",
-        "#<eof>", "#true", "#false"};
+        "#<eof>", "#true", "#false",
+        "input", "output"};
     std::pair<s7_scheme*, decltype(keywords)*> data = {sc, &keywords};
     s7_for_each_symbol_name(sc, set_insert_, &data);
     return keywords;

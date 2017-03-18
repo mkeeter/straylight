@@ -53,11 +53,6 @@ public:
     void setReader(s7_cell* r);
 
     /*
-     *  Checks to see if the given string is reserved
-     */
-    bool isReserved(const std::string& k) const;
-
-    /*
      *  Calls a function with the interpreter
      *  Used to install custom bindings
      */

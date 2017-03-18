@@ -127,25 +127,6 @@ TEST_CASE("Interpreter::eval")
     }
 }
 
-TEST_CASE("Interpreter::isReserved")
-{
-    Root r;
-    Dependencies d(r);
-    auto interp = Interpreter(&r);
-
-    REQUIRE(interp.isReserved("input"));
-    REQUIRE(interp.isReserved("output"));
-    REQUIRE(interp.isReserved("define"));
-    REQUIRE(interp.isReserved("#f"));
-    REQUIRE(interp.isReserved("+"));
-    REQUIRE(interp.isReserved("#t"));
-    REQUIRE(!interp.isReserved("hi"));
-    REQUIRE(!interp.isReserved("omg"));
-    REQUIRE(!interp.isReserved("d"));
-    REQUIRE(!interp.isReserved("e"));
-    REQUIRE(!interp.isReserved("i"));
-}
-
 TEST_CASE("Interpreter::keywords")
 {
     Root r;
@@ -157,6 +138,8 @@ TEST_CASE("Interpreter::keywords")
     REQUIRE(k.count("#t"));
     REQUIRE(k.count("define"));
     REQUIRE(k.count("lambda"));
+    REQUIRE(k.count("input"));
+    REQUIRE(k.count("output"));
     REQUIRE(!k.count("x"));
     REQUIRE(!k.count("y"));
     REQUIRE(!k.count("d"));
