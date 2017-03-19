@@ -127,12 +127,12 @@ s7_pointer shape_binary(s7_scheme* sc, Kernel::Opcode::Opcode op,
 
     // Build subtraction operation
     auto out = shape_from_tree(sc,
-                Kernel::Tree(op, get_shape(lhs)->tree, get_shape(rhs)->tree),
-                get_shape(lhs)->vars);
+                Kernel::Tree(op, get_shape(a)->tree, get_shape(b)->tree),
+                get_shape(a)->vars);
 
     // Insert all variable bindings from rhs
-    get_mutable_shape(out)->vars.insert(get_shape(rhs)->vars.begin(),
-                                        get_shape(rhs)->vars.end());
+    get_mutable_shape(out)->vars.insert(get_shape(b)->vars.begin(),
+                                        get_shape(b)->vars.end());
     return shape_check_const(sc, out);
 
 }
@@ -271,14 +271,14 @@ static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
 #define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)           \
 static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
 {                                                                           \
-    float d = DEFAULT;                                                      \
-    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, &d));         \
+    const float d = DEFAULT;                                                \
+    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, &d));       \
 }
 
 #define OVERLOAD_COMMUTATIVE(NAME, FUNC, OPCODE)                            \
 static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
 {                                                                           \
-    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, nullptr));    \
+    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, nullptr));  \
 }
 
 OVERLOAD_COMMUTATIVE_DEFAULT(shape_add, "+", Kernel::Opcode::ADD, 0);
@@ -341,7 +341,7 @@ static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
         }
         case 2:
         {
-            return shape_binary(sc, Kernel::Opcode::ATAN,
+            return shape_binary(sc, Kernel::Opcode::ATAN2,
                                 s7_car(args), s7_cadr(args), "atan");
         }
         default:    return s7_wrong_number_of_args_error(sc, "atan: wrong number of args: ~A", args);
