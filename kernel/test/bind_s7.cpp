@@ -152,4 +152,8 @@ TEST_CASE("make-shape")
     REQUIRE(num(sc,
         "(let ((f (make-shape (lambda (x y z) x))))"
         "  (f 1 2 3))") == 1);
+
+    REQUIRE(num(sc,
+        "(let ((f (make-shape (lambda (x y z) (+ x 3)))))"
+        "  (f 1 2 3))") == 4);
 }
