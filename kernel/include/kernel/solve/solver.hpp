@@ -12,8 +12,8 @@ class Tree;
 
 namespace Solver
 {
-    typedef std::map<Tree::Tree_*, float> Solution;
-    typedef std::set<Tree::Tree_*> Mask;
+    typedef std::map<Tree::Id, float> Solution;
+    typedef std::set<Tree::Id> Mask;
 
     /*
      *  Finds a set of variables that drive t to zero
@@ -22,11 +22,11 @@ namespace Solver
      *  Initial conditions are the variable values in vars
      */
     std::pair<float, Solution> findRoot(
-            const Tree& t, const std::map<Tree::Tree_*, float>& vars,
+            const Tree& t, const std::map<Tree::Id, float>& vars,
             const glm::vec3 pos={0,0,0}, const Mask& mask=Mask(),
             unsigned gas=25000);
     std::pair<float, Solution> findRoot(
-            Evaluator& t, const std::map<Tree::Tree_*, float>& vars,
+            Evaluator& t, const std::map<Tree::Id, float>& vars,
             const glm::vec3 pos={0,0,0}, const Mask& mask=Mask(),
             unsigned gas=25000);
 

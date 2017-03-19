@@ -42,7 +42,7 @@ protected:
     std::unique_ptr<Kernel::Evaluator> specialized;
 
     /*  Here are our local variable values  */
-    std::map<Kernel::Tree::Tree_*, float> vars;
+    std::map<Kernel::Tree::Id, float> vars;
 
     /*  We store the starting position for a drag here.
      *  This is a point in world space, and depends on where

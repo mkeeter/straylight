@@ -7,7 +7,7 @@ namespace App {
 namespace Bridge {
 
 EscapedShape::EscapedShape(Kernel::Tree tree,
-                 const std::map<Kernel::Tree::Tree_*, float>& vars)
+                 const std::map<Kernel::Tree::Id, float>& vars)
     : EscapedHandle(vars), tree(tree)
 {
     // Nothing to do here
@@ -21,7 +21,7 @@ int EscapedShape::tag() const
 ////////////////////////////////////////////////////////////////////////////////
 
 EscapedPointHandle::EscapedPointHandle(Kernel::Tree xyz[3],
-                 const std::map<Kernel::Tree::Tree_*, float>& vars)
+                 const std::map<Kernel::Tree::Id, float>& vars)
     : EscapedHandle(vars), xyz { xyz[0], xyz[1], xyz[2] }
 {
     // Figure out position from tree and variable values

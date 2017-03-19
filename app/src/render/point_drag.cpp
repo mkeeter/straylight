@@ -53,7 +53,7 @@ Kernel::Solver::Solution PointDrag::dragTo(const QMatrix4x4& M,
     auto _cursor_ray = world.second;
 
     // Set position and delta vector
-    std::set<Kernel::Tree::Tree_*> masked;
+    std::set<Kernel::Tree::Id> masked;
     for (int i=0; i < 3; ++i)
     {
         err->setVar(cursor_pos[i].id(), _cursor_pos[i]);

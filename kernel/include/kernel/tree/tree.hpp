@@ -72,6 +72,10 @@ public:
         const std::shared_ptr<Tree_> rhs;
     };
 
+    /*  Trees are uniquely identified by their Tree_ address, but we don't
+     *  want anyone to do anything with that value  */
+    typedef const Tree_* Id;
+
     /*
      *  Overload arrow to get shared Tree_ value
      */
@@ -92,7 +96,7 @@ public:
     /*
      *  Unique identity (as the tree pointer)
      */
-    Tree::Tree_* id() const { return ptr.get(); }
+    Id id() const { return ptr.get(); }
 
     /*
      *  Remaps the base coordinates

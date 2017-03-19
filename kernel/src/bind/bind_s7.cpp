@@ -42,7 +42,7 @@ static shape_t* get_mutable_shape(s7_pointer obj)
  *  Converts a Tree into an allocated Scheme shape
  */
 s7_pointer shape_from_tree(s7_scheme* sc, Kernel::Tree t,
-                           std::map<Kernel::Tree::Tree_*, float> vars)
+                           std::map<Kernel::Tree::Id, float> vars)
 {
     auto s = new shape_t(t);
     s->vars = vars;

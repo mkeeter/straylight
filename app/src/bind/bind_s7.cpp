@@ -18,7 +18,7 @@ int point_handle_t::tag = -1;
 ////////////////////////////////////////////////////////////////////////////////
 
 point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z,
-                               const std::map<Kernel::Tree::Tree_*, float>& vars)
+                               const std::map<Kernel::Tree::Id, float>& vars)
     : xyz{x, y, z}, vars(vars)
 {
     // Nothing to do here
@@ -96,7 +96,7 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
            Kernel::Bind::is_shape(x));
 
     // Take the union of all the variables
-    std::map<Kernel::Tree::Tree_*, float> vars;
+    std::map<Kernel::Tree::Id, float> vars;
     for (auto& a : {x, y, z})
     {
         auto s = Kernel::Bind::get_shape(a);

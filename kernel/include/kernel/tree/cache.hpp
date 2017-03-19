@@ -73,8 +73,8 @@ protected:
      *  deduplicate based on opcode  and arguments
      */
     typedef std::tuple<Opcode::Opcode,  /* opcode */
-                       Tree::Tree_*,    /* lhs */
-                       Tree::Tree_*     /* rhs */ > Key;
+                       Tree::Id,        /* lhs */
+                       Tree::Id         /* rhs */ > Key;
     std::map<Key, std::weak_ptr<Tree::Tree_>> ops;
 
     /*  Constants in the tree are uniquely identified by their value  */

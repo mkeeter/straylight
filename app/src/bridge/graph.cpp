@@ -294,12 +294,12 @@ void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GraphModel::defineVar(const Graph::CellKey& k,
-                           const Kernel::Tree::Tree_* tree)
+                           const Kernel::Tree::Id tree)
 {
     vars.insert({tree, k});
 }
 
-void GraphModel::forgetVar(const Kernel::Tree::Tree_* tree)
+void GraphModel::forgetVar(const Kernel::Tree::Id tree)
 {
     if (vars.count(tree))
     {

@@ -40,7 +40,7 @@ public:
 
 protected:
     std::unique_ptr<Kernel::Evaluator> err;
-    std::map<Kernel::Tree::Tree_*, float> vars;
+    std::map<Kernel::Tree::Id, float> vars;
 
     /*
      *  The mouse cursor line is represented by

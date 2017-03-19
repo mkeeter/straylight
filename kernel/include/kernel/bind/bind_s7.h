@@ -15,7 +15,7 @@ struct shape_t {
     shape_t(Kernel::Tree t) : tree(t) {}
 
     Kernel::Tree tree;
-    std::map<Kernel::Tree::Tree_*, float> vars;
+    std::map<Kernel::Tree::Id, float> vars;
 
     /*
      *  Construct a dummy evaluator from the tree and vars,
@@ -38,8 +38,8 @@ extern "C" {
      *  Turns the given Tree into a shape
      */
     s7_cell* shape_from_tree(s7_scheme* sc, Kernel::Tree t,
-                             std::map<Kernel::Tree::Tree_*, float> vars=
-                                 std::map<Kernel::Tree::Tree_*, float>());
+                             std::map<Kernel::Tree::Id, float> vars=
+                                 std::map<Kernel::Tree::Id, float>());
 
     /*
      *  Converts an arbitrary Scheme object into a shape

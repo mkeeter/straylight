@@ -14,7 +14,7 @@ namespace Kernel {
 ////////////////////////////////////////////////////////////////////////////////
 
 EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
-                             const std::map<Tree::Tree_*, float>& vs)
+                             const std::map<Tree::Id, float>& vs)
     : root_op(root->op)
 {
     setMatrix(M);
@@ -23,12 +23,12 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
 
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
-    std::unordered_map<const Tree::Tree_*, Clause::Id> clauses = {{nullptr, 0}};
+    std::unordered_map<Tree::Id, Clause::Id> clauses = {{nullptr, 0}};
     Clause::Id id = flat.size() - 1;
 
     // Helper function to make a new function
     std::list<Clause> tape_;
-    auto newClause = [&clauses, &id, &tape_](const Tree::Tree_* t)
+    auto newClause = [&clauses, &id, &tape_](const Tree::Id t)
     {
         tape_.push_front(
                 {t->op,
@@ -959,7 +959,7 @@ EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
              &result.dy[0][0], &result.dz[0][0] };
 }
 
-std::map<Tree::Tree_*, float> EvaluatorBase::gradient(float x, float y, float z)
+std::map<Tree::Id, float> EvaluatorBase::gradient(float x, float y, float z)
 {
     set(x, y, z, 0);
 
@@ -974,7 +974,7 @@ std::map<Tree::Tree_*, float> EvaluatorBase::gradient(float x, float y, float z)
                 itr->op, av, aj, bv, bj, result.j[itr->id]);
     }
 
-    std::map<Tree::Tree_*, float> out;
+    std::map<Tree::Id, float> out;
     {   // Unpack from flat array into map
         // (to allow correlating back to VARs in Tree)
         size_t index = 0;
@@ -1026,14 +1026,14 @@ void EvaluatorBase::setMatrix(const glm::mat4& m)
     Mi = glm::inverse(m);
 }
 
-void EvaluatorBase::setVar(Tree::Tree_* var, float value)
+void EvaluatorBase::setVar(Tree::Id var, float value)
 {
     result.setValue(value, vars.right.at(var));
 }
 
-std::map<Tree::Tree_*, float> EvaluatorBase::varValues() const
+std::map<Tree::Id, float> EvaluatorBase::varValues() const
 {
-    std::map<Tree::Tree_*, float> out;
+    std::map<Tree::Id, float> out;
 
     for (auto v : vars.left)
     {
@@ -1042,7 +1042,7 @@ std::map<Tree::Tree_*, float> EvaluatorBase::varValues() const
     return out;
 }
 
-bool EvaluatorBase::updateVars(const std::map<Kernel::Tree::Tree_*, float>& vars_)
+bool EvaluatorBase::updateVars(const std::map<Kernel::Tree::Id, float>& vars_)
 {
     bool changed = false;
     for (const auto& v : vars.left)

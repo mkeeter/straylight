@@ -11,9 +11,9 @@ public:
      *  Construct an evaluator for the given tree
      */
     EvaluatorAVX(const Tree root, const glm::mat4& M=glm::mat4(),
-                 const std::map<Tree::Tree_*, float>& vars=std::map<Tree::Tree_*, float>())
+                 const std::map<Tree::Id, float>& vars=std::map<Tree::Id, float>())
         : EvaluatorBase(root, M, vars) { /* Nothing to do here */ }
-    EvaluatorAVX(const Tree root, const std::map<Tree::Tree_*, float>& vars)
+    EvaluatorAVX(const Tree root, const std::map<Tree::Id, float>& vars)
         : EvaluatorBase(root, vars) { /* Nothing to do here */ }
 
     /*

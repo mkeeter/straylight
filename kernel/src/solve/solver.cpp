@@ -14,7 +14,7 @@ static std::pair<float, Solution> findRoot(
 {
     const float EPSILON = 1e-6;
 
-    auto filter = [&](std::map<Tree::Tree_*, float>& vs){
+    auto filter = [&](std::map<Tree::Id, float>& vs){
         for (const auto& v : mask)
         {
             vs.erase(v);
@@ -83,7 +83,7 @@ static std::pair<float, Solution> findRoot(
 ////////////////////////////////////////////////////////////////////////////////
 
 std::pair<float, Solution> findRoot(
-        const Tree& t, const std::map<Tree::Tree_*, float>& vars,
+        const Tree& t, const std::map<Tree::Id, float>& vars,
         const glm::vec3 pos, const Mask& mask, unsigned gas)
 {
     Evaluator e(t, vars);
@@ -91,7 +91,7 @@ std::pair<float, Solution> findRoot(
 }
 
 std::pair<float, Solution> findRoot(
-        Evaluator& e, const std::map<Tree::Tree_*, float>& vars,
+        Evaluator& e, const std::map<Tree::Id, float>& vars,
         const glm::vec3 pos, const Mask& mask, unsigned gas)
 {
     // Load initial variable values here

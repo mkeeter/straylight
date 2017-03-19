@@ -8,7 +8,7 @@
 namespace App {
 namespace Render {
 
-Renderer::Renderer(Kernel::Tree e, std::map<Kernel::Tree::Tree_*, float> vars)
+Renderer::Renderer(Kernel::Tree e, std::map<Kernel::Tree::Id, float> vars)
     : next(QMatrix4x4(), {0,0}, 0), todo(NOTHING)
 {
     for (int i=0; i < 8; ++i)
@@ -44,7 +44,7 @@ void Renderer::deleteWhenNotRunning()
 }
 
 // TODO: this is never used
-bool Renderer::updateVars(std::map<Kernel::Tree::Tree_*, float> vars)
+bool Renderer::updateVars(std::map<Kernel::Tree::Id, float> vars)
 {
     bool changed = false;
     for (auto& e : evaluators)

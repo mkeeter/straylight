@@ -24,9 +24,9 @@ public:
      *  Construct an evaluator for the given tree
      */
     EvaluatorBase(const Tree root, const glm::mat4& M=glm::mat4(),
-                  const std::map<Tree::Tree_*, float>& vars=
-                        std::map<Tree::Tree_*, float>());
-    EvaluatorBase(const Tree root, const std::map<Tree::Tree_*, float>& vars)
+                  const std::map<Tree::Id, float>& vars=
+                        std::map<Tree::Id, float>());
+    EvaluatorBase(const Tree root, const std::map<Tree::Id, float>& vars)
         : EvaluatorBase(root, glm::mat4(), vars) {}
 
     /*
@@ -62,7 +62,7 @@ public:
     /*
      *  Returns the gradient with respect to all VAR nodes
      */
-    std::map<Tree::Tree_*, float> gradient(float x, float y, float z);
+    std::map<Tree::Id, float> gradient(float x, float y, float z);
 
     /*
      *  Evaluates a single interval (stored with set)
@@ -125,17 +125,17 @@ public:
     /*
      *  Changes a variable's value
      */
-    void setVar(Tree::Tree_* var, float value);
+    void setVar(Tree::Id var, float value);
 
     /*
      *  Returns the current values associated with all variables
      */
-    std::map<Tree::Tree_*, float> varValues() const;
+    std::map<Tree::Id, float> varValues() const;
 
     /*
      *  Updates variable values, return true if changed
      */
-    bool updateVars(const std::map<Kernel::Tree::Tree_*, float>& vars);
+    bool updateVars(const std::map<Kernel::Tree::Id, float>& vars);
 
 protected:
     /*
@@ -184,7 +184,7 @@ protected:
     /*  Map of variables (in terms of where they live in this Evaluator) to
      *  their ids in their respective Tree (e.g. what you get when calling
      *  Tree::var().id() */
-    boost::bimap<Clause::Id, Tree::Tree_*> vars;
+    boost::bimap<Clause::Id, Tree::Id> vars;
 
     /*  Tape containing our opcodes in reverse order */
     typedef std::vector<Clause> Tape;

@@ -61,7 +61,7 @@ Tree::Tree_::~Tree_()
 
 std::list<Tree> Tree::ordered() const
 {
-    std::set<Tree_*> found = {nullptr};
+    std::set<Id> found = {nullptr};
     std::list<std::shared_ptr<Tree_>> todo = { ptr };
     std::map<unsigned, std::list<std::shared_ptr<Tree_>>> ranks;
 
@@ -92,7 +92,7 @@ std::list<Tree> Tree::ordered() const
 
 Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
 {
-    std::map<Tree::Tree_*, std::shared_ptr<Tree_>> m = {
+    std::map<Tree::Id, std::shared_ptr<Tree_>> m = {
         {X().id(), X_.ptr}, {Y().id(), Y_.ptr}, {Z().id(), Z_.ptr}};
 
     for (const auto& t : ordered())

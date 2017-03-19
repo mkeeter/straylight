@@ -99,8 +99,8 @@ public:
      *  to variable pointers (in the Kernel's tree).
      */
     void defineVar(const Graph::CellKey& k,
-                   const Kernel::Tree::Tree_* var);
-    void forgetVar(const Kernel::Tree::Tree_* var);
+                   const Kernel::Tree::Id var);
+    void forgetVar(const Kernel::Tree::Id var);
 
 signals:
     /*
@@ -150,7 +150,7 @@ protected:
     App::Render::Scene* scene;
 
     /*  Bindings from variables to cells  */
-    std::map<const Kernel::Tree::Tree_*, Graph::CellKey> vars;
+    std::map<const Kernel::Tree::Id, Graph::CellKey> vars;
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;
