@@ -198,7 +198,8 @@ Cache::Node Cache::checkIdentity(Opcode::Opcode op, Cache::Node a, Cache::Node b
 
 Cache::Node Cache::checkCommutative(Opcode::Opcode op, Cache::Node a, Cache::Node b)
 {
-    if (Opcode::isCommutative(op))
+    // Only try to rebalance commutative operations with nested trees
+    if (Opcode::isCommutative(op) && a->lhs && a->rhs && b->lhs && b->rhs)
     {
         if (a->op == op)
         {

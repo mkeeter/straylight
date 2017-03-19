@@ -20,7 +20,7 @@ TEST_CASE("Tree::flags")
     auto a = Tree::var();
     REQUIRE(a->flags == Tree::FLAG_LOCATION_AGNOSTIC);
 
-    auto b = Tree();
+    auto b = Tree::var();
     REQUIRE(b->flags == Tree::FLAG_LOCATION_AGNOSTIC);
 
     auto c = a + b;
