@@ -26,8 +26,8 @@ EscapedPointHandle::EscapedPointHandle(Kernel::Tree xyz[3],
 {
     // Figure out position from tree and variable values
     pos.setX(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
-    pos.setY(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
-    pos.setZ(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
+    pos.setY(Kernel::Evaluator(xyz[1], vars).values(1)[0]);
+    pos.setZ(Kernel::Evaluator(xyz[2], vars).values(1)[0]);
 }
 
 int EscapedPointHandle::tag() const
