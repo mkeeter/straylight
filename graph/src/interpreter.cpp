@@ -434,7 +434,9 @@ Value Interpreter::eval(const CellKey& key)
                 s7_make_string(sc, expr.c_str()),
                 s7_inlet(sc, bindings),
                 s7_make_c_pointer(sc, (void*)&key),
-                c->values.count(env) ? c->values.at(env).value : s7_nil(sc));
+                (c->values.count(env) && c->values.at(env).valid)
+                    ? untag(c->values.at(env).value)
+                    : s7_nil(sc));
         value = s7_call(sc, eval_func, args);
     }
 
