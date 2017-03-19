@@ -7,8 +7,8 @@ using namespace Kernel;
 
 Tree rectangle(float xmin, float xmax, float ymin, float ymax, glm::mat4 M)
 {
-    auto x = Tree::affine(M[0][0], M[0][1], M[0][2], M[0][3]);
-    auto y = Tree::affine(M[1][0], M[1][1], M[1][2], M[1][3]);
+    auto x = M[0][0]*Tree::X() + M[0][1]*Tree::Y() + M[0][2]*Tree::Z() + M[0][3];
+    auto y = M[1][0]*Tree::X() + M[1][1]*Tree::Y() + M[1][2]*Tree::Z() + M[1][3];
 
     return max(max(xmin - x, x - xmax), max(ymin - y, y - ymax));
 }
@@ -52,12 +52,12 @@ Tree menger(int i)
     Tree c = recurse(0, 0, 1, M, i);
 
     auto cube = max(max(
-                    max(Tree::affine(-1,  0,  0, -1.5),
-                        Tree::affine( 1,  0,  0, -1.5)),
-                    max(Tree::affine( 0, -1,  0, -1.5),
-                        Tree::affine( 0,  1,  0, -1.5))),
-                    max(Tree::affine( 0,  0, -1, -1.5),
-                        Tree::affine( 0,  0,  1, -1.5)));
+                    max(-(Tree::X() + 1.5),
+                          Tree::X() - 1.5),
+                    max(-(Tree::Y() + 1.5),
+                          Tree::Y() - 1.5)),
+                    max(-(Tree::Z() + 1.5),
+                          Tree::Z() - 1.5));
 
     auto cutout = -min(min(a, b), c);
     return max(cube, cutout);

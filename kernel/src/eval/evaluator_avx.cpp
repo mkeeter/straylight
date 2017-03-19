@@ -91,7 +91,6 @@ void EvaluatorAVX::eval_clause_values(Opcode::Opcode op,
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
 }
@@ -289,7 +288,6 @@ void EvaluatorAVX::eval_clause_derivs(Opcode::Opcode op,
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
 }

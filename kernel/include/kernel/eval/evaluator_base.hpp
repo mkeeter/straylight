@@ -3,8 +3,10 @@
 #include <array>
 #include <unordered_map>
 #include <vector>
+#include <map>
 
 #include <glm/mat4x4.hpp>
+#include <boost/bimap.hpp>
 
 #include "kernel/eval/result.hpp"
 #include "kernel/eval/interval.hpp"
@@ -21,21 +23,11 @@ public:
     /*
      *  Construct an evaluator for the given tree
      */
-    EvaluatorBase(const Tree root, const glm::mat4& M=glm::mat4());
-
-    /*
-     *  Copy constructor
-     */
-    EvaluatorBase(const EvaluatorBase& other);
-
-    /*
-     *  Converts this evaluator back into a tree
-     *
-     *  The VarId map defines how to convert variables from the original
-     *  cache to the new cache (as they are expected to live in different
-     *  threads).
-     */
-    Tree toTree(boost::bimap<Cache::VarId, Cache::VarId>& vars) const;
+    EvaluatorBase(const Tree root, const glm::mat4& M=glm::mat4(),
+                  const std::map<Tree::Tree_*, float>& vars=
+                        std::map<Tree::Tree_*, float>());
+    EvaluatorBase(const Tree root, const std::map<Tree::Tree_*, float>& vars)
+        : EvaluatorBase(root, glm::mat4(), vars) {}
 
     /*
      *  Single-argument evaluation
@@ -68,9 +60,9 @@ public:
     Derivs derivs(Result::Index count);
 
     /*
-     *  Returns the gradient with respect to all VARs
+     *  Returns the gradient with respect to all VAR nodes
      */
-    std::map<Cache::VarId, float> gradient(float x, float y, float z);
+    std::map<Tree::Tree_*, float> gradient(float x, float y, float z);
 
     /*
      *  Evaluates a single interval (stored with set)
@@ -133,17 +125,12 @@ public:
     /*
      *  Changes a variable's value
      */
-    void setVar(Cache::VarId var, float value);
+    void setVar(Tree::Tree_* var, float value);
 
     /*
      *  Returns the current values associated with all variables
      */
-    std::map<Cache::VarId, float> varValues() const;
-
-    /*
-     *  Updates variable values, returning true if changed
-     */
-    bool updateVars(const Cache& cache);
+    std::map<Tree::Tree_*, float> varValues() const;
 
     /*
      *  Updates variable values, return true if changed
@@ -197,7 +184,7 @@ protected:
     /*  Map of variables (in terms of where they live in this Evaluator) to
      *  their ids in their respective Tree (e.g. what you get when calling
      *  Tree::var(3.0).var() */
-    boost::bimap<Clause::Id, Cache::VarId> vars;
+    boost::bimap<Clause::Id, Tree::Tree_*> vars;
 
     /*  Tape containing our opcodes in reverse order */
     typedef std::vector<Clause> Tape;
@@ -206,7 +193,7 @@ protected:
 
     /*  Store the root opcode explicitly so that we can convert back into
      *  a tree even if there's nothing in the tape  */
-    Opcode::Opcode root_op;
+    const Opcode::Opcode root_op;
 
     std::vector<uint8_t> disabled;
 

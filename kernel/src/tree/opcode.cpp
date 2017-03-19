@@ -40,7 +40,6 @@ size_t Opcode::args(Opcode op)
         case NTH_ROOT:
         case MOD:
         case NANFILL:
-        case AFFINE_VEC:
             return 2;
 
         case INVALID: // fallthrough
@@ -58,7 +57,6 @@ std::string Opcode::to_str(Opcode op)
     {
         case Opcode::CONST: return "const";
         case Opcode::CONST_VAR: return "const";
-        case Opcode::AFFINE_VEC: return "affine-vec";
         case Opcode::DUMMY_A: return "dummy-a";
         case Opcode::DUMMY_B: return "dummy-b";
         case Opcode::LAST_OP: return "last-op";
@@ -137,7 +135,6 @@ bool Opcode::isCommutative(Opcode op)
         case NTH_ROOT:
         case MOD:
         case NANFILL:
-        case AFFINE_VEC:
         case INVALID:
         case DUMMY_A:
         case DUMMY_B:

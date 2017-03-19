@@ -13,79 +13,85 @@ namespace Kernel {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
+EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
+                             const std::map<Tree::Tree_*, float>& vs)
+    : root_op(root->op)
 {
     setMatrix(M);
 
-    auto root = root_.collapse();
-    root_op = root.opcode();
-
-    Cache* cache = root.parent.get();
-    auto connected = cache->findConnected(root.id);
-
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
-    std::unordered_map<Cache::Id, Clause::Id> clauses = {{Cache::Id(0), 0}};
-    Clause::Id id = connected.size() - 1;
+    std::unordered_map<const Tree::Tree_*, Clause::Id> clauses = {{nullptr, 0}};
+    Clause::Id id = 0;
 
-    std::list<Clause> rtape;
-    auto newClause = [&id, &clauses, &rtape, cache](const Cache::Id t)
+    // Prepare the base tape
+    tapes.push_back(Tape());
+    tape = tapes.begin();
+
+    auto newClause = [&clauses, &id, this](const Tree::Tree_* t)
     {
-        rtape.push_back(
-                {cache->opcode(t),
+        tape->push_back(
+                {t->op,
                  id,
-                 clauses.at(cache->lhs(t)),
-                 clauses.at(cache->rhs(t))});
+                 clauses.at(t->lhs.get()),
+                 clauses.at(t->rhs.get())});
         clauses[t] = id;
-        return id--;
+        return id++;
     };
 
     // And here we go!
     std::map<Clause::Id, float> constants;
-    for (auto m : cache->data.left)
+    std::list<Tree::Tree_*> todo = { root.id() };
+
+    while (todo.size())
     {
-        if (connected.count(m.second))
+        auto m = todo.front();
+        todo.pop_front();
+
+        // Normal clauses end up in the tape
+        if (m->rank > 0)
         {
-            // Normal clauses end up in the tape
-            if (m.first.rank() > 0)
+            newClause(m);
+
+            // Load the children into the todo list
+            if (clauses.find(m->lhs.get()) != clauses.end())
             {
-                newClause(m.second);
+                todo.push_back(m->lhs.get());
             }
-            // Other clauses get allocated results but no tape
-            else
+            if (clauses.find(m->rhs.get()) != clauses.end())
             {
-                // For constants and variables, record their values so
-                // that we can store those values in the result array
-                if (m.first.opcode() == Opcode::CONST)
-                {
-                    constants[id] = m.first.value();
-                }
-                else if (m.first.opcode() == Opcode::VAR)
-                {
-                    constants[id] = cache->value(m.second);
-                    vars.left.insert({id, m.first.var()});
-                }
-                clauses[m.second] = id--;
+                todo.push_back(m->rhs.get());
             }
         }
-    }
-    assert(id + 1 == 0);
-
-    // Copy over the tape in reversed order
-    tapes.push_back(Tape());
-    tape = tapes.begin();
-    for (auto itr = rtape.rbegin(); itr != rtape.rend(); ++itr)
-    {
-        tape->push_back(*itr);
-    }
-
-    // Make sure that X, Y, Z have been allocated space
-    for (auto a : {cache->X(), cache->Y(), cache->Z()})
-    {
-        if (!connected.count(a))
+        // Other clauses get allocated results but no tape
+        else
         {
-            clauses[a] = connected.size();
-            connected.insert(a);
+            // For constants and variables, record their values so
+            // that we can store those values in the result array
+            if (m->op == Opcode::CONST)
+            {
+                constants[id] = m->value;
+            }
+            else if (m->op == Opcode::VAR)
+            {
+                constants[id] = vs.at(m);
+                vars.left.insert({id, m});
+            }
+            else
+            {
+                assert(false);
+            }
+            clauses[m] = id++;
+        }
+    }
+
+    // Make sure that X, Y, Z have been allocated space, since
+    // we'll be blindly writing data to their arrays later on
+    for (auto a : {Tree::X(), Tree::Y(), Tree::Z()})
+    {
+        if (clauses.find(a.id()) == clauses.end())
+        {
+            clauses[a.id()] = id++;
         }
     }
 
@@ -100,9 +106,9 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
     }
 
     // Save X, Y, Z ids
-    X = clauses.at(cache->X());
-    Y = clauses.at(cache->Y());
-    Z = clauses.at(cache->Z());
+    X = clauses.at(Tree::X().id());
+    Y = clauses.at(Tree::Y().id());
+    Z = clauses.at(Tree::Z().id());
 
     // Set derivatives for X, Y, Z (unchanging)
     result.setDeriv(1, 0, 0, X);
@@ -117,146 +123,7 @@ EvaluatorBase::EvaluatorBase(const Tree root_, const glm::mat4& M)
         }
     }
 
-    assert(clauses.at(root.id) == 0);
-}
-
-EvaluatorBase::EvaluatorBase(const EvaluatorBase& other)
-{
-    setMatrix(other.M);
-
-    // Copy over the base tape
-    tapes.push_back(Tape());
-    tape = tapes.begin();
-    for (auto itr = other.tapes.front().begin();
-              itr != other.tapes.front().end(); ++itr)
-    {
-        tape->push_back(*itr);
-    }
-
-    // Copy over all of the variables in the map
-    for (const auto& v : other.vars.left)
-    {
-        vars.left.insert(v);
-    }
-
-    // Copy over the fundamental variable locations
-    X = other.X;
-    Y = other.Y;
-    Z = other.Z;
-
-    // Allocate space for all of the clauses and variables
-    const auto clause_count = other.result.i.size();
-    const auto var_count = other.result.j[0].size();
-    result.resize(clause_count, var_count);
-    disabled.resize(clause_count);
-
-    // Copy over all of the values!
-    memcpy(result.f, other.result.f, clause_count * sizeof(*result.f));
-    memcpy(result.dx, other.result.dx, clause_count * sizeof(*result.dx));
-    memcpy(result.dy, other.result.dy, clause_count * sizeof(*result.dy));
-    memcpy(result.dz, other.result.dz, clause_count * sizeof(*result.dz));
-    memcpy(result.i.data(), other.result.i.data(),
-           clause_count * sizeof(*result.i.data()));
-
-    // Then copy over all of the derivatives!
-    for (unsigned i=0; i < clause_count; ++i)
-    {
-        memcpy(result.j[i].data(), other.result.j[i].data(),
-               var_count * sizeof(*result.j[i].data()));
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Tree EvaluatorBase::toTree(boost::bimap<Cache::VarId, Cache::VarId>& vm) const
-{
-    // Special-case for when the tape has no operations
-    if (tape->size() == 0)
-    {
-        if (root_op == Opcode::CONST)
-        {
-            return Tree(result.f[0][0]);
-        }
-        else if (root_op == Opcode::VAR)
-        {
-            auto var_other = vars.left.at(0);
-            if (!vm.left.count(var_other))
-            {
-                // Make a dummy tree to get the variable id
-                auto t = Tree::var(result.f[0][0]);
-                // Record the variable id mapping into this thread
-                vm.left.insert({var_other, t.var()});
-            }
-            auto t = Tree::var(vm.left.at(var_other));
-            t.setValue(result.f[0][0]);
-            return t;
-        }
-    }
-
-    std::map<Clause::Id, Tree> trees;
-
-    // Looks up a clause from the map with special-case behavior for constants
-    // and variables (identified because they're not already in the map)
-    auto getTree = [&](const Clause::Id id){
-        if (!trees.count(id))
-        {
-            // If the id is a variable, then handle it in this branch
-            if (vars.left.count(id))
-            {
-                // Do something with vm here
-                auto var_other = vars.left.at(id);
-                if (!vm.left.count(var_other))
-                {
-                    // Make a dummy tree to get the variable id
-                    auto t = Tree::var(result.f[id][0]);
-                    // Record the variable id mapping into this thread
-                    vm.left.insert({var_other, t.var()});
-                }
-                auto t = Tree::var(vm.left.at(var_other));
-                t.setValue(result.f[id][0]);
-                trees.insert({id, t});
-            }
-            // Otherwise, it must be a constant (if we've walked through
-            // the tree correctly).
-            else
-            {
-                trees.insert({id, Tree(result.f[id][0])});
-            }
-        }
-        return trees.at(id);
-    };
-
-    // Insert coordinate nodes
-    trees.insert({X, Tree::X()});
-    trees.insert({Y, Tree::Y()});
-    trees.insert({Z, Tree::Z()});
-
-    // Roll through the tape, making all of the trees
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
-    {
-        auto& c = *itr;
-        if (c.a == 0 && c.b == 0)
-        {
-            trees.insert({c.id, Tree(c.op)});
-        }
-        else if (c.b == 0)
-        {
-            trees.insert({c.id, Tree(c.op, getTree(c.a))});
-        }
-        else
-        {
-            trees.insert({c.id, Tree(c.op, getTree(c.a), getTree(c.b))});
-        }
-    }
-
-    // Sanity-checking that the root node was created
-    assert(trees.count(0));
-
-    // Sanity-checking: anything that comes out of an Evaluator
-    // must be collapsed
-    assert(trees.at(0).flags() & Tree::FLAG_COLLAPSED);
-
-    return trees.at(0);
+    assert(clauses.at(root.id()) == 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -480,7 +347,6 @@ void EvaluatorBase::eval_clause_values(Opcode::Opcode op,
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
 }
@@ -763,7 +629,6 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
 }
@@ -984,7 +849,6 @@ float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
 
@@ -1054,7 +918,6 @@ Interval EvaluatorBase::eval_clause_interval(
         case Opcode::VAR_Y:
         case Opcode::VAR_Z:
         case Opcode::VAR:
-        case Opcode::AFFINE_VEC:
         case Opcode::LAST_OP: assert(false);
     }
     return Interval();
@@ -1106,7 +969,7 @@ EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
              &result.dy[0][0], &result.dz[0][0] };
 }
 
-std::map<Cache::VarId, float> EvaluatorBase::gradient(float x, float y, float z)
+std::map<Tree::Tree_*, float> EvaluatorBase::gradient(float x, float y, float z)
 {
     set(x, y, z, 0);
 
@@ -1121,7 +984,7 @@ std::map<Cache::VarId, float> EvaluatorBase::gradient(float x, float y, float z)
                 itr->op, av, aj, bv, bj, result.j[itr->id]);
     }
 
-    std::map<Cache::VarId, float> out;
+    std::map<Tree::Tree_*, float> out;
     {   // Unpack from flat array into map
         // (to allow correlating back to VARs in Tree)
         size_t index = 0;
@@ -1173,51 +1036,20 @@ void EvaluatorBase::setMatrix(const glm::mat4& m)
     Mi = glm::inverse(m);
 }
 
-void EvaluatorBase::setVar(Cache::VarId var, float value)
+void EvaluatorBase::setVar(Tree::Tree_* var, float value)
 {
     result.setValue(value, vars.right.at(var));
 }
 
-std::map<Cache::VarId, float> EvaluatorBase::varValues() const
+std::map<Tree::Tree_*, float> EvaluatorBase::varValues() const
 {
-    std::map<Cache::VarId, float> out;
+    std::map<Tree::Tree_*, float> out;
 
     for (auto v : vars.left)
     {
         out[v.second] = result.f[v.first][0];
     }
     return out;
-}
-
-bool EvaluatorBase::updateVars(const Cache& cache)
-{
-    bool changed = false;
-    for (const auto& v : vars.left)
-    {
-        auto val = cache.value(v.second);
-        if (val != result.f[v.first][0])
-        {
-            setVar(v.second, val);
-            changed = true;
-        }
-    }
-    return changed;
-}
-
-bool EvaluatorBase::updateVars(const EvaluatorBase& other)
-{
-    bool changed = false;
-    const auto vs = other.varValues();
-    for (const auto& v : vars.right)
-    {
-        auto val = vs.at(v.first);
-        if (val != result.f[v.second][0])
-        {
-            setVar(v.second, val);
-            changed = true;
-        }
-    }
-    return changed;
 }
 
 }   // namespace Kernel

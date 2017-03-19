@@ -43,19 +43,6 @@ enum Opcode
     NANFILL,
 
     /*
-     *  Affine trees must have the form
-     *              AFFINE
-     *             /      \
-     *          ADD         ADD
-     *        /    \      /      \
-     *      MUL    MUL   MUL     C
-     *    /   \   /  \  /   \
-     *   X    C  Y   C  Z   C
-     *  (where X, Y, Z are base coordinates and C is CONST)
-     */
-    AFFINE_VEC,
-
-    /*
      *  Dummy opcodes used to select the left or right-hand side of a function
      * (used when one of the children is disabled)
      */

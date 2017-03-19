@@ -1,3 +1,4 @@
+#include <cassert>
 #include <catch/catch.hpp>
 
 #include "s7/s7.h"
@@ -20,7 +21,7 @@ double num(s7_scheme* sc, std::string expr)
     }
     else if (Kernel::Bind::is_shape(out))
     {
-        return Kernel::Bind::get_shape(out)->tree.value();
+        return Kernel::Bind::get_shape(out)->value();
     }
     assert(false);
     return 0;

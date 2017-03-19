@@ -12,21 +12,23 @@ class Tree;
 
 namespace Solver
 {
-    typedef std::map<Cache::VarId, float> Solution;
-    typedef std::set<Cache::VarId> Mask;
+    typedef std::map<Tree::Tree_*, float> Solution;
+    typedef std::set<Tree::Tree_*> Mask;
 
     /*
      *  Finds a set of variables that drive t to zero
      *
-     *  v is the x,y,z coordinates at which to solve
-     *  Initial conditions are the variable values
+     *  pos is the x,y,z coordinates at which to solve
+     *  Initial conditions are the variable values in vars
      */
     std::pair<float, Solution> findRoot(
-            const Tree& t, const glm::vec3 v={0,0,0},
-            const Mask& mask=Mask(), unsigned gas=25000);
+            const Tree& t, const std::map<Tree::Tree_*, float>& vars,
+            const glm::vec3 pos={0,0,0}, const Mask& mask=Mask(),
+            unsigned gas=25000);
     std::pair<float, Solution> findRoot(
-            Evaluator& t, const glm::vec3 v={0,0,0},
-            const Mask& mask=Mask(), unsigned gas=25000);
+            Evaluator& t, const std::map<Tree::Tree_*, float>& vars,
+            const glm::vec3 pos={0,0,0}, const Mask& mask=Mask(),
+            unsigned gas=25000);
 
 }   // namespace Solver
 }   // namespace Kernel

@@ -9,32 +9,32 @@ TEST_CASE("Solver::findRoot")
 {
     SECTION("Single variable")
     {
-        auto v = Tree::var(3);
-        auto out = Solver::findRoot(v + 1);
+        auto v = Tree::var();
+        auto out = Solver::findRoot(v + 1, {{v.id(), 3}});
         auto res = out.first;
         auto vals = out.second;
         REQUIRE(res == Approx(0));
         REQUIRE(vals.size() == 1);
-        REQUIRE(vals.at(v.var()) == Approx(-1));
+        REQUIRE(vals.at(v.id()) == Approx(-1));
     }
 
     SECTION("Single variable (negative)")
     {
-        auto v = Tree::var(3);
-        auto out = Solver::findRoot(1 - v);
+        auto v = Tree::var();
+        auto out = Solver::findRoot(1 - v, {{v.id(), 3}});
         auto res = out.first;
         auto vals = out.second;
         REQUIRE(res == Approx(0));
         REQUIRE(vals.size() == 1);
-        REQUIRE(vals.at(v.var()) == Approx(1));
+        REQUIRE(vals.at(v.id()) == Approx(1));
     }
 
     SECTION("Multiple variables")
     {
-        auto a = Tree::var(3);
-        auto b = Tree::var(5);
+        auto a = Tree::var();
+        auto b = Tree::var();
 
-        auto out = Solver::findRoot(a*a + b*b - 1);
+        auto out = Solver::findRoot(a*a + b*b - 1, {{a.id(), 3}, {b.id(), 5}});
         auto res = out.first;
         auto vals = out.second;
 
@@ -42,32 +42,34 @@ TEST_CASE("Solver::findRoot")
         // variables to be scaled by the same size
         REQUIRE(res == Approx(0));
         REQUIRE(vals.size() == 2);
-        REQUIRE(vals.at(a.var()) == Approx(0.5145));
-        REQUIRE(vals.at(b.var()) == Approx(0.8575));
+        REQUIRE(vals.at(a.id()) == Approx(0.5145));
+        REQUIRE(vals.at(b.id()) == Approx(0.8575));
     }
 
     SECTION("Mask")
     {
-        auto a = Tree::var(1);
-        auto b = Tree::var(1);
+        auto a = Tree::var();
+        auto b = Tree::var();
 
         auto err = a + b - 1;
         {
-            auto out = Solver::findRoot(err, {0,0,0}, {a.var()});
+            auto out = Solver::findRoot(err, {{a.id(), 1}, {b.id(), 1}},
+                    {0,0,0}, {a.id()});
             auto res = out.first;
             auto vals = out.second;
             REQUIRE(res == Approx(0));
             REQUIRE(vals.size() == 1);
-            REQUIRE(vals.at(b.var()) == Approx(0));
+            REQUIRE(vals.at(b.id()) == Approx(0));
         }
 
         {
-            auto out = Solver::findRoot(err, {0,0,0}, {b.var()});
+            auto out = Solver::findRoot(err, {{a.id(), 1}, {b.id(), 1}},
+                    {0,0,0}, {b.id()});
             auto res = out.first;
             auto vals = out.second;
             REQUIRE(res == Approx(0));
             REQUIRE(vals.size() == 1);
-            REQUIRE(vals.at(a.var()) == Approx(0));
+            REQUIRE(vals.at(a.id()) == Approx(0));
         }
     }
 
@@ -75,12 +77,12 @@ TEST_CASE("Solver::findRoot")
     {
         // Constraint solving as sum-of-squares optimization
         // (based on an example at mattkeeter.com/projects/constraints)
-        auto ax = Tree::var(-3);
-        auto ay = Tree::var(3);
-        auto bx = Tree::var(1);
-        auto by = Tree::var(0);
-        auto cx = Tree::var(3);
-        auto cy = Tree::var(2);
+        auto ax = Tree::var();
+        auto ay = Tree::var();
+        auto bx = Tree::var();
+        auto by = Tree::var();
+        auto cx = Tree::var();
+        auto cy = Tree::var();
 
         // Constraints
         auto r1 = square(ax) + square(ay) - 1;
@@ -94,7 +96,10 @@ TEST_CASE("Solver::findRoot")
         std::chrono::time_point<std::chrono::system_clock> start, end;
         std::chrono::duration<double> elapsed;
         start = std::chrono::system_clock::now();
-        auto out = Solver::findRoot(sos);
+        auto out = Solver::findRoot(sos,
+                {{ax.id(), -3}, {ay.id(), 3},
+                 {bx.id(), 1}, {by.id(), 0},
+                 {cx.id(), 3}, {cy.id(), 2}});
         end = std::chrono::system_clock::now();
 
         elapsed = end - start;
