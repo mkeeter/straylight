@@ -79,7 +79,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
             }
             else
             {
-                assert(false);
+                assert(m->op == Opcode::VAR_X ||
+                       m->op == Opcode::VAR_Y ||
+                       m->op == Opcode::VAR_Z);
             }
             clauses[m] = id++;
         }
