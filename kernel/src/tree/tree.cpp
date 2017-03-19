@@ -59,38 +59,49 @@ Tree::Tree_::~Tree_()
     }
 }
 
-Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
+std::list<Tree> Tree::ordered() const
 {
-    std::list<std::shared_ptr<Tree::Tree_>> tape;
+    std::set<Tree_*> found = {nullptr};
+    std::list<std::shared_ptr<Tree_>> todo = { ptr };
+    std::map<unsigned, std::list<std::shared_ptr<Tree_>>> ranks;
 
-    {   // Flatten the tree into a tape in reverse-weighted order
-        std::set<Tree::Tree_*> found = {nullptr};
-        std::list<std::shared_ptr<Tree::Tree_>> todo = { ptr };
-        while (todo.size())
+    while (todo.size())
+    {
+        auto t = todo.front();
+        todo.pop_front();
+
+        if (found.find(t.get()) == found.end())
         {
-            auto t = todo.front();
-            todo.pop_front();
-
-            if (found.find(t.get()) == found.end())
-            {
-                todo.push_back(t->lhs);
-                todo.push_back(t->rhs);
-                tape.push_front(t);
-                found.insert(t.get());
-            }
+            todo.push_back(t->lhs);
+            todo.push_back(t->rhs);
+            found.insert(t.get());
+            ranks[t->rank].push_back(t);
         }
     }
 
+    std::list<Tree> out;
+    for (auto& r : ranks)
+    {
+        for (auto& t : r.second)
+        {
+            out.push_back(Tree(t));
+        }
+    }
+    return out;
+}
+
+Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
+{
     std::map<Tree::Tree_*, std::shared_ptr<Tree_>> m = {
         {X().id(), X_.ptr}, {Y().id(), Y_.ptr}, {Z().id(), Z_.ptr}};
 
-    for (const auto& t : tape)
+    for (const auto& t : ordered())
     {
         auto lhs = m.find(t->lhs.get());
         auto rhs = m.find(t->rhs.get());
         if (lhs != m.end() || rhs != m.end())
         {
-            m.insert({t.get(), Cache::instance()->operation(t->op, lhs->second, rhs->second)});
+            m.insert({t.id(), Cache::instance()->operation(t->op, lhs->second, rhs->second)});
         }
     }
 

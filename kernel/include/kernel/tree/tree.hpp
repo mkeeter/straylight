@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <list>
 
 #include "kernel/tree/opcode.hpp"
 
@@ -102,6 +103,12 @@ public:
      *  Remaps the base coordinates
      */
     Tree remap(Tree X, Tree Y, Tree Z) const;
+
+    /*
+     *  Walks the tree in rank order, from lowest to highest
+     *  The last item in the list will be the tree this is called on
+     */
+    std::list<Tree> ordered() const;
 
 protected:
     /*

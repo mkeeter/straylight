@@ -19,26 +19,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
 {
     setMatrix(M);
 
-    // Flatten tree into reverse-ordered list
-    std::list<Tree::Tree_*> flat;
-    {
-        std::list<Tree::Tree_*> todo = { root.id() };
-        std::set<Tree::Tree_*> found = {nullptr};
-
-        while (todo.size())
-        {
-            auto t = todo.front();
-            todo.pop_front();
-
-            if (found.find(t) == found.end())
-            {
-                todo.push_back(t->lhs.get());
-                todo.push_back(t->rhs.get());
-                flat.push_front(t);
-                found.insert(t);
-            }
-        }
-    }
+    auto flat = root.ordered();
 
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
@@ -54,44 +35,35 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
                  id,
                  clauses.at(t->lhs.get()),
                  clauses.at(t->rhs.get())});
-        clauses[t] = id;
-        return id--;
     };
 
     // Write the flattened tree into the tape!
     std::map<Clause::Id, float> constants;
-    while (flat.size())
+    for (const auto& m : flat)
     {
-        auto m = flat.front();
-        flat.pop_front();
-
         // Normal clauses end up in the tape
         if (m->rank > 0)
         {
-            newClause(m);
+            newClause(m.id());
         }
-        // Other clauses get allocated results but no tape
+        // For constants and variables, record their values so
+        // that we can store those values in the result array
+        else if (m->op == Opcode::CONST)
+        {
+            constants[id] = m->value;
+        }
+        else if (m->op == Opcode::VAR)
+        {
+            constants[id] = vs.at(m.id());
+            vars.left.insert({id, m.id()});
+        }
         else
         {
-            // For constants and variables, record their values so
-            // that we can store those values in the result array
-            if (m->op == Opcode::CONST)
-            {
-                constants[id] = m->value;
-            }
-            else if (m->op == Opcode::VAR)
-            {
-                constants[id] = vs.at(m);
-                vars.left.insert({id, m});
-            }
-            else
-            {
-                assert(m->op == Opcode::VAR_X ||
-                       m->op == Opcode::VAR_Y ||
-                       m->op == Opcode::VAR_Z);
-            }
-            clauses[m] = id--;
+            assert(m->op == Opcode::VAR_X ||
+                   m->op == Opcode::VAR_Y ||
+                   m->op == Opcode::VAR_Z);
         }
+        clauses[m.id()] = id--;
     }
     assert(id + 1 == 0);
 
