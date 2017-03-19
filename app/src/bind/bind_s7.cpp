@@ -92,8 +92,8 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
 
     // Assert that the bindings were successful
     assert(Kernel::Bind::is_shape(x) &&
-           Kernel::Bind::is_shape(x) &&
-           Kernel::Bind::is_shape(x));
+           Kernel::Bind::is_shape(y) &&
+           Kernel::Bind::is_shape(z));
 
     // Take the union of all the variables
     std::map<Kernel::Tree::Id, float> vars;
