@@ -87,9 +87,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
         }
     }
 
-    // Make sure that X, Y, Z have been allocated space, since
-    // we'll be blindly writing data to their arrays later on
-    for (auto a : {Tree::X(), Tree::Y(), Tree::Z()})
+    // Make sure that X, Y, Z have been allocated space
+    std::vector<Tree> axes = {Tree::X(), Tree::Y(), Tree::Z()};
+    for (auto a : axes)
     {
         if (clauses.find(a.id()) == clauses.end())
         {
@@ -108,9 +108,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     }
 
     // Save X, Y, Z ids
-    X = clauses.at(Tree::X().id());
-    Y = clauses.at(Tree::Y().id());
-    Z = clauses.at(Tree::Z().id());
+    X = clauses.at(axes[0].id());
+    Y = clauses.at(axes[1].id());
+    Z = clauses.at(axes[2].id());
 
     // Set derivatives for X, Y, Z (unchanging)
     result.setDeriv(1, 0, 0, X);
