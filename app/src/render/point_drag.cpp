@@ -26,16 +26,21 @@ bool PointDrag::updateFrom(App::Bridge::EscapedPointHandle* p)
     // TODO: update evaluator variables instead of making a new one here
     // (if X/Y/Z trees are identical)
     vars = p->vars;
-    vars.insert({d.id(), 0});
 
+    // Load default values into variables to construct evaluator
+    // (but don't leave the values in vars, because otherwise they'll
+    //  mess with our attempts to change them later)
+    auto vars_ = vars;
     for (int i=0; i < 3; ++i)
     {
-        vars.insert({cursor_pos[i].id(), 0});
-        vars.insert({cursor_ray[i].id(), 0});
+        vars_.insert({cursor_pos[i].id(), 0});
+        vars_.insert({cursor_ray[i].id(), 0});
     }
+    vars_.insert({d.id(), 0});
 
+    auto root = square(dx) + square(dy) + square(dz);
     err.reset(new Kernel::Evaluator(square(dx) + square(dy) + square(dz),
-                                    vars));
+                                    vars_));
 
     return true;
 }
