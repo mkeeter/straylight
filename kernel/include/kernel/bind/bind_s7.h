@@ -45,7 +45,8 @@ extern "C" {
      *  Converts an arbitrary Scheme object into a shape
      */
     s7_cell* shape_from_obj(s7_scheme* sc, s7_cell* obj,
-                            const char* func_name="shape_from_obj");
+                            const char* func_name="shape_from_obj",
+                            bool throw_error=true);
 
     /*
      *  Checks if the given Tree is a shape

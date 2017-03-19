@@ -54,7 +54,8 @@ s7_pointer shape_from_tree(s7_scheme* sc, Kernel::Tree t,
  *
  *  On failure, returns an error message with the given function name
  */
-s7_pointer shape_from_obj(s7_scheme* sc, s7_pointer obj, const char* func_name)
+s7_pointer shape_from_obj(s7_scheme* sc, s7_pointer obj, const char* func_name,
+                          bool throw_error)
 {
     if (is_shape(obj))
     {
@@ -64,10 +65,14 @@ s7_pointer shape_from_obj(s7_scheme* sc, s7_pointer obj, const char* func_name)
     {
         return shape_from_tree(sc, Kernel::Tree(s7_number_to_real(sc, obj)));
     }
-    else
+    else if (throw_error)
     {
         return s7_wrong_type_arg_error(sc, func_name, 0, obj,
                 "shape or real");
+    }
+    else
+    {
+        return obj;
     }
 }
 
@@ -84,7 +89,8 @@ static s7_pointer shape_from_lambda(s7_scheme* sc, s7_pointer args)
             shape_from_tree(sc, Kernel::Tree::Z())));
 
     // If it autocollapsed into a constant, then wrap that in a constant Tree
-    return shape_from_obj(sc, obj, "shape_from_lambda");
+    // Errors are throw in shape_apply, so don't rethrow here
+    return shape_from_obj(sc, obj, "shape_from_lambda", false);
 }
 
 #define CHECK_SHAPE(OBJ) {   if (!is_shape(OBJ)) return OBJ; }
