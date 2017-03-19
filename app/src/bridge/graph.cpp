@@ -283,9 +283,7 @@ void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 {
     for (const auto& s : sol)
     {
-        var_lock.lock();
-        const auto key = vars.right.at(s.first);
-        var_lock.unlock();
+        const auto key = vars.at(s.first);
 
         std::stringstream ss;
         ss << s.second;
@@ -295,34 +293,18 @@ void GraphModel::setVariables(const Kernel::Solver::Solution& sol)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-bool GraphModel::hasVar(const Graph::CellKey& k) const
-{
-    return vars.left.find(k) != vars.left.end();
-}
-
-Kernel::Cache::VarId GraphModel::varId(const Graph::CellKey& k) const
-{
-    return vars.left.count(k) ? vars.left.at(k) : 0;
-}
-
 void GraphModel::defineVar(const Graph::CellKey& k,
-                           const Kernel::Cache::VarId id)
+                           const Kernel::Tree::Tree_* tree)
 {
-    vars.insert({k, id});
+    vars.insert({tree, k});
 }
 
-void GraphModel::forgetVar(const Graph::CellKey& k)
+void GraphModel::forgetVar(const Kernel::Tree::Tree_* tree)
 {
-    if (vars.left.count(k))
+    if (vars.count(tree))
     {
-        vars.left.erase(k);
+        vars.erase(tree);
     }
-}
-
-std::unique_lock<std::mutex>&& GraphModel::varLock()
-{
-    return std::move(std::unique_lock<std::mutex>(var_lock));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -42,6 +42,12 @@ extern "C" {
                                  std::map<Kernel::Tree::Tree_*, float>());
 
     /*
+     *  Converts an arbitrary Scheme object into a shape
+     */
+    s7_cell* shape_from_obj(s7_scheme* sc, s7_cell* obj,
+                            const char* func_name="shape_from_obj");
+
+    /*
      *  Checks if the given Tree is a shape
      */
     bool is_shape(s7_cell* obj);

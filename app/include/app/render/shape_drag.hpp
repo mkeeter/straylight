@@ -41,6 +41,9 @@ protected:
      *  starting point  */
     std::unique_ptr<Kernel::Evaluator> specialized;
 
+    /*  Here are our local variable values  */
+    std::map<Kernel::Tree::Tree_*, float> vars;
+
     /*  We store the starting position for a drag here.
      *  This is a point in world space, and depends on where
      *  the user clicked on the shape  */
@@ -49,9 +52,6 @@ protected:
     /*  This is the drag normal.  It is in world space and depends on
      *  the normal where the user clicked on the shape  */
     QVector3D norm;
-
-    /*  Map from interpreter thread to local vars  */
-    boost::bimap<Kernel::Cache::VarId, Kernel::Cache::VarId> vars;
 };
 
 }   // namespace Render

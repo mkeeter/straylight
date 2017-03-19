@@ -319,7 +319,7 @@ void Scene::updateFrom(const Graph::Response& r)
             // wire it into the Scene, kicking off an initial render.
             if (auto n = dynamic_cast<App::Bridge::EscapedShape*>(r.value))
             {
-                auto ren = new App::Render::Renderer(n->eval);
+                auto ren = new App::Render::Renderer(n->tree, n->vars);
                 shapes[k] = ren;
                 connect(ren, &App::Render::Renderer::done,
                         this, &Scene::update);

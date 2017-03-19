@@ -1042,4 +1042,19 @@ std::map<Tree::Tree_*, float> EvaluatorBase::varValues() const
     return out;
 }
 
+bool EvaluatorBase::updateVars(const std::map<Kernel::Tree::Tree_*, float>& vars_)
+{
+    bool changed = false;
+    for (const auto& v : vars.left)
+    {
+        auto val = vars_.at(v.second);
+        if (val != result.f[v.first][0])
+        {
+            setVar(v.second, val);
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 }   // namespace Kernel

@@ -135,7 +135,7 @@ public:
     /*
      *  Updates variable values, return true if changed
      */
-    bool updateVars(const EvaluatorBase& other);
+    bool updateVars(const std::map<Kernel::Tree::Tree_*, float>& vars);
 
 protected:
     /*

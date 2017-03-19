@@ -54,8 +54,7 @@ s7_pointer shape_from_tree(s7_scheme* sc, Kernel::Tree t,
  *
  *  On failure, returns an error message with the given function name
  */
-static s7_pointer shape_from_obj(s7_scheme* sc, s7_pointer obj,
-                                 const char* func_name="shape_new")
+s7_pointer shape_from_obj(s7_scheme* sc, s7_pointer obj, const char* func_name)
 {
     if (is_shape(obj))
     {

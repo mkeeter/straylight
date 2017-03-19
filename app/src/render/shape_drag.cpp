@@ -16,9 +16,10 @@ void ShapeDrag::startDrag(const QVector3D& p)
 
 bool ShapeDrag::updateFrom(App::Bridge::EscapedShape* s)
 {
-    shape.reset(s->eval);
-
     // TODO: only update shape if evaluator is different
+    shape.reset(new Kernel::Evaluator(s->tree, s->vars));
+    vars = s->vars;
+
     return true;
 }
 
@@ -36,8 +37,9 @@ Kernel::Solver::Solution ShapeDrag::dragTo(const QMatrix4x4& M,
     auto nearest = start + QVector3D::dotProduct(cursor_pos - start, n2) /
         QVector3D::dotProduct(norm, n2) * norm;
 
+    // TODO: this sets vars twice (once in Evaluator constructor, once here)
     auto sol = Kernel::Solver::findRoot(
-            *shape, {nearest.x(), nearest.y(), nearest.z()});
+            *shape, vars, {nearest.x(), nearest.y(), nearest.z()});
 
     return sol.second;
 }

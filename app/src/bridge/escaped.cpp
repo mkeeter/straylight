@@ -6,19 +6,28 @@
 namespace App {
 namespace Bridge {
 
-EscapedShape::EscapedShape(Kernel::Tree tree)
-    : eval(new Kernel::Evaluator(tree))
+EscapedShape::EscapedShape(Kernel::Tree tree,
+                 const std::map<Kernel::Tree::Tree_*, float>& vars)
+    : EscapedHandle(vars), tree(tree)
 {
     // Nothing to do here
 }
 
-EscapedPointHandle::EscapedPointHandle(Kernel::Tree xyz[3])
-    : pos(xyz[0].value(), xyz[1].value(), xyz[2].value()),
-      xyz{Kernel::Evaluator(xyz[0]),
-          Kernel::Evaluator(xyz[1]),
-          Kernel::Evaluator(xyz[2])}
+int EscapedShape::tag() const
 {
-    // Nothing to do here
+    return App::Render::ShapeHandle::_tag;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+EscapedPointHandle::EscapedPointHandle(Kernel::Tree xyz[3],
+                 const std::map<Kernel::Tree::Tree_*, float>& vars)
+    : EscapedHandle(vars), xyz { xyz[0], xyz[1], xyz[2] }
+{
+    // Figure out position from tree and variable values
+    pos.setX(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
+    pos.setY(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
+    pos.setZ(Kernel::Evaluator(xyz[0], vars).values(1)[0]);
 }
 
 int EscapedPointHandle::tag() const
@@ -27,11 +36,6 @@ int EscapedPointHandle::tag() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-int EscapedShape::tag() const
-{
-    return App::Render::ShapeHandle::_tag;
-}
 
 }   // namespace Bridge
 }   // namespace App

@@ -18,15 +18,15 @@ Graph::Escaped* Translator::operator()(Graph::ValuePtr ptr)
     if (Kernel::Bind::is_shape(ptr))
     {
         auto s = Kernel::Bind::get_shape(ptr);
-        if (!(s->tree.flags() & Kernel::Tree::FLAG_LOCATION_AGNOSTIC))
+        if (!(s->tree->flags & Kernel::Tree::FLAG_LOCATION_AGNOSTIC))
         {
-            return new App::Bridge::EscapedShape(s->tree);
+            return new App::Bridge::EscapedShape(s->tree, s->vars);
         }
     }
     else if (App::Bind::is_point_handle(ptr))
     {
         auto p = App::Bind::get_point_handle(ptr);
-        return new App::Bridge::EscapedPointHandle(p->xyz);
+        return new App::Bridge::EscapedPointHandle(p->xyz, p->vars);
     }
 
     return nullptr;

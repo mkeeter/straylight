@@ -240,7 +240,7 @@ Interpreter::Interpreter(Root* parent)
             (lambda args "")))
       )")),
       eval_func(s7_eval_c_string(sc, R"(
-        (lambda (str eval-env cell-env)
+        (lambda (str eval-env cell-env prev-value)
           (define (read-all port)
             (let recurse ()
               (let ((r (read port)))
@@ -260,7 +260,7 @@ Interpreter::Interpreter(Root* parent)
             (lambda ()
               (let* ((i (read-all (open-input-string str)))
                      (j (strip-output i))
-                     (r (cons 'begin (*cell-reader* j cell-env))))
+                     (r (cons 'begin (*cell-reader* j cell-env prev-value))))
                 (cons 'value (eval r eval-env))))
             (lambda args
               (cond ((string=? "~A: unbound variable" (caadr args))
@@ -270,7 +270,7 @@ Interpreter::Interpreter(Root* parent)
       )"))
 {
     // Install default *cell-reader*
-    setReader(s7_eval_c_string(sc, "(lambda (s c) s)"));
+    setReader(s7_eval_c_string(sc, "(lambda (s c p) s)"));
 
     for (s7_pointer ptr: {is_input, is_output, default_expr, eval_func})
     {
@@ -397,6 +397,9 @@ Value Interpreter::eval(const CellKey& key)
         }
     }
 
+    // Pick out the cell object in the tree
+    auto c = root->getTree().at(cell).cell();
+
     // If we didn't get an error, then make bindings for all symbols
     const auto parent = root->getTree().at(env.back()).instance()->sheet;
     if (value == nullptr)
@@ -427,10 +430,11 @@ Value Interpreter::eval(const CellKey& key)
         }
 
         // Run the evaluation and get out a value
-        auto args = s7_list(sc, 3,
+        auto args = s7_list(sc, 4,
                 s7_make_string(sc, expr.c_str()),
                 s7_inlet(sc, bindings),
-                s7_make_c_pointer(sc, (void*)&key));
+                s7_make_c_pointer(sc, (void*)&key),
+                c->values.count(env) ? c->values.at(env).value : s7_nil(sc));
         value = s7_call(sc, eval_func, args);
     }
 
@@ -475,7 +479,6 @@ Value Interpreter::eval(const CellKey& key)
     }
 
     // If the value is present and unchanged, return false
-    auto c = root->getTree().at(cell).cell();
     if (c->values.count(env) &&
         s7_is_equal(sc, value, c->values.at(env).value))
     {
