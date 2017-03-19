@@ -97,11 +97,13 @@ Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
 
     for (const auto& t : ordered())
     {
-        auto lhs = m.find(t->lhs.get());
-        auto rhs = m.find(t->rhs.get());
-        if (lhs != m.end() || rhs != m.end())
+        if (Opcode::args(t->op) >= 1)
         {
-            m.insert({t.id(), Cache::instance()->operation(t->op, lhs->second, rhs->second)});
+            auto lhs = m.find(t->lhs.get());
+            auto rhs = m.find(t->rhs.get());
+            m.insert({t.id(), Cache::instance()->operation(t->op,
+                        lhs == m.end() ? t->lhs : lhs->second,
+                        rhs == m.end() ? t->rhs : rhs->second)});
         }
     }
 
