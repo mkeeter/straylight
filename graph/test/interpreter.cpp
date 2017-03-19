@@ -147,7 +147,7 @@ TEST_CASE("Interpreter::keywords")
 
 static s7_cell* customReader(s7_scheme* sc)
 {
-    return s7_eval_c_string(sc, "(lambda (sexp c) '(123))");
+    return s7_eval_c_string(sc, "(lambda (sexp c prev) '(123))");
 }
 
 TEST_CASE("Interpreter::setReader")
