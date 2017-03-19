@@ -124,6 +124,8 @@ public:
 
     /*
      *  Changes a variable's value
+     *
+     *  If the variable isn't present in the tree, does nothing
      */
     void setVar(Tree::Id var, float value);
 

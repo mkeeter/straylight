@@ -1028,7 +1028,11 @@ void EvaluatorBase::setMatrix(const glm::mat4& m)
 
 void EvaluatorBase::setVar(Tree::Id var, float value)
 {
-    result.setValue(value, vars.right.at(var));
+    auto r = vars.right.find(var);
+    if (r != vars.right.end())
+    {
+        result.setValue(value, r->second);
+    }
 }
 
 std::map<Tree::Id, float> EvaluatorBase::varValues() const
