@@ -19,49 +19,56 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
 {
     setMatrix(M);
 
+    // Flatten tree into reverse-ordered list
+    std::list<Tree::Tree_*> flat;
+    {
+        std::list<Tree::Tree_*> todo = { root.id() };
+        std::set<Tree::Tree_*> found = {nullptr};
+
+        while (todo.size())
+        {
+            auto t = todo.front();
+            todo.pop_front();
+
+            if (found.find(t) == found.end())
+            {
+                todo.push_back(t->lhs.get());
+                todo.push_back(t->rhs.get());
+                flat.push_front(t);
+                found.insert(t);
+            }
+        }
+    }
+
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
     std::unordered_map<const Tree::Tree_*, Clause::Id> clauses = {{nullptr, 0}};
-    Clause::Id id = 0;
+    Clause::Id id = flat.size() - 1;
 
-    // Prepare the base tape
-    tapes.push_back(Tape());
-    tape = tapes.begin();
-
-    auto newClause = [&clauses, &id, this](const Tree::Tree_* t)
+    // Helper function to make a new function
+    std::list<Clause> tape_;
+    auto newClause = [&clauses, &id, &tape_](const Tree::Tree_* t)
     {
-        tape->push_back(
+        tape_.push_front(
                 {t->op,
                  id,
                  clauses.at(t->lhs.get()),
                  clauses.at(t->rhs.get())});
         clauses[t] = id;
-        return id++;
+        return id--;
     };
 
-    // And here we go!
+    // Write the flattened tree into the tape!
     std::map<Clause::Id, float> constants;
-    std::list<Tree::Tree_*> todo = { root.id() };
-
-    while (todo.size())
+    while (flat.size())
     {
-        auto m = todo.front();
-        todo.pop_front();
+        auto m = flat.front();
+        flat.pop_front();
 
         // Normal clauses end up in the tape
         if (m->rank > 0)
         {
             newClause(m);
-
-            // Load the children into the todo list
-            if (clauses.find(m->lhs.get()) != clauses.end())
-            {
-                todo.push_back(m->lhs.get());
-            }
-            if (clauses.find(m->rhs.get()) != clauses.end())
-            {
-                todo.push_back(m->rhs.get());
-            }
         }
         // Other clauses get allocated results but no tape
         else
@@ -83,8 +90,17 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
                        m->op == Opcode::VAR_Y ||
                        m->op == Opcode::VAR_Z);
             }
-            clauses[m] = id++;
+            clauses[m] = id--;
         }
+    }
+    assert(id + 1 == 0);
+
+    //  Move from the list tape to a more-compact vector tape
+    tapes.push_back(Tape());
+    tape = tapes.begin();
+    for (auto& t : tape_)
+    {
+        tape->push_back(t);
     }
 
     // Make sure that X, Y, Z have been allocated space
@@ -93,7 +109,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     {
         if (clauses.find(a.id()) == clauses.end())
         {
-            clauses[a.id()] = id++;
+            clauses[a.id()] = clauses.size();
         }
     }
 
