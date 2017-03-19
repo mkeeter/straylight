@@ -76,6 +76,7 @@ Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
                 todo.push_back(t->lhs);
                 todo.push_back(t->rhs);
                 tape.push_front(t);
+                found.insert(t.get());
             }
         }
     }
