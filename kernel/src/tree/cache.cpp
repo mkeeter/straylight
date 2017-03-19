@@ -1,72 +1,38 @@
 #include <cassert>
-#include <list>
 
 #include "kernel/tree/cache.hpp"
-#include "kernel/tree/tree.hpp"
-
 #include "kernel/eval/evaluator.hpp"
 
 namespace Kernel {
 
-/******************************************************************************
- * Per-thread cache lookup
- ******************************************************************************/
-std::map<std::thread::id, std::shared_ptr<Cache>> Cache::instances;
-std::mutex Cache::instance_lock;
+// Static class variables
+std::recursive_mutex Cache::mut;
+Cache Cache::_instance;
 
-std::shared_ptr<Cache> Cache::instance()
+Cache::Node Cache::constant(float v)
 {
-    auto id = std::this_thread::get_id();
-
-    std::lock_guard<std::mutex> g(instance_lock);
-    if (instances.find(id) == instances.end())
+    auto f = constants.find(v);
+    if (f == constants.end())
     {
-        instances[id].reset(new Cache);
+        Node out(new Tree::Tree_ {
+            Opcode::CONST,
+            Tree::FLAG_LOCATION_AGNOSTIC,
+            0, // rank
+            v, // value
+            nullptr,
+            nullptr });
+        constants.insert({v, out});
+        return out;
     }
-    return instances[id];
-}
-
-void Cache::reset()
-{
-    auto id = std::this_thread::get_id();
-
-    std::lock_guard<std::mutex> g(instance_lock);
-    auto itr = instances.find(id);
-    if (itr != instances.end())
+    else
     {
-        instances.erase(itr);
+        assert(!f->second.expired());
+        return f->second.lock();
     }
 }
 
-/******************************************************************************
- * Id constructors
- ******************************************************************************/
-
-Cache::Id Cache::constant(float v)
-{
-    auto k = key(v);
-    if (data.left.find(k) == data.left.end())
-    {
-        data.insert({k, next});
-        values.insert({next, v});
-        flags_.insert({next++, Tree::FLAG_COLLAPSED|
-                               Tree::FLAG_LOCATION_AGNOSTIC});
-    }
-    return data.left.at(k);
-}
-
-Cache::VarId Cache::var(float v)
-{
-    auto k = Key(Id(next));
-    assert(data.left.find(k) == data.left.end());
-    data.insert({k, next});
-    values.insert({next, v});
-    flags_.insert({next++, Tree::FLAG_COLLAPSED|
-                           Tree::FLAG_LOCATION_AGNOSTIC});
-    return VarId(data.left.at(k).i);
-}
-
-Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
+Cache::Node Cache::operation(Opcode::Opcode op, Cache::Node lhs,
+                             Cache::Node rhs, bool simplify)
 {
     // These are opcodes that you're not allowed to use here
     assert(op != Opcode::CONST &&
@@ -76,174 +42,128 @@ Cache::Id Cache::operation(Opcode::Opcode op, Id a, Id b, bool simplify)
            op != Opcode::LAST_OP);
 
     // See if we can simplify the expression, either because it's an identity
-    // operation (e.g. X + 0) or a linear combination of affine forms
+    // operation (e.g. X + 0) or a commutative expression to be balanced
     if (simplify)
     {
-#define CHECK_RETURN(func) { auto t = func(op, a, b); if (t != 0) { return t; }}
+#define CHECK_RETURN(func) { auto t = func(op, lhs, rhs); if (t.get() != nullptr) { return t; }}
         CHECK_RETURN(checkIdentity);
-        CHECK_RETURN(checkAffine);
         CHECK_RETURN(checkCommutative);
     }
 
-    // Otherwise, construct a new Id and add it to the ops set
-    auto k = key(op, a, b);
-    if (data.left.find(k) == data.left.end())
+    Key k(op, lhs.get(), rhs.get());
+
+    auto found = ops.find(k);
+    if (found == ops.end())
     {
-        data.insert({k, next});
-        values.insert({next, 0.0f});
-        flags_.insert({next++,
+        // Construct a new operation node
+        Node out(new Tree::Tree_ {
+            op,
 
-                (((a == 0 || (flags(a) & Tree::FLAG_COLLAPSED)) &&
-                  (b == 0 || (flags(b) & Tree::FLAG_COLLAPSED)) &&
-                  op != Opcode::AFFINE_VEC) ? Tree::FLAG_COLLAPSED : 0) |
+            // Flags
+            (uint8_t)
+            (((!lhs.get() || (lhs->flags & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+              (!rhs.get() || (rhs->flags & Tree::FLAG_LOCATION_AGNOSTIC)) &&
+               op != Opcode::VAR_X &&
+               op != Opcode::VAR_Y &&
+               op != Opcode::VAR_Z)
+                  ? Tree::FLAG_LOCATION_AGNOSTIC : 0),
 
-                (((a == 0 || (flags(a) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
-                  (b == 0 || (flags(b) & Tree::FLAG_LOCATION_AGNOSTIC)) &&
-                  op != Opcode::VAR_X &&
-                  op != Opcode::VAR_Y &&
-                  op != Opcode::VAR_Z)
-                  ? Tree::FLAG_LOCATION_AGNOSTIC : 0)});
+            // Rank
+            std::max(lhs.get() ? lhs->rank + 1 : 0,
+                     rhs.get() ? rhs->rank + 1 : 0),
+
+            // Value
+            std::nanf(""),
+
+            // Arguments
+            lhs,
+            rhs });
+
+        // Store a weak pointer to this new Node
+        ops.insert({k, out});
+
+        // If both sides of the operation are constant, then build up a
+        // temporary Evaluator in order to get a constant value out
+        // (out will be GC'd immediately when it goes out of scope)
+        if ((lhs.get() || rhs.get()) &&
+            (!lhs.get() || lhs->op == Opcode::CONST) &&
+            (!rhs.get() || rhs->op == Opcode::CONST))
+        {
+            // Here, we construct a Tree manually to avoid a recursive loop,
+            // then pass it immediately into a dummy Evaluator
+            Evaluator e((Tree(out)));
+            return constant(e.values(1)[0]);
+        }
+        else
+        {
+            return out;
+        }
     }
-
-    // If both sides of the operation are constant, then return a constant
-    if ((a != 0 || b != 0) && (a == 0 || opcode(a) == Opcode::CONST) &&
-                               (b == 0 || opcode(b) == Opcode::CONST))
+    else
     {
-        // Here, we construct a Tree manually to avoid a recursive loop,
-        // then pass it immediately into a dummy Evaluator
-        Evaluator e(Tree(instance(), data.left.at(k)));
-        return constant(e.values(1)[0]);
+        assert(!found->second.expired());
+        return found->second.lock();
     }
-
-    return data.left.at(k);
 }
 
-Cache::Id Cache::affine(float a, float b, float c, float d)
+
+Cache::Node Cache::var()
 {
-    // Build up the desired tree structure with simplify = false
-    // to keep branches from automatically simplifying themselves.
-    return operation(Opcode::AFFINE_VEC,
-            operation(Opcode::ADD,
-                operation(Opcode::MUL, X(), constant(a), false),
-                operation(Opcode::MUL, Y(), constant(b), false), false),
-            operation(Opcode::ADD,
-                operation(Opcode::MUL, Z(), constant(c), false),
-                constant(d), false));
+    return Node(new Tree::Tree_ {
+        Opcode::VAR,
+        Tree::FLAG_LOCATION_AGNOSTIC,
+        0, // rank
+        std::nanf(""), // value
+        nullptr,
+        nullptr});
 }
 
-/******************************************************************************
- * Clause simplification
- ******************************************************************************/
-Cache::Id Cache::checkAffine(Opcode::Opcode op, Id a, Id b)
+void Cache::del(float v)
 {
-    if (Opcode::args(op) != 2)
-    {
-        return 0;
-    }
-
-    // Pull op-codes from both branches
-    auto op_a = opcode(a);
-    auto op_b = opcode(b);
-
-    if (op == Opcode::ADD)
-    {
-        if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::CONST)
-        {
-            auto va = getAffine(a);
-            auto vb = glm::vec4(0, 0, 0, value(b));
-            return affine(va + vb);
-        }
-        else if (op_b == Opcode::AFFINE_VEC && op_a == Opcode::CONST)
-        {
-            auto va = glm::vec4(0, 0, 0, value(a));
-            auto vb = getAffine(b);
-            return affine(va + vb);
-        }
-        else if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::AFFINE_VEC)
-        {
-            auto va = getAffine(a);
-            auto vb = getAffine(b);
-            return affine(va + vb);
-        }
-    }
-    else if (op == Opcode::SUB)
-    {
-        if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::CONST)
-        {
-            auto va = getAffine(a);
-            auto vb = glm::vec4(0, 0, 0, value(b));
-            return affine(va - vb);
-        }
-        else if (op_b == Opcode::AFFINE_VEC && op_a == Opcode::CONST)
-        {
-            auto va = glm::vec4(0, 0, 0, value(a));
-            auto vb = getAffine(b);
-            return affine(va - vb);
-        }
-        else if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::AFFINE_VEC)
-        {
-            auto va = getAffine(a);
-            auto vb = getAffine(b);
-            return affine(va - vb);
-        }
-    }
-    else if (op == Opcode::MUL)
-    {
-        if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::CONST)
-        {
-            auto va = getAffine(a);
-            auto sb = value(b);
-            return affine(va * sb);
-        }
-        else if (op_b == Opcode::AFFINE_VEC && op_a == Opcode::CONST)
-        {
-            auto sa = value(a);
-            auto vb = getAffine(b);
-            return affine(vb * sa);
-        }
-    }
-    else if (op == Opcode::DIV)
-    {
-        if (op_a == Opcode::AFFINE_VEC && op_b == Opcode::CONST)
-        {
-            auto va = getAffine(a);
-            auto sb = value(b);
-            return affine(va / sb);
-        }
-    }
-    return 0;
+    auto c = constants.find(v);
+    assert(c != constants.end());
+    assert(c->second.expired());
+    constants.erase(c);
 }
 
-Cache::Id Cache::checkIdentity(Opcode::Opcode op, Id a, Id b)
+void Cache::del(Opcode::Opcode op, Node lhs, Node rhs)
+{
+    auto o = ops.find({op, lhs.get(), rhs.get()});
+    assert(o != ops.end());
+    assert(o->second.expired());
+    ops.erase(o);
+}
+
+Cache::Node Cache::checkIdentity(Opcode::Opcode op, Cache::Node a, Cache::Node b)
 {
     if (Opcode::args(op) != 2)
     {
-        return 0;
+        return Node();
     }
 
     // Pull op-codes from both branches
-    auto op_a = opcode(a);
-    auto op_b = opcode(b);
+    const auto op_a = a->op;
+    const auto op_b = b->op;
 
     // Special cases to handle identity operations
     if (op == Opcode::ADD)
     {
-        if (op_a == Opcode::CONST && value(a) == 0)
+        if (op_a == Opcode::CONST && a->value == 0)
         {
             return b;
         }
-        else if (op_b == Opcode::CONST && value(b) == 0)
+        else if (op_b == Opcode::CONST && b->value == 0)
         {
             return a;
         }
     }
     else if (op == Opcode::SUB)
     {
-        if (op_a == Opcode::CONST && value(a) == 0)
+        if (op_a == Opcode::CONST && a->value == 0)
         {
             return operation(Opcode::NEG, b);
         }
-        else if (op_b == Opcode::CONST && value(b) == 0)
+        else if (op_b == Opcode::CONST && b->value == 0)
         {
             return a;
         }
@@ -252,199 +172,64 @@ Cache::Id Cache::checkIdentity(Opcode::Opcode op, Id a, Id b)
     {
         if (op_a == Opcode::CONST)
         {
-            if (value(a) == 0)
+            if (a->value == 0)
             {
                 return a;
             }
-            else if (value(a) == 1)
+            else if (a->value == 1)
             {
                 return b;
             }
         }
         if (op_b == Opcode::CONST)
         {
-            if (value(b) == 0)
+            if (b->value == 0)
             {
                 return b;
             }
-            else if (value(b) == 1)
+            else if (b->value == 1)
             {
                 return a;
             }
         }
     }
-    return 0;
+    return Node();
 }
 
-Cache::Id Cache::checkCommutative(Opcode::Opcode op, Id a, Id b)
+Cache::Node Cache::checkCommutative(Opcode::Opcode op, Cache::Node a, Cache::Node b)
 {
     if (Opcode::isCommutative(op))
     {
-        if (opcode(a) == op)
+        const auto al = a->lhs ? a->lhs->rank : 0;
+        const auto ar = a->rhs ? a->rhs->rank : 0;
+        const auto bl = b->lhs ? b->lhs->rank : 0;
+        const auto br = b->rhs ? b->rhs->rank : 0;
+
+        if (a->op == op)
         {
-            if (rank(lhs(a)) > rank(b))
+            if (al > bl)
             {
-                return operation(op, lhs(a), operation(op, rhs(a), b));
+                return operation(op, a->lhs, operation(op, a->rhs, b));
             }
-            else if (rank(rhs(a)) > rank(b))
+            else if (ar > b->rank)
             {
-                return operation(op, rhs(a), operation(op, lhs(a), b));
+                return operation(op, a->rhs, operation(op, a->lhs, b));
             }
         }
-        else if (opcode(b) == op)
+        else if (b->op == op)
         {
-            if (rank(lhs(b)) > rank(a))
+            if (bl > a->rank)
             {
-                return operation(op, lhs(b), operation(op, rhs(b), a));
+                return operation(op, b->lhs, operation(op, b->rhs, a));
             }
-            else if (rank(rhs(b)) > rank(a))
+            else if (br > a->rank)
             {
-                return operation(op, rhs(b), operation(op, lhs(b), a));
+                return operation(op, b->rhs, operation(op, b->lhs, a));
             }
         }
     }
     return 0;
-}
 
-/******************************************************************************
- * Utilities
- ******************************************************************************/
-glm::vec4 Cache::getAffine(Id root, bool* success) const
-{
-    if (opcode(root) != Opcode::AFFINE_VEC)
-    {
-        if (success != nullptr)
-        {
-            *success = false;
-        }
-        return {};
-    }
-
-    if (success != nullptr)
-    {
-        *success = true;
-    }
-
-    return {value(rhs(lhs(lhs(root)))), value(rhs(rhs(lhs(root)))),
-            value(rhs(lhs(rhs(root)))), value(rhs(rhs(root)))};
-}
-
-/******************************************************************************
- * Key constructors
- ******************************************************************************/
-Cache::Key Cache::key(float v) const
-{
-    return Key(v);
-}
-
-Cache::Key Cache::key(Opcode::Opcode op, Id a, Id b) const
-{
-    return Key(op, a, b, std::max(a != 0 ? rank(a) + 1 : 0,
-                                  b != 0 ? rank(b) + 1 : 0));
-}
-
-/******************************************************************************
- * Tree walking and modification
- ******************************************************************************/
-std::set<Cache::Id> Cache::findConnected(Id root) const
-{
-    std::set<Id> found = {root};
-
-    // Iterate over weight levels from top to bottom
-    for (auto c = data.left.rbegin(); c != data.left.rend(); ++c)
-    {
-        if (found.find(c->second) != found.end())
-        {
-            found.insert(c->first.lhs());
-            found.insert(c->first.rhs());
-        }
-    }
-    found.erase(0);
-    return found;
-}
-
-Cache::Id Cache::rebuild(Id root, std::map<Id, Id> changed)
-{
-    std::map<Id, Key> tokens;
-    for (auto c : findConnected(root))
-    {
-        tokens.insert({c, token(c)});
-    }
-
-    // Iterate over weight levels from bottom to top
-    for (auto c : tokens)
-    {
-        // Get child Ids
-        auto a = c.second.lhs();
-        auto b = c.second.rhs();
-
-        // If either of the child pointers has changed, regenerate
-        // the operation to ensure correct pointers and weight
-        if (changed.count(a) || changed.count(b))
-        {
-            changed.insert({c.first, operation(c.second.opcode(),
-                changed.count(a) ? changed.at(a) : a,
-                changed.count(b) ? changed.at(b) : b)});
-        }
-    }
-
-    return changed.count(root) ? changed.at(root) : root;
-}
-
-Cache::Id Cache::collapse(Id root)
-{
-    // Deep copy of clauses so that changes don't invalidate iterators
-    decltype(data) tokens = data;
-
-    // Details on which nodes have changed
-    std::map<Id, Id> changed;
-
-    auto connected = findConnected(root);
-
-    // Turn every AFFINE into a normal OP_ADD
-    // (with identity operations automatically cancelled out)
-    for (auto c : tokens.left)
-    {
-        if (connected.find(c.second) != connected.end() &&
-            c.first.opcode() == Opcode::AFFINE_VEC)
-        {
-            auto v = getAffine(c.second);
-            changed.insert({c.second, operation(Opcode::ADD,
-                    operation(Opcode::ADD,
-                        operation(Opcode::MUL, X(), constant(v.x)),
-                        operation(Opcode::MUL, Y(), constant(v.y))),
-                    operation(Opcode::ADD,
-                        operation(Opcode::MUL, Z(), constant(v.z)),
-                        constant(v.w)))});
-        }
-    }
-
-    return rebuild(root, changed);
-}
-
-void Cache::setValue(Id id, float v)
-{
-    assert(flags(id) & Tree::FLAG_LOCATION_AGNOSTIC);
-    values.at(id) = v;
-}
-
-std::map<Kernel::Cache::VarId, float> Cache::vars(Id id) const
-{
-    std::map<Kernel::Cache::VarId, float> out;
-    for (auto t : findConnected(id))
-    {
-        if (opcode(t) == Opcode::VAR)
-        {
-            out.insert({token(t).var(), value(t)});
-        }
-    }
-    return out;
-}
-
-Cache::Id Cache::remap(Id root, Id x, Id y, Id z)
-{
-    auto r = collapse(root);
-    return rebuild(r, {{X(), x}, {Y(), y}, {Z(), z}});
 }
 
 }   // namespace Kernel

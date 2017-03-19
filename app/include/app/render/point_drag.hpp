@@ -40,6 +40,7 @@ public:
 
 protected:
     std::unique_ptr<Kernel::Evaluator> err;
+    std::map<Kernel::Tree::Id, float> vars;
 
     /*
      *  The mouse cursor line is represented by
@@ -64,9 +65,6 @@ protected:
      *  This lets us minimize changes in the z plane (which can't be
      *  controlled by the user)     */
     QVector3D start;
-
-    /*  Map from interpreter thread to local vars  */
-    boost::bimap<Kernel::Cache::VarId, Kernel::Cache::VarId> vars;
 };
 
 }   // namespace Render

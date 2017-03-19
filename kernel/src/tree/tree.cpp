@@ -1,76 +1,115 @@
 #include <algorithm>
+#include <set>
+#include <list>
 #include <cmath>
 #include <cassert>
 
-#include "kernel/tree/tree.hpp"
-#include "kernel/eval/evaluator.hpp"
+#include "kernel/tree/cache.hpp"
 
 namespace Kernel {
 
+Tree::Tree()
+    : ptr(nullptr)
+{
+    // Nothing to do here
+}
+
 Tree::Tree(float v)
-    : Tree(Cache::instance(), Cache::instance()->constant(v))
+    : ptr(Cache::instance()->constant(v))
 {
     // Nothing to do here
 }
 
 Tree::Tree(Opcode::Opcode op, Tree a, Tree b)
-    : Tree(Cache::instance(), Cache::instance()->operation(op, a.id, b.id))
+    : ptr(Cache::instance()->operation(op, a.ptr, b.ptr))
 {
-    assert(a.id == 0 || a.parent == Cache::instance());
-    assert(b.id == 0 || b.parent == Cache::instance());
-    assert((Opcode::args(op) == 0 && a.id == 0 && b.id == 0) ||
-           (Opcode::args(op) == 1 && a.id != 0 && b.id == 0) ||
-           (Opcode::args(op) == 2 && a.id != 0 && b.id != 0));
+    // Aggressive sanity-checking
+    assert((Opcode::args(op) == 0 && a.ptr.get() == 0 && b.ptr.get() == 0) ||
+           (Opcode::args(op) == 1 && a.ptr.get() != 0 && b.ptr.get() == 0) ||
+           (Opcode::args(op) == 2 && a.ptr.get() != 0 && b.ptr.get() != 0));
 
     // POW only accepts integral values as its second argument
     if (op == Opcode::POW)
     {
-        assert(b.opcode() == Opcode::CONST &&
-               b.value() == std::round(b.value()));
+        assert(b->op == Opcode::CONST &&
+               b->value == std::round(b->value));
     }
     else if (op == Opcode::NTH_ROOT)
     {
-        assert(b.opcode() == Opcode::CONST &&
-               b.value() == std::round(b.value()) &&
-               b.value() > 0);
+        assert(b->op == Opcode::CONST &&
+               b->value == std::round(b->value) &&
+               b->value > 0);
     }
 }
 
-/*
- *  Returns an AFFINE token (of the form a*x + b*y + c*z + d)
- */
-Tree Tree::affine(float a, float b, float c, float d)
+Tree Tree::var()
 {
-    auto s = Cache::instance();
-    return Tree(s, s->affine(a, b, c, d));
+    return Tree(Cache::instance()->var());
 }
 
-Tree Tree::var(float v)
+Tree::Tree_::~Tree_()
 {
-    auto s = Cache::instance();
-    return Tree(s, s->var(v));
+    if (op == Opcode::CONST)
+    {
+        Cache::instance()->del(value);
+    }
+    else if (op != Opcode::VAR)
+    {
+        Cache::instance()->del(op, lhs, rhs);
+    }
 }
 
-Tree Tree::var(Cache::VarId id)
+std::list<Tree> Tree::ordered() const
 {
-    auto s = Cache::instance();
-    return Tree(s, id);
+    std::set<Id> found = {nullptr};
+    std::list<std::shared_ptr<Tree_>> todo = { ptr };
+    std::map<unsigned, std::list<std::shared_ptr<Tree_>>> ranks;
+
+    while (todo.size())
+    {
+        auto t = todo.front();
+        todo.pop_front();
+
+        if (found.find(t.get()) == found.end())
+        {
+            todo.push_back(t->lhs);
+            todo.push_back(t->rhs);
+            found.insert(t.get());
+            ranks[t->rank].push_back(t);
+        }
+    }
+
+    std::list<Tree> out;
+    for (auto& r : ranks)
+    {
+        for (auto& t : r.second)
+        {
+            out.push_back(Tree(t));
+        }
+    }
+    return out;
 }
 
-Tree Tree::collapse() const
+Tree Tree::remap(Tree X_, Tree Y_, Tree Z_) const
 {
-    return (flags() & FLAG_COLLAPSED) ? *this :
-           Tree(parent, parent->collapse(id));
-}
+    std::map<Tree::Id, std::shared_ptr<Tree_>> m = {
+        {X().id(), X_.ptr}, {Y().id(), Y_.ptr}, {Z().id(), Z_.ptr}};
 
-void Tree::checkValue()
-{
-    assert((opcode() != Opcode::VAR) &&
-           (flags() & Tree::FLAG_LOCATION_AGNOSTIC));
-    assert(Opcode::args(opcode()) == 1 || Opcode::args(opcode()) == 2);
+    for (const auto& t : ordered())
+    {
+        if (Opcode::args(t->op) >= 1)
+        {
+            auto lhs = m.find(t->lhs.get());
+            auto rhs = m.find(t->rhs.get());
+            m.insert({t.id(), Cache::instance()->operation(t->op,
+                        lhs == m.end() ? t->lhs : lhs->second,
+                        rhs == m.end() ? t->rhs : rhs->second)});
+        }
+    }
 
-    Evaluator e(*this);
-    setValue(e.values(1)[0]);
+    // If this Tree was remapped, then return it; otherwise return itself
+    auto r = m.find(id());
+    return r == m.end() ? *this : Tree(r->second);
 }
 
 }   // namespace Kernel

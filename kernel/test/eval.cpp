@@ -29,7 +29,8 @@ TEST_CASE("Constant evaluation")
 
 TEST_CASE("Secondary variable evaluation")
 {
-    Evaluator e(Tree::var(3.14));
+    auto v = Tree::var();
+    Evaluator e(v, {{v.id(), 3.14}});
     REQUIRE(e.eval(1.0, 2.0, 3.0) == Approx(3.14));
 }
 
@@ -37,114 +38,103 @@ TEST_CASE("Evaluator::gradient")
 {
     SECTION("constant + variable")
     {
-        auto v = Tree::var(3.14);
-        Evaluator e(v + 1.0);
+        auto v = Tree::var();
+        Evaluator e(v + 1.0, {{v.id(), 3.14}});
         REQUIRE(e.eval(1.0, 2.0, 3.0) == Approx(4.14));
         auto g = e.gradient(1, 2, 3);
         REQUIRE(g.size() == 1);
-        REQUIRE(g.count(v.var()) == 1);
-        REQUIRE(g.at(v.var()) == Approx(1));
+        REQUIRE(g.count(v.id()) == 1);
+        REQUIRE(g.at(v.id()) == Approx(1));
     }
 
     SECTION("x * variable")
     {
-        auto v = Tree::var(1.0);
-        Evaluator e(Tree::X() * v);
+        auto v = Tree::var();
+        Evaluator e(Tree::X() * v, {{v.id(), 1}});
         {
             auto g = e.gradient(2, 0, 0);
             REQUIRE(g.size() == 1);
-            REQUIRE(g.at(v.var()) == Approx(2));
+            REQUIRE(g.at(v.id()) == Approx(2));
         }
         {
             auto g = e.gradient(3, 0, 0);
-            REQUIRE(g.at(v.var()) == Approx(3));
+            REQUIRE(g.at(v.id()) == Approx(3));
         }
     }
 
     SECTION("Multiple variables")
     {
         // Deliberately construct out of order
-        auto a = Tree::var(3.0);
-        auto c = Tree::var(7.0);
-        auto b = Tree::var(5.0);
+        auto a = Tree::var();
+        auto c = Tree::var();
+        auto b = Tree::var();
 
-        Evaluator e(Tree(a*1 + b*2 + c*3));
+        Evaluator e(Tree(a*1 + b*2 + c*3),
+                {{a.id(), 3}, {c.id(), 7}, {b.id(), 5}});
         REQUIRE(e.eval(0, 0, 0) == Approx(34));
+
         auto g = e.gradient(0, 0, 0);
-        REQUIRE(g.at(a.var()) == Approx(1.0f));
-        REQUIRE(g.at(b.var()) == Approx(2.0f));
-        REQUIRE(g.at(c.var()) == Approx(3.0f));
+        REQUIRE(g.at(a.id()) == Approx(1.0f));
+        REQUIRE(g.at(b.id()) == Approx(2.0f));
+        REQUIRE(g.at(c.id()) == Approx(3.0f));
     }
 }
 
 TEST_CASE("Evaluator copy-constructor")
 {
     // Deliberately construct out of order
-    auto a = Tree::var(3.0);
-    auto c = Tree::var(7.0);
-    auto b = Tree::var(5.0);
+    auto a = Tree::var();
+    auto c = Tree::var();
+    auto b = Tree::var();
 
-    Evaluator e_(Tree(a*1 + b*2 + c*3));
+    Evaluator e_(Tree(a*1 + b*2 + c*3),
+                {{a.id(), 3}, {c.id(), 7}, {b.id(), 5}});
 
     Evaluator e(e_);
     REQUIRE(e.eval(0, 0, 0) == Approx(34));
     auto g = e.gradient(0, 0, 0);
-    REQUIRE(g.at(a.var()) == Approx(1.0f));
-    REQUIRE(g.at(b.var()) == Approx(2.0f));
-    REQUIRE(g.at(c.var()) == Approx(3.0f));
+    REQUIRE(g.at(a.id()) == Approx(1.0f));
+    REQUIRE(g.at(b.id()) == Approx(2.0f));
+    REQUIRE(g.at(c.id()) == Approx(3.0f));
 }
 
 TEST_CASE("Evaluator::setVar")
 {
     // Deliberately construct out of order
-    auto a = Tree::var(3.0);
-    auto c = Tree::var(7.0);
-    auto b = Tree::var(5.0);
+    auto a = Tree::var();
+    auto c = Tree::var();
+    auto b = Tree::var();
 
-    Evaluator e(a*1 + b*2 + c*3);
+    Evaluator e(a*1 + b*2 + c*3,
+                {{a.id(), 3}, {c.id(), 7}, {b.id(), 5}});
     REQUIRE(e.eval(0, 0, 0) == Approx(34));
 
-    e.setVar(a.var(), 5);
+    e.setVar(a.id(), 5);
     REQUIRE(e.eval(0, 0, 0) == Approx(36));
-    e.setVar(b.var(), 0);
+    e.setVar(b.id(), 0);
     REQUIRE(e.eval(0, 0, 0) == Approx(26));
-    e.setVar(c.var(), 10);
+    e.setVar(c.id(), 10);
     REQUIRE(e.eval(0, 0, 0) == Approx(35));
 }
 
 TEST_CASE("Evaluator::varValues")
 {
     // Deliberately construct out of order
-    auto a = Tree::var(3.0);
-    Evaluator e(a);
+    auto a = Tree::var();
+    Evaluator e(a, {{a.id(), 3}});
 
     {
         auto v = e.varValues();
         REQUIRE(v.size() == 1);
-        REQUIRE(v.at(a.var()) == 3.0);
+        REQUIRE(v.at(a.id()) == 3.0);
     }
 
-    e.setVar(a.var(), 5.0);
+    e.setVar(a.id(), 5.0);
     {
         auto v = e.varValues();
         REQUIRE(v.size() == 1);
-        REQUIRE(v.at(a.var()) == 5.0);
+        REQUIRE(v.at(a.id()) == 5.0);
     }
-}
-
-TEST_CASE("Evaluator::updateVars")
-{
-    // Deliberately construct out of order
-    auto a = Tree::var(3.0);
-    Evaluator e(a);
-
-    a.setValue(5.0);
-    REQUIRE(e.updateVars(a.cache()));
-    REQUIRE(!e.updateVars(a.cache()));
-
-    auto v = e.varValues();
-    REQUIRE(v.size() == 1);
-    REQUIRE(v.at(a.var()) == 5.0);
 }
 
 TEST_CASE("Float evaluation")
@@ -196,15 +186,9 @@ TEST_CASE("Push / pop behavior")
     REQUIRE(e.eval(1.0f, 2.0f, 0.0f) == 2);
 }
 
-TEST_CASE("Affine evaluation")
-{
-    Evaluator e(Tree::affine(1, 0, 0, 0));
-    REQUIRE(e.eval(1.0, 2.0, 3.0) == 1.0);
-}
-
 TEST_CASE("Matrix evaluation")
 {
-    Tree t(Tree::affine(1, 0, 0, 0));
+    auto t = Tree::X();
 
     SECTION("Default matrix")
     {
@@ -234,7 +218,7 @@ TEST_CASE("Matrix evaluation")
 
 TEST_CASE("Matrix normals")
 {
-    Tree t(Tree::affine(1, 0, 0, 0));
+    auto t = Tree::X();
 
     SECTION("Swapping")
     {
@@ -310,103 +294,5 @@ TEST_CASE("Evaluator::derivs")
         // d/dz = 1
         REQUIRE(d.dz[0] == 1.0);
         REQUIRE(d.dz[1] == 1.0);
-    }
-}
-
-TEST_CASE("Evaluator::toTree")
-{
-    boost::bimap<Cache::VarId, Cache::VarId> vm;
-
-    SECTION("Tree without XYZ")
-    {
-        auto a = Tree::var(3.0);
-        auto b = a + Tree(4.5);
-
-        auto e = Evaluator(b);
-
-        auto t = e.toTree(vm);
-
-        REQUIRE(vm.size() == 1);
-        REQUIRE(vm.left.count(a.var()) == 1);
-        auto a_ = vm.left.at(a.var());
-
-        REQUIRE(t.opcode() == Opcode::ADD);
-
-        REQUIRE(t.lhs().opcode() == Opcode::VAR);
-        REQUIRE(t.lhs().value() == 3.0);
-        REQUIRE(t.lhs().var() == a_);
-
-        REQUIRE(t.rhs().opcode() == Opcode::CONST);
-        REQUIRE(t.rhs().value() == 4.5);
-
-        // Re-run and confirm that we get the same tree
-        auto t_ = e.toTree(vm);
-        REQUIRE(vm.size() == 1);
-        REQUIRE(t == t_);
-    }
-
-    SECTION("Tree with XYZ")
-    {
-        auto a = Tree::var(3.0);
-        auto b = a + Tree::X();
-        REQUIRE(b.opcode() == Opcode::ADD);
-
-        auto e = Evaluator(b);
-
-        auto t = e.toTree(vm);
-
-        REQUIRE(vm.size() == 1);
-        REQUIRE(vm.left.count(a.var()) == 1);
-        auto a_ = vm.left.at(a.var());
-
-        REQUIRE(t.opcode() == Opcode::ADD);
-
-        REQUIRE(t.lhs().opcode() == Opcode::VAR);
-        REQUIRE(t.lhs().value() == 3.0);
-        REQUIRE(t.lhs().var() == a_);
-
-        REQUIRE(t.rhs().opcode() == Opcode::VAR_X);
-    }
-
-    SECTION("Constant")
-    {
-        auto a = Tree(3.0);
-        auto e = Evaluator(a);
-
-        auto a_ = e.toTree(vm);
-        REQUIRE(a_.opcode() == Opcode::CONST);
-        REQUIRE(a_.value() == 3.0);
-    }
-
-    SECTION("X")
-    {
-        auto a = Tree::X();
-        auto e = Evaluator(a);
-
-        auto a_ = e.toTree(vm);
-        REQUIRE(a_.opcode() == Opcode::VAR_X);
-    }
-
-    SECTION("Y")
-    {
-        auto a = Tree::Y();
-        auto e = Evaluator(a);
-
-        auto a_ = e.toTree(vm);
-        REQUIRE(a_.opcode() == Opcode::VAR_Y);
-    }
-
-    SECTION("Var")
-    {
-        auto a = Tree::var(5.5);
-        auto e = Evaluator(a);
-
-        auto a_ = e.toTree(vm);
-        REQUIRE(a_.opcode() == Opcode::VAR);
-        REQUIRE(a.value() == 5.5);
-
-        REQUIRE(vm.size() == 1);
-        auto v = vm.left.at(a.var());
-        REQUIRE(a_.var() == v);
     }
 }

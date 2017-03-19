@@ -10,8 +10,11 @@ public:
     /*
      *  Construct an evaluator for the given tree
      */
-    EvaluatorAVX(const Tree root, const glm::mat4& M=glm::mat4())
-        : EvaluatorBase(root, M) { /* Nothing to do here */ }
+    EvaluatorAVX(const Tree root, const glm::mat4& M=glm::mat4(),
+                 const std::map<Tree::Id, float>& vars=std::map<Tree::Id, float>())
+        : EvaluatorBase(root, M, vars) { /* Nothing to do here */ }
+    EvaluatorAVX(const Tree root, const std::map<Tree::Id, float>& vars)
+        : EvaluatorBase(root, vars) { /* Nothing to do here */ }
 
     /*
      *  Copy constructor

@@ -13,19 +13,24 @@ namespace Bridge {
 class EscapedHandle : public Graph::Escaped
 {
 public:
-    EscapedHandle() {};
+    EscapedHandle(const std::map<Kernel::Tree::Id, float>& vars)
+        : vars(vars) {};
 
     virtual int tag() const=0;
+    std::map<Kernel::Tree::Id, float> vars;
 };
+
+////////////////////////////////////////////////////////////////////////////////
 
 class EscapedPointHandle : public EscapedHandle
 {
 public:
-    EscapedPointHandle(Kernel::Tree xyz[3]);
+    EscapedPointHandle(Kernel::Tree xyz[3],
+                       const std::map<Kernel::Tree::Id, float>& vars);
     int tag() const override;
 
     QVector3D pos;
-    Kernel::Evaluator xyz[3];
+    Kernel::Tree xyz[3];
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,10 +38,11 @@ public:
 class EscapedShape : public EscapedHandle
 {
 public:
-    EscapedShape(Kernel::Tree tree);
+    EscapedShape(Kernel::Tree tree,
+                 const std::map<Kernel::Tree::Id, float>& vars);
     int tag() const override;
 
-    Kernel::Evaluator* eval;
+    Kernel::Tree tree;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

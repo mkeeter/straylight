@@ -96,18 +96,11 @@ public:
 
     /*
      *  Manipulate the mapping of cell keys (in the Graph)
-     *  to variable Ids (in the Kernel's tree).
+     *  to variable pointers (in the Kernel's tree).
      */
-    bool hasVar(const Graph::CellKey& k) const;
-    Kernel::Cache::VarId varId(const Graph::CellKey& k) const;
     void defineVar(const Graph::CellKey& k,
-                   const Kernel::Cache::VarId id);
-    void forgetVar(const Graph::CellKey& k);
-
-    /*
-     *  Returns a lock on a mutex used for wrangling variables
-     */
-    std::unique_lock<std::mutex>&& varLock();
+                   const Kernel::Tree::Id var);
+    void forgetVar(const Kernel::Tree::Id var);
 
 signals:
     /*
@@ -156,9 +149,8 @@ protected:
 
     App::Render::Scene* scene;
 
-    /*  Bindings from cells to variables  */
-    boost::bimap<Graph::CellKey, Kernel::Cache::VarId> vars;
-    std::mutex var_lock;
+    /*  Bindings from variables to cells  */
+    std::map<const Kernel::Tree::Id, Graph::CellKey> vars;
 
     /*  Reserved words from the interpreter  */
     QSet<QString> keywords;

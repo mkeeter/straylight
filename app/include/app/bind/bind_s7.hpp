@@ -19,9 +19,11 @@ namespace Bind {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct point_handle_t {
-    point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z);
+    point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z,
+                   const std::map<Kernel::Tree::Id, float>& vars);
 
     Kernel::Tree xyz[3];
+    std::map<Kernel::Tree::Id, float> vars;
 
     // Type tag for interpreter
     static int tag;

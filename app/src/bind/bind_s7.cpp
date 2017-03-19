@@ -17,8 +17,9 @@ int point_handle_t::tag = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z)
-    : xyz{x, y, z}
+point_handle_t::point_handle_t(Kernel::Tree x, Kernel::Tree y, Kernel::Tree z,
+                               const std::map<Kernel::Tree::Id, float>& vars)
+    : xyz{x, y, z}, vars(vars)
 {
     // Nothing to do here
 }
@@ -35,7 +36,7 @@ static char* point_handle_print(s7_scheme* sc, void* s)
     std::string axes;
     for (unsigned i=0; i < 3; ++i)
     {
-        if (p->xyz[i].opcode() != Kernel::Opcode::CONST)
+        if (p->xyz[i]->op != Kernel::Opcode::CONST)
         {
             axes += "xyz"[i];
         }
@@ -74,7 +75,7 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
             }
             else if (Kernel::Bind::is_shape(args[i]))
             {
-                if (!(Kernel::Bind::get_shape(args[i])->tree.flags() &
+                if (!(Kernel::Bind::get_shape(args[i])->tree->flags &
                       Kernel::Tree::FLAG_LOCATION_AGNOSTIC))
                 {
                     return s7_wrong_type_arg_error(sc, "point_handle_new", i,
@@ -84,17 +85,29 @@ static s7_pointer point_handle_new(s7_scheme* sc, s7_pointer args)
         }
     }
 
-    auto to_tree = [=](s7_pointer p){
-        return s7_is_number(p) ? Kernel::Tree(s7_number_to_real(sc, p))
-                               : Kernel::Bind::get_shape(p)->tree;
-    };
+    // Convert from objects into bound shapes
+    auto x = Kernel::Bind::shape_from_obj(sc, _x);
+    auto y = Kernel::Bind::shape_from_obj(sc, _y);
+    auto z = Kernel::Bind::shape_from_obj(sc, _z);
 
-    auto x = to_tree(_x);
-    auto y = to_tree(_y);
-    auto z = to_tree(_z);
+    // Assert that the bindings were successful
+    assert(Kernel::Bind::is_shape(x) &&
+           Kernel::Bind::is_shape(x) &&
+           Kernel::Bind::is_shape(x));
+
+    // Take the union of all the variables
+    std::map<Kernel::Tree::Id, float> vars;
+    for (auto& a : {x, y, z})
+    {
+        auto s = Kernel::Bind::get_shape(a);
+        vars.insert(s->vars.begin(), s->vars.end());
+    }
 
     return s7_make_object(sc, point_handle_t::tag,
-            new point_handle_t(x, y, z));
+            new point_handle_t(
+                Kernel::Bind::get_shape(x)->tree,
+                Kernel::Bind::get_shape(y)->tree,
+                Kernel::Bind::get_shape(z)->tree, vars));
 }
 
 bool is_point_handle(s7_pointer s)
@@ -123,35 +136,46 @@ s7_pointer reader(s7_scheme* sc, s7_pointer args)
     const auto& cell = *static_cast<Graph::CellKey*>(
             s7_c_pointer(s7_cadr(args)));
 
+    // Previous value is passed into reader for exactly this use case
+    s7_pointer prev_value = s7_caddr(args);
+    const bool was_shape_var =
+        Kernel::Bind::get_shape(prev_value) &&
+        Kernel::Bind::get_shape(prev_value)->tree->op == Kernel::Opcode::VAR;
+
+    // If this is a single-clause expression that is a number, wrap it
+    // into a tree variable so that we can manipulate it later on
     if (s7_list_length(sc, begin) == 1 && s7_is_number(s7_car(begin)))
     {
-        auto cache = Kernel::Cache::instance();
+        // Extract the numerical value for this variable
         const auto v = s7_number_to_real(sc, s7_car(begin));
 
         // If this variable is already in use, then update its value and
         // return a Shape with the new variable value (which will be
         // marked as not equal because of the vars map in each shape)
-        if (graph->hasVar(cell))
+        if (was_shape_var)
         {
-            auto id = graph->varId(cell);
-            cache->setValue(id, v);
-
-            auto var = Kernel::Tree::var(id);
-            return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
+            // Build a variable with the same Tree but a different value
+            auto shape = Kernel::Bind::get_shape(prev_value);
+            auto var = Kernel::Bind::shape_from_tree(sc,
+                    shape->tree, {{shape->tree.id(), v}});
+            return s7_list(sc, 1, var);
         }
         // Otherwise, make a new variable and save it in the graph model
         else
         {
-            auto var = Kernel::Tree::var(v);
-            graph->defineVar(cell, var.var());
-            return s7_list(sc, 1, Kernel::Bind::shape_new(sc, var));
+            auto tree = Kernel::Tree::var();
+            graph->defineVar(cell, tree.id());
+            return s7_list(sc, 1, Kernel::Bind::shape_from_tree(
+                        sc, tree, {{tree.id(), v}}));
         }
     }
-    else
+    // If the previous value was a variable, but this is not, tell the
+    // graph to forget about the previous value
+    else if (was_shape_var)
     {
-        graph->forgetVar(cell);
-        return begin;
+        graph->forgetVar(Kernel::Bind::get_shape(prev_value)->tree.id());
     }
+    return begin;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +197,7 @@ void init(s7_scheme* sc)
     s7_define_function(sc, "ui-point", point_handle_new, 3, 0, false,
             "(ui-point x y z) makes a point handle in the 3D viewport");
 
-    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
+    s7_define_function(sc, "*cell-reader*", reader, 3, 0, 0,
         "Reads a list of s-exprs, doing special things to floats");
 }
 

@@ -8,12 +8,12 @@
 namespace App {
 namespace Render {
 
-Renderer::Renderer(Kernel::Evaluator* e)
+Renderer::Renderer(Kernel::Tree e, std::map<Kernel::Tree::Id, float> vars)
     : next(QMatrix4x4(), {0,0}, 0), todo(NOTHING)
 {
     for (int i=0; i < 8; ++i)
     {
-        evaluators.push_back(new Kernel::Evaluator(*e));
+        evaluators.push_back(new Kernel::Evaluator(e, vars));
     }
     connect(&watcher, &QFutureWatcher<Result>::finished,
             this, &Renderer::onRenderFinished);
@@ -43,12 +43,13 @@ void Renderer::deleteWhenNotRunning()
     }
 }
 
-bool Renderer::updateVars(Kernel::Tree tree)
+// TODO: this is never used
+bool Renderer::updateVars(std::map<Kernel::Tree::Id, float> vars)
 {
     bool changed = false;
     for (auto& e : evaluators)
     {
-        changed |= e->updateVars(tree.cache());
+        changed |= e->updateVars(vars);
     }
     return changed;
 }

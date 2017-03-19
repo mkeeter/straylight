@@ -17,7 +17,7 @@ class Renderer : public QObject
 {
     Q_OBJECT
 public:
-    Renderer(Kernel::Evaluator* e);
+    Renderer(Kernel::Tree e, std::map<Kernel::Tree::Id, float> vars);
     ~Renderer();
 
     /*
@@ -30,7 +30,7 @@ public:
      *  Updates each of the stored Evaluators with changed
      *  variable values, return true if there's a change.
      */
-    bool updateVars(Kernel::Tree tree);
+    bool updateVars(std::map<Kernel::Tree::Id, float> vars);
 
     /*
      *  This struct can be passed into a Blitter to draw

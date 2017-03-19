@@ -1,3 +1,4 @@
+#include <cassert>
 #include <catch/catch.hpp>
 
 #include "s7/s7.h"
@@ -20,7 +21,7 @@ double num(s7_scheme* sc, std::string expr)
     }
     else if (Kernel::Bind::is_shape(out))
     {
-        return Kernel::Bind::get_shape(out)->tree.value();
+        return Kernel::Bind::get_shape(out)->value();
     }
     assert(false);
     return 0;
@@ -40,22 +41,22 @@ TEST_CASE("shape_add")
 {
     auto sc = get_scm();
 
-    REQUIRE(eval(sc, "(+)") == "0.0");
-    REQUIRE(eval(sc, "(+ 1)") == "1.0");
-    REQUIRE(eval(sc, "(+ 2)") == "2.0");
-    REQUIRE(eval(sc, "(+ 1 2)") == "3.0");
-    REQUIRE(eval(sc, "(+ 1 2 3 4)") == "10.0");
+    REQUIRE(num(sc, "(+)") == 0);
+    REQUIRE(num(sc, "(+ 1)") == 1.0);
+    REQUIRE(num(sc, "(+ 2)") == 2.0);
+    REQUIRE(num(sc, "(+ 1 2)") == 3.0);
+    REQUIRE(num(sc, "(+ 1 2 3 4)") == 10.0);
 }
 
 TEST_CASE("shape_mul")
 {
     auto sc = get_scm();
 
-    REQUIRE(eval(sc, "(*)") == "1.0");
-    REQUIRE(eval(sc, "(* 1)") == "1.0");
-    REQUIRE(eval(sc, "(* 2)") == "2.0");
-    REQUIRE(eval(sc, "(* 1 2)") == "2.0");
-    REQUIRE(eval(sc, "(* 1 2 3 4)") == "24.0");
+    REQUIRE(num(sc, "(*)") == 1.0);
+    REQUIRE(num(sc, "(* 1)") == 1.0);
+    REQUIRE(num(sc, "(* 2)") == 2.0);
+    REQUIRE(num(sc, "(* 1 2)") == 2.0);
+    REQUIRE(num(sc, "(* 1 2 3 4)") == 24.0);
 }
 
 TEST_CASE("shape_min")
@@ -63,10 +64,10 @@ TEST_CASE("shape_min")
     auto sc = get_scm();
 
     REQUIRE(eval(sc, "(min)") == "wrong-number-of-args");
-    REQUIRE(eval(sc, "(min 1)") == "1.0");
-    REQUIRE(eval(sc, "(min 2)") == "2.0");
-    REQUIRE(eval(sc, "(min 1 2)") == "1.0");
-    REQUIRE(eval(sc, "(min 1 2 3 4)") == "1.0");
+    REQUIRE(num(sc, "(min 1)") == 1.0);
+    REQUIRE(num(sc, "(min 2)") == 2.0);
+    REQUIRE(num(sc, "(min 1 2)") == 1.0);
+    REQUIRE(num(sc, "(min 1 2 3 4)") == 1.0);
 }
 
 TEST_CASE("shape_max")
@@ -74,10 +75,10 @@ TEST_CASE("shape_max")
     auto sc = get_scm();
 
     REQUIRE(eval(sc, "(max)") == "wrong-number-of-args");
-    REQUIRE(eval(sc, "(max 1)") == "1.0");
-    REQUIRE(eval(sc, "(max 2)") == "2.0");
-    REQUIRE(eval(sc, "(max 1 2)") == "2.0");
-    REQUIRE(eval(sc, "(max 1 2 3 4)") == "4.0");
+    REQUIRE(num(sc, "(max 1)") == 1.0);
+    REQUIRE(num(sc, "(max 2)") == 2.0);
+    REQUIRE(num(sc, "(max 1 2)") == 2.0);
+    REQUIRE(num(sc, "(max 1 2 3 4)") == 4.0);
 }
 
 TEST_CASE("shape_sub")
@@ -85,10 +86,10 @@ TEST_CASE("shape_sub")
     auto sc = get_scm();
 
     REQUIRE(eval(sc, "(-)") == "wrong-number-of-args");
-    REQUIRE(eval(sc, "(- 1)") == "-1.0");
-    REQUIRE(eval(sc, "(- 2)") == "-2.0");
-    REQUIRE(eval(sc, "(- 1 2)") == "-1.0");
-    REQUIRE(eval(sc, "(- 1 2 3 4)") == "-8.0");
+    REQUIRE(num(sc, "(- 1)") == -1.0);
+    REQUIRE(num(sc, "(- 2)") == -2.0);
+    REQUIRE(num(sc, "(- 1 2)") == -1.0);
+    REQUIRE(num(sc, "(- 1 2 3 4)") == -8.0);
 }
 
 TEST_CASE("shape_div")
@@ -96,10 +97,10 @@ TEST_CASE("shape_div")
     auto sc = get_scm();
 
     REQUIRE(eval(sc, "(/)") == "wrong-number-of-args");
-    REQUIRE(eval(sc, "(/ 1)") == "1.0");
-    REQUIRE(eval(sc, "(/ 2)") == "0.5");
-    REQUIRE(eval(sc, "(/ 1 4)") == "0.25");
-    REQUIRE(eval(sc, "(/ 1 2 4)") == "0.125");
+    REQUIRE(num(sc, "(/ 1)") == 1.0);
+    REQUIRE(num(sc, "(/ 2)") == 0.5);
+    REQUIRE(num(sc, "(/ 1 4)") == 0.25);
+    REQUIRE(num(sc, "(/ 1 2 4)") == 0.125);
 }
 
 TEST_CASE("shape_atan")
@@ -140,8 +141,8 @@ TEST_CASE("shape_mod")
 
     REQUIRE(eval(sc, "(modulo)") == "wrong-number-of-args");
     REQUIRE(eval(sc, "(modulo 1)") == "wrong-number-of-args");
-    REQUIRE(eval(sc, "(modulo 3 2)") == "1.0");
-    REQUIRE(eval(sc, "(modulo -5 4)") == "3.0");
+    REQUIRE(num(sc, "(modulo 3 2)") == 1.0);
+    REQUIRE(num(sc, "(modulo -5 4)") == 3.0);
 }
 
 TEST_CASE("make-shape")
@@ -151,4 +152,8 @@ TEST_CASE("make-shape")
     REQUIRE(num(sc,
         "(let ((f (make-shape (lambda (x y z) x))))"
         "  (f 1 2 3))") == 1);
+
+    REQUIRE(num(sc,
+        "(let ((f (make-shape (lambda (x y z) (+ x 3)))))"
+        "  (f 1 2 3))") == 4);
 }
