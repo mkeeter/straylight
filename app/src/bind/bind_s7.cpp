@@ -197,7 +197,7 @@ void init(s7_scheme* sc)
     s7_define_function(sc, "ui-point", point_handle_new, 3, 0, false,
             "(ui-point x y z) makes a point handle in the 3D viewport");
 
-    s7_define_function(sc, "*cell-reader*", reader, 2, 0, 0,
+    s7_define_function(sc, "*cell-reader*", reader, 3, 0, 0,
         "Reads a list of s-exprs, doing special things to floats");
 }
 
