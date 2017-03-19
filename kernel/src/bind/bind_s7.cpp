@@ -177,13 +177,12 @@ static char* shape_print(s7_scheme* sc, void* s)
 {
     (void)sc;
 
-    Tree t = static_cast<shape_t*>(s)->tree;
+    auto shape = static_cast<shape_t*>(s);
     std::stringstream ss;
 
-    if (t->flags & Tree::FLAG_LOCATION_AGNOSTIC)
+    if (shape->tree->flags & Tree::FLAG_LOCATION_AGNOSTIC)
     {
-        // TODO
-        ss << t->value;
+        ss << shape->value();
     }
     else
     {
