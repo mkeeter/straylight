@@ -183,7 +183,7 @@ protected:
 
     /*  Map of variables (in terms of where they live in this Evaluator) to
      *  their ids in their respective Tree (e.g. what you get when calling
-     *  Tree::var(3.0).var() */
+     *  Tree::var().id() */
     boost::bimap<Clause::Id, Tree::Tree_*> vars;
 
     /*  Tape containing our opcodes in reverse order */
