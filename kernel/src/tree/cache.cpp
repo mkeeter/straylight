@@ -198,27 +198,31 @@ Cache::Node Cache::checkIdentity(Opcode::Opcode op, Cache::Node a, Cache::Node b
 
 Cache::Node Cache::checkCommutative(Opcode::Opcode op, Cache::Node a, Cache::Node b)
 {
-    // Only try to rebalance commutative operations with nested trees
-    if (Opcode::isCommutative(op) && a->lhs && a->rhs && b->lhs && b->rhs)
+    if (Opcode::isCommutative(op))
     {
+        const auto al = a->lhs ? a->lhs->rank : 0;
+        const auto ar = a->rhs ? a->rhs->rank : 0;
+        const auto bl = b->lhs ? b->lhs->rank : 0;
+        const auto br = b->rhs ? b->rhs->rank : 0;
+
         if (a->op == op)
         {
-            if (a->lhs->rank > b->lhs->rank)
+            if (al > bl)
             {
                 return operation(op, a->lhs, operation(op, a->rhs, b));
             }
-            else if (a->rhs->rank > b->rank)
+            else if (ar > b->rank)
             {
                 return operation(op, a->rhs, operation(op, a->lhs, b));
             }
         }
         else if (b->op == op)
         {
-            if (b->lhs->rank > a->rank)
+            if (bl > a->rank)
             {
                 return operation(op, b->lhs, operation(op, b->rhs, a));
             }
-            else if (b->rhs->rank > a->rank)
+            else if (br > a->rank)
             {
                 return operation(op, b->rhs, operation(op, b->lhs, a));
             }
