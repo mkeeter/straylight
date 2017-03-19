@@ -18,11 +18,6 @@ class Tree
 {
 public:
     /*
-     *  Empty tree constructor
-     */
-    Tree();
-
-    /*
      *  Returns a Tree for the given constant
      */
     Tree(float v);
@@ -111,6 +106,11 @@ public:
     std::list<Tree> ordered() const;
 
 protected:
+    /*
+     *  Empty tree constructor
+     */
+    explicit Tree();
+
     /*
      *  Private constructor
      */
