@@ -56,6 +56,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
         {
             constants[id] = vs.at(m.id());
             vars.left.insert({id, m.id()});
+            var_handles.insert({m.id(), m});
         }
         else
         {
@@ -139,9 +140,13 @@ void EvaluatorBase::set(Interval x, Interval y, Interval z)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void EvaluatorBase::push()
+std::list<EvaluatorBase::Tape>::iterator EvaluatorBase::pushTape()
 {
     auto current_tape = tape;
+
+    // Add another tape to the top of the tape stack if one doesn't already
+    // exist (we never erase them, to avoid re-allocating memory during
+    // nested evaluations).
     if (++tape == tapes.end())
     {
         tape = tapes.insert(tape, Tape());
@@ -155,57 +160,123 @@ void EvaluatorBase::push()
         // (but make sure it still has allocated storage)
         tape->clear();
         assert(tape->capacity() >= current_tape->size());
-
-        // Next, we figure out which clauses are disabled and only push enabled
-        // clauses into the new tape (aspirationally)
-        std::fill(disabled.begin(), disabled.end(), true);
-
-        // Mark the root node as active
-        disabled[0] = false;
-
-        for (const auto& c : *current_tape)
-        {
-            if (!disabled[c.id])
-            {
-                // For min and max operations, we may only need to keep one branch
-                // active if it is decisively above or below the other branch.
-                if (c.op == Opcode::MAX)
-                {
-                    if (result.i[c.a].lower() >= result.i[c.b].upper())
-                    {
-                        disabled[c.a] = false;
-                        tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                        continue;
-                    }
-                    else if (result.i[c.b].lower() >= result.i[c.a].upper())
-                    {
-                        disabled[c.b] = false;
-                        tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                        continue;
-                    }
-                }
-                else if (c.op == Opcode::MIN)
-                {
-                    if (result.i[c.a].lower() >= result.i[c.b].upper())
-                    {
-                        disabled[c.b] = false;
-                        tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                        continue;
-                    }
-                    else if (result.i[c.b].lower() >= result.i[c.a].upper())
-                    {
-                        disabled[c.a] = false;
-                        tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                        continue;
-                    }
-                }
-                disabled[c.a] = false;
-                disabled[c.b] = false;
-                tape->push_back(c);
-            }
-        }
-        assert(tape->size() <= current_tape->size());
     }
+
+    return current_tape;
+}
+
+void EvaluatorBase::push()
+{
+    auto current_tape = pushTape();
+
+    // Next, we figure out which clauses are disabled and only push enabled
+    // clauses into the new tape (aspirationally)
+    std::fill(disabled.begin(), disabled.end(), true);
+
+    // Mark the root node as active
+    disabled[0] = false;
+
+    for (const auto& c : *current_tape)
+    {
+        if (!disabled[c.id])
+        {
+            // For min and max operations, we may only need to keep one branch
+            // active if it is decisively above or below the other branch.
+            if (c.op == Opcode::MAX)
+            {
+                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                {
+                    disabled[c.a] = false;
+                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
+                    continue;
+                }
+                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                {
+                    disabled[c.b] = false;
+                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
+                    continue;
+                }
+            }
+            else if (c.op == Opcode::MIN)
+            {
+                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                {
+                    disabled[c.b] = false;
+                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
+                    continue;
+                }
+                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                {
+                    disabled[c.a] = false;
+                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
+                    continue;
+                }
+            }
+            disabled[c.a] = false;
+            disabled[c.b] = false;
+            tape->push_back(c);
+        }
+    }
+    assert(tape->size() <= current_tape->size());
+}
+
+void EvaluatorBase::specialize(float x, float y, float z)
+{
+    // Load results into the first floating-point result slot
+    eval(x, y, z);
+
+    // The same logic as push, but using float instead of interval comparisons
+    auto current_tape = pushTape();
+
+    // Next, we figure out which clauses are disabled and only push enabled
+    // clauses into the new tape (aspirationally)
+    std::fill(disabled.begin(), disabled.end(), true);
+
+    // Mark the root node as active
+    disabled[0] = false;
+
+    for (const auto& c : *current_tape)
+    {
+        if (!disabled[c.id])
+        {
+            // For min and max operations, we may only need to keep one branch
+            // active if it is decisively above or below the other branch.
+            if (c.op == Opcode::MAX)
+            {
+                if (result.f[c.a][0] >= result.f[c.b][0])
+                {
+                    disabled[c.a] = false;
+                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
+                    continue;
+                }
+                else if (result.f[c.b][0] >= result.f[c.a][0])
+                {
+                    disabled[c.b] = false;
+                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
+                    continue;
+                }
+            }
+            else if (c.op == Opcode::MIN)
+            {
+                if (result.f[c.a][0] >= result.f[c.b][0])
+                {
+                    disabled[c.b] = false;
+                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
+                    continue;
+                }
+                else if (result.f[c.b][0] >= result.f[c.a][0])
+                {
+                    disabled[c.a] = false;
+                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
+                    continue;
+                }
+            }
+            disabled[c.a] = false;
+            disabled[c.b] = false;
+            tape->push_back(c);
+        }
+    }
+    assert(tape->size() <= current_tape->size());
 }
 
 void EvaluatorBase::pop()

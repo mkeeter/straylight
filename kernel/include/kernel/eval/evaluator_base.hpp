@@ -139,7 +139,22 @@ public:
      */
     bool updateVars(const std::map<Kernel::Tree::Id, float>& vars);
 
+    /*
+     *  Pushes into a tree with min/max nodes specialized
+     *  based on evaluation at the given point
+     */
+    void specialize(float x, float y, float z);
+
 protected:
+    /*  This is our evaluation tape type */
+    typedef std::vector<Clause> Tape;
+
+    /*
+     *  Pushes a new tape onto the stack, storing it in tape and returning
+     *  the previous top tape
+     */
+    std::list<Tape>::iterator pushTape();
+
     /*
      *  Evaluate a single clause, populating the out array
      */
@@ -187,9 +202,11 @@ protected:
      *  their ids in their respective Tree (e.g. what you get when calling
      *  Tree::var().id() */
     boost::bimap<Clause::Id, Tree::Id> vars;
+    /*  We also store shared-pointer handles to var Trees, so we can
+     *  reconstruct a proper Tree from the Evaluator  */
+    std::map<Tree::Id, Tree> var_handles;
 
     /*  Tape containing our opcodes in reverse order */
-    typedef std::vector<Clause> Tape;
     std::list<Tape> tapes;
     std::list<Tape>::iterator tape;
 
