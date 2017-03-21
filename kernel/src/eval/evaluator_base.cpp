@@ -152,16 +152,15 @@ std::list<EvaluatorBase::Tape>::iterator EvaluatorBase::pushTape()
         tape = tapes.insert(tape, Tape());
         tape->reserve(tapes.front().size());
     }
-    assert(tape != tapes.end());
-
-    if (current_tape->size())
+    else
     {
         // We may be reusing an existing tape, so resize to 0
-        // (but make sure it still has allocated storage)
+        // (preserving allocated storage)
         tape->clear();
-        assert(tape->capacity() >= current_tape->size());
     }
 
+    assert(tape != tapes.end());
+    assert(tape->capacity() >= current_tape->size());
     return current_tape;
 }
 
