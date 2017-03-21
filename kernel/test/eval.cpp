@@ -296,3 +296,21 @@ TEST_CASE("Evaluator::derivs")
         REQUIRE(d.dz[1] == 1.0);
     }
 }
+
+TEST_CASE("Evalutor::specialize")
+{
+    Evaluator e(min(Tree::X(), Tree::Y()));
+
+    e.specialize(-1, 0, 0); // specialize to just "X"
+    REQUIRE(e.eval(-2, 0, 0) == -2);
+    REQUIRE(e.eval(4, 0, 0) == 4);
+    REQUIRE(e.eval(4, 5, 0) == 4);
+    REQUIRE(e.eval(10, 5, 0) == 10);
+
+    e.pop();
+    e.specialize(0, -1, 0); // specialize to just "X"
+    REQUIRE(e.eval(-2, 0, 0) == 0);
+    REQUIRE(e.eval(4, 0, 0) == 0);
+    REQUIRE(e.eval(4, 5, 0) == 5);
+    REQUIRE(e.eval(10, 5, 0) == 5);
+}
