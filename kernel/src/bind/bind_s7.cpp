@@ -449,7 +449,7 @@ static s7_pointer detree_args(s7_scheme* sc, s7_pointer args)
         {
             auto f = s7_car(a);
             new_args = s7_cons(sc, is_shape(f)
-                    ? s7_make_real(sc, get_shape(f)->tree->value) // TODO: get real value
+                    ? s7_make_real(sc, get_shape(f)->value())
                     : f, new_args);
         }
         return s7_reverse(sc, new_args);
