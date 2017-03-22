@@ -19,7 +19,8 @@ public:
      *  p is in world coordinates
      *  This finds the specialized tree and the drag normal
      */
-    void startDrag(const QVector3D& p);
+    void startDrag(const QVector3D& p) override;
+    void endDrag() override;
 
     /*
      *  Drags to a particular position
@@ -44,6 +45,9 @@ protected:
     /*  Here are our local variable values  */
     std::map<Kernel::Tree::Id, float> vars;
 
+    std::unique_ptr<Kernel::Evaluator> next;
+    std::map<Kernel::Tree::Id, float> next_vars;
+
     /*  We store the starting position for a drag here.
      *  This is a point in world space, and depends on where
      *  the user clicked on the shape  */
@@ -52,6 +56,8 @@ protected:
     /*  This is the drag normal.  It is in world space and depends on
      *  the normal where the user clicked on the shape  */
     QVector3D norm;
+
+    bool dragging=false;
 };
 
 }   // namespace Render

@@ -25,7 +25,7 @@ public:
     /*
      *  Loads a starting position for a drag operation
      */
-    void startDrag(const QVector3D& p) { start = p; }
+    void startDrag(const QVector3D& p) override { start = p; }
 
     /*
      *  Drags to a particular position

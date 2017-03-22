@@ -6,19 +6,41 @@ namespace Render {
 void ShapeDrag::startDrag(const QVector3D& p)
 {
     start = p;
-    shape->set(p.x(), p.y(), p.z(), 0);
+
+    shape->specialize(p.x(), p.y(), p.z());
     auto ds = shape->derivs(1);
     norm = QVector3D(ds.dx[0], ds.dy[0], ds.dz[0]);
 
-    // TODO:
-    // Specialize shape here
+    dragging = true;
+}
+
+void ShapeDrag::endDrag()
+{
+    dragging = false;
+    shape->pop();
+
+    // Move in an evaluator that was installed while dragging
+    if (next.get() != nullptr)
+    {
+        shape.reset(next.release());
+        vars = next_vars;
+        next_vars.clear();
+    }
 }
 
 bool ShapeDrag::updateFrom(App::Bridge::EscapedShape* s)
 {
-    // TODO: only update shape if evaluator is different
-    shape.reset(new Kernel::Evaluator(s->tree, s->vars));
-    vars = s->vars;
+    if (!dragging)
+    {
+        // TODO: only update shape if evaluator is different
+        shape.reset(new Kernel::Evaluator(s->tree, s->vars));
+        vars = s->vars;
+    }
+    else
+    {
+        next.reset(new Kernel::Evaluator(s->tree, s->vars));
+        next_vars = s->vars;
+    }
 
     return true;
 }

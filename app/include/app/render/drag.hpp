@@ -20,6 +20,9 @@ public:
     virtual Kernel::Solver::Solution dragTo(const QMatrix4x4& M,
                                             const QVector2D& cursor)=0;
 
+    virtual void startDrag(const QVector3D& pos) { (void)pos; }
+    virtual void endDrag() {}
+
     /*
      *  Returns a pair of vectors [pos, ray], where the mouse line can
      *  be defined as pos + d*ray in world coordinates

@@ -160,6 +160,7 @@ std::list<EvaluatorBase::Tape>::iterator EvaluatorBase::pushTape()
     }
 
     assert(tape != tapes.end());
+    assert(tape != tapes.begin());
     assert(tape->capacity() >= current_tape->size());
     return current_tape;
 }

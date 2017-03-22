@@ -134,6 +134,7 @@ void Scene::mouseRelease()
 {
     if (mouse_state == DRAG_HANDLE)
     {
+        mouse_drag->endDrag();
         mouse_drag = nullptr;
     }
     mouse_state = RELEASED;
