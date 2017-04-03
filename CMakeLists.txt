@@ -20,9 +20,9 @@ endif()
 
 # Build the kernel and graph libraries
 add_subdirectory(kernel)
-add_subdirectory(graph)
+add_subdirectory(graph2)
 
 # Build the test suite
 add_subdirectory(test)
 
-add_subdirectory(app)
+#add_subdirectory(app)

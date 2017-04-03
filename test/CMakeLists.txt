@@ -13,12 +13,7 @@ add_executable(straylight-test main.cpp
     ../kernel/test/tree.cpp
     ../kernel/test/util/shapes.cpp
 
-    ../graph/test/async.cpp
-    ../graph/test/dependencies.cpp
-    ../graph/test/interpreter.cpp
-    ../graph/test/item.cpp
-    ../graph/test/root.cpp
-    ../graph/test/tree.cpp
+    ../graph2/test/dependencies.cpp
 )
 target_include_directories(straylight-test PRIVATE ../app/src)
 target_link_libraries(straylight-test straylight-kernel straylight-graph)
