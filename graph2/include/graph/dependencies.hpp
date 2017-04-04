@@ -39,6 +39,11 @@ public:
      */
     void erase(const CellKey& looker);
 
+    /*
+     *  Checks whether the given lookup creates a recursive loop
+     */
+    bool isRecursive(const CellKey& looker, const CellKey& lookee) const;
+
 protected:
     /*  lookups.left[$FOO] are successful lookups by $FOO
      *  lookups.right[$BAR] are things that looked up $BAR  */
@@ -49,11 +54,6 @@ protected:
      *  lookups.right[$BAR] are things that looked up $BAR  */
     boost::bimap<boost::bimaps::multiset_of<CellKey>,
                  boost::bimaps::multiset_of<NameKey>> failed;
-
-    /*  upstream[cell] records everything that's upstream of cell
-     *  This is the recursive union of lookups.left[cell], and is used to
-     *  detect circular dependencies. */
-    std::map<CellKey, std::set<CellKey>> upstream;
 
 public:
     /*
@@ -71,6 +71,16 @@ public:
     typedef decltype(lookups)::right_const_iterator inverse_iterator;
     std::pair<inverse_iterator, inverse_iterator>
         inverse(const CellKey& lookee) const;
+
+    /*
+     *  Finds the first inverse iterator for the given key
+     */
+    inverse_iterator find(const CellKey& lookee) const;
+
+    /*
+     *  Finds the final inverse iterator
+     */
+    inverse_iterator end() const;
 
     typedef decltype(failed)::right_const_iterator failed_iterator;
     std::pair<failed_iterator, failed_iterator>
