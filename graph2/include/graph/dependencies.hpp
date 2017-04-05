@@ -5,8 +5,7 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/multiset_of.hpp>
 
-#include "graph/cell.hpp"
-#include "graph/id.hpp"
+#include "graph/key.hpp"
 
 namespace Graph
 {
@@ -14,9 +13,6 @@ namespace Graph
 class Dependencies
 {
 public:
-    typedef std::pair<CellId, Cell::Env> CellKey;
-    typedef std::pair<SheetId, std::string> NameKey;
-
     /*
      *  Resets all stored dependencies
      */
