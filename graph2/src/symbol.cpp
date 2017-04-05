@@ -4,32 +4,55 @@
 namespace Graph
 {
 
-SymbolTable::SymbolTable(Graph& g, const CellKey& t)
-    : graph(g), target(t), sheet(graph.sheet(graph.cell(target.id)->parent))
+SymbolTable::SymbolTable(const Root& r, Dependencies& d, const CellKey& t)
+    : root(r), deps(d), target(t),
+      sheet(root.sheets.at(root.cells.at(target.id)->parent).get())
 {
-    // Nothing to do here
+    // Since a symbol table is only constructed before an evaluation,
+    // clear target's dependencies here.  They'll be re-populated by
+    // SymbolTable::get, which is called through the unbound variable
+    // hook in the interpreter.
+    deps.erase(target);
 }
 
-Interpreter::Value SymbolTable::get(const std::string& symbol)
+std::pair<Interpreter::Value, SymbolTable::Result>
+SymbolTable::get(const std::string& symbol)
 {
-    if (graph.isItemName(symbol))
+    auto c = sheet->cells.left.find(symbol);
+    if (c != sheet->cells.left.end())
     {
-        auto c = sheet->cells.find(symbol);
-        if (c != sheet->cells.end())
+        const CellId cell_id = c->second;
+
+        if (deps.insert(target, {cell_id, target.env}))
         {
-            // Return cell value
+            return {nullptr, RECURSIVE};
         }
 
-        auto i = sheet->instances.find(symbol);
-        if (i != sheet->instances.end())
+        const auto& cell = *root.cells.at(cell_id);
+        auto v = cell.values.find(target.env);
+        if (v == cell.values.end())
         {
-            // Return instance thunk
+            for (auto b = cell.values.lower_bound(target.env);
+                      b != cell.values.end() && b->first.specializes(target.env);
+                 ++b)
+            {
+                _todo.push_back({cell_id, b->first});
+            }
+            // Check for multiple values
+            return {nullptr, _todo.size() ? MULTIPLE_VALUES : MISSING_ENV};
         }
+
+        // Return cell value
+        return {v->second.value, OKAY};
     }
-    else if (graph.isSheetName(symbol))
+
+    auto i = sheet->instances.find(symbol);
+    if (i != sheet->instances.end())
     {
-        // TODO
+        // Return instance thunk
     }
+
+    return {nullptr, NO_SUCH_NAME };
 }
 
 }   // namespace Graph

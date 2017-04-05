@@ -10,13 +10,17 @@ namespace Graph
 class SymbolTable
 {
 public:
-    SymbolTable(Graph& g, const CellKey& t);
+    /*
+     *  Construct a symbol table, clearing the target's dependencies
+     */
+    SymbolTable(const Root& r, Dependencies& deps, const CellKey& t);
 
     /*
      *  Looks up the value in our given environment
-     *  The result could be an error or a valid result
+     *  Records the lookup in dependencies map.
      */
-    Interpreter::Value get(const std::string& symbol);
+    enum Result { OKAY, RECURSIVE, NO_SUCH_NAME, MISSING_ENV, MULTIPLE_VALUES };
+    std::pair<Interpreter::Value, Result> get(const std::string& symbol);
 
     /*
      *  Looks up the previous value associated with our target
@@ -29,7 +33,9 @@ public:
     const std::list<CellKey>& todo() const { return _todo; }
 
 protected:
-    Graph& graph;
+    const Root& root;
+    Dependencies& deps;
+
     const CellKey target;
     Sheet* sheet;
 

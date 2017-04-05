@@ -19,13 +19,6 @@ public:
     bool isItemName(const std::string& symbol);
     bool isSheetName(const std::string& symbol);
 
-    /*
-     *  Look up items by index
-     */
-    Sheet* sheet(SheetId s) const;
-    Cell* cell(CellId c) const;
-    Instance* instance(InstanceId i) const;
-
 protected:
 
     /*  Here's all the data in the graph.  */

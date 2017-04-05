@@ -16,9 +16,9 @@ public:
     /*
      *  Installs data into the graph, returning a unique identifier
      */
-    uint32_t install(Sheet* s);
-    uint32_t install(Cell* c);
-    uint32_t install(Instance* i);
+    SheetId install(Sheet* s);
+    CellId install(Cell* c);
+    InstanceId install(Instance* i);
 
     /*  This is the owned (canonical) location of data in the graph */
     std::map<SheetId, std::unique_ptr<Sheet>> sheets;
