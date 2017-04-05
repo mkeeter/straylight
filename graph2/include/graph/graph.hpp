@@ -1,28 +1,60 @@
 #pragma once
 
-#include <map>
+#include <stack>
+#include <regex>
+
+#include "graph/root.hpp"
+#include "graph/dependencies.hpp"
+#include "graph/interpreter.hpp"
 
 namespace Graph {
 
-class Sheet;
-class Cell;
-class Instance;
+class Translator;
 
 class Graph
 {
 public:
+    Graph();
+
+    bool isItemName(const std::string& symbol);
+    bool isSheetName(const std::string& symbol);
+
     /*
-     *  Installs data into the graph, returning a unique identifier
+     *  Look up items by index
      */
-    uint32_t install(Sheet* s);
-    uint32_t install(Cell* c);
-    uint32_t install(Instance* i);
+    Sheet* sheet(SheetId s) const;
+    Cell* cell(CellId c) const;
+    Instance* instance(InstanceId i) const;
 
 protected:
-    /*  This is the owned (canonical) location of data in the graph */
-    std::map<uint32_t, std::unique_ptr<Sheet>> sheets;
-    std::map<uint32_t, std::unique_ptr<Cell>> cells;
-    std::map<uint32_t, std::unique_ptr<Instance>> instances;
+
+    /*  Here's all the data in the graph.  */
+    Root root;
+
+    /*  When locked, changes don't provoke evaluation
+     *  (though the dirty list is still populated)  */
+    bool locked=false;
+
+    /*  struct that stores lookups in both directions  */
+    Dependencies deps;
+
+    /*  This is our embedded Scheme interpreter  */
+    Interpreter interpreter;
+
+    /*  List of keys that need re-evaluation  */
+    std::stack<std::list<CellKey>> dirty;
+
+    // Regex strings aren't stored, so we store them statically here
+    static const std::list<std::pair<std::string, std::string>> _bad_item_names;
+    static const std::list<std::pair<std::string, std::string>> _bad_sheet_names;
+    static const std::string _good_item_name;
+    static const std::string _good_sheet_name;
+
+    std::list<std::pair<std::regex, std::string>> bad_item_names;
+    std::list<std::pair<std::regex, std::string>> bad_sheet_names;
+    std::regex good_item_name;
+    std::regex good_sheet_name;
 };
 
 }   // namespace Graph
+

@@ -15,7 +15,6 @@ public:
         : parent(parent)
     {   /*  Nothing to do here  */  }
 
-protected:
     const SheetId parent;
 };
 
