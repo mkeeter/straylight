@@ -6,9 +6,9 @@
 
 namespace Graph {
 
-class Sheet;
-class Cell;
-class Instance;
+struct Sheet;
+struct Cell;
+struct Instance;
 
 class Root
 {

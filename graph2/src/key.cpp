@@ -28,6 +28,7 @@ bool CellKey::operator<(const CellKey& other) const
 bool CellKey::specializes(const CellKey& other) const
 {
     return id == other.id &&
+           env.size() >= other.env.size() &&
            std::mismatch(other.env.begin(), other.env.end(),
                          env.begin()).first == other.env.end();
 

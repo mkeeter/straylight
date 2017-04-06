@@ -33,7 +33,8 @@ SymbolTable::get(const std::string& symbol)
         if (v == cell.values.end())
         {
             for (auto b = cell.values.lower_bound(target.env);
-                      b != cell.values.end() && b->first.specializes(target.env);
+                      b != cell.values.end() &&
+                      CellKey(target.id, b->first).specializes(target);
                  ++b)
             {
                 _todo.push_back({cell_id, b->first});
@@ -46,8 +47,8 @@ SymbolTable::get(const std::string& symbol)
         return {v->second.value, OKAY};
     }
 
-    auto i = sheet->instances.find(symbol);
-    if (i != sheet->instances.end())
+    auto i = sheet->instances.left.find(symbol);
+    if (i != sheet->instances.left.end())
     {
         // Return instance thunk
     }

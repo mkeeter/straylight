@@ -12,13 +12,11 @@ namespace Graph {
 
 class Sheet;
 
-class Cell : public Node
+struct Cell : public Node
 {
-public:
     enum Type { BASE, INPUT, OUTPUT };
     typedef std::list<InstanceId> Env;
 
-protected:
     /*  Expression to be evaluated  */
     std::string expr;
 
