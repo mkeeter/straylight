@@ -32,15 +32,26 @@ SymbolTable::get(const std::string& symbol)
         auto v = cell.values.find(target.env);
         if (v == cell.values.end())
         {
-            for (auto b = cell.values.lower_bound(target.env);
-                      b != cell.values.end() &&
-                      CellKey(target.id, b->first).specializes(target);
-                 ++b)
+            auto itr = cell.values.lower_bound(target.env);
+            if (itr != cell.values.end() &&
+                CellKey(target.id, itr->first).specializes(target))
             {
-                _todo.push_back({cell_id, b->first});
+                auto b = itr;
+
+                while (b != cell.values.end() &&
+                       CellKey(target.id, b->first).specializes(target))
+                {
+                    ++b;
+                }
+                todo = {itr, b};
+                return {nullptr, MULTIPLE_VALUES};
             }
-            // Check for multiple values
-            return {nullptr, _todo.size() ? MULTIPLE_VALUES : MISSING_ENV};
+            else if (itr != cell.values.begin() &&
+                     target.specializes(CellKey(target.id, (--itr)->first)))
+            {
+                return {itr->second.value, OKAY};
+            }
+            return {nullptr, MISSING_ENV};
         }
 
         // Return cell value

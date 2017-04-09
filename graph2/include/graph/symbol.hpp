@@ -28,9 +28,13 @@ public:
     Value& prev() const;
 
     /*
-     *  Checks whether there are specialized keys in need of evaluation
+     *  Return an iterator range for specialized evaluation
      */
-    const std::list<CellKey>& todo() const { return _todo; }
+    typedef std::map<Cell::Env, Value>::const_iterator itr;
+
+    /*  If a lookup produced more than one valid result, then the target
+     *  range is stored here.  */
+    std::pair<itr, itr> todo;
 
 protected:
     const Root& root;
@@ -38,11 +42,6 @@ protected:
 
     const CellKey target;
     Sheet* sheet;
-
-    /*  If a lookup produced more than one valid result, then they are stored
-     *  here in _todo.  It is the caller's responsability to check this and
-     *  re-schedule them for evaluation  */
-    std::list<CellKey> _todo;
 };
 
 }   // namespace Graph
