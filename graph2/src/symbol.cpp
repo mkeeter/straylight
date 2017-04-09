@@ -1,11 +1,13 @@
 #include "graph/symbol.hpp"
-#include "graph/sheet.hpp"
+#include "graph/root.hpp"
+#include "graph/dependencies.hpp"
 
 namespace Graph
 {
 
-SymbolTable::SymbolTable(const Root& r, Dependencies& d, const CellKey& t)
-    : root(r), deps(d), target(t),
+SymbolTable::SymbolTable(const Root& r, Dependencies& d, Caller& c,
+                         const CellKey& t)
+    : root(r), deps(d), caller(c), target(t),
       sheet(root.sheets.at(root.cells.at(target.id)->parent).get())
 {
     // Since a symbol table is only constructed before an evaluation,

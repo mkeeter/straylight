@@ -1,6 +1,9 @@
 #include "catch/catch.hpp"
 
 #include "graph/symbol.hpp"
+#include "graph/root.hpp"
+#include "graph/caller.hpp"
+#include "graph/graph.hpp"
 
 using namespace Graph;
 
@@ -18,7 +21,9 @@ TEST_CASE("SymbolTable::get (cell)")
 
     Dependencies deps;
     CellKey k(a, {});
-    SymbolTable t(r, deps, k);
+    ::Graph::Graph g;
+    Caller c(g);
+    SymbolTable t(r, deps, c, k);
 
     auto va = t.get("a");
     REQUIRE(va.first == nullptr);
@@ -54,7 +59,9 @@ TEST_CASE("SymbolTable::todo")
 
     Dependencies deps;
     CellKey k(a, {0});
-    SymbolTable t(r, deps, k);
+    ::Graph::Graph g;
+    Caller c(g);
+    SymbolTable t(r, deps, c, k);
 
     SECTION("Looking up a less-specialized value")
     {

@@ -1,11 +1,15 @@
 #pragma once
 
-#include "graph/graph.hpp"
+#include "graph/sheet.hpp"
 #include "graph/interpreter.hpp"
 #include "graph/key.hpp"
 
 namespace Graph
 {
+
+class Caller;
+struct Root;
+class Dependencies;
 
 class SymbolTable
 {
@@ -13,7 +17,8 @@ public:
     /*
      *  Construct a symbol table, clearing the target's dependencies
      */
-    SymbolTable(const Root& r, Dependencies& deps, const CellKey& t);
+    SymbolTable(const Root& r, Dependencies& deps, Caller& c,
+                const CellKey& t);
 
     /*
      *  Looks up the value in our given environment
@@ -37,8 +42,14 @@ public:
     std::pair<itr, itr> todo;
 
 protected:
+    /*  Look up data and values here  */
     const Root& root;
+
+    /*  Track dependencies and detect recursive loops  */
     Dependencies& deps;
+
+    /*  Used for calling sheets  */
+    Caller& caller;
 
     const CellKey target;
     Sheet* sheet;
