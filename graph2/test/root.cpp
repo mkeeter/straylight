@@ -12,4 +12,6 @@ TEST_CASE("Root::insert(Sheet)")
 
     auto i = r.insert("omg", new Sheet(s));
     REQUIRE(i.i == 5);
+    REQUIRE(r.sheets.at(s)->sheets.left.find("omg") !=
+            r.sheets.at(s)->sheets.left.end());
 }
