@@ -10,20 +10,17 @@ struct Sheet;
 struct Cell;
 struct Instance;
 
-class Root
+struct Root
 {
-public:
-    /*
-     *  Installs data into the graph, returning a unique identifier
-     */
-    SheetId install(Sheet* s);
-    CellId install(Cell* c);
-    InstanceId install(Instance* i);
-
     /*  This is the owned (canonical) location of data in the graph */
-    std::map<SheetId, std::unique_ptr<Sheet>> sheets;
-    std::map<CellId, std::unique_ptr<Cell>> cells;
-    std::map<InstanceId, std::unique_ptr<Instance>> instances;
+    IdMap<SheetId, Sheet, 1, 2> sheets;
+    IdMap<CellId, Cell, 3, 2> cells;
+    IdMap<InstanceId, Instance, 2, 2> instances;
 };
 
 }   // namespace Graph
+
+// For unique_ptr destructors
+#include "graph/sheet.hpp"
+#include "graph/cell.hpp"
+#include "graph/instance.hpp"

@@ -10,8 +10,6 @@
 
 namespace Graph {
 
-class Sheet;
-
 struct Cell : public Node
 {
     enum Type { BASE, INPUT, OUTPUT };

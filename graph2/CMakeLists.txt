@@ -1,5 +1,6 @@
 add_library(straylight-graph STATIC
     src/dependencies.cpp
+    src/sheet.cpp
     src/symbol.cpp
     src/key.cpp
 

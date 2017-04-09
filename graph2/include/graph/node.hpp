@@ -11,7 +11,7 @@ namespace Graph {
 struct Node
 {
 public:
-    Node(const SheetId parent=0)
+    Node(const SheetId parent)
         : parent(parent)
     {   /*  Nothing to do here  */  }
 

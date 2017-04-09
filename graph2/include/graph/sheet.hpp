@@ -18,6 +18,11 @@ struct Sheet : public Node
     /*
      *  Constructor for the root-level sheet
      */
+    Sheet();
+
+    /*
+     *  Constructor for other sheets
+     */
     Sheet(const SheetId parent);
 
     /*  Items that are hierarchically within this Sheet

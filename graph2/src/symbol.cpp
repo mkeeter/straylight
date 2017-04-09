@@ -50,8 +50,10 @@ SymbolTable::get(const std::string& symbol)
     auto i = sheet->instances.left.find(symbol);
     if (i != sheet->instances.left.end())
     {
-        // Return instance thunk
+        // TODO: Return instance thunk
     }
+
+    // TODO: call sheet operation here
 
     return {nullptr, NO_SUCH_NAME };
 }

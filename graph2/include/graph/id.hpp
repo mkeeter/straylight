@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <list>
 
 namespace Graph {
 
@@ -36,23 +38,55 @@ typedef Id<CellId_> CellId;
 typedef Id<InstanceId_> InstanceId;
 typedef Id<SheetId_> SheetId;
 
-struct ItemId : public Id<ItemId_>
+/*
+ *  An IdMap owns a set of objects with unique Ids.
+ *
+ *  The Ids are constructed with the lowest 'shift' bits filled with 'mask';
+ *  they count upwards from that point.
+ *
+ *  I must be an Id type.
+ *  T can be any type.
+ */
+template <typename I, typename T, unsigned mask, unsigned shift>
+class IdMap
 {
-    ItemId() : Id(-1) {}
-    ItemId(unsigned i) : Id(i) {}
-    ItemId(const CellId& j) : Id(j.i) {}
-    ItemId(const InstanceId& j) : Id(j.i) {}
-    ItemId(const SheetId& j) : Id(j.i) {}
+public:
+    I insert(T* t) {
+        auto i = next();
+        map.emplace(i, std::unique_ptr<T>(t));
+        return i;
+    }
 
-    bool operator<(const ItemId& other) const {
-        return i < other.i;
+    std::unique_ptr<T>& at(const I& i) { return map.at(i); }
+    const std::unique_ptr<T>& at(const I& i) const { return map.at(i); }
+
+    void erase(const I& i) {
+        auto itr = map.find(i);
+        if (itr != map.end())
+        {
+            unused.push_back(itr->first);
+            map.erase(itr);
+        }
     }
-    bool operator!=(const ItemId& other) const {
-        return i != other.i;
+protected:
+    I next() const {
+        if (!unused.empty())
+        {
+            auto i = unused.front();
+            unused.pop_front();
+            return i;
+        }
+        else if (map.empty())
+        {
+            return mask;
+        }
+        else
+        {
+            return map.rbegin()->first.i + (1 << shift);
+        }
     }
-    bool operator==(const ItemId& other) const {
-        return i == other.i;
-    }
+    std::map<I, std::unique_ptr<T>> map;
+    mutable std::list<I> unused;
 };
 
 }   // namespace Graph
