@@ -12,6 +12,8 @@ namespace Graph {
 
 struct Cell : public Node
 {
+    Cell(SheetId parent) : Node(parent) { /* nothing to do here */ }
+
     enum Type { BASE, INPUT, OUTPUT };
     typedef std::list<InstanceId> Env;
 

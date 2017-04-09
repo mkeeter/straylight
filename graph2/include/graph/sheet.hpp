@@ -18,12 +18,12 @@ struct Sheet : public Node
     /*
      *  Constructor for the root-level sheet
      */
-    Sheet();
+    Sheet() : Sheet(0) { /* nothing to do here */ }
 
     /*
      *  Constructor for other sheets
      */
-    Sheet(const SheetId parent);
+    Sheet(const SheetId parent) : Node(parent) { /* nothing to do here */ }
 
     /*  Items that are hierarchically within this Sheet
      *  (they're actually stored as unique_ptrs in the Graph ) */
