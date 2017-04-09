@@ -34,7 +34,11 @@ protected:
     /*  This is our embedded Scheme interpreter  */
     Interpreter interpreter;
 
-    /*  List of keys that need re-evaluation  */
+    /*  List of keys that need re-evaluation
+     *
+     *  This is a stack so that when we construct a dummy sheet
+     *  (to call it as a function), we can push into the stack,
+     *  evaluate until the pushed list is empty, then pop back out */
     std::stack<std::list<CellKey>> dirty;
 
     // Regex strings aren't stored, so we store them statically here
