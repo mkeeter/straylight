@@ -12,6 +12,13 @@ struct Instance;
 
 struct Root
 {
+    /*
+     *  Insertion functions both store a node and add it to the parent sheet
+     */
+    CellId insert(const std::string& name, Cell* c);
+    InstanceId insert(const std::string& name, Instance* i);
+    SheetId insert(const std::string& name, Sheet* s);
+
     /*  This is the owned (canonical) location of data in the graph */
     IdMap<SheetId, Sheet, 1, 2> sheets;
     IdMap<CellId, Cell, 3, 2> cells;
