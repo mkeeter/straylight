@@ -37,7 +37,7 @@ struct Worker2D
      *  Mutually recursive functions to get a mesh from an Octree
      */
     void cell(const Quadtree* c);
-    void edge(const Quadtree* a, const Quadtree* b, Quadtree::Axis axis);
+    void edge(const Quadtree* a, const Quadtree* b, Axis axis);
 
     /*
      *  Write out the given segment into the segment list
@@ -58,18 +58,18 @@ void Worker2D::cell(const Quadtree* c)
         }
 
         //  Then, call edge on every pair of cells
-        edge(c->child(0), c->child(Quadtree::AXIS_X), Quadtree::AXIS_X);
-        edge(c->child(Quadtree::AXIS_Y),
-             c->child(Quadtree::AXIS_Y | Quadtree::AXIS_X),
-             Quadtree::AXIS_X);
-        edge(c->child(0), c->child(Quadtree::AXIS_Y), Quadtree::AXIS_Y);
-        edge(c->child(Quadtree::AXIS_X),
-             c->child(Quadtree::AXIS_X | Quadtree::AXIS_Y),
-             Quadtree::AXIS_Y);
+        edge(c->child(0), c->child(AXIS_X), AXIS_X);
+        edge(c->child(AXIS_Y),
+             c->child(AXIS_Y | AXIS_X),
+             AXIS_X);
+        edge(c->child(0), c->child(AXIS_Y), AXIS_Y);
+        edge(c->child(AXIS_X),
+             c->child(AXIS_X | AXIS_Y),
+             AXIS_Y);
     }
 }
 
-void Worker2D::edge(const Quadtree* a, const Quadtree* b, Quadtree::Axis axis)
+void Worker2D::edge(const Quadtree* a, const Quadtree* b, Axis axis)
 {
     if (a->getType() == Quadtree::LEAF && b->getType() == Quadtree::LEAF)
     {
@@ -90,7 +90,7 @@ void Worker2D::edge(const Quadtree* a, const Quadtree* b, Quadtree::Axis axis)
 
         if (crossed)
         {
-            if (ordering ^ (axis == Quadtree::AXIS_X))
+            if (ordering ^ (axis == AXIS_X))
             {
                 segment(a, b);
             }

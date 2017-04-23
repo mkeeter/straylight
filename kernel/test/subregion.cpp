@@ -138,7 +138,7 @@ TEST_CASE("Subregion::splitEven(3)")
         CAPTURE(sub.Y.upper());
         CAPTURE(sub.Z.lower());
         CAPTURE(sub.Z.upper());
-        if (i & Octree::AXIS_X)
+        if (i & AXIS_X)
         {
             REQUIRE(sub.X.lower() ==  0);
             REQUIRE(sub.X.upper() ==  1);
@@ -149,7 +149,7 @@ TEST_CASE("Subregion::splitEven(3)")
             REQUIRE(sub.X.upper() ==  0);
         }
 
-        if (i & Octree::AXIS_Y)
+        if (i & AXIS_Y)
         {
             REQUIRE(sub.Y.lower() ==  0);
             REQUIRE(sub.Y.upper() ==  2);
@@ -160,7 +160,7 @@ TEST_CASE("Subregion::splitEven(3)")
             REQUIRE(sub.Y.upper() ==  0);
         }
 
-        if (i & Octree::AXIS_Z)
+        if (i & AXIS_Z)
         {
             REQUIRE(sub.Z.lower() ==  0);
             REQUIRE(sub.Z.upper() ==  4);
@@ -189,7 +189,7 @@ TEST_CASE("Subregion::splitEven(2)")
         CAPTURE(sub.X.upper());
         CAPTURE(sub.Y.lower());
         CAPTURE(sub.Y.upper());
-        if (i & Octree::AXIS_X)
+        if (i & AXIS_X)
         {
             REQUIRE(sub.X.lower() ==  0);
             REQUIRE(sub.X.upper() ==  1);
@@ -200,7 +200,7 @@ TEST_CASE("Subregion::splitEven(2)")
             REQUIRE(sub.X.upper() ==  0);
         }
 
-        if (i & Octree::AXIS_Y)
+        if (i & AXIS_Y)
         {
             REQUIRE(sub.Y.lower() ==  0);
             REQUIRE(sub.Y.upper() ==  2);
@@ -211,6 +211,6 @@ TEST_CASE("Subregion::splitEven(2)")
             REQUIRE(sub.Y.upper() ==  0);
         }
 
-        REQUIRE(!(i & Octree::AXIS_Z));
+        REQUIRE(!(i & AXIS_Z));
     }
 }
