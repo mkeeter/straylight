@@ -104,30 +104,30 @@ TEST_CASE("Splitting a region with equal voxels")
 TEST_CASE("Subregion::canSplitEven")
 {
     Region a({-1, 1}, {-1, 1}, {-1, 1}, 8);
-    REQUIRE(a.view().canSplitEven(3));
-    REQUIRE(!a.view().canSplitEven(2));
+    REQUIRE(a.view().canSplitEven<3>());
+    REQUIRE(!a.view().canSplitEven<2>());
 
     Region b({0, 1}, {0, 1}, {0, 1}, 7);
-    REQUIRE(!b.view().canSplitEven(3));
-    REQUIRE(!b.view().canSplitEven(2));
+    REQUIRE(!b.view().canSplitEven<3>());
+    REQUIRE(!b.view().canSplitEven<2>());
 
     Region c({0, 1}, {-1, 1}, {-1, 1}, 8);
-    REQUIRE(!c.view().canSplitEven(3));
-    REQUIRE(!c.view().canSplitEven(2));
+    REQUIRE(!c.view().canSplitEven<3>());
+    REQUIRE(!c.view().canSplitEven<2>());
 
     Region d({-1, 1}, {-1, 1}, {0, 0}, 8);
-    REQUIRE(d.view().canSplitEven(2));
-    REQUIRE(!d.view().canSplitEven(3));
+    REQUIRE(d.view().canSplitEven<2>());
+    REQUIRE(!d.view().canSplitEven<3>());
 }
 
-TEST_CASE("Subregion::splitEven(3)")
+TEST_CASE("Subregion::splitEven<3>")
 {
     Region a({-1, 1}, {-2, 2}, {-4, 4}, 4, 2, 1);
     Subregion s = a.view();
 
-    REQUIRE(s.canSplitEven(3));
+    REQUIRE(s.canSplitEven<3>());
 
-    auto out = s.splitEven(3);
+    auto out = s.splitEven<3>();
     REQUIRE(out.size() == 8);
     for (int i=0; i < 8; ++i)
     {
@@ -173,14 +173,14 @@ TEST_CASE("Subregion::splitEven(3)")
     }
 }
 
-TEST_CASE("Subregion::splitEven(2)")
+TEST_CASE("Subregion::splitEven<2>()")
 {
     Region a({-1, 1}, {-2, 2}, {0, 0}, 4, 2, 1);
     Subregion s = a.view();
 
-    REQUIRE(s.canSplitEven(2));
+    REQUIRE(s.canSplitEven<2>());
 
-    auto out = s.splitEven(2);
+    auto out = s.splitEven<2>();
     REQUIRE(out.size() == 4);
     for (int i=0; i < 4; ++i)
     {

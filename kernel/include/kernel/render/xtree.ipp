@@ -15,12 +15,12 @@ T* XTree<T, dims>::render(const Tree t, const Region& r, bool multithread)
 {
     auto rp = r.powerOfTwo(dims).view();
 
-    if (multithread && rp.canSplitEven(dims))
+    if (multithread && rp.canSplitEven<dims>())
     {
         std::list<std::future<T*>> futures;
 
         // Start up a set of future rendering every branch of the octree
-        for (auto region : rp.splitEven(dims))
+        for (auto region : rp.splitEven<dims>())
         {
             auto e = new Evaluator(t);
 
@@ -102,7 +102,7 @@ void XTree<T, dims>::populateChildren(Evaluator* e, const Subregion& r)
 
         if (r.canSplit())
         {
-            auto rs = r.splitEven(dims);
+            auto rs = r.splitEven<dims>();
             e->push();
             for (uint8_t i=0; i < children.size(); ++i)
             {
