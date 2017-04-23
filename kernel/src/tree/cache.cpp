@@ -37,8 +37,6 @@ Cache::Node Cache::operation(Opcode::Opcode op, Cache::Node lhs,
     // These are opcodes that you're not allowed to use here
     assert(op != Opcode::CONST &&
            op != Opcode::INVALID &&
-           op != Opcode::DUMMY_A &&
-           op != Opcode::DUMMY_B &&
            op != Opcode::LAST_OP);
 
     // See if we can simplify the expression, either because it's an identity

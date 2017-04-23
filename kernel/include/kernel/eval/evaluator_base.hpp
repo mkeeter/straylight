@@ -147,13 +147,18 @@ public:
 
 protected:
     /*  This is our evaluation tape type */
-    typedef std::vector<Clause> Tape;
+    struct Tape {
+        std::vector<Clause> t;
+        Clause::Id i;
+    };
 
     /*
-     *  Pushes a new tape onto the stack, storing it in tape and returning
-     *  the previous top tape
+     *  Pushes a new tape onto the stack, storing it in tape
+     *
+     *  Requires disabled and remap both to contain useful data; this is used
+     *  when deciding which clauses to push into the new tape.
      */
-    std::list<Tape>::iterator pushTape();
+    void pushTape();
 
     /*
      *  Evaluate a single clause, populating the out array
@@ -215,6 +220,7 @@ protected:
     const Opcode::Opcode root_op;
 
     std::vector<uint8_t> disabled;
+    std::vector<Clause::Id> remap;
 
     Result result;
 };

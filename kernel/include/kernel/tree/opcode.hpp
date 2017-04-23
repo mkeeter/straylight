@@ -42,13 +42,6 @@ enum Opcode
     MOD,
     NANFILL,
 
-    /*
-     *  Dummy opcodes used to select the left or right-hand side of a function
-     * (used when one of the children is disabled)
-     */
-    DUMMY_A,
-    DUMMY_B,
-
     LAST_OP,
 };
 

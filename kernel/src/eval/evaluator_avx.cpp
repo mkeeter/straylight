@@ -52,14 +52,6 @@ void EvaluatorAVX::eval_clause_values(Opcode::Opcode op,
             out[i] = _mm256_andnot_ps(a[i], _mm256_set1_ps(-0.0f));
             break;
 
-        case Opcode::DUMMY_A:
-            EVAL_LOOP
-            out[i] = a[i];
-            break;
-        case Opcode::DUMMY_B:
-            EVAL_LOOP
-            out[i] = b[i];
-            break;
         case Opcode::CONST_VAR:
             EVAL_LOOP
             out[i] = a[i];
@@ -226,22 +218,6 @@ void EvaluatorAVX::eval_clause_derivs(Opcode::Opcode op,
                         adz[i], _mm256_sub_ps(_mm256_setzero_ps(), adz[i]), cmp);
             }
             break;
-        case Opcode::DUMMY_A:
-            EVAL_LOOP
-            {
-                odx[i] = adx[i];
-                ody[i] = ady[i];
-                odz[i] = adz[i];
-            }
-            break;
-        case Opcode::DUMMY_B:
-            EVAL_LOOP
-            {
-                odx[i] = bdx[i];
-                ody[i] = bdy[i];
-                odz[i] = bdz[i];
-            }
-            break;
         case Opcode::CONST_VAR:
             EVAL_LOOP
             {
@@ -296,21 +272,21 @@ const float* EvaluatorAVX::values(Result::Index count)
 {
     count = (count - 1)/8 + 1;
 
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         eval_clause_values(itr->op,
                 &result.mf[itr->a][0], &result.mf[itr->b][0],
                 &result.mf[itr->id][0], count);
     }
 
-    return &result.f[0][0];
+    return &result.f[tape->i][0];
 }
 
 EvaluatorBase::Derivs EvaluatorAVX::derivs(Result::Index count)
 {
     Result::Index vc = (count - 1)/8 + 1;
 
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         eval_clause_derivs(itr->op,
                &result.mf[itr->a][0], &result.mdx[itr->a][0],
@@ -327,18 +303,19 @@ EvaluatorBase::Derivs EvaluatorAVX::derivs(Result::Index count)
     // Apply the inverse matrix transform to our normals
     // TODO: we could SIMD this as well!
     auto o = Mi * glm::vec4(0,0,0,1);
+    const auto index = tape->i;
     for (size_t i=0; i < count; ++i)
     {
-        auto n = Mi * glm::vec4(result.dx[0][i],
-                                result.dy[0][i],
-                                result.dz[0][i], 1) - o;
-        result.dx[0][i] = n.x;
-        result.dy[0][i] = n.y;
-        result.dz[0][i] = n.z;
+        auto n = Mi * glm::vec4(result.dx[index][i],
+                                result.dy[index][i],
+                                result.dz[index][i], 1) - o;
+        result.dx[index][i] = n.x;
+        result.dy[index][i] = n.y;
+        result.dz[index][i] = n.z;
     }
 
-    return { &result.f[0][0], &result.dx[0][0],
-             &result.dy[0][0], &result.dz[0][0] };
+    return { &result.f[index][0],  &result.dx[index][0],
+             &result.dy[index][0], &result.dz[index][0] };
 }
 
 void EvaluatorAVX::applyTransform(Result::Index count)
