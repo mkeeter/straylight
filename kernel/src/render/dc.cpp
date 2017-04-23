@@ -19,9 +19,9 @@ struct Worker
      *  Mutually recursive functions to get a mesh from an Octree
      */
     void cell(const Octree* c);
-    void face(const Octree* a, const Octree* b, Octree::Axis axis);
+    void face(const Octree* a, const Octree* b, Axis axis);
     void edge(const Octree* a, const Octree* b,
-              const Octree* c, const Octree* d, Octree::Axis axis);
+              const Octree* c, const Octree* d, Axis axis);
 
     /*
      *  Write out the given quad into the mesh
@@ -32,8 +32,8 @@ struct Worker
     /*
      *  Return new axes such that a, q, r is right-handed
      */
-    static Octree::Axis Q(Octree::Axis a);
-    static Octree::Axis R(Octree::Axis a);
+    static Axis Q(Axis a);
+    static Axis R(Axis a);
 
     std::map<const Octree*, unsigned> verts;
     Mesh mesh;
@@ -41,18 +41,16 @@ struct Worker
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Octree::Axis Worker::Q(Octree::Axis a)
+Axis Worker::Q(Axis a)
 {
-    return (a == Octree::AXIS_X) ? Octree::AXIS_Y :
-           (a == Octree::AXIS_Y) ? Octree::AXIS_Z
-                                 : Octree::AXIS_X;
+    return (a == AXIS_X) ? AXIS_Y :
+           (a == AXIS_Y) ? AXIS_Z : AXIS_X;
 }
 
-Octree::Axis Worker::R(Octree::Axis a)
+Axis Worker::R(Axis a)
 {
-    return (a == Octree::AXIS_X) ? Octree::AXIS_Z :
-           (a == Octree::AXIS_Y) ? Octree::AXIS_X
-                                 : Octree::AXIS_Y;
+    return (a == AXIS_X) ? AXIS_Z :
+           (a == AXIS_Y) ? AXIS_X : AXIS_Y;
 }
 
 void Worker::cell(const Octree* c)
@@ -66,81 +64,81 @@ void Worker::cell(const Octree* c)
         }
 
         // Then call the face procedure on every pair of cells
-        face(c->child(0), c->child(Octree::AXIS_X), Octree::AXIS_X);
-        face(c->child(Octree::AXIS_Y),
-             c->child(Octree::AXIS_Y | Octree::AXIS_X),
-             Octree::AXIS_X);
-        face(c->child(Octree::AXIS_Z),
-             c->child(Octree::AXIS_Z | Octree::AXIS_X),
-             Octree::AXIS_X);
-        face(c->child(Octree::AXIS_Y | Octree::AXIS_Z),
-             c->child(Octree::AXIS_Y | Octree::AXIS_Z | Octree::AXIS_X),
-             Octree::AXIS_X);
+        face(c->child(0), c->child(AXIS_X), AXIS_X);
+        face(c->child(AXIS_Y),
+             c->child(AXIS_Y | AXIS_X),
+             AXIS_X);
+        face(c->child(AXIS_Z),
+             c->child(AXIS_Z | AXIS_X),
+             AXIS_X);
+        face(c->child(AXIS_Y | AXIS_Z),
+             c->child(AXIS_Y | AXIS_Z | AXIS_X),
+             AXIS_X);
 
-        face(c->child(0), c->child(Octree::AXIS_Y), Octree::AXIS_Y);
-        face(c->child(Octree::AXIS_X),
-             c->child(Octree::AXIS_X | Octree::AXIS_Y),
-             Octree::AXIS_Y);
-        face(c->child(Octree::AXIS_Z),
-             c->child(Octree::AXIS_Z | Octree::AXIS_Y),
-             Octree::AXIS_Y);
-        face(c->child(Octree::AXIS_X | Octree::AXIS_Z),
-             c->child(Octree::AXIS_X | Octree::AXIS_Z | Octree::AXIS_Y),
-             Octree::AXIS_Y);
+        face(c->child(0), c->child(AXIS_Y), AXIS_Y);
+        face(c->child(AXIS_X),
+             c->child(AXIS_X | AXIS_Y),
+             AXIS_Y);
+        face(c->child(AXIS_Z),
+             c->child(AXIS_Z | AXIS_Y),
+             AXIS_Y);
+        face(c->child(AXIS_X | AXIS_Z),
+             c->child(AXIS_X | AXIS_Z | AXIS_Y),
+             AXIS_Y);
 
-        face(c->child(0), c->child(Octree::AXIS_Z), Octree::AXIS_Z);
-        face(c->child(Octree::AXIS_X),
-             c->child(Octree::AXIS_X | Octree::AXIS_Z),
-             Octree::AXIS_Z);
-        face(c->child(Octree::AXIS_Y),
-             c->child(Octree::AXIS_Y | Octree::AXIS_Z),
-             Octree::AXIS_Z);
-        face(c->child(Octree::AXIS_X | Octree::AXIS_Y),
-             c->child(Octree::AXIS_X | Octree::AXIS_Y | Octree::AXIS_Z),
-             Octree::AXIS_Z);
+        face(c->child(0), c->child(AXIS_Z), AXIS_Z);
+        face(c->child(AXIS_X),
+             c->child(AXIS_X | AXIS_Z),
+             AXIS_Z);
+        face(c->child(AXIS_Y),
+             c->child(AXIS_Y | AXIS_Z),
+             AXIS_Z);
+        face(c->child(AXIS_X | AXIS_Y),
+             c->child(AXIS_X | AXIS_Y | AXIS_Z),
+             AXIS_Z);
 
         // Finally, call the edge function 6 times
         edge(c->child(0),
-             c->child(Octree::AXIS_X),
-             c->child(Octree::AXIS_Y),
-             c->child(Octree::AXIS_X | Octree::AXIS_Y),
-             Octree::AXIS_Z);
-        edge(c->child(Octree::AXIS_Z),
-             c->child(Octree::AXIS_X | Octree::AXIS_Z),
-             c->child(Octree::AXIS_Y | Octree::AXIS_Z),
-             c->child(Octree::AXIS_X | Octree::AXIS_Y | Octree::AXIS_Z),
-             Octree::AXIS_Z);
+             c->child(AXIS_X),
+             c->child(AXIS_Y),
+             c->child(AXIS_X | AXIS_Y),
+             AXIS_Z);
+        edge(c->child(AXIS_Z),
+             c->child(AXIS_X | AXIS_Z),
+             c->child(AXIS_Y | AXIS_Z),
+             c->child(AXIS_X | AXIS_Y | AXIS_Z),
+             AXIS_Z);
 
         edge(c->child(0),
-             c->child(Octree::AXIS_Y),
-             c->child(Octree::AXIS_Z),
-             c->child(Octree::AXIS_Y | Octree::AXIS_Z),
-             Octree::AXIS_X);
-        edge(c->child(Octree::AXIS_X),
-             c->child(Octree::AXIS_Y | Octree::AXIS_X),
-             c->child(Octree::AXIS_Z | Octree::AXIS_X),
-             c->child(Octree::AXIS_Y | Octree::AXIS_Z | Octree::AXIS_X),
-             Octree::AXIS_X);
+             c->child(AXIS_Y),
+             c->child(AXIS_Z),
+             c->child(AXIS_Y | AXIS_Z),
+             AXIS_X);
+        edge(c->child(AXIS_X),
+             c->child(AXIS_Y | AXIS_X),
+             c->child(AXIS_Z | AXIS_X),
+             c->child(AXIS_Y | AXIS_Z | AXIS_X),
+             AXIS_X);
 
         edge(c->child(0),
-             c->child(Octree::AXIS_Z),
-             c->child(Octree::AXIS_X),
-             c->child(Octree::AXIS_Z | Octree::AXIS_X),
-             Octree::AXIS_Y);
-        edge(c->child(Octree::AXIS_Y),
-             c->child(Octree::AXIS_Z | Octree::AXIS_Y),
-             c->child(Octree::AXIS_X | Octree::AXIS_Y),
-             c->child(Octree::AXIS_Z | Octree::AXIS_X | Octree::AXIS_Y),
-             Octree::AXIS_Y);
+             c->child(AXIS_Z),
+             c->child(AXIS_X),
+             c->child(AXIS_Z | AXIS_X),
+             AXIS_Y);
+        edge(c->child(AXIS_Y),
+             c->child(AXIS_Z | AXIS_Y),
+             c->child(AXIS_X | AXIS_Y),
+             c->child(AXIS_Z | AXIS_X | AXIS_Y),
+             AXIS_Y);
     }
 }
 
-void Worker::face(const Octree* a, const Octree* b, Octree::Axis axis)
+void Worker::face(const Octree* a, const Octree* b, Axis axis)
 {
     if (a->getType() == Octree::BRANCH || b->getType() == Octree::BRANCH)
     {
-        Octree::Axis q = Q(axis);
-        Octree::Axis r = R(axis);
+        Axis q = Q(axis);
+        Axis r = R(axis);
 
         face(a->child(axis), b->child(0), axis);
         face(a->child(q|axis), b->child(q), axis);
@@ -157,10 +155,10 @@ void Worker::face(const Octree* a, const Octree* b, Octree::Axis axis)
 
 void Worker::edge(const Octree* a, const Octree* b,
                   const Octree* c, const Octree* d,
-                  Octree::Axis axis)
+                  Axis axis)
 {
-    Octree::Axis q = Q(axis);
-    Octree::Axis r = R(axis);
+    Axis q = Q(axis);
+    Axis r = R(axis);
 
     if (a->getType() == Octree::LEAF && b->getType() == Octree::LEAF &&
         c->getType() == Octree::LEAF && d->getType() == Octree::LEAF)

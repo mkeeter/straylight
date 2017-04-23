@@ -49,17 +49,18 @@ public:
     /*
      *  Splits this subregion into (1 << dims) other subregions
      *
-     *  This function may only be called with relevant dimensions that are
-     *  equal and divisible by 2
-     *
-     *  dims must be 2 or 3
+     *  This function may only be called when canSplitEven is true
+     *  N must be 2 or 3
      */
-    std::vector<Subregion> splitEven(int dims) const;
+    template <int N>
+    std::array<Subregion, 1<<N> splitEven() const;
 
     /*
-     *  Returns true if we can octsect the given subregion
+     *  Returns true if we can quadsect or octsect the given subregion
+     *  N must be 2 or 3
      */
-    bool canSplitEven(int dims) const;
+    template <int N>
+    bool canSplitEven() const;
 
     /*
      *  Returns the number of voxels in this region
@@ -117,3 +118,5 @@ protected:
 };
 
 }   // namespace Kernel
+
+#include "kernel/render/subregion.ipp"

@@ -11,6 +11,7 @@
 #include "kernel/eval/interval.hpp"
 #include "kernel/eval/evaluator.hpp"
 #include "kernel/render/region.hpp"
+#include "kernel/render/axes.hpp"
 #include "kernel/tree/tree.hpp"
 
 namespace Kernel {
@@ -29,9 +30,6 @@ public:
 
     /*  Enumerator that distinguishes between cell types  */
     enum Type { LEAF, BRANCH, EMPTY, FULL };
-
-    /*  Enumerator to refer to octree axes  */
-    enum Axis { AXIS_X = 1, AXIS_Y = 2, AXIS_Z = 4 };
 
     /*
      *  Returns the position of the given corner
