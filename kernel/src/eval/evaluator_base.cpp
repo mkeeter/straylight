@@ -73,7 +73,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     tape = tapes.begin();
     for (auto& t : tape_)
     {
-        tape->push_back(t);
+        tape->t.push_back(t);
     }
 
     // Make sure that X, Y, Z have been allocated space
@@ -89,6 +89,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     // Allocate enough memory for all the clauses
     result.resize(clauses.size(), vars.size());
     disabled.resize(clauses.size());
+    remap.resize(clauses.size());
 
     // Store all constants in results array
     for (auto c : constants)
@@ -114,7 +115,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
         }
     }
 
+    // Store the index of the tree's root
     assert(clauses.at(root.id()) == 0);
+    tape->i = clauses.at(root.id());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,9 +143,9 @@ void EvaluatorBase::set(Interval x, Interval y, Interval z)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<EvaluatorBase::Tape>::iterator EvaluatorBase::pushTape()
+void EvaluatorBase::pushTape()
 {
-    auto current_tape = tape;
+    auto prev_tape = tape;
 
     // Add another tape to the top of the tape stack if one doesn't already
     // exist (we never erase them, to avoid re-allocating memory during
@@ -150,33 +153,49 @@ std::list<EvaluatorBase::Tape>::iterator EvaluatorBase::pushTape()
     if (++tape == tapes.end())
     {
         tape = tapes.insert(tape, Tape());
-        tape->reserve(tapes.front().size());
+        tape->t.reserve(tapes.front().t.size());
     }
     else
     {
         // We may be reusing an existing tape, so resize to 0
         // (preserving allocated storage)
-        tape->clear();
+        tape->t.clear();
     }
 
     assert(tape != tapes.end());
     assert(tape != tapes.begin());
-    assert(tape->capacity() >= current_tape->size());
-    return current_tape;
+    assert(tape->t.capacity() >= prev_tape->t.size());
+
+    // Now, use the data in disabled and remap to make the new tape
+    for (const auto& c : prev_tape->t)
+    {
+        if (!disabled[c.id])
+        {
+            Clause::Id ra, rb;
+            for (ra = c.a; remap[ra]; ra = remap[ra]);
+            for (rb = c.b; remap[rb]; rb = remap[rb]);
+            tape->t.push_back({c.op, c.id, ra, rb});
+        }
+    }
+
+    // Remap the tape root index
+    for (tape->i = prev_tape->i; remap[tape->i]; tape->i = remap[tape->i]);
+
+    // Make sure that the tape got shorter
+    assert(tape->t.size() <= prev_tape->t.size());
 }
 
 void EvaluatorBase::push()
 {
-    auto current_tape = pushTape();
-
-    // Next, we figure out which clauses are disabled and only push enabled
-    // clauses into the new tape (aspirationally)
+    // Since we'll be figuring out which clauses are disabled and
+    // which should be remapped, we reset those arrays here
     std::fill(disabled.begin(), disabled.end(), true);
+    std::fill(remap.begin(), remap.end(), 0);
 
     // Mark the root node as active
-    disabled[0] = false;
+    disabled[tape->i] = false;
 
-    for (const auto& c : *current_tape)
+    for (const auto& c : tape->t)
     {
         if (!disabled[c.id])
         {
@@ -187,14 +206,12 @@ void EvaluatorBase::push()
                 if (result.i[c.a].lower() >= result.i[c.b].upper())
                 {
                     disabled[c.a] = false;
-                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                    continue;
+                    remap[c.id] = c.a;
                 }
                 else if (result.i[c.b].lower() >= result.i[c.a].upper())
                 {
                     disabled[c.b] = false;
-                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                    continue;
+                    remap[c.id] = c.b;
                 }
             }
             else if (c.op == Opcode::MIN)
@@ -202,22 +219,27 @@ void EvaluatorBase::push()
                 if (result.i[c.a].lower() >= result.i[c.b].upper())
                 {
                     disabled[c.b] = false;
-                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                    continue;
+                    remap[c.id] = c.b;
                 }
                 else if (result.i[c.b].lower() >= result.i[c.a].upper())
                 {
                     disabled[c.a] = false;
-                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                    continue;
+                    remap[c.id] = c.a;
                 }
             }
-            disabled[c.a] = false;
-            disabled[c.b] = false;
-            tape->push_back(c);
+            if (!remap[c.id])
+            {
+                disabled[c.a] = false;
+                disabled[c.b] = false;
+            }
+            else
+            {
+                disabled[c.id] = true;
+            }
         }
     }
-    assert(tape->size() <= current_tape->size());
+
+    pushTape();
 }
 
 void EvaluatorBase::specialize(float x, float y, float z)
@@ -226,16 +248,13 @@ void EvaluatorBase::specialize(float x, float y, float z)
     eval(x, y, z);
 
     // The same logic as push, but using float instead of interval comparisons
-    auto current_tape = pushTape();
-
-    // Next, we figure out which clauses are disabled and only push enabled
-    // clauses into the new tape (aspirationally)
     std::fill(disabled.begin(), disabled.end(), true);
+    std::fill(remap.begin(), remap.end(), 0);
 
     // Mark the root node as active
-    disabled[0] = false;
+    disabled[tape->i] = false;
 
-    for (const auto& c : *current_tape)
+    for (const auto& c : tape->t)
     {
         if (!disabled[c.id])
         {
@@ -246,14 +265,12 @@ void EvaluatorBase::specialize(float x, float y, float z)
                 if (result.f[c.a][0] >= result.f[c.b][0])
                 {
                     disabled[c.a] = false;
-                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                    continue;
+                    remap[c.id] = c.a;
                 }
                 else if (result.f[c.b][0] >= result.f[c.a][0])
                 {
                     disabled[c.b] = false;
-                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                    continue;
+                    remap[c.id] = c.b;
                 }
             }
             else if (c.op == Opcode::MIN)
@@ -261,22 +278,27 @@ void EvaluatorBase::specialize(float x, float y, float z)
                 if (result.f[c.a][0] >= result.f[c.b][0])
                 {
                     disabled[c.b] = false;
-                    tape->push_back({Opcode::DUMMY_B, c.id, 0, c.b});
-                    continue;
+                    remap[c.id] = c.b;
                 }
                 else if (result.f[c.b][0] >= result.f[c.a][0])
                 {
                     disabled[c.a] = false;
-                    tape->push_back({Opcode::DUMMY_A, c.id, c.a, 0});
-                    continue;
+                    remap[c.id] = c.a;
                 }
             }
-            disabled[c.a] = false;
-            disabled[c.b] = false;
-            tape->push_back(c);
+            if (!remap[c.id])
+            {
+                disabled[c.a] = false;
+                disabled[c.b] = false;
+            }
+            else
+            {
+                disabled[c.id] = true;
+            }
         }
     }
-    assert(tape->size() <= current_tape->size());
+
+    pushTape();
 }
 
 void EvaluatorBase::pop()
@@ -389,14 +411,6 @@ void EvaluatorBase::eval_clause_values(Opcode::Opcode op,
             out[i] = exp(a[i]);
             break;
 
-        case Opcode::DUMMY_A:
-            EVAL_LOOP
-            out[i] = a[i];
-            break;
-        case Opcode::DUMMY_B:
-            EVAL_LOOP
-            out[i] = b[i];
-            break;
         case Opcode::CONST_VAR:
             EVAL_LOOP
             out[i] = a[i];
@@ -659,22 +673,6 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
             }
             break;
 
-        case Opcode::DUMMY_A:
-            EVAL_LOOP
-            {
-                odx[i] = adx[i];
-                ody[i] = ady[i];
-                odz[i] = adz[i];
-            }
-            break;
-        case Opcode::DUMMY_B:
-            EVAL_LOOP
-            {
-                odx[i] = bdx[i];
-                ody[i] = bdy[i];
-                odz[i] = bdz[i];
-            }
-            break;
         case Opcode::CONST_VAR:
             EVAL_LOOP
             {
@@ -885,18 +883,6 @@ float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
             }
             break;
 
-        case Opcode::DUMMY_A:
-            JAC_LOOP
-            {
-                (*o) = (*a);
-            }
-            break;
-        case Opcode::DUMMY_B:
-            JAC_LOOP
-            {
-                (*o) = (*b);
-            }
-            break;
         case Opcode::CONST_VAR:
             JAC_LOOP
             {
@@ -966,10 +952,6 @@ Interval EvaluatorBase::eval_clause_interval(
         case Opcode::EXP:
             return boost::numeric::exp(a);
 
-        case Opcode::DUMMY_A:
-            return a;
-        case Opcode::DUMMY_B:
-            return b;
         case Opcode::CONST_VAR:
             return a;
 
@@ -988,19 +970,19 @@ Interval EvaluatorBase::eval_clause_interval(
 
 const float* EvaluatorBase::values(Result::Index count)
 {
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         eval_clause_values(itr->op,
                 &result.f[itr->a][0], &result.f[itr->b][0],
                 &result.f[itr->id][0], count);
     }
 
-    return &result.f[0][0];
+    return &result.f[tape->i][0];
 }
 
 EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
 {
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         eval_clause_derivs(itr->op,
                &result.f[itr->a][0], &result.dx[itr->a][0],
@@ -1015,26 +997,27 @@ EvaluatorBase::Derivs EvaluatorBase::derivs(Result::Index count)
     }
 
     // Apply the inverse matrix transform to our normals
+    const auto index = tape->i;
     auto o = Mi * glm::vec4(0,0,0,1);
     for (size_t i=0; i < count; ++i)
     {
-        auto n = Mi * glm::vec4(result.dx[0][i],
-                                result.dy[0][i],
-                                result.dz[0][i], 1) - o;
-        result.dx[0][i] = n.x;
-        result.dy[0][i] = n.y;
-        result.dz[0][i] = n.z;
+        auto n = Mi * glm::vec4(result.dx[index][i],
+                                result.dy[index][i],
+                                result.dz[index][i], 1) - o;
+        result.dx[index][i] = n.x;
+        result.dy[index][i] = n.y;
+        result.dz[index][i] = n.z;
     }
 
-    return { &result.f[0][0], &result.dx[0][0],
-             &result.dy[0][0], &result.dz[0][0] };
+    return { &result.f[index][0],  &result.dx[index][0],
+             &result.dy[index][0], &result.dz[index][0] };
 }
 
 std::map<Tree::Id, float> EvaluatorBase::gradient(float x, float y, float z)
 {
     set(x, y, z, 0);
 
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         float av = result.f[itr->a][0];
         float bv = result.f[itr->b][0];
@@ -1048,10 +1031,11 @@ std::map<Tree::Id, float> EvaluatorBase::gradient(float x, float y, float z)
     std::map<Tree::Id, float> out;
     {   // Unpack from flat array into map
         // (to allow correlating back to VARs in Tree)
+        const auto ti = tape->i;
         size_t index = 0;
         for (auto v : vars.left)
         {
-            out[v.second] = result.j[0][index++];
+            out[v.second] = result.j[ti][index++];
         }
     }
     return out;
@@ -1059,14 +1043,14 @@ std::map<Tree::Id, float> EvaluatorBase::gradient(float x, float y, float z)
 
 Interval EvaluatorBase::interval()
 {
-    for (auto itr = tape->rbegin(); itr != tape->rend(); ++itr)
+    for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
     {
         Interval a = result.i[itr->a];
         Interval b = result.i[itr->b];
 
         result.i[itr->id] = eval_clause_interval(itr->op, a, b);
     }
-    return result.i[0];
+    return result.i[tape->i];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1088,7 +1072,7 @@ void EvaluatorBase::applyTransform(Result::Index count)
 
 double EvaluatorBase::utilization() const
 {
-    return tape->size() / double(tapes.front().size());
+    return tape->t.size() / double(tapes.front().t.size());
 }
 
 void EvaluatorBase::setMatrix(const glm::mat4& m)

@@ -43,8 +43,6 @@ size_t Opcode::args(Opcode op)
             return 2;
 
         case INVALID: // fallthrough
-        case DUMMY_A:
-        case DUMMY_B:
         case LAST_OP: return -1;
     }
     assert(false); /* All enumeration values must be handled */
@@ -57,8 +55,6 @@ std::string Opcode::to_str(Opcode op)
     {
         case Opcode::CONST: return "const";
         case Opcode::CONST_VAR: return "const";
-        case Opcode::DUMMY_A: return "dummy-a";
-        case Opcode::DUMMY_B: return "dummy-b";
         case Opcode::LAST_OP: return "last-op";
         case Opcode::INVALID: return "invalid";
         case Opcode::VAR_X: return "X";
@@ -136,8 +132,6 @@ bool Opcode::isCommutative(Opcode op)
         case MOD:
         case NANFILL:
         case INVALID:
-        case DUMMY_A:
-        case DUMMY_B:
         case CONST_VAR: // fallthrough
         case LAST_OP:
             return false;
