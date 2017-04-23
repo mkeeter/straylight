@@ -29,7 +29,7 @@ class Cache
 
 public:
     /*
-     *  Returns a safe (locking) handle to the global Cache 
+     *  Returns a safe (locking) handle to the global Cache
      */
     static Handle instance() { return Handle(); }
 

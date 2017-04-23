@@ -297,7 +297,7 @@ TEST_CASE("Evaluator::derivs")
     }
 }
 
-TEST_CASE("Evalutor::specialize")
+TEST_CASE("Evaluator::specialize")
 {
     Evaluator e(min(Tree::X(), Tree::Y()));
 
