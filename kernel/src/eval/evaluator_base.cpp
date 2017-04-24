@@ -242,6 +242,11 @@ void EvaluatorBase::push()
     pushTape();
 }
 
+unsigned EvaluatorBase::features(Result::Index n)
+{
+    return 0;
+}
+
 void EvaluatorBase::specialize(float x, float y, float z)
 {
     // Load results into the first floating-point result slot

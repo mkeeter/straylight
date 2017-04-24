@@ -145,6 +145,12 @@ public:
      */
     void specialize(float x, float y, float z);
 
+    /*
+     *  Returns how many unique features are explored by the first
+     *  'count' floating-point positions (already stored by set)
+     */
+    unsigned features(Result::Index count);
+
 protected:
     /*  This is our evaluation tape type */
     struct Tape {

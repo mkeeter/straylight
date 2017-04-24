@@ -314,3 +314,79 @@ TEST_CASE("Evaluator::specialize")
     REQUIRE(e.eval(4, 5, 0) == 5);
     REQUIRE(e.eval(10, 5, 0) == 5);
 }
+
+TEST_CASE("Evaluator::features")
+{
+    SECTION("min")
+    {
+        Evaluator e(min(Tree::X(), Tree::Y()));
+
+        e.set(1, 0, 0, 0);
+        e.set(0, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 2);
+
+        e.set(1, 0, 0, 0);
+        e.set(2, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+
+        e.set(1, 2, 0, 0);
+        e.set(0, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+    }
+    SECTION("max")
+    {
+        Evaluator e(max(Tree::X(), Tree::Y()));
+
+        e.set(1, 0, 0, 0);
+        e.set(0, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 2);
+
+        e.set(1, 0, 0, 0);
+        e.set(2, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+
+        e.set(1, 2, 0, 0);
+        e.set(0, 1, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+    }
+    SECTION("abs")
+    {
+        Evaluator e(abs(Tree::X()));
+
+        e.set(1, 0, 0, 0);
+        e.set(-1, 0, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 2);
+
+        e.set(1, 0, 0, 0);
+        e.set(2, 0, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+
+        e.set(-1, 0, 0, 0);
+        e.set(-2, 0, 0, 1);
+        e.values(2);
+        REQUIRE(e.features(2) == 1);
+    }
+    SECTION("mod")
+    {
+        Evaluator e(mod(Tree::X(), Tree(2)));
+
+        e.set(1, 0, 0, 0);
+        e.set(3, 0, 0, 1);
+        e.set(3.5, 0, 0, 1);
+        e.set(5, 0, 0, 1);
+        e.set(7, 0, 0, 1);
+        e.values(5);
+        REQUIRE(e.features(2) == 2);
+        REQUIRE(e.features(3) == 2);
+        REQUIRE(e.features(4) == 3);
+        REQUIRE(e.features(5) == 4);
+    }
+}
