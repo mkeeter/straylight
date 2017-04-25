@@ -317,7 +317,7 @@ TEST_CASE("Evaluator::specialize")
 
 TEST_CASE("Evaluator::accumulateFeatures")
 {
-    std::map<Evaluator::Feature, std::set<glm::vec3>> fs;
+    std::map<Evaluator::Feature, std::list<glm::vec3>> fs;
     SECTION("min")
     {
         Evaluator e(min(Tree::X(), Tree::Y()));

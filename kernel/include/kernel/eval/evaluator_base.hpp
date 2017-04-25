@@ -164,7 +164,7 @@ public:
      *  Looks for features at the given position, storing it in the map fs
      */
     void accumulateFeatures(float x, float y, float z,
-                            std::map<Feature, std::set<glm::vec3>>& fs);
+                            std::map<Feature, std::list<glm::vec3>>& fs);
 
 protected:
     /*  This is our evaluation tape type */

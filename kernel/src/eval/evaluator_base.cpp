@@ -245,7 +245,7 @@ void EvaluatorBase::push()
 std::set<EvaluatorBase::Feature> EvaluatorBase::featuresAt(
         float x, float y, float z)
 {
-    std::map<Feature, std::set<glm::vec3>> fs;
+    std::map<Feature, std::list<glm::vec3>> fs;
     accumulateFeatures(x, y, z, fs);
 
     std::set<Feature> out;
@@ -257,9 +257,110 @@ std::set<EvaluatorBase::Feature> EvaluatorBase::featuresAt(
 }
 
 void EvaluatorBase::accumulateFeatures(float x, float y, float z,
-        std::map<Feature, std::set<glm::vec3>>& fs)
+        std::map<Feature, std::list<glm::vec3>>& fs)
 {
+    // Load the first data slot with this value
+    eval(x, y, z);
 
+    // Begin the breadth-first searching
+    std::list<Feature> prefixes = {{}};
+    while (prefixes.size())
+    {
+        auto& p = prefixes.front();
+
+        std::fill(disabled.begin(), disabled.end(), true);
+        disabled[tape->i] = false;
+        Feature f;
+        bool complete = true;
+
+        for (auto c = tape->t.begin(); c != tape->t.end() && complete; ++c)
+        {
+            if (!disabled[c->id])
+            {
+                if (c->op == Opcode::MAX)
+                {
+                    if (p.size())
+                    {
+                        disabled[p.front() ? c->b : c->a] = false;
+                        f.push_back(p.front());
+                        p.pop_front();
+                    }
+                    else if (result.f[c->a][0] > result.f[c->b][0])
+                    {
+                        f.push_back(0);
+                        disabled[c->a] = false;
+                    }
+                    else if (result.f[c->b][0] > result.f[c->a][0])
+                    {
+                        f.push_back(1);
+                        disabled[c->b] = false;
+                    }
+                    else
+                    {
+                        assert(p.size() == 0);
+                        complete = false;
+                    }
+                }
+                else if (c->op == Opcode::MIN)
+                {
+                    if (p.size())
+                    {
+                        disabled[p.front() ? c->b : c->a] = false;
+                        f.push_back(p.front());
+                        p.pop_front();
+                    }
+                    else if (result.f[c->a][0] < result.f[c->b][0])
+                    {
+                        f.push_back(0);
+                        disabled[c->a] = false;
+                    }
+                    else if (result.f[c->b][0] < result.f[c->a][0])
+                    {
+                        f.push_back(1);
+                        disabled[c->b] = false;
+                    }
+                    else
+                    {
+                        assert(p.size() == 0);
+                        complete = false;
+                    }
+                }
+                else if (c->op == Opcode::MOD)
+                {
+                    if (p.size())
+                    {
+                        f.push_back(p.front());
+                        p.pop_front();
+                    }
+                    else
+                    {
+                        f.push_back(result.f[c->a][0] / result.f[c->b][0]);
+                    }
+                }
+                else
+                {
+                    disabled[c->a] = false;
+                    disabled[c->b] = false;
+                }
+            }
+        }
+
+        // If we found a full feature, then record it here
+        if (complete)
+        {
+            fs[f].push_back({x, y, z});
+        }
+        else
+        {
+            auto fa = f;
+            auto fb = f;
+            fa.push_back(0);
+            fb.push_back(1);
+            prefixes.push_back(fa);
+            prefixes.push_back(fb);
+        }
+        prefixes.pop_front();
+    }
 }
 
 void EvaluatorBase::specialize(float x, float y, float z)
