@@ -315,78 +315,95 @@ TEST_CASE("Evaluator::specialize")
     REQUIRE(e.eval(10, 5, 0) == 5);
 }
 
-TEST_CASE("Evaluator::features")
+TEST_CASE("Evaluator::accumulateFeatures")
 {
+    std::map<Evaluator::Feature, std::set<glm::vec3>> fs;
     SECTION("min")
     {
         Evaluator e(min(Tree::X(), Tree::Y()));
 
-        e.set(1, 0, 0, 0);
-        e.set(0, 1, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 2);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(0, 1, 0, fs);
+        REQUIRE(fs.size() == 2);
 
-        e.set(1, 0, 0, 0);
-        e.set(2, 1, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 1);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(2, 1, 0, fs);
+        REQUIRE(fs.size() == 1);
 
-        e.set(1, 2, 0, 0);
-        e.set(0, 1, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 1);
+        fs.clear();
+        e.accumulateFeatures(1, 2, 0, fs);
+        e.accumulateFeatures(0, 1, 0, fs);
+        REQUIRE(fs.size() == 1);
+
+        fs.clear();
+        e.accumulateFeatures(0, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
     }
     SECTION("max")
     {
         Evaluator e(max(Tree::X(), Tree::Y()));
 
-        e.set(1, 0, 0, 0);
-        e.set(0, 1, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 2);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(0, 1, 0, fs);
+        REQUIRE(fs.size() == 2);
 
-        e.set(1, 0, 0, 0);
-        e.set(2, 1, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 1);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(2, 1, 0, fs);
+        REQUIRE(fs.size() == 1);
 
-        e.set(1, 2, 0, 0);
-        e.set(0, 1, 0, 1);
+        fs.clear();
+        e.accumulateFeatures(1, 2, 0, fs);
+        e.accumulateFeatures(0, 1, 0, fs);
+        REQUIRE(fs.size() == 1);
+
+        fs.clear();
+        e.accumulateFeatures(0, 0, 0, fs);
+        e.accumulateFeatures(0, 0, 0, fs);
         e.values(2);
-        REQUIRE(e.features(2) == 1);
+        REQUIRE(fs.size() == 2);
     }
     SECTION("abs")
     {
         Evaluator e(abs(Tree::X()));
 
-        e.set(1, 0, 0, 0);
-        e.set(-1, 0, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 2);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(-1, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
 
-        e.set(1, 0, 0, 0);
-        e.set(2, 0, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 1);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        e.accumulateFeatures(2, 0, 0, fs);
+        REQUIRE(fs.size() == 1);
 
-        e.set(-1, 0, 0, 0);
-        e.set(-2, 0, 0, 1);
-        e.values(2);
-        REQUIRE(e.features(2) == 1);
+        fs.clear();
+        e.accumulateFeatures(-1, 0, 0, fs);
+        e.accumulateFeatures(-2, 0, 0, fs);
+        REQUIRE(fs.size() == 1);
+
+        fs.clear();
+        e.accumulateFeatures(0, 0, 0, fs);
+        e.accumulateFeatures(0, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
     }
     SECTION("mod")
     {
         Evaluator e(mod(Tree::X(), Tree(2)));
 
-        e.set(1, 0, 0, 0);
-        e.set(3, 0, 0, 1);
-        e.set(3.5, 0, 0, 1);
-        e.set(5, 0, 0, 1);
-        e.set(7, 0, 0, 1);
-        e.values(5);
-        REQUIRE(e.features(2) == 2);
-        REQUIRE(e.features(3) == 2);
-        REQUIRE(e.features(4) == 3);
-        REQUIRE(e.features(5) == 4);
+        fs.clear();
+        e.accumulateFeatures(1, 0, 0, fs);
+        REQUIRE(fs.size() == 1);
+        e.accumulateFeatures(3, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
+        e.accumulateFeatures(3.5, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
+        e.accumulateFeatures(5, 0, 0, fs);
+        REQUIRE(fs.size() == 3);
+        e.accumulateFeatures(7, 0, 0, fs);
+        REQUIRE(fs.size() == 4);
     }
 }

@@ -145,11 +145,26 @@ public:
      */
     void specialize(float x, float y, float z);
 
-    /*
-     *  Returns how many unique features are explored by the first
-     *  'count' floating-point positions (already stored by set)
+    /*  A feature represents a set of decisions to be made when
+     *  iterating through a tape.  Whenever a min, max, mod, or abs
+     *  node is encountered, the feature stores an int indicating the decision:
+     *      - For min and max nodes, 0 / 1 indicate which branch is taken
+     *      - For mod nodes, the result of floor(a / b)
      */
-    unsigned features(Result::Index count);
+    typedef std::list<int> Feature;
+
+    /*
+     *  Returns the number of features at the given location.
+     *  In general, this will be 1, but there are exceptions for min / max
+     *  where both branches are equal.
+     */
+    std::set<Feature> featuresAt(float x, float y, float z);
+
+    /*
+     *  Looks for features at the given position, storing it in the map fs
+     */
+    void accumulateFeatures(float x, float y, float z,
+                            std::map<Feature, std::set<glm::vec3>>& fs);
 
 protected:
     /*  This is our evaluation tape type */

@@ -242,9 +242,24 @@ void EvaluatorBase::push()
     pushTape();
 }
 
-unsigned EvaluatorBase::features(Result::Index n)
+std::set<EvaluatorBase::Feature> EvaluatorBase::featuresAt(
+        float x, float y, float z)
 {
-    return 0;
+    std::map<Feature, std::set<glm::vec3>> fs;
+    accumulateFeatures(x, y, z, fs);
+
+    std::set<Feature> out;
+    for (auto& f : fs)
+    {
+        out.insert(f.first);
+    }
+    return out;
+}
+
+void EvaluatorBase::accumulateFeatures(float x, float y, float z,
+        std::map<Feature, std::set<glm::vec3>>& fs)
+{
+
 }
 
 void EvaluatorBase::specialize(float x, float y, float z)
