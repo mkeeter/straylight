@@ -47,10 +47,6 @@ void EvaluatorAVX::eval_clause_values(Opcode::Opcode op,
             EVAL_LOOP
             out[i] = _mm256_sub_ps(_mm256_setzero_ps(), a[i]);
             break;
-        case Opcode::ABS:
-            EVAL_LOOP
-            out[i] = _mm256_andnot_ps(a[i], _mm256_set1_ps(-0.0f));
-            break;
 
         case Opcode::CONST_VAR:
             EVAL_LOOP
@@ -202,20 +198,6 @@ void EvaluatorAVX::eval_clause_derivs(Opcode::Opcode op,
                 odx[i] = _mm256_sub_ps(_mm256_setzero_ps(), adx[i]);
                 ody[i] = _mm256_sub_ps(_mm256_setzero_ps(), ady[i]);
                 odz[i] = _mm256_sub_ps(_mm256_setzero_ps(), adz[i]);
-            }
-            break;
-        case Opcode::ABS:
-            EVAL_LOOP
-            {
-                __m256 cmp = _mm256_cmp_ps(av[i], _mm256_setzero_ps(), CMP_LT_OQ);
-
-                // If a value is less than zero, negate its derivative
-                odx[i] = _mm256_blendv_ps(
-                        adx[i], _mm256_sub_ps(_mm256_setzero_ps(), adx[i]), cmp);
-                ody[i] = _mm256_blendv_ps(
-                        ady[i], _mm256_sub_ps(_mm256_setzero_ps(), ady[i]), cmp);
-                odz[i] = _mm256_blendv_ps(
-                        adz[i], _mm256_sub_ps(_mm256_setzero_ps(), adz[i]), cmp);
             }
             break;
         case Opcode::CONST_VAR:

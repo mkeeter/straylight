@@ -18,7 +18,6 @@ size_t Opcode::args(Opcode op)
         case SQUARE: // fallthrough
         case SQRT:
         case NEG:
-        case ABS:
         case SIN:
         case COS:
         case TAN:
@@ -74,7 +73,6 @@ std::string Opcode::to_str(Opcode op)
         case Opcode::NANFILL: return "nan-fill";
         case Opcode::SQUARE: return "square";
         case Opcode::SQRT: return "sqrt";
-        case Opcode::ABS: return "abs";
         case Opcode::NEG: return "neg";
         case Opcode::SIN: return "sin";
         case Opcode::COS: return "cos";
@@ -116,7 +114,6 @@ bool Opcode::isCommutative(Opcode op)
         case SQUARE:
         case SQRT:
         case NEG:
-        case ABS:
         case SIN:
         case COS:
         case TAN:

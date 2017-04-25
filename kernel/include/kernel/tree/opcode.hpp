@@ -21,7 +21,6 @@ enum Opcode
     SQUARE,
     SQRT,
     NEG,
-    ABS,
     SIN,
     COS,
     TAN,

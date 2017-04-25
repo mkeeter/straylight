@@ -123,7 +123,7 @@ OP_UNARY(square,    Kernel::Opcode::SQUARE);
 OP_UNARY(sqrt,      Kernel::Opcode::SQRT);
 Kernel::Tree Kernel::Tree::operator-() const
     { return Kernel::Tree(Kernel::Opcode::NEG, *this); }
-OP_UNARY(abs,       Kernel::Opcode::ABS);
+Kernel::Tree abs(const Kernel::Tree& a) { return max(a, -a); }
 OP_UNARY(sin,       Kernel::Opcode::SIN);
 OP_UNARY(cos,       Kernel::Opcode::COS);
 OP_UNARY(tan,       Kernel::Opcode::TAN);

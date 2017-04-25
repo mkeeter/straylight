@@ -401,25 +401,30 @@ static s7_pointer shape_modulo(s7_scheme* sc, s7_pointer args)
     }
 }
 
-#define OVERLOAD_UNARY(NAME, FUNC, OPCODE)                  \
-static s7_pointer NAME(s7_scheme* sc, s7_pointer args)      \
-{                                                           \
-    if (s7_list_length(sc, args) != 1)                      \
-    {                                                       \
-        return s7_wrong_number_of_args_error(sc,            \
-                FUNC ": wrong number of args: ~A", args);   \
-    }                                                       \
-    return shape_unary(sc, OPCODE, s7_car(args));           \
+#define OVERLOAD_UNARY(FUNC)                                    \
+static s7_pointer shape_##FUNC(s7_scheme* sc, s7_pointer args)  \
+{                                                               \
+    if (s7_list_length(sc, args) != 1)                          \
+    {                                                           \
+        return s7_wrong_number_of_args_error(sc,                \
+               #FUNC ": wrong number of args: ~A", args);       \
+    }                                                           \
+                                                                \
+    auto s = shape_from_obj(sc, s7_car(args), #FUNC);           \
+    CHECK_SHAPE(s);                                             \
+    return shape_check_const(sc, shape_from_tree(sc,            \
+                FUNC(get_shape(s)->tree),                       \
+                get_shape(s)->vars));                           \
 }
-OVERLOAD_UNARY(shape_square, "square", Kernel::Opcode::SQUARE);
-OVERLOAD_UNARY(shape_sqrt, "sqrt", Kernel::Opcode::SQRT);
-OVERLOAD_UNARY(shape_abs, "abs", Kernel::Opcode::ABS);
-OVERLOAD_UNARY(shape_sin, "sin", Kernel::Opcode::SIN);
-OVERLOAD_UNARY(shape_cos, "cos", Kernel::Opcode::COS);
-OVERLOAD_UNARY(shape_tan, "tan", Kernel::Opcode::TAN);
-OVERLOAD_UNARY(shape_asin, "asin", Kernel::Opcode::ASIN);
-OVERLOAD_UNARY(shape_acos, "acos", Kernel::Opcode::ACOS);
-OVERLOAD_UNARY(shape_exp, "exp", Kernel::Opcode::EXP);
+OVERLOAD_UNARY(square);
+OVERLOAD_UNARY(sqrt);
+OVERLOAD_UNARY(abs);
+OVERLOAD_UNARY(sin);
+OVERLOAD_UNARY(cos);
+OVERLOAD_UNARY(tan);
+OVERLOAD_UNARY(asin);
+OVERLOAD_UNARY(acos);
+OVERLOAD_UNARY(exp);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -378,10 +378,6 @@ void EvaluatorBase::eval_clause_values(Opcode::Opcode op,
             EVAL_LOOP
             out[i] = -a[i];
             break;
-        case Opcode::ABS:
-            EVAL_LOOP
-            out[i] = fabs(a[i]);
-            break;
         case Opcode::SIN:
             EVAL_LOOP
             out[i] = sin(a[i]);
@@ -590,23 +586,6 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
                 odx[i] = -adx[i];
                 ody[i] = -ady[i];
                 odz[i] = -adz[i];
-            }
-            break;
-        case Opcode::ABS:
-            EVAL_LOOP
-            {
-                if (av[i] < 0)
-                {
-                    odx[i] = -adx[i];
-                    ody[i] = -ady[i];
-                    odz[i] = -adz[i];
-                }
-                else
-                {
-                    odx[i] = adx[i];
-                    ody[i] = ady[i];
-                    odz[i] = adz[i];
-                }
             }
             break;
         case Opcode::SIN:
@@ -820,19 +799,6 @@ float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
                 (*o) = -(*a);
             }
             break;
-        case Opcode::ABS:
-            JAC_LOOP
-            {
-                if (av < 0)
-                {
-                    (*o) = -(*a);
-                }
-                else
-                {
-                    (*o) = (*a);
-                }
-            }
-            break;
         case Opcode::SIN:
             JAC_LOOP
             {
@@ -935,8 +901,6 @@ Interval EvaluatorBase::eval_clause_interval(
             return boost::numeric::sqrt(a);
         case Opcode::NEG:
             return -a;
-        case Opcode::ABS:
-            return boost::numeric::abs(a);
         case Opcode::SIN:
             return boost::numeric::sin(a);
         case Opcode::COS:
