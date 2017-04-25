@@ -259,24 +259,16 @@ static s7_pointer reduce_##NAME(s7_scheme* sc, s7_pointer list) \
 #define REDUCER_NO_DEFAULT(NAME, FUNC, OP) \
 static s7_pointer reduce_##NAME(s7_scheme* sc, s7_pointer list) \
 {                                                               \
-    switch (s7_list_length(sc, list))                           \
+    if (s7_list_length(sc, list) == 1)                          \
     {                                                           \
-        case 0:                                                 \
-        {                                                       \
-            /* On an empty list, return an error */             \
-            return s7_wrong_number_of_args_error(sc,            \
-                #FUNC ": too few arguments: ~A", list);         \
-        }                                                       \
-        case 1:                                                 \
-        {                                                       \
-            return shape_from_obj(sc, s7_car(list), FUNC);      \
-        }                                                       \
-        default:                                                \
-        {                                                       \
-            return shape_binary(sc, OP, s7_car(list),           \
-                    reduce_##NAME(sc, s7_cdr(list)),            \
-                    FUNC);                                      \
-        }                                                       \
+        return shape_from_obj(sc, s7_car(list), FUNC);          \
+    }                                                           \
+    else                                                        \
+    {                                                           \
+        /*  Length-0 lists should be prevented by caller */     \
+        return shape_binary(sc, OP, s7_car(list),               \
+                reduce_##NAME(sc, s7_cdr(list)),                \
+                FUNC);                                          \
     }                                                           \
 }
 
@@ -302,120 +294,80 @@ OVERLOAD_COMMUTATIVE(max, "max");
 
 static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
 {
-    switch (s7_list_length(sc, args))
+    if (s7_list_length(sc, args) == 1)
     {
-        case 0:
-        {
-            return s7_wrong_number_of_args_error(sc, "-: too few arguments: ~A", args);
-        }
-        case 1:
-        {
-            return shape_unary(sc, Kernel::Opcode::NEG, s7_car(args), "-");
-        }
-        default:
-        {
-            return shape_binary(sc, Kernel::Opcode::SUB, s7_car(args),
-                    reduce_add_sub(sc, s7_cdr(args)));
-        }
+        return shape_unary(sc, Kernel::Opcode::NEG, s7_car(args), "-");
+    }
+    else
+    {
+        return shape_binary(sc, Kernel::Opcode::SUB, s7_car(args),
+                reduce_add_sub(sc, s7_cdr(args)));
     }
 }
 
 static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
 {
-    switch (s7_list_length(sc, args))
+    if (s7_list_length(sc, args) == 1)
     {
-        case 0:
-        {
-            return s7_wrong_number_of_args_error(sc, "/: too few arguments: ~A", args);
-        }
-        case 1:
-        {
-            return shape_binary(sc, Kernel::Opcode::DIV,
-                                s7_make_real(sc, 1.0f), s7_car(args), "/");
-        }
-        default:
-        {
-            return shape_binary(sc, Kernel::Opcode::DIV, s7_car(args),
-                    reduce_mul_div(sc, s7_cdr(args)));
-        }
+        return shape_binary(sc, Kernel::Opcode::DIV,
+                            s7_make_real(sc, 1.0f), s7_car(args), "/");
+    }
+    else
+    {
+        return shape_binary(sc, Kernel::Opcode::DIV, s7_car(args),
+                reduce_mul_div(sc, s7_cdr(args)));
     }
 }
 
 static s7_pointer shape_atan(s7_scheme* sc, s7_pointer args)
 {
-    switch (s7_list_length(sc, args))
+    if (s7_list_length(sc, args) == 1)
     {
-        case 1:
-        {
-            return shape_unary(sc, Kernel::Opcode::ATAN, s7_car(args), "atan");
-        }
-        case 2:
-        {
-            return shape_binary(sc, Kernel::Opcode::ATAN2,
-                                s7_car(args), s7_cadr(args), "atan");
-        }
-        default:    return s7_wrong_number_of_args_error(sc, "atan: wrong number of args: ~A", args);
+        return shape_unary(sc, Kernel::Opcode::ATAN, s7_car(args), "atan");
+    }
+    else
+    {
+        return shape_binary(sc, Kernel::Opcode::ATAN2,
+                            s7_car(args), s7_cadr(args), "atan");
     }
 }
 
 static s7_pointer shape_expt(s7_scheme* sc, s7_pointer args)
 {
-    if (s7_list_length(sc, args) == 2)
-    {
-        auto a = s7_car(args);
-        auto b = s7_cadr(args);
+    auto a = s7_car(args);
+    auto b = s7_cadr(args);
 
-        if (s7_is_number(a) && s7_is_number(b))
-        {
-            return s7_make_real(sc, pow(s7_number_to_real(sc, a),
-                                        s7_number_to_real(sc, b)));
-        }
-        else if (s7_is_integer(b))
-        {
-            return shape_binary(sc, Kernel::Opcode::POW, a, b, "expt");
-        }
-        else if (s7_is_ratio(b) && s7_numerator(b) == 1)
-        {
-            return shape_binary(sc, Kernel::Opcode::NTH_ROOT,
-                                a, s7_make_real(sc, s7_denominator(b)),
-                                "expt");
-        }
-        else
-        {
-            return s7_wrong_type_arg_error(sc, "expt", 2, b,
-                    "integer or 1/integer");
-        }
+    if (s7_is_number(a) && s7_is_number(b))
+    {
+        return s7_make_real(sc, pow(s7_number_to_real(sc, a),
+                                    s7_number_to_real(sc, b)));
+    }
+    else if (s7_is_integer(b))
+    {
+        return shape_binary(sc, Kernel::Opcode::POW, a, b, "expt");
+    }
+    else if (s7_is_ratio(b) && s7_numerator(b) == 1)
+    {
+        return shape_binary(sc, Kernel::Opcode::NTH_ROOT,
+                            a, s7_make_real(sc, s7_denominator(b)),
+                            "expt");
     }
     else
     {
-        return s7_wrong_number_of_args_error(sc,
-                "expt: wrong number of args: ~A", args);
+        return s7_wrong_type_arg_error(sc, "expt", 2, b,
+                "integer or 1/integer");
     }
 }
 
 static s7_pointer shape_modulo(s7_scheme* sc, s7_pointer args)
 {
-    if (s7_list_length(sc, args) != 2)
-    {
-        return s7_wrong_number_of_args_error(sc,
-                "modulo: wrong number of args: ~A", args);
-    }
-    else
-    {
-        return shape_binary(sc, Kernel::Opcode::MOD,
-                            s7_car(args), s7_cadr(args), "modulo");
-    }
+    return shape_binary(sc, Kernel::Opcode::MOD,
+                        s7_car(args), s7_cadr(args), "modulo");
 }
 
 #define OVERLOAD_UNARY(FUNC)                                    \
 static s7_pointer shape_##FUNC(s7_scheme* sc, s7_pointer args)  \
 {                                                               \
-    if (s7_list_length(sc, args) != 1)                          \
-    {                                                           \
-        return s7_wrong_number_of_args_error(sc,                \
-               #FUNC ": wrong number of args: ~A", args);       \
-    }                                                           \
-                                                                \
     auto s = shape_from_obj(sc, s7_car(args), #FUNC);           \
     CHECK_SHAPE(s);                                             \
     return shape_check_const(sc, shape_from_tree(sc,            \
@@ -434,10 +386,11 @@ OVERLOAD_UNARY(exp);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void install_overload(s7_scheme* sc, const char* op,
-                      s7_pointer (*f)(s7_scheme*, s7_pointer))
+static void install_overload(s7_scheme* sc, const char* op, int required_args,
+                             int optional_args, bool rest_args,
+                             s7_pointer (*f)(s7_scheme*, s7_pointer))
 {
-    s7_define_function(sc, op, f, 0, 0, true,
+    s7_define_function(sc, op, f, required_args, optional_args, rest_args,
                        s7_help(sc, s7_name_to_value(sc, op)));
 }
 
@@ -552,33 +505,33 @@ void init(s7_scheme* sc)
     s7_define_macro(sc, "define-shape", shape_define, 2, 0, true,
             "(define-shape (name x y z) body) -> (define name (lambda (x y z) body))");
 
-    install_overload(sc, "+", shape_add);
-    install_overload(sc, "*", shape_mul);
-    install_overload(sc, "min", shape_min);
-    install_overload(sc, "max", shape_max);
-    install_overload(sc, "-", shape_sub);
-    install_overload(sc, "/", shape_div);
-    install_overload(sc, "atan", shape_atan);
-    install_overload(sc, "expt", shape_expt);
-    install_overload(sc, "modulo", shape_modulo);
+    install_overload(sc, "+", 0, 0, true, shape_add);
+    install_overload(sc, "*", 0, 0, true, shape_mul);
+    install_overload(sc, "min", 1, 0, true, shape_min);
+    install_overload(sc, "max", 1, 0, true, shape_max);
+    install_overload(sc, "-", 1, 0, true, shape_sub);
+    install_overload(sc, "/", 1, 0, true, shape_div);
+    install_overload(sc, "atan", 1, 1, false, shape_atan);
+    install_overload(sc, "expt", 2, 0, false, shape_expt);
+    install_overload(sc, "modulo", 2, 0, false, shape_modulo);
 
-    install_overload(sc, "square", shape_square);
-    install_overload(sc, "sqrt", shape_sqrt);
-    install_overload(sc, "abs", shape_abs);
-    install_overload(sc, "sin", shape_sin);
-    install_overload(sc, "cos", shape_cos);
-    install_overload(sc, "tan", shape_tan);
-    install_overload(sc, "asin", shape_asin);
-    install_overload(sc, "acos", shape_acos);
-    install_overload(sc, "exp", shape_exp);
+    install_overload(sc, "square", 1, 0, false, shape_square);
+    install_overload(sc, "sqrt", 1, 0, false, shape_sqrt);
+    install_overload(sc, "abs", 1, 0, false, shape_abs);
+    install_overload(sc, "sin", 1, 0, false, shape_sin);
+    install_overload(sc, "cos", 1, 0, false, shape_cos);
+    install_overload(sc, "tan", 1, 0, false, shape_tan);
+    install_overload(sc, "asin", 1, 0, false, shape_asin);
+    install_overload(sc, "acos", 1, 0, false, shape_acos);
+    install_overload(sc, "exp", 1, 0, false, shape_exp);
 
-    install_overload(sc, "<", custom_lt);
-    install_overload(sc, "<=", custom_leq);
-    install_overload(sc, ">", custom_gt);
-    install_overload(sc, ">=", custom_geq);
-    install_overload(sc, "=", custom_equ);
-    install_overload(sc, "eq?", custom_eq);
-    install_overload(sc, "equal?", custom_equal);
+    install_overload(sc, "<", 0, 0, true, custom_lt);
+    install_overload(sc, "<=", 0, 0, true, custom_leq);
+    install_overload(sc, ">", 0, 0, true, custom_gt);
+    install_overload(sc, ">=", 0, 0, true, custom_geq);
+    install_overload(sc, "=", 0, 0, true, custom_equ);
+    install_overload(sc, "eq?", 0, 0, true, custom_eq);
+    install_overload(sc, "equal?", 0, 0, true, custom_equal);
 }
 
 }   // namespace Bind
