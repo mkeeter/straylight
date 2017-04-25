@@ -203,12 +203,12 @@ void EvaluatorBase::push()
             // active if it is decisively above or below the other branch.
             if (c.op == Opcode::MAX)
             {
-                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                if (result.i[c.a].lower() > result.i[c.b].upper())
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
                 }
-                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                else if (result.i[c.b].lower() > result.i[c.a].upper())
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
@@ -216,12 +216,12 @@ void EvaluatorBase::push()
             }
             else if (c.op == Opcode::MIN)
             {
-                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                if (result.i[c.a].lower() > result.i[c.b].upper())
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
                 }
-                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                else if (result.i[c.b].lower() > result.i[c.a].upper())
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
