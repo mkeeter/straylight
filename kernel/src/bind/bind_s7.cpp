@@ -233,62 +233,72 @@ static s7_pointer shape_apply(s7_scheme* sc, s7_pointer obj, s7_pointer args)
 ////////////////////////////////////////////////////////////////////////////////
 //  Operations
 
-static s7_pointer reduce(s7_scheme* sc, s7_pointer list, const char* func_name,
-                         Kernel::Opcode::Opcode op, const float* default_value)
-{
-    switch (s7_list_length(sc, list))
-    {
-        case 0:
-        {
-            // On an empty list, return the default value or an error
-            if (default_value != nullptr)
-            {
-                return shape_from_tree(sc, Kernel::Tree(*default_value));
-            }
-            else
-            {
-                // FIXME
-                // This is an ugly hack where we make a Scheme string,
-                // which guarantees that it won't be GC'd for a little while,
-                // in order to make a heap-allocated string that escapes this
-                // function but will be deleted eventually
-                std::string err = std::string(func_name) + ": too few arguments: ~A";
-                auto err_sc = s7_make_string(sc, err.c_str());
-                return s7_wrong_number_of_args_error(sc, s7_string(err_sc), list);
-            }
-        }
-        case 1:
-        {
-            return shape_from_obj(sc, s7_car(list), func_name);
-        }
-        default:
-        {
-            return shape_binary(sc, op, s7_car(list),
-                    reduce(sc, s7_cdr(list), func_name, op, default_value),
-                    func_name);
-        }
-    }
+#define REDUCER_DEFAULT(NAME, FUNC, OP, DEFAULT) \
+static s7_pointer reduce_##NAME(s7_scheme* sc, s7_pointer list) \
+{                                                               \
+    switch (s7_list_length(sc, list))                           \
+    {                                                           \
+        case 0:                                                 \
+        {                                                       \
+            /* On an empty list, return the default value */    \
+            return shape_from_tree(sc, Kernel::Tree(DEFAULT));  \
+        }                                                       \
+        case 1:                                                 \
+        {                                                       \
+            return shape_from_obj(sc, s7_car(list), FUNC);      \
+        }                                                       \
+        default:                                                \
+        {                                                       \
+            return shape_binary(sc, OP, s7_car(list),           \
+                    reduce_##NAME(sc, s7_cdr(list)),            \
+                    FUNC);                                      \
+        }                                                       \
+    }                                                           \
+}
+
+#define REDUCER_NO_DEFAULT(NAME, FUNC, OP) \
+static s7_pointer reduce_##NAME(s7_scheme* sc, s7_pointer list) \
+{                                                               \
+    switch (s7_list_length(sc, list))                           \
+    {                                                           \
+        case 0:                                                 \
+        {                                                       \
+            /* On an empty list, return an error */             \
+            return s7_wrong_number_of_args_error(sc,            \
+                #FUNC ": too few arguments: ~A", list);         \
+        }                                                       \
+        case 1:                                                 \
+        {                                                       \
+            return shape_from_obj(sc, s7_car(list), FUNC);      \
+        }                                                       \
+        default:                                                \
+        {                                                       \
+            return shape_binary(sc, OP, s7_car(list),           \
+                    reduce_##NAME(sc, s7_cdr(list)),            \
+                    FUNC);                                      \
+        }                                                       \
+    }                                                           \
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OVERLOAD_COMMUTATIVE_DEFAULT(NAME, FUNC, OPCODE, DEFAULT)           \
-static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
+#define OVERLOAD_COMMUTATIVE(NAME, FUNC)                                    \
+static s7_pointer shape_##NAME(s7_scheme* sc, s7_pointer args)              \
 {                                                                           \
-    const float d = DEFAULT;                                                \
-    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, &d));       \
+    return shape_check_const(sc, reduce_##NAME(sc, args));                  \
 }
 
-#define OVERLOAD_COMMUTATIVE(NAME, FUNC, OPCODE)                            \
-static s7_pointer NAME(s7_scheme* sc, s7_pointer args)                      \
-{                                                                           \
-    return shape_check_const(sc, reduce(sc, args, FUNC, OPCODE, nullptr));  \
-}
+REDUCER_DEFAULT(add, "+", Kernel::Opcode::ADD, 0);
+REDUCER_DEFAULT(mul, "*", Kernel::Opcode::MUL, 1);
+REDUCER_DEFAULT(add_sub, "-", Kernel::Opcode::ADD, 0);
+REDUCER_DEFAULT(mul_div, "/", Kernel::Opcode::MUL, 1);
+REDUCER_NO_DEFAULT(min, "min", Kernel::Opcode::MIN);
+REDUCER_NO_DEFAULT(max, "max", Kernel::Opcode::MAX);
 
-OVERLOAD_COMMUTATIVE_DEFAULT(shape_add, "+", Kernel::Opcode::ADD, 0);
-OVERLOAD_COMMUTATIVE_DEFAULT(shape_mul, "*", Kernel::Opcode::MUL, 1);
-OVERLOAD_COMMUTATIVE(shape_min, "min", Kernel::Opcode::MIN);
-OVERLOAD_COMMUTATIVE(shape_max, "max", Kernel::Opcode::MAX);
+OVERLOAD_COMMUTATIVE(add, "+");
+OVERLOAD_COMMUTATIVE(mul, "*");
+OVERLOAD_COMMUTATIVE(min, "min");
+OVERLOAD_COMMUTATIVE(max, "max");
 
 static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
 {
@@ -304,10 +314,8 @@ static s7_pointer shape_sub(s7_scheme* sc, s7_pointer args)
         }
         default:
         {
-            const float default_value = 0;
             return shape_binary(sc, Kernel::Opcode::SUB, s7_car(args),
-                    reduce(sc, s7_cdr(args), "-",
-                           Kernel::Opcode::ADD, &default_value));
+                    reduce_add_sub(sc, s7_cdr(args)));
         }
     }
 }
@@ -327,10 +335,8 @@ static s7_pointer shape_div(s7_scheme* sc, s7_pointer args)
         }
         default:
         {
-            const float default_value = 1;
             return shape_binary(sc, Kernel::Opcode::DIV, s7_car(args),
-                    reduce(sc, s7_cdr(args), "/",
-                           Kernel::Opcode::MUL, &default_value));
+                    reduce_mul_div(sc, s7_cdr(args)));
         }
     }
 }
