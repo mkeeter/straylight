@@ -383,12 +383,12 @@ void EvaluatorBase::specialize(float x, float y, float z)
             // active if it is decisively above or below the other branch.
             if (c.op == Opcode::MAX)
             {
-                if (result.f[c.a][0] >= result.f[c.b][0])
+                if (result.f[c.a][0] > result.f[c.b][0])
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
                 }
-                else if (result.f[c.b][0] >= result.f[c.a][0])
+                else if (result.f[c.b][0] > result.f[c.a][0])
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
@@ -396,12 +396,12 @@ void EvaluatorBase::specialize(float x, float y, float z)
             }
             else if (c.op == Opcode::MIN)
             {
-                if (result.f[c.a][0] >= result.f[c.b][0])
+                if (result.f[c.a][0] > result.f[c.b][0])
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
                 }
-                else if (result.f[c.b][0] >= result.f[c.a][0])
+                else if (result.f[c.b][0] > result.f[c.a][0])
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;

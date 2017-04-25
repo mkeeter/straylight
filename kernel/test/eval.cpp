@@ -341,6 +341,26 @@ TEST_CASE("Evaluator::accumulateFeatures")
         e.accumulateFeatures(0, 0, 0, fs);
         REQUIRE(fs.size() == 2);
     }
+    SECTION("Push / pop behavior")
+    {
+        Evaluator e(max(Tree::X(), Tree::Y()));
+
+        e.set({0,0}, {0,0}, {0,1});
+        e.interval();
+        e.push();
+        fs.clear();
+        e.accumulateFeatures(0, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
+        e.pop();
+
+        e.set({0,1}, {1,2}, {0,1});
+        e.interval();
+        e.push();
+        fs.clear();
+        e.accumulateFeatures(0, 0, 0, fs);
+        REQUIRE(fs.size() == 2);
+        e.pop();
+    }
     SECTION("max")
     {
         Evaluator e(max(Tree::X(), Tree::Y()));
