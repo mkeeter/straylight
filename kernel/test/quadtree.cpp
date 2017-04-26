@@ -103,7 +103,6 @@ TEST_CASE("Quadtree: vertex positioning (with corners)")
         else if (o->getType() == Quadtree::LEAF)
         {
             auto v = o->getVertex();
-            std::cout << v.x << ' ' << v.y << ' ' << v.z << '\n';
             if (v.x < 0)
             {
                 REQUIRE(v.x > -0.55);
