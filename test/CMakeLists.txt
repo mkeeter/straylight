@@ -7,6 +7,7 @@ add_executable(straylight-test main.cpp
     ../kernel/test/heightmap.cpp
     ../kernel/test/mesh.cpp
     ../kernel/test/octree.cpp
+    ../kernel/test/quadtree.cpp
     ../kernel/test/region.cpp
     ../kernel/test/solver.cpp
     ../kernel/test/subregion.cpp
