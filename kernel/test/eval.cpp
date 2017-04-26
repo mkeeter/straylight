@@ -295,6 +295,51 @@ TEST_CASE("Evaluator::derivs")
         REQUIRE(d.dz[0] == 1.0);
         REQUIRE(d.dz[1] == 1.0);
     }
+
+    SECTION("max(X, Y)")
+    {
+        Evaluator e(max(Tree::X(), Tree::Y()));
+
+        e.set(0, 0, 0, 0);
+        auto d = e.derivs(1);
+        CAPTURE(d.dx[0]);
+        CAPTURE(d.dy[0]);
+        CAPTURE(d.dz[0]);
+
+        REQUIRE(d.dx[0] == 1.0);
+        REQUIRE(d.dy[0] == 0.0);
+        REQUIRE(d.dz[0] == 0.0);
+    }
+
+    SECTION("min(X, Y)")
+    {
+        Evaluator e(min(Tree::X(), Tree::Y()));
+
+        e.set(0, 0, 0, 0);
+        auto d = e.derivs(1);
+        CAPTURE(d.dx[0]);
+        CAPTURE(d.dy[0]);
+        CAPTURE(d.dz[0]);
+
+        REQUIRE(d.dx[0] == 1.0);
+        REQUIRE(d.dy[0] == 0.0);
+        REQUIRE(d.dz[0] == 0.0);
+    }
+
+    SECTION("abs(X)")
+    {
+        Evaluator e(abs(Tree::X()));
+
+        e.set(0, 0, 0, 0);
+        auto d = e.derivs(1);
+        CAPTURE(d.dx[0]);
+        CAPTURE(d.dy[0]);
+        CAPTURE(d.dz[0]);
+
+        REQUIRE(d.dx[0] == 1.0);
+        REQUIRE(d.dy[0] == 0.0);
+        REQUIRE(d.dz[0] == 0.0);
+    }
 }
 
 TEST_CASE("Evaluator::specialize")
