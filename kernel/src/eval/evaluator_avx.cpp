@@ -126,10 +126,10 @@ void EvaluatorAVX::eval_clause_derivs(Opcode::Opcode op,
         case Opcode::MIN:
             EVAL_LOOP
             {
-                __m256 cmp = _mm256_cmp_ps(av[i], bv[i], CMP_LT_OQ);
-                odx[i] = _mm256_blendv_ps(bdx[i], adx[i], cmp);
-                ody[i] = _mm256_blendv_ps(bdy[i], ady[i], cmp);
-                odz[i] = _mm256_blendv_ps(bdz[i], adz[i], cmp);
+                __m256 cmp = _mm256_cmp_ps(bv[i], av[i], CMP_LT_OQ);
+                odx[i] = _mm256_blendv_ps(adx[i], bdx[i], cmp);
+                ody[i] = _mm256_blendv_ps(ady[i], bdy[i], cmp);
+                odz[i] = _mm256_blendv_ps(adz[i], bdz[i], cmp);
             }
             break;
         case Opcode::MAX:

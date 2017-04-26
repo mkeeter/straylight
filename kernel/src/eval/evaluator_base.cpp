@@ -620,7 +620,7 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
         case Opcode::MIN:
             EVAL_LOOP
             {
-                if (av[i] < bv[i])
+                if (av[i] <= bv[i])
                 {
                     odx[i] = adx[i];
                     ody[i] = ady[i];
@@ -637,17 +637,17 @@ void EvaluatorBase::eval_clause_derivs(Opcode::Opcode op,
         case Opcode::MAX:
             EVAL_LOOP
             {
-                if (av[i] < bv[i])
-                {
-                    odx[i] = bdx[i];
-                    ody[i] = bdy[i];
-                    odz[i] = bdz[i];
-                }
-                else
+                if (av[i] >= bv[i])
                 {
                     odx[i] = adx[i];
                     ody[i] = ady[i];
                     odz[i] = adz[i];
+                }
+                else
+                {
+                    odx[i] = bdx[i];
+                    ody[i] = bdy[i];
+                    odz[i] = bdz[i];
                 }
             }
             break;
@@ -861,7 +861,7 @@ float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::MIN:
             JAC_LOOP
             {
-                if (av < bv)
+                if (av <= bv)
                 {
                     (*o) = (*a);
                 }
@@ -874,13 +874,13 @@ float EvaluatorBase::eval_clause_jacobians(Opcode::Opcode op,
         case Opcode::MAX:
             JAC_LOOP
             {
-                if (av < bv)
+                if (av >= bv)
                 {
-                    (*o) = (*b);
+                    (*o) = (*a);
                 }
                 else
                 {
-                    (*o) = (*a);
+                    (*o) = (*b);
                 }
             }
             break;
