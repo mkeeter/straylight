@@ -256,6 +256,49 @@ std::set<EvaluatorBase::Feature> EvaluatorBase::featuresAt(
     return out;
 }
 
+void EvaluatorBase::push(const Feature& f)
+{
+    // Since we'll be figuring out which clauses are disabled and
+    // which should be remapped, we reset those arrays here
+    std::fill(disabled.begin(), disabled.end(), true);
+    std::fill(remap.begin(), remap.end(), 0);
+
+    // Mark the root node as active
+    disabled[tape->i] = false;
+
+    auto itr = f.begin();
+    for (const auto& c : tape->t)
+    {
+        if (!disabled[c.id])
+        {
+            // For min and max operations, we may only need to keep one branch
+            // active if it is decisively above or below the other branch.
+            if (c.op == Opcode::MAX || c.op == Opcode::MIN)
+            {
+                disabled[*itr ? c.b : c.a] = false;
+                remap[c.id] = *itr ? c.b : c.a;
+                ++itr;
+            }
+            else if (c.op == Opcode::MOD)
+            {
+                ++itr;
+            }
+
+            if (!remap[c.id])
+            {
+                disabled[c.a] = false;
+                disabled[c.b] = false;
+            }
+            else
+            {
+                disabled[c.id] = true;
+            }
+        }
+    }
+
+    pushTape();
+}
+
 void EvaluatorBase::accumulateFeatures(float x, float y, float z,
         std::map<Feature, std::list<glm::vec3>>& fs)
 {

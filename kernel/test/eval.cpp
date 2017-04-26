@@ -427,3 +427,16 @@ TEST_CASE("Evaluator::accumulateFeatures")
         REQUIRE(fs.size() == 4);
     }
 }
+
+TEST_CASE("Evaluator::push(Feature)")
+{
+    Evaluator e(max(Tree::X(), Tree::Y()));
+
+    e.push({1});
+    REQUIRE(e.eval(2, 1, 0) == 1);
+    e.pop();
+
+    e.push({0});
+    REQUIRE(e.eval(2, 3, 0) == 2);
+    e.pop();
+}

@@ -166,6 +166,11 @@ public:
     void accumulateFeatures(float x, float y, float z,
                             std::map<Feature, std::list<glm::vec3>>& fs);
 
+    /*
+     *  Pushes into a feature
+     */
+    void push(const Feature& f);
+
 protected:
     /*  This is our evaluation tape type */
     struct Tape {
