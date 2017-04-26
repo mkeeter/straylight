@@ -82,7 +82,7 @@ TEST_CASE("Vertex positioning")
         {
             float r = glm::length(o->getVertex());
             rmax = std::max(r, rmax);
-            rmin = std::max(r, rmin);
+            rmin = std::min(r, rmin);
         }
     }
 
