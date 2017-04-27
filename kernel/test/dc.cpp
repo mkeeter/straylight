@@ -88,3 +88,61 @@ TEST_CASE("2D contour tracking")
     REQUIRE(max < 0.51);
     REQUIRE(min > 0.49);
 }
+
+TEST_CASE("2D contour tracking (coincident)")
+{
+    Tree t = max(max(-0.5 - Tree::Y(), Tree::Y() - 0.5),
+             min(max(Tree::X(), -0.5 - Tree::X()),
+                 max(-Tree::X(), Tree::X() - 0.5)));
+
+    Region r({-1, 1}, {-1, 1}, {0, 0}, 10);
+
+    auto m = Contours::render(t, r);
+    m.writeSVG("out.svg", r);
+    REQUIRE(m.contours.size() == 1);
+
+    float xmin = 1;
+    float xmax = -1;
+    float ymin = 1;
+    float ymax = -1;
+    for (auto c : m.contours[0])
+    {
+        xmin = fmin(xmin, c.x);
+        xmax = fmax(xmax, c.x);
+        ymin = fmin(ymin, c.y);
+        ymax = fmax(ymax, c.y);
+    }
+    REQUIRE(xmax == 0.5);
+    REQUIRE(xmin == -0.5);
+    REQUIRE(ymax == 0.5);
+    REQUIRE(ymin == -0.5);
+}
+
+TEST_CASE("2D contour tracking (coincident, negative)")
+{
+    Tree t = -max(max(-0.5 - Tree::Y(), Tree::Y() - 0.5),
+              min(max(Tree::X(), -0.5 - Tree::X()),
+                  max(-Tree::X(), Tree::X() - 0.5)));
+
+    Region r({-1, 1}, {-1, 1}, {0, 0}, 10);
+
+    auto m = Contours::render(t, r);
+    m.writeSVG("out.svg", r);
+    REQUIRE(m.contours.size() == 1);
+
+    float xmin = 1;
+    float xmax = -1;
+    float ymin = 1;
+    float ymax = -1;
+    for (auto c : m.contours[0])
+    {
+        xmin = fmin(xmin, c.x);
+        xmax = fmax(xmax, c.x);
+        ymin = fmin(ymin, c.y);
+        ymax = fmax(ymax, c.y);
+    }
+    REQUIRE(xmax == 0.5);
+    REQUIRE(xmin == -0.5);
+    REQUIRE(ymax == 0.5);
+    REQUIRE(ymin == -0.5);
+}
