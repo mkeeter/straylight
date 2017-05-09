@@ -22,14 +22,79 @@ bool Feature::isCompatible(glm::vec3 e) const
     {
         return glm::dot(e, epsilons.front()) != -1;
     }
-    return true;
+
+    // Return early if the epsilon is already in the list
+    for (const auto& i : epsilons)
+    {
+        if (e == i)
+        {
+            return true;
+        }
+    }
+
+    // Otherwise, we construct every possible plane and check against
+    // every remaining point to make sure they work
+    auto es = epsilons;
+    es.push_back(e);
+
+    // Yes, this is an O(n^3) loop
+    // It's far from optimal, but will suffice unless people start making
+    // deliberately pathological models.
+    for (auto a=es.begin(); a != es.end(); ++a)
+    {
+        for (auto b=es.begin(); b != es.end(); ++b)
+        {
+            if (a == b || glm::dot(*a, *b) == -1)
+            {
+                continue;
+            }
+            const auto norm = glm::cross(*a, *b);
+            int sign = 0;
+            bool passed = true;
+            for (auto c=es.begin(); passed && c != es.end(); ++c)
+            {
+                if (a == c || b == c)
+                {
+                    continue;
+                }
+                auto d = glm::dot(norm, *c);
+                if (d < 0)
+                {
+                    passed &= (sign <= 0);
+                    sign = -1;
+                }
+                else if (d > 0)
+                {
+                    passed &= (sign >= 0);
+                    sign = 1;
+                }
+                else
+                {
+                    passed = false;
+                }
+            }
+            if (passed)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool Feature::push(glm::vec3 e)
 {
     if (isCompatible(e))
     {
-        epsilons.push_back(e / glm::length(e));
+        e /= glm::length(e);
+        for (const auto& i : epsilons)
+        {
+            if (e == i)
+            {
+                return true;
+            }
+        }
+        epsilons.push_back(e);
         return true;
     }
     else
