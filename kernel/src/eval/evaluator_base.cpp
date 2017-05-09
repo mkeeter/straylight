@@ -301,6 +301,56 @@ void EvaluatorBase::specialize(float x, float y, float z)
     pushTape();
 }
 
+bool EvaluatorBase::isInside(float x, float y, float z)
+{
+    set(x, y, z, 0);
+    auto vs = values(1);
+
+    if (vs[0] < 0)
+    {
+        return true;
+    }
+    else if (vs[0] > 0)
+    {
+        return false;
+    }
+
+    // Handle the zero-crossing case!
+    auto fs = featuresAt(x, y, z);
+
+    // If there's only a single feature, we can get both positive and negative
+    // values out if it's got a non-zero gradient
+    if (fs.size() == 1)
+    {
+        return fs.front().deriv().length() > 0;
+    }
+
+    // Otherwise, check each feature
+    // The only case where we're inside the model is if all features
+    // and their normals are all negative (i.e. for every epsilon that
+    // we move from (x,y,z), epsilon . deriv < 0
+    for (auto& f : fs)
+    {
+        auto d = f.deriv();
+        if (f.isCompatible(d))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
+{
+    set(x, y, z, 0);
+    const auto ds = derivs(1);
+
+    std::list<Feature> fs;
+    Feature f;
+    f.setDeriv({ds.dx[0], ds.dy[0], ds.dz[0]});
+    fs.push_back(f);
+}
+
 void EvaluatorBase::pop()
 {
     assert(tape != tapes.begin());

@@ -9,6 +9,7 @@ add_executable(straylight-test main.cpp
     ../kernel/test/octree.cpp
     ../kernel/test/region.cpp
     ../kernel/test/contours.cpp
+    ../kernel/test/feature.cpp
     ../kernel/test/solver.cpp
     ../kernel/test/subregion.cpp
     ../kernel/test/tree.cpp

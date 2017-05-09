@@ -314,3 +314,21 @@ TEST_CASE("Evaluator::specialize")
     REQUIRE(e.eval(4, 5, 0) == 5);
     REQUIRE(e.eval(10, 5, 0) == 5);
 }
+
+TEST_CASE("Evaluator::isInside")
+{
+    Evaluator a(Tree::X());
+    REQUIRE(a.isInside(0, 0, 0) == false);
+    REQUIRE(a.isInside(-1, 0, 0) == false);
+    REQUIRE(a.isInside(1, 0, 0) == true);
+
+    Evaluator b(min(Tree::X(), -Tree::X()));
+    REQUIRE(b.isInside(0, 0, 0) == true);
+    REQUIRE(b.isInside(1, 0, 0) == true);
+    REQUIRE(b.isInside(-1, 0, 0) == true);
+
+    Evaluator c(max(Tree::X(), -Tree::X()));
+    REQUIRE(c.isInside(0, 0, 0) == false);
+    REQUIRE(c.isInside(1, 0, 0) == false);
+    REQUIRE(c.isInside(-1, 0, 0) == false);
+}

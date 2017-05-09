@@ -10,6 +10,7 @@
 
 #include "kernel/eval/result.hpp"
 #include "kernel/eval/interval.hpp"
+#include "kernel/eval/feature.hpp"
 #include "kernel/eval/clause.hpp"
 #include "kernel/tree/tree.hpp"
 
@@ -144,6 +145,20 @@ public:
      *  based on evaluation at the given point
      */
     void specialize(float x, float y, float z);
+
+    /*
+     *  Checks to see if the given point is inside the solid body.
+     *  There are three cases
+     *      eval(x, y, z) < 0  => true
+     *      eval(x, y, z) > 0  => false
+     *      eval(x, y, z) == 0 => further checking is performed
+     */
+    bool isInside(float x, float y, float z);
+
+    /*
+     *  Checks for features at the given position
+     */
+    std::list<Feature> featuresAt(float x, float y, float z);
 
 protected:
     /*  This is our evaluation tape type */
