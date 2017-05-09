@@ -13,6 +13,15 @@ bool Feature::isCompatible(glm::vec3 e) const
         }
         e /= norm;
     }
+
+    if (epsilons.size() == 0)
+    {
+        return true;
+    }
+    else if (epsilons.size() == 1)
+    {
+        return glm::dot(e, epsilons.front()) != -1;
+    }
     return true;
 }
 
