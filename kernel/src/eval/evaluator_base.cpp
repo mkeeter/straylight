@@ -349,6 +349,8 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
     Feature f;
     f.setDeriv({ds.dx[0], ds.dy[0], ds.dz[0]});
     fs.push_back(f);
+
+    return fs;
 }
 
 void EvaluatorBase::pop()
