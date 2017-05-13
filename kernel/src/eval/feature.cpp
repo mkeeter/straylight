@@ -82,10 +82,12 @@ bool Feature::isCompatible(glm::vec3 e) const
     return false;
 }
 
-bool Feature::push(glm::vec3 e)
+bool Feature::push(glm::vec3 e, int choice)
 {
     if (isCompatible(e))
     {
+        choices.push_back(choice);
+
         e /= glm::length(e);
         for (const auto& i : epsilons)
         {

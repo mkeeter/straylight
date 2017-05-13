@@ -17,9 +17,10 @@ public:
      */
     bool isCompatible(glm::vec3 e) const;
 
-    bool push(glm::vec3 e);
+    bool push(glm::vec3 e, int choice=0);
     glm::vec3 deriv() const { return d; }
     void setDeriv(glm::vec3 d_) { d = d_; }
+    const std::list<int>& getChoices() const { return choices; }
 
 protected:
     std::list<int> choices;
