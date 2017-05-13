@@ -242,6 +242,58 @@ void EvaluatorBase::push()
     pushTape();
 }
 
+void EvaluatorBase::push(const Feature& f)
+{
+    // Since we'll be figuring out which clauses are disabled and
+    // which should be remapped, we reset those arrays here
+    std::fill(disabled.begin(), disabled.end(), true);
+    std::fill(remap.begin(), remap.end(), 0);
+
+    // Mark the root node as active
+    disabled[tape->i] = false;
+
+    const auto& choices = f.getChoices();
+    auto itr = choices.begin();
+
+    for (const auto& c : tape->t)
+    {
+        if (!disabled[c.id])
+        {
+            // For ambiguous min and max operations, we obey the feature in
+            // terms of which branch to take
+            if (result.f[c.a][0] == result.f[c.b][0] &&
+                (c.op == Opcode::MAX || c.op == Opcode::MIN))
+            {
+                assert(itr != choices.end());
+
+                if (*(itr++) == 0)
+                {
+                    disabled[c.a] = false;
+                    remap[c.id] = c.a;
+                }
+                else
+                {
+                    disabled[c.b] = false;
+                    remap[c.id] = c.b;
+                }
+            }
+
+            if (!remap[c.id])
+            {
+                disabled[c.a] = false;
+                disabled[c.b] = false;
+            }
+            else
+            {
+                disabled[c.id] = true;
+            }
+        }
+    }
+    assert(itr == choices.end());
+
+    pushTape();
+}
+
 void EvaluatorBase::specialize(float x, float y, float z)
 {
     // Load results into the first floating-point result slot

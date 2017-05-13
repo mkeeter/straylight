@@ -107,6 +107,14 @@ public:
     void push();
 
     /*
+     *  Pushes into a tree based on the given feature
+     *
+     *  result.f[][0] must contain evaluation results with a matching
+     *  number of ambiguous min/max nodes as the given feature
+     */
+    void push(const Feature& f);
+
+    /*
      *  Pops out of interval evaluation, re-enabling disabled nodes
      */
     void pop();

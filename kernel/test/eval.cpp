@@ -332,3 +332,41 @@ TEST_CASE("Evaluator::isInside")
     REQUIRE(c.isInside(1, 0, 0) == false);
     REQUIRE(c.isInside(-1, 0, 0) == false);
 }
+
+TEST_CASE("Evaluator::featuresAt")
+{
+    Evaluator a(Tree::X());
+    auto fa = a.featuresAt(0, 0, 0);
+    REQUIRE(fa.size() == 1);
+    REQUIRE(fa.front().deriv() == glm::vec3(1, 0, 0));
+
+    Evaluator b(min(Tree::X(), -Tree::X()));
+    auto fb = b.featuresAt(0, 0, 0);
+    REQUIRE(fb.size() == 2);
+    auto ib = fb.begin();
+    REQUIRE((ib++)->deriv() == glm::vec3(1, 0, 0));
+    REQUIRE((ib++)->deriv() == glm::vec3(-1, 0, 0));
+}
+
+TEST_CASE("Evaluator::push(Feature)")
+{
+    Evaluator e(min(Tree::X(), -Tree::X()));
+    REQUIRE(e.eval(0, 0, 0) == 0); // Force an ambiguous evaluation
+    Feature f;
+
+    SECTION("LHS")
+    {   // Use a dummy feature to select the first branch
+        REQUIRE(f.push({1,0,0}, 0));
+        e.push(f);
+        REQUIRE(e.eval(1, 0, 0) == 1);
+    }
+
+    SECTION("RHS")
+    {   // Use a dummy feature to select the second branch
+        REQUIRE(f.push({-1,0,0}, 1));
+        e.push(f);
+        REQUIRE(e.eval(-2, 0, 0) == 2);
+    }
+
+    e.pop();
+}
