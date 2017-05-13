@@ -380,7 +380,7 @@ bool EvaluatorBase::isInside(float x, float y, float z)
     // Otherwise, check each feature
     // The only case where we're inside the model is if all features
     // and their normals are all negative (i.e. for every epsilon that
-    // we move from (x,y,z), epsilon . deriv < 0
+    // we move from (x,y,z), epsilon . deriv < 0)
     for (auto& f : fs)
     {
         auto d = f.deriv();
