@@ -19,11 +19,20 @@ TEST_CASE("Feature::push")
     }
     SECTION("Separability testing")
     {
-        Feature f;
-        REQUIRE(f.push({1, 0, 0}) == true);
-        REQUIRE(f.push({0, 1, 0}) == true);
-        REQUIRE(f.push({0, 0, 1}) == true);
-        REQUIRE(f.push({1, 1, 1}) == true);
-        REQUIRE(f.push({-1, -1, -1}) == false);
+        Feature a;
+        REQUIRE(a.push({1, 0, 0}) == true);
+        REQUIRE(a.push({0, 1, 0}) == true);
+        REQUIRE(a.push({0, 0, 1}) == true);
+        REQUIRE(a.push({1, 1, 1}) == true);
+        REQUIRE(a.push({-1, -1, -1}) == false);
+
+        Feature b;
+        REQUIRE(b.push({1, 0, 0}) == true);
+        REQUIRE(b.push({0, -1, 0}) == true);
+        REQUIRE(b.push({0, 0, -1}) == true);
+        REQUIRE(b.push({0, 0, -1}) == true);
+        REQUIRE(b.push({0, -1, 0}) == true);
+        REQUIRE(b.push({-1, 1, 1}) == false);
+        REQUIRE(b.push({1, -1, -1}) == true);
     }
 }
