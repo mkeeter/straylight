@@ -396,8 +396,10 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
     // The initial feature doesn't know any ambiguities
     Feature f;
     std::list<Feature> todo = {f};
-
     std::list<Feature> done;
+
+    // Load the location into the first results slot and evaluate
+    eval(x, y, z);
 
     while (todo.size())
     {
@@ -409,12 +411,13 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
         auto f = todo.front();
         todo.pop_front();
 
-        // Run a single evaluation of the value + derivatives
-        set(x, y, z, 0);
-        const auto ds = derivs(1);
-
         // Then, push into this feature
         push(f);
+
+        // Run a single evaluation of the value + derivatives
+        // The value will be the same, but derivatives may change
+        // depending on which feature we've pushed ourselves into
+        const auto ds = derivs(1);
 
         bool ambiguous = false;
         for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
