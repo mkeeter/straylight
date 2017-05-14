@@ -110,7 +110,8 @@ public:
      *  Pushes into a tree based on the given feature
      *
      *  result.f[][0] must contain evaluation results with a matching
-     *  number of ambiguous min/max nodes as the given feature
+     *  number of ambiguous min/max nodes as the given feature (or more,
+     *  if the feature is partial)
      */
     void push(const Feature& f);
 

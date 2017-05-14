@@ -262,11 +262,10 @@ void EvaluatorBase::push(const Feature& f)
             // For ambiguous min and max operations, we obey the feature in
             // terms of which branch to take
             if (result.f[c.a][0] == result.f[c.b][0] &&
-                (c.op == Opcode::MAX || c.op == Opcode::MIN))
+                (c.op == Opcode::MAX || c.op == Opcode::MIN) &&
+                itr != choices.end() && itr->id == c.id)
             {
-                assert(itr != choices.end());
-
-                if (*(itr++) == 0)
+                if ((itr++)->choice == 0)
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
@@ -374,7 +373,7 @@ bool EvaluatorBase::isInside(float x, float y, float z)
     // values out if it's got a non-zero gradient
     if (fs.size() == 1)
     {
-        return fs.front().deriv().length() > 0;
+        return fs.front().deriv.length() > 0;
     }
 
     // Otherwise, check each feature
@@ -383,7 +382,7 @@ bool EvaluatorBase::isInside(float x, float y, float z)
     // we move from (x,y,z), epsilon . deriv < 0)
     for (auto& f : fs)
     {
-        auto d = f.deriv();
+        auto d = f.deriv;
         if (f.isCompatible(d))
         {
             return false;
@@ -394,15 +393,75 @@ bool EvaluatorBase::isInside(float x, float y, float z)
 
 std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
 {
-    set(x, y, z, 0);
-    const auto ds = derivs(1);
-
-    std::list<Feature> fs;
+    // The initial feature doesn't know any ambiguities
     Feature f;
-    f.setDeriv({ds.dx[0], ds.dy[0], ds.dz[0]});
-    fs.push_back(f);
+    std::list<Feature> todo = {f};
 
-    return fs;
+    std::list<Feature> done;
+
+    while (todo.size())
+    {
+        // Take the most recent feature and scan for ambiguous min/max nodes
+        // (from the bottom up).  If we find such an ambiguous node, then push
+        // both versions to the feature (if compatible) and re-insert the
+        // augmented feature in the todo list; otherwise, move the feature
+        // to the done list.
+        auto f = todo.front();
+        todo.pop_front();
+
+        // Run a single evaluation of the value + derivatives
+        set(x, y, z, 0);
+        const auto ds = derivs(1);
+
+        // Then, push into this feature
+        std::cout << f.getChoices().size() << '\n';
+        push(f);
+
+        bool ambiguous = false;
+        for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
+        {
+            std::cout << "  " << Opcode::to_str(itr->op) << '\n';
+            // Check for ambiguity here
+            if ((itr->op == Opcode::MIN || itr->op == Opcode::MAX) &&
+                    result.f[itr->a][0] == result.f[itr->b][0])
+            {
+                // Check both branches of the ambiguity
+                auto epsilon = glm::vec3(result.dx[itr->b][0],
+                                         result.dy[itr->b][0],
+                                         result.dz[itr->b][0]) -
+                               glm::vec3(result.dx[itr->a][0],
+                                         result.dy[itr->a][0],
+                                         result.dz[itr->a][0]);
+                auto fa = f;
+                if (fa.push(epsilon, {itr->id, 0}))
+                {
+                    printf("Re-pushing for A\n");
+                    todo.push_back(fa);
+                }
+
+                auto fb = f;
+                if (fb.push(-epsilon, {itr->id, 1}))
+                {
+                    printf("Re-pushing for B\n");
+                    todo.push_back(fb);
+                }
+                ambiguous = true;
+                break;
+            }
+        }
+
+        if (!ambiguous)
+        {
+            printf("Non-ambiguous\n");
+            f.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
+            done.push_back(f);
+        }
+        else{ printf("Ambiguous, repeating\n"); }
+
+        pop();
+    }
+
+    return done;
 }
 
 void EvaluatorBase::pop()

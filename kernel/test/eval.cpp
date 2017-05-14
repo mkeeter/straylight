@@ -336,16 +336,18 @@ TEST_CASE("Evaluator::isInside")
 TEST_CASE("Evaluator::featuresAt")
 {
     Evaluator a(Tree::X());
+    printf("fa:\n");
     auto fa = a.featuresAt(0, 0, 0);
     REQUIRE(fa.size() == 1);
-    REQUIRE(fa.front().deriv() == glm::vec3(1, 0, 0));
+    REQUIRE(fa.front().deriv == glm::vec3(1, 0, 0));
 
+    printf("fb:\n");
     Evaluator b(min(Tree::X(), -Tree::X()));
     auto fb = b.featuresAt(0, 0, 0);
     REQUIRE(fb.size() == 2);
     auto ib = fb.begin();
-    REQUIRE((ib++)->deriv() == glm::vec3(1, 0, 0));
-    REQUIRE((ib++)->deriv() == glm::vec3(-1, 0, 0));
+    REQUIRE((ib++)->deriv == glm::vec3(1, 0, 0));
+    REQUIRE((ib++)->deriv == glm::vec3(-1, 0, 0));
 }
 
 TEST_CASE("Evaluator::push(Feature)")
@@ -356,17 +358,17 @@ TEST_CASE("Evaluator::push(Feature)")
 
     SECTION("LHS")
     {   // Use a dummy feature to select the first branch
-        REQUIRE(f.push({1,0,0}, 0));
+        REQUIRE(f.push({1, 0, 0}, {0, 0}));
         e.push(f);
         REQUIRE(e.eval(1, 0, 0) == 1);
+        REQUIRE(e.utilization() < 1);
     }
 
     SECTION("RHS")
     {   // Use a dummy feature to select the second branch
-        REQUIRE(f.push({-1,0,0}, 1));
+        REQUIRE(f.push({-1, 0, 0}, {0, 1}));
         e.push(f);
         REQUIRE(e.eval(-2, 0, 0) == 2);
+        REQUIRE(e.utilization() < 1);
     }
-
-    e.pop();
 }
