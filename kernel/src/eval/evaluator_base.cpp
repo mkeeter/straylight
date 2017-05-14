@@ -414,13 +414,11 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
         const auto ds = derivs(1);
 
         // Then, push into this feature
-        std::cout << f.getChoices().size() << '\n';
         push(f);
 
         bool ambiguous = false;
         for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
         {
-            std::cout << "  " << Opcode::to_str(itr->op) << '\n';
             // Check for ambiguity here
             if ((itr->op == Opcode::MIN || itr->op == Opcode::MAX) &&
                     result.f[itr->a][0] == result.f[itr->b][0])
@@ -435,14 +433,12 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
                 auto fa = f;
                 if (fa.push(epsilon, {itr->id, 0}))
                 {
-                    printf("Re-pushing for A\n");
                     todo.push_back(fa);
                 }
 
                 auto fb = f;
                 if (fb.push(-epsilon, {itr->id, 1}))
                 {
-                    printf("Re-pushing for B\n");
                     todo.push_back(fb);
                 }
                 ambiguous = true;
@@ -452,11 +448,9 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
 
         if (!ambiguous)
         {
-            printf("Non-ambiguous\n");
             f.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
             done.push_back(f);
         }
-        else{ printf("Ambiguous, repeating\n"); }
 
         pop();
     }
