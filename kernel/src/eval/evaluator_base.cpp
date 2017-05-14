@@ -357,6 +357,7 @@ bool EvaluatorBase::isInside(float x, float y, float z)
     set(x, y, z, 0);
     auto vs = values(1);
 
+    // Unambiguous cases
     if (vs[0] < 0)
     {
         return true;
@@ -366,7 +367,9 @@ bool EvaluatorBase::isInside(float x, float y, float z)
         return false;
     }
 
-    // Handle the zero-crossing case!
+    // Otherwise, we need to handle the zero-crossing case!
+
+    // First, we extract all of the features
     auto fs = featuresAt(x, y, z);
 
     // If there's only a single feature, we can get both positive and negative
@@ -377,18 +380,17 @@ bool EvaluatorBase::isInside(float x, float y, float z)
     }
 
     // Otherwise, check each feature
-    // The only case where we're inside the model is if all features
-    // and their normals are all negative (i.e. for every epsilon that
-    // we move from (x,y,z), epsilon . deriv < 0)
+    // The only case where we're outside the model is if all features
+    // and their normals are all positive (i.e. for every epsilon that
+    // we move from (x,y,z), epsilon . deriv > 0)
+    bool pos = false;
+    bool neg = false;
     for (auto& f : fs)
     {
-        auto d = f.deriv;
-        if (f.isCompatible(d))
-        {
-            return false;
-        }
+        pos |= f.isCompatible(f.deriv);
+        neg |= f.isCompatible(-f.deriv);
     }
-    return true;
+    return !(pos && !neg);
 }
 
 std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
@@ -433,6 +435,13 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
                                glm::vec3(result.dx[itr->a][0],
                                          result.dy[itr->a][0],
                                          result.dz[itr->a][0]);
+
+                // Flip logic of MAX nodes
+                if (itr->op == Opcode::MAX)
+                {
+                    epsilon = -epsilon;
+                }
+
                 auto fa = f;
                 if (fa.push(epsilon, {itr->id, 0}))
                 {

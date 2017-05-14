@@ -318,9 +318,9 @@ TEST_CASE("Evaluator::specialize")
 TEST_CASE("Evaluator::isInside")
 {
     Evaluator a(Tree::X());
-    REQUIRE(a.isInside(0, 0, 0) == false);
-    REQUIRE(a.isInside(-1, 0, 0) == false);
-    REQUIRE(a.isInside(1, 0, 0) == true);
+    REQUIRE(a.isInside(0, 0, 0) == true);
+    REQUIRE(a.isInside(-1, 0, 0) == true);
+    REQUIRE(a.isInside(1, 0, 0) == false);
 
     Evaluator b(min(Tree::X(), -Tree::X()));
     REQUIRE(b.isInside(0, 0, 0) == true);
@@ -336,12 +336,10 @@ TEST_CASE("Evaluator::isInside")
 TEST_CASE("Evaluator::featuresAt")
 {
     Evaluator a(Tree::X());
-    printf("fa:\n");
     auto fa = a.featuresAt(0, 0, 0);
     REQUIRE(fa.size() == 1);
     REQUIRE(fa.front().deriv == glm::vec3(1, 0, 0));
 
-    printf("fb:\n");
     Evaluator b(min(Tree::X(), -Tree::X()));
     auto fb = b.featuresAt(0, 0, 0);
     REQUIRE(fb.size() == 2);
