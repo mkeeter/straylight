@@ -358,7 +358,7 @@ TEST_CASE("Evaluator::push(Feature)")
 
     SECTION("LHS")
     {   // Use a dummy feature to select the first branch
-        REQUIRE(f.push({1, 0, 0}, {0, 0}));
+        REQUIRE(f.push({1, 0, 0}, {1, 0}));
         e.push(f);
         REQUIRE(e.eval(1, 0, 0) == 1);
         REQUIRE(e.utilization() < 1);
@@ -366,7 +366,7 @@ TEST_CASE("Evaluator::push(Feature)")
 
     SECTION("RHS")
     {   // Use a dummy feature to select the second branch
-        REQUIRE(f.push({-1, 0, 0}, {0, 1}));
+        REQUIRE(f.push({-1, 0, 0}, {1, 1}));
         e.push(f);
         REQUIRE(e.eval(-2, 0, 0) == 2);
         REQUIRE(e.utilization() < 1);

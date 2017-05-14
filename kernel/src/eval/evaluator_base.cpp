@@ -24,7 +24,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
     std::unordered_map<Tree::Id, Clause::Id> clauses = {{nullptr, 0}};
-    Clause::Id id = flat.size() - 1;
+    Clause::Id id = flat.size();
 
     // Helper function to make a new function
     std::list<Clause> tape_;
@@ -66,7 +66,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
         }
         clauses[m.id()] = id--;
     }
-    assert(id + 1 == 0);
+    assert(id == 0);
 
     //  Move from the list tape to a more-compact vector tape
     tapes.push_back(Tape());
@@ -87,9 +87,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     }
 
     // Allocate enough memory for all the clauses
-    result.resize(clauses.size(), vars.size());
-    disabled.resize(clauses.size());
-    remap.resize(clauses.size());
+    result.resize(clauses.size() + 1, vars.size());
+    disabled.resize(clauses.size() + 1);
+    remap.resize(clauses.size() + 1);
 
     // Store all constants in results array
     for (auto c : constants)
@@ -116,7 +116,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     }
 
     // Store the index of the tree's root
-    assert(clauses.at(root.id()) == 0);
+    assert(clauses.at(root.id()) == 1);
     tape->i = clauses.at(root.id());
 }
 
