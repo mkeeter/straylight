@@ -90,7 +90,7 @@ void XTree<T, dims>::populateChildren(Evaluator* e, const Subregion& r)
     {
         type = FULL;
     }
-    else if (out.lower() >= 0)
+    else if (out.lower() > 0)
     {
         type = EMPTY;
     }
@@ -136,7 +136,15 @@ void XTree<T, dims>::populateChildren(Evaluator* e, const Subregion& r)
             // And unpack from evaluator
             for (uint8_t i=0; i < children.size(); ++i)
             {
-                corners[i] = fs[i] < 0;
+                if (fs[i] == 0)
+                {
+                    const auto c = pos(i);
+                    corners[i] = e->isInside(c.x, c.y, c.z);
+                }
+                else
+                {
+                    corners[i] = fs[i] < 0;
+                }
                 all_full  &=  corners[i];
                 all_empty &= !corners[i];
             }
@@ -431,7 +439,8 @@ glm::vec3 XTree<T, dims>::searchEdge(glm::vec3 a, glm::vec3 b,
         auto out = e->values(N);
         for (int j=0; j < N; ++j)
         {
-            if (out[j] >= 0)
+            if (out[j] > 0 ||
+                (out[j] == 0 && !e->isInside(ps[j].x, ps[j].y, ps[j].z)))
             {
                 a = ps[j - 1];
                 b = ps[j];

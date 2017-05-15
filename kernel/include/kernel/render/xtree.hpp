@@ -145,7 +145,7 @@ protected:
     /*
      *  Performs binary search along a cube's edge, returning the intersection
      *
-     *  eval(a) should be < 0 (inside the shape) and eval(b) should be outside
+     *  eval(a) should be inside the shape and eval(b) should be outside
      */
     glm::vec3 searchEdge(glm::vec3 a, glm::vec3 b, Evaluator* eval) const;
 
