@@ -128,7 +128,10 @@ Contours Contours::render(const Tree t, const Region& r)
     std::map<glm::vec2, glm::vec2, Comparator> segs;
     for (const auto& s : w.segments)
     {
-        segs[s.first] = s.second;
+        if (s.first != s.second)
+        {
+            segs[s.first] = s.second;
+        }
     }
 
     Contours c;
