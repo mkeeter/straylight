@@ -86,7 +86,7 @@ bool Feature::push(glm::vec3 e, Choice choice)
 {
     if (isCompatible(e))
     {
-        choices.push_back(choice);
+        choices.push_front(choice);
 
         // Store the epsilon if it isn't already present
         e /= glm::length(e);

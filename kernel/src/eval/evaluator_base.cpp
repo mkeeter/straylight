@@ -257,15 +257,17 @@ void EvaluatorBase::push(const Feature& f)
 
     for (const auto& c : tape->t)
     {
+        const bool match =  (result.f[c.a][0] == result.f[c.b][0] &&
+                            (c.op == Opcode::MAX || c.op == Opcode::MIN) &&
+                            itr != choices.end() && itr->id == c.id);
+
         if (!disabled[c.id])
         {
             // For ambiguous min and max operations, we obey the feature in
             // terms of which branch to take
-            if (result.f[c.a][0] == result.f[c.b][0] &&
-                (c.op == Opcode::MAX || c.op == Opcode::MIN) &&
-                itr != choices.end() && itr->id == c.id)
+            if (match)
             {
-                if ((itr++)->choice == 0)
+                if (itr->choice == 0)
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
@@ -286,6 +288,11 @@ void EvaluatorBase::push(const Feature& f)
             {
                 disabled[c.id] = true;
             }
+        }
+
+        if (match)
+        {
+            ++itr;
         }
     }
     assert(itr == choices.end());
