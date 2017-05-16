@@ -335,17 +335,34 @@ TEST_CASE("Evaluator::isInside")
 
 TEST_CASE("Evaluator::featuresAt")
 {
-    Evaluator a(Tree::X());
-    auto fa = a.featuresAt(0, 0, 0);
-    REQUIRE(fa.size() == 1);
-    REQUIRE(fa.front().deriv == glm::vec3(1, 0, 0));
+    SECTION("Single feature")
+    {
+        Evaluator e(Tree::X());
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 1);
+        REQUIRE(fs.front().deriv == glm::vec3(1, 0, 0));
+    }
 
-    Evaluator b(min(Tree::X(), -Tree::X()));
-    auto fb = b.featuresAt(0, 0, 0);
-    REQUIRE(fb.size() == 2);
-    auto ib = fb.begin();
-    REQUIRE((ib++)->deriv == glm::vec3(1, 0, 0));
-    REQUIRE((ib++)->deriv == glm::vec3(-1, 0, 0));
+    SECTION("Two features")
+    {
+        Evaluator e(min(Tree::X(), -Tree::X()));
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 2);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(-1, 0, 0));
+    }
+
+    SECTION("Three features")
+    {
+        Evaluator e(min(Tree::X(), min(Tree::Y(), Tree::Z())));
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 3);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(0, 1, 0));
+        REQUIRE((i++)->deriv == glm::vec3(0, 0, 1));
+    }
 }
 
 TEST_CASE("Evaluator::push(Feature)")
