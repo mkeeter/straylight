@@ -382,7 +382,7 @@ TEST_CASE("Evaluator::featuresAt")
     SECTION("Rectangle")
     {
         Evaluator e(rectangle(-1, 0, -1, 1));
-        REQUIRE(e.featuresAt(-0.5, -1, 0).size() == 1);
+        REQUIRE(e.featuresAt(-0.5, -1, 0).size() == 3);
     }
 }
 
