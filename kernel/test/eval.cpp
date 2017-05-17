@@ -4,6 +4,8 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/eval/evaluator.hpp"
 
+#include "util/shapes.hpp"
+
 using namespace Kernel;
 
 TEST_CASE("Principle variable evaluation")
@@ -375,6 +377,12 @@ TEST_CASE("Evaluator::featuresAt")
         REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
         REQUIRE((i++)->deriv == glm::vec3(0, 1, 0));
         REQUIRE((i++)->deriv == glm::vec3(0, 0, 1));
+    }
+
+    SECTION("Rectangle")
+    {
+        Evaluator e(rectangle(-1, 0, -1, 1));
+        REQUIRE(e.featuresAt(-0.5, -1, 0).size() == 1);
     }
 }
 
