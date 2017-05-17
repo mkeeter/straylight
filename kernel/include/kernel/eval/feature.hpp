@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <glm/vec3.hpp>
 
 #include "kernel/eval/clause.hpp"
@@ -41,9 +42,28 @@ public:
      */
     glm::vec3 deriv;
 
+    /*
+     *  Inserts a choice without any checking
+     */
+    void push_raw(Choice c, glm::vec3 v);
+
+    /*
+     *  Returns the epsilon associated with a particular choice
+     */
+    glm::vec3 getEpsilon(Clause::Id i) const { return _epsilons.at(i); }
+
 protected:
+    /*  Per-clause decisions  */
     std::list<Choice> choices;
+
+    /*  Deduplicated list of epsilons  */
     std::list<glm::vec3> epsilons;
+
+    /*  Per-clause epsilons  */
+    std::map<Clause::Id, glm::vec3> _epsilons;
 };
+
+/*  Defining operator< lets us store Choices in std::set, etc */
+bool operator<(const Feature::Choice& a, const Feature::Choice& b);
 
 }   // namespace Kernel

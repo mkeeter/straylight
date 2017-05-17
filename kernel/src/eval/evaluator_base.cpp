@@ -242,7 +242,7 @@ void EvaluatorBase::push()
     pushTape();
 }
 
-void EvaluatorBase::push(const Feature& f)
+Feature EvaluatorBase::push(const Feature& f)
 {
     // Since we'll be figuring out which clauses are disabled and
     // which should be remapped, we reset those arrays here
@@ -251,6 +251,9 @@ void EvaluatorBase::push(const Feature& f)
 
     // Mark the root node as active
     disabled[tape->i] = false;
+
+    Feature out;
+    out.deriv = f.deriv;
 
     const auto& choices = f.getChoices();
     auto itr = choices.begin();
@@ -267,6 +270,8 @@ void EvaluatorBase::push(const Feature& f)
             // terms of which branch to take
             if (match)
             {
+                out.push_raw(*itr, f.getEpsilon(c.id));
+
                 if (itr->choice == 0)
                 {
                     disabled[c.a] = false;
@@ -298,6 +303,7 @@ void EvaluatorBase::push(const Feature& f)
     assert(itr == choices.end());
 
     pushTape();
+    return out;
 }
 
 void EvaluatorBase::specialize(float x, float y, float z)
@@ -406,6 +412,7 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
     Feature f;
     std::list<Feature> todo = {f};
     std::list<Feature> done;
+    std::set<std::list<Feature::Choice>> seen;
 
     // Load the location into the first results slot and evaluate
     eval(x, y, z);
@@ -421,7 +428,8 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
         todo.pop_front();
 
         // Then, push into this feature
-        push(f);
+        // (storing a minimized version of the feature)
+        auto f_ = push(f);
 
         // Run a single evaluation of the value + derivatives
         // The value will be the same, but derivatives may change
@@ -467,8 +475,12 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
 
         if (!ambiguous)
         {
-            f.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
-            done.push_back(f);
+            f_.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
+            if (seen.find(f_.getChoices()) == seen.end())
+            {
+                seen.insert(f_.getChoices());
+                done.push_back(f_);
+            }
         }
 
         pop();

@@ -343,9 +343,19 @@ TEST_CASE("Evaluator::featuresAt")
         REQUIRE(fs.front().deriv == glm::vec3(1, 0, 0));
     }
 
-    SECTION("Two features")
+    SECTION("Two features (min)")
     {
         Evaluator e(min(Tree::X(), -Tree::X()));
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 2);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(-1, 0, 0));
+    }
+
+    SECTION("Two features (max)")
+    {
+        Evaluator e(max(Tree::X(), -Tree::X()));
         auto fs = e.featuresAt(0, 0, 0);
         REQUIRE(fs.size() == 2);
         auto i = fs.begin();
@@ -360,11 +370,10 @@ TEST_CASE("Evaluator::featuresAt")
 
         // TODO: This should actually only give 3 features, because the branches
         // that chooise X, Y and X, Z collapse to X.
-        REQUIRE(fs.size() >= 3);
+        REQUIRE(fs.size() == 3);
         auto i = fs.begin();
         REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
         REQUIRE((i++)->deriv == glm::vec3(0, 1, 0));
-        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
         REQUIRE((i++)->deriv == glm::vec3(0, 0, 1));
     }
 }

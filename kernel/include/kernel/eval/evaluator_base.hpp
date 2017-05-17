@@ -112,8 +112,10 @@ public:
      *  result.f[][0] must contain evaluation results with a matching
      *  number of ambiguous min/max nodes as the given feature (or more,
      *  if the feature is partial)
+     *
+     *  Returns the feature f with non-relevant choices removed
      */
-    void push(const Feature& f);
+    Feature push(const Feature& f);
 
     /*
      *  Pops out of interval evaluation, re-enabling disabled nodes

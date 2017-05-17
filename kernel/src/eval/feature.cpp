@@ -82,11 +82,21 @@ bool Feature::isCompatible(glm::vec3 e) const
     return false;
 }
 
+void Feature::push_raw(Choice c, glm::vec3 v)
+{
+    v /= glm::length(v);
+
+    epsilons.push_back(v);
+    choices.push_back(c);
+    _epsilons[c.id] = v;
+}
+
 bool Feature::push(glm::vec3 e, Choice choice)
 {
     if (isCompatible(e))
     {
         choices.push_front(choice);
+        _epsilons[choice.id] = e;
 
         // Store the epsilon if it isn't already present
         e /= glm::length(e);
@@ -104,6 +114,15 @@ bool Feature::push(glm::vec3 e, Choice choice)
     {
         return false;
     }
+}
+
+bool operator<(const Feature::Choice& a, const Feature::Choice& b)
+{
+    if (a.id != b.id)
+    {
+        return a.id < b.id;
+    }
+    return a.choice < b.choice;
 }
 
 }   // namespace Kernel
