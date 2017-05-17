@@ -444,18 +444,14 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
                     result.f[itr->a][0] == result.f[itr->b][0])
             {
                 // Check both branches of the ambiguity
-                auto epsilon = glm::vec3(result.dx[itr->b][0],
-                                         result.dy[itr->b][0],
-                                         result.dz[itr->b][0]) -
-                               glm::vec3(result.dx[itr->a][0],
-                                         result.dy[itr->a][0],
-                                         result.dz[itr->a][0]);
-
-                // Flip logic of MAX nodes
-                if (itr->op == Opcode::MAX)
-                {
-                    epsilon = -epsilon;
-                }
+                const glm::vec3 rhs(result.dx[itr->b][0],
+                                    result.dy[itr->b][0],
+                                    result.dz[itr->b][0]);
+                const glm::vec3 lhs(result.dx[itr->a][0],
+                                    result.dy[itr->a][0],
+                                    result.dz[itr->a][0]);
+                const auto epsilon = (itr->op == Opcode::MIN) ? (rhs - lhs)
+                                                              : (lhs - rhs);
 
                 auto fa = f;
                 if (fa.push(epsilon, {itr->id, 0}))
