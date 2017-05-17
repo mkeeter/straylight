@@ -378,6 +378,26 @@ TEST_CASE("Evaluator::featuresAt")
     }
 }
 
+TEST_CASE("Evaluator::getAmbiguous")
+{
+    Evaluator e(min(Tree::X(), -Tree::X()));
+    e.set(0, 0, 0, 0);
+    e.set(1, 0, 0, 1);
+    e.set(2, 0, 0, 2);
+    e.set(0, 0, 0, 3);
+
+    e.values(4);
+
+    auto a = e.getAmbiguous(3);
+    REQUIRE(a.size() == 1);
+    REQUIRE(a.count(0) == 1);
+
+    auto b = e.getAmbiguous(4);
+    REQUIRE(b.size() == 2);
+    REQUIRE(b.count(0) == 1);
+    REQUIRE(b.count(3) == 1);
+}
+
 TEST_CASE("Evaluator::push(Feature)")
 {
     Evaluator e(min(Tree::X(), -Tree::X()));

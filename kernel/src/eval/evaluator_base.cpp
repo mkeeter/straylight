@@ -489,6 +489,25 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
     return done;
 }
 
+std::set<Result::Index> EvaluatorBase::getAmbiguous(Result::Index i) const
+{
+    std::set<Result::Index> out;
+    for (const auto& c : tape->t)
+    {
+        if (c.op == Opcode::MIN || c.op == Opcode::MAX)
+        {
+            for (Result::Index j=0; j < i; ++j)
+            {
+                if (result.f[c.a][j] == result.f[c.b][j])
+                {
+                    out.insert(j);
+                }
+            }
+        }
+    }
+    return out;
+}
+
 void EvaluatorBase::pop()
 {
     assert(tape != tapes.begin());

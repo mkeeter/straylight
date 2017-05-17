@@ -171,6 +171,11 @@ public:
      */
     std::list<Feature> featuresAt(float x, float y, float z);
 
+    /*
+     *  Returns a list of ambiguous items from indices 0 to i
+     */
+    std::set<Result::Index> getAmbiguous(Result::Index i) const;
+
 protected:
     /*  This is our evaluation tape type */
     struct Tape {
