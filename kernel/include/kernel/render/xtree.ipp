@@ -213,7 +213,7 @@ std::vector<Intersection> XTree<T, dims>::findIntersections(
 
     // Check every edge and use binary search to find intersections on
     // edges that have mismatched signs
-    std::vector<Intersection> intersections;
+    std::vector<glm::vec3> pts;
     for (auto e : static_cast<const T*>(this)->cellEdges())
     {
         if (corner(e.first) != corner(e.second))
@@ -224,21 +224,40 @@ std::vector<Intersection> XTree<T, dims>::findIntersections(
 
             // Store position in big list o' intersections
             // (along with a dummy normal)
-            intersections.push_back({p, glm::vec3()});
+            pts.push_back(p);
         }
     }
 
     // Calculate normals in bulk (since that's more efficient)
-    for (unsigned i=0; i < intersections.size(); ++i)
+    for (unsigned i=0; i < pts.size(); ++i)
     {
-        const auto p = intersections[i].pos;
-        eval->setRaw(p.x, p.y, p.z, i);
+        eval->setRaw(pts[i].x, pts[i].y, pts[i].z, i);
     }
-    auto ds = eval->derivs(intersections.size());
-    for (unsigned i=0; i < intersections.size(); ++i)
+    auto ds = eval->derivs(pts.size());
+
+    // Mark which of the points are ambiguous
+    const auto ambiguous = eval->getAmbiguous(pts.size());
+
+    // Accumulate intersections, ambiguous and non-ambiguous
+    std::vector<Intersection> intersections;
+    for (unsigned i=0; i < pts.size(); ++i)
     {
-        const glm::vec3 g(ds.dx[i], ds.dy[i], ds.dz[i]);
-        intersections[i].norm = glm::normalize(g);
+        const auto p = pts[i];
+        if (ambiguous.find(i) == ambiguous.end())
+        {
+            const glm::vec3 g(ds.dx[i], ds.dy[i], ds.dz[i]);
+            intersections.push_back({p, glm::normalize(g)});
+        }
+        else
+        {
+            for (auto& f : eval->featuresAt(p.x, p.y, p.z))
+            {
+                if (f.isCompatible(f.deriv) && f.isCompatible(-f.deriv))
+                {
+                    intersections.push_back({p, f.deriv});
+                }
+            }
+        }
     }
 
     return intersections;
