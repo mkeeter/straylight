@@ -415,7 +415,7 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
     std::set<std::list<Feature::Choice>> seen;
 
     // Load the location into the first results slot and evaluate
-    eval(x, y, z);
+    specialize(x, y, z);
 
     while (todo.size())
     {
@@ -471,16 +471,18 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
 
         if (!ambiguous)
         {
+            printf("Saving non-ambiguous\n");
             f_.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
             if (seen.find(f_.getChoices()) == seen.end())
             {
+                printf("   yes it's unique\n");
                 seen.insert(f_.getChoices());
                 done.push_back(f_);
             }
         }
-
-        pop();
+        pop(); // push(Feature)
     }
+    pop(); // specialization
 
     return done;
 }
