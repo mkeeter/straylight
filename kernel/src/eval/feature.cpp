@@ -32,6 +32,14 @@ bool Feature::isCompatible(glm::vec3 e) const
         }
     }
 
+    // Special case for 2D (planar) sets of points
+    switch (checkPlanar(e))
+    {
+        case PLANAR_FAIL: return false;
+        case PLANAR_SUCCESS: return true;
+        case NOT_PLANAR: break;
+    }
+
     // Otherwise, we construct every possible plane and check against
     // every remaining point to make sure they work
     auto es = epsilons;
@@ -123,6 +131,40 @@ bool operator<(const Feature::Choice& a, const Feature::Choice& b)
         return a.id < b.id;
     }
     return a.choice < b.choice;
+}
+
+Feature::PlanarResult Feature::checkPlanar(glm::vec3 v) const
+{
+    if (epsilons.size() < 2)
+    {
+        return NOT_PLANAR;
+    }
+
+    v /= glm::length(v);
+
+    auto itr = epsilons.begin();
+    const auto cross = glm::cross(*itr, v);
+    const auto cross_ = cross / glm::length(cross);
+
+    const auto angle = asin(glm::length(cross));
+    auto angle_min = std::min(0.0, angle);
+    auto angle_max = std::max(0.0, angle);
+
+    while (++itr != epsilons.end())
+    {
+        auto c = glm::cross(*itr, v);
+        auto c_ = c / glm::length(c);
+        if (std::abs(glm::dot(c_, cross_)) != 1)
+        {
+            return NOT_PLANAR;
+        }
+
+        const auto angle = asin(glm::length(c));
+        angle_min = std::min(angle, angle_min);
+        angle_max = std::max(angle, angle_max);
+    }
+
+    return (angle_max - angle_min > M_PI) ? PLANAR_FAIL : PLANAR_SUCCESS;
 }
 
 }   // namespace Kernel

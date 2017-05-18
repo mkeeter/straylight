@@ -53,6 +53,9 @@ public:
     glm::vec3 getEpsilon(Clause::Id i) const { return _epsilons.at(i); }
 
 protected:
+    typedef enum { NOT_PLANAR, PLANAR_FAIL, PLANAR_SUCCESS } PlanarResult;
+    PlanarResult checkPlanar(glm::vec3 v) const;
+
     /*  Per-clause decisions  */
     std::list<Choice> choices;
 
