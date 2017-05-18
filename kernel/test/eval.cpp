@@ -333,6 +333,9 @@ TEST_CASE("Evaluator::isInside")
     REQUIRE(c.isInside(0, 0, 0) == false);
     REQUIRE(c.isInside(1, 0, 0) == false);
     REQUIRE(c.isInside(-1, 0, 0) == false);
+
+    Evaluator d(min(min(Tree::X(), -Tree::X()), min(Tree::Y(), -Tree::Y())));
+    REQUIRE(d.isInside(0, 0, 0) == true);
 }
 
 TEST_CASE("Evaluator::featuresAt")
