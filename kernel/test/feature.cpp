@@ -36,3 +36,18 @@ TEST_CASE("Feature::push")
         REQUIRE(b.push({1, -1, -1}) == true);
     }
 }
+
+TEST_CASE("Feature::isCompatible")
+{
+    SECTION("Flat plane")
+    {
+        Feature a;
+        REQUIRE(a.push({-1, 1, 0}) == true);
+        REQUIRE(a.push({-1, -1, 0}) == true);
+        REQUIRE(a.isCompatible({0, -1, 0}));
+        REQUIRE(a.isCompatible({0, 1, 0}));
+
+        REQUIRE(a.push({0, 1, 0}));
+        REQUIRE(!a.isCompatible({0, -1, 0}));
+    }
+}
