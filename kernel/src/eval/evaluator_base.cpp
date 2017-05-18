@@ -453,15 +453,17 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
                 const auto epsilon = (itr->op == Opcode::MIN) ? (rhs - lhs)
                                                               : (lhs - rhs);
 
-                auto fa = f;
+                auto fa = f_;
                 if (fa.push(epsilon, {itr->id, 0}))
                 {
+                    printf("   Pushing A\n");
                     todo.push_back(fa);
                 }
 
-                auto fb = f;
+                auto fb = f_;
                 if (fb.push(-epsilon, {itr->id, 1}))
                 {
+                    printf("   Pushing B\n");
                     todo.push_back(fb);
                 }
                 ambiguous = true;
