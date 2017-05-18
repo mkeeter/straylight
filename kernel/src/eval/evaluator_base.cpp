@@ -456,14 +456,12 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
                 auto fa = f_;
                 if (fa.push(epsilon, {itr->id, 0}))
                 {
-                    printf("   Pushing A\n");
                     todo.push_back(fa);
                 }
 
                 auto fb = f_;
                 if (fb.push(-epsilon, {itr->id, 1}))
                 {
-                    printf("   Pushing B\n");
                     todo.push_back(fb);
                 }
                 ambiguous = true;
@@ -473,11 +471,9 @@ std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
 
         if (!ambiguous)
         {
-            printf("Saving non-ambiguous\n");
             f_.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
             if (seen.find(f_.getChoices()) == seen.end())
             {
-                printf("   yes it's unique\n");
                 seen.insert(f_.getChoices());
                 done.push_back(f_);
             }
