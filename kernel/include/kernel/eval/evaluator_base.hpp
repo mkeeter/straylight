@@ -10,6 +10,7 @@
 
 #include "kernel/eval/result.hpp"
 #include "kernel/eval/interval.hpp"
+#include "kernel/eval/feature.hpp"
 #include "kernel/eval/clause.hpp"
 #include "kernel/tree/tree.hpp"
 
@@ -106,6 +107,17 @@ public:
     void push();
 
     /*
+     *  Pushes into a tree based on the given feature
+     *
+     *  result.f[][0] must contain evaluation results with a matching
+     *  number of ambiguous min/max nodes as the given feature (or more,
+     *  if the feature is partial)
+     *
+     *  Returns the feature f with non-relevant choices removed
+     */
+    Feature push(const Feature& f);
+
+    /*
      *  Pops out of interval evaluation, re-enabling disabled nodes
      */
     void pop();
@@ -144,6 +156,25 @@ public:
      *  based on evaluation at the given point
      */
     void specialize(float x, float y, float z);
+
+    /*
+     *  Checks to see if the given point is inside the solid body.
+     *  There are three cases
+     *      eval(x, y, z) < 0  => true
+     *      eval(x, y, z) > 0  => false
+     *      eval(x, y, z) == 0 => further checking is performed
+     */
+    bool isInside(float x, float y, float z);
+
+    /*
+     *  Checks for features at the given position
+     */
+    std::list<Feature> featuresAt(float x, float y, float z);
+
+    /*
+     *  Returns a list of ambiguous items from indices 0 to i
+     */
+    std::set<Result::Index> getAmbiguous(Result::Index i) const;
 
 protected:
     /*  This is our evaluation tape type */

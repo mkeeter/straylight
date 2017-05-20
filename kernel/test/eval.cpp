@@ -4,6 +4,8 @@
 #include "kernel/tree/tree.hpp"
 #include "kernel/eval/evaluator.hpp"
 
+#include "util/shapes.hpp"
+
 using namespace Kernel;
 
 TEST_CASE("Principle variable evaluation")
@@ -313,4 +315,121 @@ TEST_CASE("Evaluator::specialize")
     REQUIRE(e.eval(4, 0, 0) == 0);
     REQUIRE(e.eval(4, 5, 0) == 5);
     REQUIRE(e.eval(10, 5, 0) == 5);
+}
+
+TEST_CASE("Evaluator::isInside")
+{
+    Evaluator a(Tree::X());
+    REQUIRE(a.isInside(0, 0, 0) == true);
+    REQUIRE(a.isInside(-1, 0, 0) == true);
+    REQUIRE(a.isInside(1, 0, 0) == false);
+
+    Evaluator b(min(Tree::X(), -Tree::X()));
+    REQUIRE(b.isInside(0, 0, 0) == true);
+    REQUIRE(b.isInside(1, 0, 0) == true);
+    REQUIRE(b.isInside(-1, 0, 0) == true);
+
+    Evaluator c(max(Tree::X(), -Tree::X()));
+    REQUIRE(c.isInside(0, 0, 0) == false);
+    REQUIRE(c.isInside(1, 0, 0) == false);
+    REQUIRE(c.isInside(-1, 0, 0) == false);
+
+    Evaluator d(min(min(Tree::X(), -Tree::X()), min(Tree::Y(), -Tree::Y())));
+    REQUIRE(d.isInside(0, 0, 0) == true);
+}
+
+TEST_CASE("Evaluator::featuresAt")
+{
+    SECTION("Single feature")
+    {
+        Evaluator e(Tree::X());
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 1);
+        REQUIRE(fs.front().deriv == glm::vec3(1, 0, 0));
+    }
+
+    SECTION("Two features (min)")
+    {
+        Evaluator e(min(Tree::X(), -Tree::X()));
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 2);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(-1, 0, 0));
+    }
+
+    SECTION("Two features (max)")
+    {
+        Evaluator e(max(Tree::X(), -Tree::X()));
+        auto fs = e.featuresAt(0, 0, 0);
+        REQUIRE(fs.size() == 2);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(-1, 0, 0));
+    }
+
+    SECTION("Three features")
+    {
+        Evaluator e(min(Tree::X(), min(Tree::Y(), Tree::Z())));
+        auto fs = e.featuresAt(0, 0, 0);
+
+        // TODO: This should actually only give 3 features, because the branches
+        // that chooise X, Y and X, Z collapse to X.
+        REQUIRE(fs.size() == 3);
+        auto i = fs.begin();
+        REQUIRE((i++)->deriv == glm::vec3(1, 0, 0));
+        REQUIRE((i++)->deriv == glm::vec3(0, 1, 0));
+        REQUIRE((i++)->deriv == glm::vec3(0, 0, 1));
+    }
+
+    SECTION("Buried ambiguity")
+    {
+        // The ambiguity here (in max(-1 - X, X) is irrelevant, as
+        // it ends up being masked by the Y clause)
+        Evaluator e(rectangle(-1, 0, -1, 1));
+        REQUIRE(e.featuresAt(-0.5, -1, 0).size() == 1);
+    }
+}
+
+TEST_CASE("Evaluator::getAmbiguous")
+{
+    Evaluator e(min(Tree::X(), -Tree::X()));
+    e.set(0, 0, 0, 0);
+    e.set(1, 0, 0, 1);
+    e.set(2, 0, 0, 2);
+    e.set(0, 0, 0, 3);
+
+    e.values(4);
+
+    auto a = e.getAmbiguous(3);
+    REQUIRE(a.size() == 1);
+    REQUIRE(a.count(0) == 1);
+
+    auto b = e.getAmbiguous(4);
+    REQUIRE(b.size() == 2);
+    REQUIRE(b.count(0) == 1);
+    REQUIRE(b.count(3) == 1);
+}
+
+TEST_CASE("Evaluator::push(Feature)")
+{
+    Evaluator e(min(Tree::X(), -Tree::X()));
+    REQUIRE(e.eval(0, 0, 0) == 0); // Force an ambiguous evaluation
+    Feature f;
+
+    SECTION("LHS")
+    {   // Use a dummy feature to select the first branch
+        REQUIRE(f.push({1, 0, 0}, {1, 0}));
+        e.push(f);
+        REQUIRE(e.eval(1, 0, 0) == 1);
+        REQUIRE(e.utilization() < 1);
+    }
+
+    SECTION("RHS")
+    {   // Use a dummy feature to select the second branch
+        REQUIRE(f.push({-1, 0, 0}, {1, 1}));
+        e.push(f);
+        REQUIRE(e.eval(-2, 0, 0) == 2);
+        REQUIRE(e.utilization() < 1);
+    }
 }

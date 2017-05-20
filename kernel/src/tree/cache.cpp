@@ -205,7 +205,7 @@ Cache::Node Cache::checkCommutative(Opcode::Opcode op, Cache::Node a, Cache::Nod
 
         if (a->op == op)
         {
-            if (al > bl)
+            if (al > b->rank)
             {
                 return operation(op, a->lhs, operation(op, a->rhs, b));
             }
@@ -227,7 +227,6 @@ Cache::Node Cache::checkCommutative(Opcode::Opcode op, Cache::Node a, Cache::Nod
         }
     }
     return 0;
-
 }
 
 }   // namespace Kernel

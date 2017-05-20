@@ -8,6 +8,7 @@ add_library(straylight-kernel STATIC
     src/eval/evaluator_avx.cpp
     src/eval/evaluator_base.cpp
     src/eval/result.cpp
+    src/eval/feature.cpp
     src/format/contours.cpp
     src/format/image.cpp
     src/format/mesh.cpp

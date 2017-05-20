@@ -24,7 +24,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     // Helper function to create a new clause in the data array
     // The dummy clause (0) is mapped to the first result slot
     std::unordered_map<Tree::Id, Clause::Id> clauses = {{nullptr, 0}};
-    Clause::Id id = flat.size() - 1;
+    Clause::Id id = flat.size();
 
     // Helper function to make a new function
     std::list<Clause> tape_;
@@ -66,7 +66,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
         }
         clauses[m.id()] = id--;
     }
-    assert(id + 1 == 0);
+    assert(id == 0);
 
     //  Move from the list tape to a more-compact vector tape
     tapes.push_back(Tape());
@@ -87,9 +87,9 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     }
 
     // Allocate enough memory for all the clauses
-    result.resize(clauses.size(), vars.size());
-    disabled.resize(clauses.size());
-    remap.resize(clauses.size());
+    result.resize(clauses.size() + 1, vars.size());
+    disabled.resize(clauses.size() + 1);
+    remap.resize(clauses.size() + 1);
 
     // Store all constants in results array
     for (auto c : constants)
@@ -116,7 +116,7 @@ EvaluatorBase::EvaluatorBase(const Tree root, const glm::mat4& M,
     }
 
     // Store the index of the tree's root
-    assert(clauses.at(root.id()) == 0);
+    assert(clauses.at(root.id()) == 1);
     tape->i = clauses.at(root.id());
 }
 
@@ -203,12 +203,12 @@ void EvaluatorBase::push()
             // active if it is decisively above or below the other branch.
             if (c.op == Opcode::MAX)
             {
-                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                if (result.i[c.a].lower() > result.i[c.b].upper())
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
                 }
-                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                else if (result.i[c.b].lower() > result.i[c.a].upper())
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
@@ -216,12 +216,12 @@ void EvaluatorBase::push()
             }
             else if (c.op == Opcode::MIN)
             {
-                if (result.i[c.a].lower() >= result.i[c.b].upper())
+                if (result.i[c.a].lower() > result.i[c.b].upper())
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
                 }
-                else if (result.i[c.b].lower() >= result.i[c.a].upper())
+                else if (result.i[c.b].lower() > result.i[c.a].upper())
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
@@ -240,6 +240,70 @@ void EvaluatorBase::push()
     }
 
     pushTape();
+}
+
+Feature EvaluatorBase::push(const Feature& f)
+{
+    // Since we'll be figuring out which clauses are disabled and
+    // which should be remapped, we reset those arrays here
+    std::fill(disabled.begin(), disabled.end(), true);
+    std::fill(remap.begin(), remap.end(), 0);
+
+    // Mark the root node as active
+    disabled[tape->i] = false;
+
+    Feature out;
+    out.deriv = f.deriv;
+
+    const auto& choices = f.getChoices();
+    auto itr = choices.begin();
+
+    for (const auto& c : tape->t)
+    {
+        const bool match =  (result.f[c.a][0] == result.f[c.b][0] &&
+                            (c.op == Opcode::MAX || c.op == Opcode::MIN) &&
+                            itr != choices.end() && itr->id == c.id);
+
+        if (!disabled[c.id])
+        {
+            // For ambiguous min and max operations, we obey the feature in
+            // terms of which branch to take
+            if (match)
+            {
+                out.push_raw(*itr, f.getEpsilon(c.id));
+
+                if (itr->choice == 0)
+                {
+                    disabled[c.a] = false;
+                    remap[c.id] = c.a;
+                }
+                else
+                {
+                    disabled[c.b] = false;
+                    remap[c.id] = c.b;
+                }
+            }
+
+            if (!remap[c.id])
+            {
+                disabled[c.a] = false;
+                disabled[c.b] = false;
+            }
+            else
+            {
+                disabled[c.id] = true;
+            }
+        }
+
+        if (match)
+        {
+            ++itr;
+        }
+    }
+    assert(itr == choices.end());
+
+    pushTape();
+    return out;
 }
 
 void EvaluatorBase::specialize(float x, float y, float z)
@@ -262,12 +326,12 @@ void EvaluatorBase::specialize(float x, float y, float z)
             // active if it is decisively above or below the other branch.
             if (c.op == Opcode::MAX)
             {
-                if (result.f[c.a][0] >= result.f[c.b][0])
+                if (result.f[c.a][0] > result.f[c.b][0])
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
                 }
-                else if (result.f[c.b][0] >= result.f[c.a][0])
+                else if (result.f[c.b][0] > result.f[c.a][0])
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
@@ -275,12 +339,12 @@ void EvaluatorBase::specialize(float x, float y, float z)
             }
             else if (c.op == Opcode::MIN)
             {
-                if (result.f[c.a][0] >= result.f[c.b][0])
+                if (result.f[c.a][0] > result.f[c.b][0])
                 {
                     disabled[c.b] = false;
                     remap[c.id] = c.b;
                 }
-                else if (result.f[c.b][0] >= result.f[c.a][0])
+                else if (result.f[c.b][0] > result.f[c.a][0])
                 {
                     disabled[c.a] = false;
                     remap[c.id] = c.a;
@@ -299,6 +363,145 @@ void EvaluatorBase::specialize(float x, float y, float z)
     }
 
     pushTape();
+}
+
+bool EvaluatorBase::isInside(float x, float y, float z)
+{
+    set(x, y, z, 0);
+    auto vs = values(1);
+
+    // Unambiguous cases
+    if (vs[0] < 0)
+    {
+        return true;
+    }
+    else if (vs[0] > 0)
+    {
+        return false;
+    }
+
+    // Otherwise, we need to handle the zero-crossing case!
+
+    // First, we extract all of the features
+    auto fs = featuresAt(x, y, z);
+
+    // If there's only a single feature, we can get both positive and negative
+    // values out if it's got a non-zero gradient
+    if (fs.size() == 1)
+    {
+        return fs.front().deriv.length() > 0;
+    }
+
+    // Otherwise, check each feature
+    // The only case where we're outside the model is if all features
+    // and their normals are all positive (i.e. for every epsilon that
+    // we move from (x,y,z), epsilon . deriv > 0)
+    bool pos = false;
+    bool neg = false;
+    for (auto& f : fs)
+    {
+        pos |= f.isCompatible(f.deriv);
+        neg |= f.isCompatible(-f.deriv);
+    }
+    return !(pos && !neg);
+}
+
+std::list<Feature> EvaluatorBase::featuresAt(float x, float y, float z)
+{
+    // The initial feature doesn't know any ambiguities
+    Feature f;
+    std::list<Feature> todo = {f};
+    std::list<Feature> done;
+    std::set<std::list<Feature::Choice>> seen;
+
+    // Load the location into the first results slot and evaluate
+    specialize(x, y, z);
+
+    while (todo.size())
+    {
+        // Take the most recent feature and scan for ambiguous min/max nodes
+        // (from the bottom up).  If we find such an ambiguous node, then push
+        // both versions to the feature (if compatible) and re-insert the
+        // augmented feature in the todo list; otherwise, move the feature
+        // to the done list.
+        auto f = todo.front();
+        todo.pop_front();
+
+        // Then, push into this feature
+        // (storing a minimized version of the feature)
+        auto f_ = push(f);
+
+        // Run a single evaluation of the value + derivatives
+        // The value will be the same, but derivatives may change
+        // depending on which feature we've pushed ourselves into
+        const auto ds = derivs(1);
+
+        bool ambiguous = false;
+        for (auto itr = tape->t.rbegin(); itr != tape->t.rend(); ++itr)
+        {
+            // Check for ambiguity here
+            if ((itr->op == Opcode::MIN || itr->op == Opcode::MAX) &&
+                    result.f[itr->a][0] == result.f[itr->b][0])
+            {
+                // Check both branches of the ambiguity
+                const glm::vec3 rhs(result.dx[itr->b][0],
+                                    result.dy[itr->b][0],
+                                    result.dz[itr->b][0]);
+                const glm::vec3 lhs(result.dx[itr->a][0],
+                                    result.dy[itr->a][0],
+                                    result.dz[itr->a][0]);
+                const auto epsilon = (itr->op == Opcode::MIN) ? (rhs - lhs)
+                                                              : (lhs - rhs);
+
+                auto fa = f_;
+                if (fa.push(epsilon, {itr->id, 0}))
+                {
+                    todo.push_back(fa);
+                }
+
+                auto fb = f_;
+                if (fb.push(-epsilon, {itr->id, 1}))
+                {
+                    todo.push_back(fb);
+                }
+                ambiguous = true;
+                break;
+            }
+        }
+
+        if (!ambiguous)
+        {
+            f_.deriv = {ds.dx[0], ds.dy[0], ds.dz[0]};
+            if (seen.find(f_.getChoices()) == seen.end())
+            {
+                seen.insert(f_.getChoices());
+                done.push_back(f_);
+            }
+        }
+        pop(); // push(Feature)
+    }
+    pop(); // specialization
+
+    return done;
+}
+
+std::set<Result::Index> EvaluatorBase::getAmbiguous(Result::Index i) const
+{
+    std::set<Result::Index> out;
+    for (const auto& c : tape->t)
+    {
+        if (c.op == Opcode::MIN || c.op == Opcode::MAX)
+        {
+            for (Result::Index j=0; j < i; ++j)
+            {
+                if (result.f[c.a][j] == result.f[c.b][j])
+                {
+                    out.insert(j);
+                }
+            }
+        }
+    }
+    return out;
 }
 
 void EvaluatorBase::pop()
