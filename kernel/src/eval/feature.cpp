@@ -147,8 +147,8 @@ Feature::PlanarResult Feature::checkPlanar(glm::vec3 v) const
     const auto cross_ = cross / glm::length(cross);
 
     const auto angle = asin(glm::length(cross));
-    auto angle_min = std::min(0.0, angle);
-    auto angle_max = std::max(0.0, angle);
+    auto angle_min = fmin(0.0, angle);
+    auto angle_max = fmax(0.0, angle);
 
     while (++itr != epsilons.end())
     {
@@ -160,8 +160,8 @@ Feature::PlanarResult Feature::checkPlanar(glm::vec3 v) const
         }
 
         const auto angle = asin(glm::length(c));
-        angle_min = std::min(angle, angle_min);
-        angle_max = std::max(angle, angle_max);
+        angle_min = fmin(angle, angle_min);
+        angle_max = fmax(angle, angle_max);
     }
 
     return (angle_max - angle_min > M_PI) ? PLANAR_FAIL : PLANAR_SUCCESS;
